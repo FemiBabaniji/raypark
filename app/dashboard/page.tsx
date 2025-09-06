@@ -49,7 +49,7 @@ const ExpandedViewNavigation = ({
 }) => {
   if (isPreviewMode) {
     return (
-      <div className="fixed top-6 left-6 z-50">
+      <div className="fixed top-8 left-8 z-50">
         <BackButton onClick={() => onPreview()} />
       </div>
     )
@@ -58,12 +58,12 @@ const ExpandedViewNavigation = ({
   return (
     <>
       {/* Back button in top left corner */}
-      <div className="fixed top-6 left-6 z-50">
+      <div className="fixed top-8 left-8 z-50">
         <BackButton onClick={onZoomOut} aria-label="Back to Dashboard" />
       </div>
 
       {/* Preview button in top right corner */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-8 right-8 z-50">
         <button
           onClick={onPreview}
           className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
@@ -288,9 +288,9 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="flex" style={{ paddingTop: shouldHideNav ? 0 : NAV_H }}>
+      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 32 : 0) : NAV_H }}>
         {/* Left Column: Main Content */}
-        <div className="flex-1" style={{ padding: BASE_PADDING }}>
+        <div className="flex-1 max-w-6xl mx-auto" style={{ padding: BASE_PADDING }}>
           {/* Content Area */}
           <AnimatePresence mode="wait">
             {viewMode === "minimized" ? (

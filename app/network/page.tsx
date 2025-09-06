@@ -54,12 +54,19 @@ export default function NetworkPage() {
         }}
         transition={{ duration: 0.2, ease: [0.4, 0, 0, 1] }}
       >
-        {/* Logo */}
-        <div className="flex items-center space-x-3">
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+        <div className="flex items-center space-x-4">
+          <BackButton
+            onClick={() => window.history.back()}
+            className="text-neutral-400 hover:text-white transition-colors"
+          />
+
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+            </div>
+            <span className="text-sm font-medium text-neutral-400">pathwai</span>
           </div>
-          <span className="text-sm font-medium text-neutral-400">pathwai</span>
         </div>
 
         {/* User actions */}

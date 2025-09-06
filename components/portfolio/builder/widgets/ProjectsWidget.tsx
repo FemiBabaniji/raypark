@@ -109,7 +109,10 @@ export default function ProjectsWidget({
 
           {/* AI/ML */}
           <div
-            className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.aiml)?.gradient || "from-purple-500/20 to-pink-500/20"} rounded-2xl p-4 space-y-3 relative group/aiml`}
+            className={`bg-gradient-to-br ${
+              projectColorOptions?.find((c) => c.name === projectColors.aiml)?.gradient ||
+              "from-purple-500/20 to-pink-500/20"
+            } rounded-2xl p-4 space-y-3 relative group/aiml`}
           >
             {!isPreviewMode && (
               <div className="absolute top-2 right-2">
@@ -166,7 +169,10 @@ export default function ProjectsWidget({
 
           {/* Mobile */}
           <div
-            className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.mobile)?.gradient || "from-blue-500/20 to-cyan-500/20"} rounded-2xl p-4 space-y-3 relative group/mobile`}
+            className={`bg-gradient-to-br ${
+              projectColorOptions?.find((c) => c.name === projectColors.mobile)?.gradient ||
+              "from-blue-500/20 to-cyan-500/20"
+            } rounded-2xl p-4 space-y-3 relative group/mobile`}
           >
             {!isPreviewMode && (
               <div className="absolute top-2 right-2">

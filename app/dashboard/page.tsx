@@ -272,6 +272,8 @@ export default function Home() {
   const handleSavePortfolio = (portfolioData: UnifiedPortfolio) => {
     setPortfolios((prev) => {
       // Check if updating existing portfolio or creating new one
+      if (!prev) return [portfolioData]
+
       const existingIndex = prev.findIndex((p) => p.id === portfolioData.id)
       if (existingIndex >= 0) {
         // Update existing portfolio
@@ -290,7 +292,7 @@ export default function Home() {
     }
   }
 
-  const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
+  const activePortfolio = portfolios?.find((p) => p.id === selectedPortfolioId)
 
   if (loading) {
     return (

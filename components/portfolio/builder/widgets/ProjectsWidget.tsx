@@ -1,6 +1,12 @@
 "use client"
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { GripVertical, X, Palette, Upload } from "lucide-react"
+import { GripVertical, X } from "lucide-react"
+import dynamic from "next/dynamic"
+import FullscreenWidgetOverlay from "@/components/FullscreenWidgetOverlay"
+
+const ProjectWorkflowTab = dynamic(() => import("@/components/ProjectWorkflowTab"), { ssr: false })
 
 type ProjectItem = {
   name: string
@@ -43,22 +49,26 @@ export default function ProjectsWidget({
   setShowProjectColorPicker,
   projectColorOptions,
 }: Props) {
+  const [open, setOpen] = useState(false)
+  const layoutId = `widget-${widgetId}`
+
   return (
-    <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 bg-neutral-600 rounded flex items-center justify-center">
-            <div className="w-3 h-3 border border-neutral-400 rounded-sm"></div>
-          </div>
-          <h2 className="text-xl font-bold text-white">Projects Portfolio</h2>
-        </div>
+    <>
+      <motion.div
+        layoutId={layoutId}
+        className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 cursor-pointer group relative"
+        onClick={() => setOpen(true)}
+      >
         {!isPreviewMode && (
-          <div className="flex items-center gap-2">
+          <div className="absolute top-4 right-4 flex items-center gap-2">
             <Button
               size="sm"
               variant="ghost"
               className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2"
-              onClick={onDelete}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete()
+              }}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -67,124 +77,22 @@ export default function ProjectsWidget({
             </div>
           </div>
         )}
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Web Development */}
-        <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">Web Development</span>
-            <Upload className="w-4 h-4 text-neutral-400" />
-          </div>
-          <p className="text-xs text-neutral-400 leading-relaxed">
-            Complete overhaul of user experience and backend architecture for scalable growth...
-          </p>
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">React</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">Node.js</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">AWS</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-blue-400">In Progress</span>
-            <span className="text-2xl font-bold text-white">85%</span>
-          </div>
+        <h2 className="text-xl font-bold text-white mb-4">Projects</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-20 rounded-2xl bg-white/10" />
+          <div className="h-20 rounded-2xl bg-white/10" />
         </div>
+      </motion.div>
 
-        {/* AI/ML */}
-        <div
-          className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.aiml)?.gradient} rounded-2xl p-4 space-y-3 relative group/aiml`}
-        >
-          {!isPreviewMode && (
-            <div className="absolute top-2 right-2">
-              {showProjectColorPicker.aiml && (
-                <div className="absolute bottom-full right-0 mb-2 bg-neutral-900/95 backdrop-blur-xl rounded-2xl p-4 z-50 min-w-[200px]">
-                  <div className="grid grid-cols-3 gap-3">
-                    {projectColorOptions.map((color) => (
-                      <button
-                        key={color.name}
-                        className={`w-10 h-10 rounded-full bg-gradient-to-br ${color.gradient} ${
-                          projectColors.aiml === color.name ? "ring-2 ring-white" : ""
-                        } hover:ring-2 hover:ring-white/50 transition-all`}
-                        onClick={() => {
-                          setProjectColors({ ...projectColors, aiml: color.name })
-                          setShowProjectColorPicker({ ...showProjectColorPicker, aiml: false })
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              <Button
-                size="sm"
-                variant="ghost"
-                className="opacity-0 group-hover/aiml:opacity-100 transition-opacity bg-black/20 hover:bg-black/30 text-white p-2"
-                onClick={() =>
-                  setShowProjectColorPicker({ ...showProjectColorPicker, aiml: !showProjectColorPicker.aiml })
-                }
-              >
-                <Palette className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium bg-black/20 px-2 py-1 rounded">AI/ML</span>
-            <Upload className="w-4 h-4" />
-          </div>
-          <p className="text-xs text-white/80 leading-relaxed">
-            Real-time insights with machine learning predictions and interactive data visual...
-          </p>
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-black/20 px-2 py-1 rounded">Python</span>
-            <span className="text-xs bg-black/20 px-2 py-1 rounded">React</span>
-            <span className="text-xs bg-black/20 px-2 py-1 rounded">TensorFlow</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-white/80">In Progress</span>
-            <span className="text-2xl font-bold text-white">60%</span>
-          </div>
-        </div>
-
-        {/* Mobile Development */}
-        <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">Mobile</span>
-            <Upload className="w-4 h-4 text-neutral-400" />
-          </div>
-          <p className="text-xs text-neutral-400 leading-relaxed">
-            Cross-platform mobile application with native performance and seamless user experience...
-          </p>
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">React Native</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">TypeScript</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">Firebase</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-green-400">Completed</span>
-            <span className="text-2xl font-bold text-white">100%</span>
-          </div>
-        </div>
-
-        {/* DevOps */}
-        <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">DevOps</span>
-            <Upload className="w-4 h-4 text-neutral-400" />
-          </div>
-          <p className="text-xs text-neutral-400 leading-relaxed">
-            Infrastructure automation and deployment pipeline optimization for continuous delivery...
-          </p>
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">Docker</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">Kubernetes</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded">CI/CD</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-yellow-400">Planning</span>
-            <span className="text-2xl font-bold text-white">25%</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      <FullscreenWidgetOverlay
+        open={open}
+        onClose={() => setOpen(false)}
+        layoutId={layoutId}
+        title="Projects Dashboard"
+      >
+        <ProjectWorkflowTab />
+      </FullscreenWidgetOverlay>
+    </>
   )
 }

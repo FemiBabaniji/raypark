@@ -66,18 +66,25 @@ export default function LandingPage() {
     },
   }
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <AnimatePresence mode="wait">
       {!isTransitioning && (
         <motion.div
-          className="min-h-screen bg-black relative overflow-hidden"
+          className="min-h-screen bg-zinc-950 relative overflow-hidden"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
-          {/* Subtle background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-black to-neutral-950" />
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950" />
 
           {/* Floating elements for visual interest */}
           <motion.div
@@ -105,7 +112,7 @@ export default function LandingPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-neutral-400 hover:text-white hover:bg-white/5 rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 border border-white/10 hover:border-white/20"
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-2xl px-6 py-2 text-sm font-medium transition-all duration-300"
                 onClick={() => router.push("/auth")}
               >
                 Sign In
@@ -116,28 +123,39 @@ export default function LandingPage() {
           {/* Main Content */}
           <div className="flex flex-col items-center justify-center min-h-screen px-8 py-20">
             <motion.div className="text-center max-w-4xl" variants={containerVariants}>
+              <motion.div variants={itemVariants} className="flex justify-center mb-8">
+                <div className="w-20 h-20 bg-zinc-800 rounded-3xl flex items-center justify-center">
+                  <div className="w-14 h-14 bg-gradient-to-br from-pink-400 via-purple-500 to-pink-600 rounded-2xl flex items-center justify-center p-2">
+                    <div className="grid grid-cols-2 gap-1 w-full h-full">
+                      <div className="bg-white/20 rounded-sm"></div>
+                      <div className="bg-white/30 rounded-sm"></div>
+                      <div className="bg-white/25 rounded-sm"></div>
+                      <div className="bg-white/35 rounded-sm"></div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
               {/* Badge */}
               <motion.div
                 variants={itemVariants}
-                className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mb-8 backdrop-blur-xl"
+                className="inline-flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-full px-4 py-2 mb-8"
               >
                 <Sparkles className="w-4 h-4 text-purple-400" />
-                <span className="text-neutral-300 text-sm font-medium">Trusted by 10,000+ professionals</span>
+                <span className="text-zinc-300 text-sm font-medium">Trusted by 10,000+ professionals</span>
               </motion.div>
 
               {/* Main Headline */}
               <motion.h1
-                className="text-6xl lg:text-8xl font-black text-white mb-8 tracking-tight leading-[0.9]"
+                className="text-4xl lg:text-6xl font-medium text-white mb-8 tracking-tight leading-tight"
                 variants={itemVariants}
               >
-                Your digital
-                <br />
-                <span className="text-purple-400">workroom</span>
+                Your digital workroom to grow and connect
               </motion.h1>
 
               {/* Subtitle */}
               <motion.p
-                className="text-neutral-400 text-xl lg:text-2xl mb-12 leading-relaxed font-light max-w-2xl mx-auto"
+                className="text-zinc-400 text-lg lg:text-xl mb-12 leading-relaxed font-light max-w-2xl mx-auto"
                 variants={itemVariants}
               >
                 Build stunning portfolios that showcase your work and connect you with opportunities.
@@ -147,7 +165,7 @@ export default function LandingPage() {
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
                 <Button
                   size="lg"
-                  className="bg-white text-black hover:bg-neutral-100 rounded-full px-10 py-6 text-lg font-semibold transition-all duration-300 group shadow-2xl"
+                  className="bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl px-10 py-6 text-lg font-medium transition-all duration-300 group"
                   onClick={handleGetStarted}
                 >
                   Get Started
@@ -156,8 +174,8 @@ export default function LandingPage() {
 
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full px-10 py-6 text-lg font-medium backdrop-blur-xl transition-all duration-300"
+                  variant="ghost"
+                  className="text-white hover:bg-zinc-800/50 rounded-2xl px-10 py-6 text-lg font-medium transition-all duration-300"
                   onClick={() => router.push("/dashboard")}
                 >
                   View Examples
@@ -166,22 +184,22 @@ export default function LandingPage() {
 
               {/* Feature Cards */}
               <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800 transition-all duration-300">
                   <Zap className="w-8 h-8 text-purple-400 mb-4" />
                   <h3 className="text-white font-semibold text-lg mb-2">Lightning Fast</h3>
-                  <p className="text-neutral-400 text-sm">Build and deploy your portfolio in minutes, not hours.</p>
+                  <p className="text-zinc-400 text-sm">Build and deploy your portfolio in minutes, not hours.</p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800 transition-all duration-300">
                   <Sparkles className="w-8 h-8 text-pink-400 mb-4" />
                   <h3 className="text-white font-semibold text-lg mb-2">Beautiful Design</h3>
-                  <p className="text-neutral-400 text-sm">Professional templates that make you stand out.</p>
+                  <p className="text-zinc-400 text-sm">Professional templates that make you stand out.</p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800 transition-all duration-300">
                   <Users className="w-8 h-8 text-blue-400 mb-4" />
                   <h3 className="text-white font-semibold text-lg mb-2">Connect & Grow</h3>
-                  <p className="text-neutral-400 text-sm">Network with professionals and discover opportunities.</p>
+                  <p className="text-zinc-400 text-sm">Network with professionals and discover opportunities.</p>
                 </div>
               </motion.div>
             </motion.div>
@@ -190,7 +208,7 @@ export default function LandingPage() {
           {/* Footer */}
           <motion.div variants={itemVariants} className="absolute bottom-8 left-8 right-8 z-10">
             <div className="flex justify-center">
-              <div className="text-neutral-500 text-sm font-light">© 2024 pathwai. Crafted for professionals.</div>
+              <div className="text-zinc-500 text-sm font-light">© 2024 pathwai. Crafted for professionals.</div>
             </div>
           </motion.div>
         </motion.div>

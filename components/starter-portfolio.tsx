@@ -111,9 +111,9 @@ export default function StarterPortfolio({
         id: `starter-${Date.now()}`,
         name: profileText.name,
         title: "Portfolio",
-        email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+        email: `${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
         location: "Location",
-        handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
+        handle: `@${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}`,
         initials: profileText.name
           .split(" ")
           .map((n) => n[0])
@@ -721,9 +721,9 @@ export default function StarterPortfolio({
     id: `starter-${Date.now()}`,
     name: profileText.name,
     title: "Portfolio",
-    email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+    email: `${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
     location: "Location",
-    handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
+    handle: `@${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}`,
     initials: profileText.name
       .split(" ")
       .map((n) => n[0])

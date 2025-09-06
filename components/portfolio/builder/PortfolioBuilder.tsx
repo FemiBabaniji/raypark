@@ -240,7 +240,7 @@ export default function PortfolioBuilder({
       id: portfolioId || `portfolio-${Date.now()}`,
       name: identity.name,
       title: "Portfolio",
-      email: `${identity.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+      email: `${(identity.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
       location: "Location",
       handle: identity.handle,
       initials: identity.name

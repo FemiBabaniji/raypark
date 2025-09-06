@@ -120,19 +120,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized") // Default to minimized (grid view)
   const [useStarterTemplate, setUseStarterTemplate] = useState(false) // Added useStarterTemplate state
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("jenny-wilson")
-  const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([
-    {
-      id: "jenny-wilson",
-      name: "jenny wilson",
-      title: "is a digital product designer",
-      email: "jenny@acme.com",
-      location: "currently designing at acme.",
-      handle: "@jenny_design",
-      avatarUrl: "/professional-woman-headshot.png",
-      initials: "JW",
-      selectedColor: 0 as ThemeIndex, // rose
-    },
-  ])
+  const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([])
   const [publishedPortfolios, setPublishedPortfolios] = useState<Portfolio[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -161,8 +149,8 @@ export default function Home() {
               : "??",
             selectedColor: (index % 7) as ThemeIndex, // ⬅️ use all 7 theme colors
           }))
-          setPortfolios((prev) => [...prev, ...portfolioCards])
-          setSelectedPortfolioId(portfolioCards[0].id)
+          // setPortfolios((prev) => [...prev, ...portfolioCards])
+          // setSelectedPortfolioId(portfolioCards[0].id)
         }
       } catch (error) {
         console.error("Error fetching portfolios:", error)

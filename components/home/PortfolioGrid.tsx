@@ -21,6 +21,38 @@ export default function PortfolioGrid({
   onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
   onStartStarter: () => void // Added onStartStarter prop type
 }) {
+  if (portfolios.length === 0) {
+    return (
+      <div className="max-w-7xl w-full space-y-12">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white mb-1">Welcome to Pathwai</h1>
+          <p className="text-neutral-400">Get started by creating your first portfolio</p>
+        </div>
+
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto">
+              <div className="w-6 h-6 bg-white rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full"></div>
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-white">Create Your First Portfolio</h2>
+            <p className="text-neutral-400 max-w-md">
+              Start with our guided template to build a professional portfolio in minutes
+            </p>
+          </div>
+
+          <button
+            onClick={onStartStarter}
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-medium hover:shadow-lg hover:scale-105 transition-all duration-200"
+          >
+            Start with template
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl w-full space-y-12">
       <div className="flex items-center justify-between">

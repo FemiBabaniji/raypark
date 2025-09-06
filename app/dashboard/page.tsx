@@ -81,12 +81,16 @@ const PortfolioCanvasWrapper = ({
   activeIdentity,
   onActiveIdentityChange,
   onSavePortfolio, // Added onSavePortfolio prop
+  isLive, // Added isLive prop
+  onToggleLive, // Added onToggleLive prop
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean // Added useStarterTemplate prop type
   activeIdentity?: UnifiedPortfolio
   onActiveIdentityChange?: (next: Partial<UnifiedPortfolio>) => void
   onSavePortfolio?: (portfolioData: UnifiedPortfolio) => void // Added onSavePortfolio prop type
+  isLive?: boolean // Added isLive prop type
+  onToggleLive?: (isLive: boolean) => void // Added onToggleLive prop type
 }) => {
   return (
     <PortfolioCanvas
@@ -100,6 +104,7 @@ const PortfolioCanvasWrapper = ({
               handle: activeIdentity.handle || "",
               avatarUrl: activeIdentity.avatarUrl,
               selectedColor: activeIdentity.selectedColor,
+              isLive: activeIdentity.isLive, // Pass isLive to PortfolioCanvas
             }
           : undefined
       }
@@ -116,6 +121,8 @@ const PortfolioCanvasWrapper = ({
           : undefined
       }
       onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to PortfolioCanvas
+      onToggleLive={onToggleLive} // Pass onToggleLive to PortfolioCanvas
+      isLive={isLive} // Pass isLive to PortfolioCanvas
     />
   )
 }
@@ -171,6 +178,7 @@ export default function Home() {
                   .toUpperCase()
               : "??",
             selectedColor: (index % 7) as ThemeIndex, // ⬅️ use all 7 theme colors
+            isLive: false, // Default to not live
           }))
           setPortfolios(portfolioCards)
           setSelectedPortfolioId(portfolioCards[0].id)
@@ -212,6 +220,7 @@ export default function Home() {
       handle: "@newuser",
       initials: "NP",
       selectedColor: Math.floor(Math.random() * 7) as ThemeIndex, // ⬅️ 0..6
+      isLive: false, // Added isLive property for new portfolios
     }
     setPortfolios((prev) => [...prev, newPortfolio])
     setSelectedPortfolioId(newPortfolio.id)
@@ -239,6 +248,10 @@ export default function Home() {
   const handleChangeActivePortfolioColor = (colorIndex: ThemeIndex) => {
     setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, selectedColor: colorIndex } : p)))
     // TODO: persist to DB here
+  }
+
+  const handleToggleLive = (isLive: boolean) => {
+    setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
   }
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
@@ -288,7 +301,7 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 24 : 0) : NAV_H }}>
+      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : NAV_H }}>
         {/* Left Column: Main Content */}
         <div className="flex-1 max-w-5xl mx-auto" style={{ padding: viewMode === "expanded" ? 0 : BASE_PADDING }}>
           {/* Content Area */}
@@ -342,6 +355,8 @@ export default function Home() {
                     setSelectedPortfolioId(portfolioData.id)
                     setUseStarterTemplate(false)
                   }}
+                  isLive={activePortfolio?.isLive || false}
+                  onToggleLive={handleToggleLive}
                 />
               </motion.div>
             )}

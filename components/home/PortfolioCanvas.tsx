@@ -10,6 +10,8 @@ export default function PortfolioCanvas({
   activeIdentity,
   onActiveIdentityChange,
   onSavePortfolio, // Added onSavePortfolio prop
+  isLive = false,
+  onToggleLive,
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean
@@ -29,6 +31,8 @@ export default function PortfolioCanvas({
     }>,
   ) => void
   onSavePortfolio?: (portfolioData: any) => void // Added onSavePortfolio prop type
+  isLive?: boolean
+  onToggleLive?: (isLive: boolean) => void
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
@@ -46,6 +50,8 @@ export default function PortfolioCanvas({
             isPreviewMode={isPreviewMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
+            isLive={isLive}
+            onToggleLive={onToggleLive}
           />
         )
       )}

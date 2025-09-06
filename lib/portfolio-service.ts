@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/client"
-import { createClient as createServerClient } from "@/lib/supabase/server"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 
 export interface PortfolioData {
@@ -202,24 +201,6 @@ export async function deletePortfolio(portfolioId: string): Promise<void> {
     console.error("Error deleting portfolio:", error)
     throw new Error(`Failed to delete portfolio: ${error.message}`)
   }
-}
-
-// Server-side functions
-export async function getServerPortfolios(userId: string): Promise<PortfolioData[]> {
-  const supabase = await createServerClient()
-
-  const { data, error } = await supabase
-    .from("portfolios")
-    .select("*")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false })
-
-  if (error) {
-    console.error("Error loading server portfolios:", error)
-    throw new Error(`Failed to load portfolios: ${error.message}`)
-  }
-
-  return data || []
 }
 
 export async function getPortfolioBySlug(slug: string): Promise<any> {

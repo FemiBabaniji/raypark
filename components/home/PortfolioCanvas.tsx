@@ -9,6 +9,7 @@ export default function PortfolioCanvas({
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
+  onSavePortfolio, // Added onSavePortfolio prop
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean
@@ -27,11 +28,17 @@ export default function PortfolioCanvas({
       selectedColor: ThemeIndex
     }>,
   ) => void
+  onSavePortfolio?: (portfolioData: any) => void // Added onSavePortfolio prop type
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
       {useStarterTemplate ? (
-        <StarterPortfolio isPreviewMode={isPreviewMode} />
+        <StarterPortfolio
+          isPreviewMode={isPreviewMode}
+          activeIdentity={activeIdentity}
+          onActiveIdentityChange={onActiveIdentityChange}
+          onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to StarterPortfolio
+        />
       ) : (
         activeIdentity &&
         onActiveIdentityChange && (

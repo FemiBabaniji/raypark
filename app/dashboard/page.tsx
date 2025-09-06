@@ -9,7 +9,7 @@ import MusicAppInterface from "@/components/music-app-interface"
 import BackButton from "@/components/ui/back-button"
 import { getPublishedPortfolios } from "@/lib/portfolio-data"
 import { DebugPanel } from "@/components/debug-panel"
-import type { Portfolio } from "@/lib/types"
+import type { Portfolio } from "@/lib/portfolio-data"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
@@ -60,11 +60,13 @@ const PortfolioCanvasWrapper = ({
   useStarterTemplate, // Added useStarterTemplate prop
   activeIdentity,
   onActiveIdentityChange,
+  onSavePortfolio, // Added onSavePortfolio prop
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean // Added useStarterTemplate prop type
   activeIdentity?: UnifiedPortfolio
   onActiveIdentityChange?: (next: Partial<UnifiedPortfolio>) => void
+  onSavePortfolio?: (portfolioData: UnifiedPortfolio) => void // Added onSavePortfolio prop type
 }) => {
   return (
     <PortfolioCanvas
@@ -93,6 +95,7 @@ const PortfolioCanvasWrapper = ({
             }
           : undefined
       }
+      onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to PortfolioCanvas
     />
   )
 }
@@ -149,8 +152,8 @@ export default function Home() {
               : "??",
             selectedColor: (index % 7) as ThemeIndex, // ⬅️ use all 7 theme colors
           }))
-          // setPortfolios((prev) => [...prev, ...portfolioCards])
-          // setSelectedPortfolioId(portfolioCards[0].id)
+          setPortfolios(portfolioCards)
+          setSelectedPortfolioId(portfolioCards[0].id)
         }
       } catch (error) {
         console.error("Error fetching portfolios:", error)
@@ -191,6 +194,7 @@ export default function Home() {
       selectedColor: Math.floor(Math.random() * 7) as ThemeIndex, // ⬅️ 0..6
     }
     setPortfolios((prev) => [...prev, newPortfolio])
+    setSelectedPortfolioId(newPortfolio.id)
   }
 
   const handleDeletePortfolio = (portfolioId: string, e: React.MouseEvent) => {
@@ -296,7 +300,7 @@ export default function Home() {
               >
                 <PortfolioCanvasWrapper
                   isPreviewMode={isPreviewMode}
-                  useStarterTemplate={useStarterTemplate} // Pass useStarterTemplate to wrapper
+                  useStarterTemplate={useStarterTemplate}
                   activeIdentity={activePortfolio}
                   onActiveIdentityChange={(next) => {
                     setPortfolios((prev) =>
@@ -311,7 +315,11 @@ export default function Home() {
                         }
                       }),
                     )
-                    // TODO: persist to DB
+                  }}
+                  onSavePortfolio={(portfolioData) => {
+                    setPortfolios((prev) => [...prev, portfolioData])
+                    setSelectedPortfolioId(portfolioData.id)
+                    setUseStarterTemplate(false) // Switch back to regular builder
                   }}
                 />
               </motion.div>

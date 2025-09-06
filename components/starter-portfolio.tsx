@@ -22,13 +22,15 @@ export default function StarterPortfolio({
   isPreviewMode = false,
   activeIdentity,
   onActiveIdentityChange,
+  onSavePortfolio, // Added callback to save portfolio when user finishes
 }: {
   isPreviewMode?: boolean
   activeIdentity?: Identity
   onActiveIdentityChange?: (identity: Identity) => void
+  onSavePortfolio?: (portfolio: any) => void // Added onSavePortfolio prop type
 }) {
   const [step, setStep] = useState<Step>(0)
-  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(true) // Always start with onboarding visible
   const [profileColorIdx, setProfileColorIdx] = useState<ThemeIndex>(activeIdentity?.selectedColor ?? 0)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [projectColors, setProjectColors] = useState({
@@ -80,10 +82,10 @@ export default function StarterPortfolio({
     { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
   ]
 
-  useEffect(() => {
-    const seen = localStorage.getItem("starter.onboarding.seen")
-    if (seen === "1") setShowOnboarding(false)
-  }, [])
+  // useEffect(() => {
+  //   const seen = localStorage.getItem("starter.onboarding.seen")
+  //   if (seen === "1") setShowOnboarding(false)
+  // }, [])
 
   useEffect(() => {
     if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
@@ -99,7 +101,37 @@ export default function StarterPortfolio({
   const handleNext = () => setStep((s) => Math.min(3, (s + 1) as Step))
   const handleBack = () => setStep((s) => Math.max(0, (s - 1) as Step))
   const handleSkip = () => setShowOnboarding(false)
-  const handleDone = () => setShowOnboarding(false)
+  const handleDone = () => {
+    setShowOnboarding(false)
+    if (onSavePortfolio) {
+      const portfolioData = {
+        id: `starter-${Date.now()}`,
+        name: profileText.name,
+        title: "Portfolio",
+        email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+        location: "Location",
+        handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
+        initials: profileText.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase(),
+        selectedColor: profileColorIdx,
+        widgets: {
+          left: leftWidgets,
+          right: rightWidgets,
+        },
+        content: {
+          profile: profileText,
+          about: aboutText,
+          projectColors,
+          galleryGroups,
+        },
+      }
+      onSavePortfolio(portfolioData)
+    }
+  }
 
   const handleColorChange = (colorIdx: ThemeIndex) => {
     setProfileColorIdx(colorIdx)

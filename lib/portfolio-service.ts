@@ -15,6 +15,7 @@ export interface PortfolioData {
 
 // Client-side functions
 export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> {
+  console.log("[v0] Starting portfolio save for:", portfolio.name)
   const supabase = createClient()
 
   // Get current user
@@ -22,8 +23,33 @@ export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> 
     data: { user },
     error: userError,
   } = await supabase.auth.getUser()
+
+  console.log("[v0] User authentication check:", { user: user?.id, error: userError })
+
   if (userError || !user) {
-    throw new Error("User must be authenticated to save portfolios")
+    console.log("[v0] No authenticated user, saving as demo portfolio")
+    // For now, let's save demo portfolios with a placeholder user_id
+    const demoUserId = "demo-user"
+
+    const portfolioData: Partial<PortfolioData> = {
+      id: portfolio.id,
+      user_id: demoUserId,
+      name: portfolio.name,
+      slug: portfolio.id,
+      is_public: portfolio.isLive || false,
+      is_demo: true, // Mark as demo
+    }
+
+    console.log("[v0] Saving demo portfolio data:", portfolioData)
+
+    const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
+    if (portfolioError) {
+      console.error("[v0] Error saving demo portfolio:", portfolioError)
+      throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
+    }
+
+    console.log("[v0] Demo portfolio saved successfully")
+    return
   }
 
   // Save basic portfolio info
@@ -36,11 +62,15 @@ export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> 
     is_demo: false,
   }
 
+  console.log("[v0] Saving authenticated portfolio data:", portfolioData)
+
   const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
   if (portfolioError) {
-    console.error("Error saving portfolio:", portfolioError)
+    console.error("[v0] Error saving portfolio:", portfolioError)
     throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
   }
+
+  console.log("[v0] Portfolio saved successfully")
 
   // Create or update the main page
   const pageData = {
@@ -52,66 +82,107 @@ export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> 
     is_demo: false,
   }
 
+  console.log("[v0] Saving page data:", pageData)
+
   const { error: pageError } = await supabase.from("pages").upsert(pageData)
   if (pageError) {
-    console.error("Error saving page:", pageError)
+    console.error("[v0] Error saving page:", pageError)
     throw new Error(`Failed to save page: ${pageError.message}`)
   }
 
+  console.log("[v0] Page saved successfully")
+
   // Save template data using RPC functions if it's a template portfolio
   if (portfolio.isTemplate && (portfolio as any).content) {
+    console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
     const pageId = `${portfolio.id}-main`
 
     try {
-      // Use RPC to add profile widget
-      await supabase.rpc("add_widget_to_page", {
-        p_page_id: pageId,
-        p_widget_key: "profile",
-        p_props: {
-          name: portfolio.name,
-          title: portfolio.title,
-          email: portfolio.email,
-          location: portfolio.location,
-          handle: portfolio.handle,
-          initials: portfolio.initials,
-          selectedColor: portfolio.selectedColor,
-          profileText: content.profile,
-        },
-        p_column: "left",
-        p_position: null,
-      })
+      console.log("[v0] Using direct widget insertion instead of RPC")
 
-      // Use RPC to add about widget
-      await supabase.rpc("add_widget_to_page", {
-        p_page_id: pageId,
-        p_widget_key: "description",
-        p_props: {
-          title: "About",
-          content: content.about,
-        },
-        p_column: "left",
-        p_position: null,
-      })
+      // Get widget type IDs first
+      const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
 
-      // Use RPC to add projects widget
-      await supabase.rpc("add_widget_to_page", {
-        p_page_id: pageId,
-        p_widget_key: "projects",
-        p_props: {
-          title: "Projects",
-          projectColors: content.projectColors,
-          galleryGroups: content.galleryGroups,
-        },
-        p_column: "right",
-        p_position: null,
-      })
+      if (widgetTypesError) {
+        console.error("[v0] Error fetching widget types:", widgetTypesError)
+        throw new Error(`Failed to fetch widget types: ${widgetTypesError.message}`)
+      }
+
+      console.log("[v0] Available widget types:", widgetTypes)
+
+      const profileWidgetType = widgetTypes?.find((wt) => wt.key === "profile")
+      const descriptionWidgetType = widgetTypes?.find((wt) => wt.key === "description")
+      const projectsWidgetType = widgetTypes?.find((wt) => wt.key === "projects")
+
+      // Insert widgets directly
+      const widgets = []
+
+      if (profileWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-profile`,
+          page_id: pageId,
+          widget_type_id: profileWidgetType.id,
+          props: {
+            name: portfolio.name,
+            title: portfolio.title,
+            email: portfolio.email,
+            location: portfolio.location,
+            handle: portfolio.handle,
+            initials: portfolio.initials,
+            selectedColor: portfolio.selectedColor,
+            profileText: content.profile,
+          },
+          enabled: true,
+        })
+      }
+
+      if (descriptionWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-about`,
+          page_id: pageId,
+          widget_type_id: descriptionWidgetType.id,
+          props: {
+            title: "About",
+            content: content.about,
+          },
+          enabled: true,
+        })
+      }
+
+      if (projectsWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-projects`,
+          page_id: pageId,
+          widget_type_id: projectsWidgetType.id,
+          props: {
+            title: "Projects",
+            projectColors: content.projectColors,
+            galleryGroups: content.galleryGroups,
+          },
+          enabled: true,
+        })
+      }
+
+      console.log("[v0] Inserting widgets:", widgets)
+
+      if (widgets.length > 0) {
+        const { error: widgetError } = await supabase.from("widget_instances").upsert(widgets)
+
+        if (widgetError) {
+          console.error("[v0] Error saving widgets:", widgetError)
+          throw new Error(`Failed to save widgets: ${widgetError.message}`)
+        }
+
+        console.log("[v0] Widgets saved successfully")
+      }
     } catch (rpcError) {
-      console.error("Error adding widgets via RPC:", rpcError)
-      // Fallback to direct widget insertion if RPC fails
+      console.error("[v0] Error saving template content:", rpcError)
       throw new Error(`Failed to save portfolio widgets: ${rpcError}`)
     }
   }
+
+  console.log("[v0] Portfolio save completed successfully")
 }
 
 export async function loadUserPortfolios(): Promise<UnifiedPortfolio[]> {

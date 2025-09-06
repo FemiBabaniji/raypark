@@ -4,8 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Sparkles, Zap, Users } from "lucide-react"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -28,12 +27,13 @@ export default function LandingPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
       },
     },
     exit: {
-      x: "-100%",
+      opacity: 0,
+      scale: 0.95,
       transition: {
         duration: 0.8,
         ease: "easeInOut",
@@ -42,310 +42,157 @@ export default function LandingPage() {
   }
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 30, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25,
+        mass: 0.8,
+      },
     },
   }
 
-  const DeviceMockup = () => (
-    <div className="relative">
-      {/* Desktop/Mac Frame */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
-        animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="relative w-[600px] h-[400px] bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-2xl p-6 shadow-2xl border border-neutral-700"
-      >
-        {/* Screen */}
-        <div className="bg-neutral-950 rounded-xl h-full p-6 relative overflow-hidden">
-          {/* Portfolio Content */}
-          <div className="flex gap-6 h-full">
-            {/* Left Column */}
-            <div className="flex-1 space-y-4">
-              {/* Profile Widget */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="bg-gradient-to-br from-rose-400/40 to-rose-600/60 backdrop-blur-xl rounded-2xl p-6 text-white"
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src="/professional-woman-headshot.png" />
-                    <AvatarFallback>JW</AvatarFallback>
-                  </Avatar>
-                </div>
-                <h3 className="text-lg font-bold mb-1">Jenny Wilson</h3>
-                <p className="text-white/80 text-sm mb-2">Digital Product Designer</p>
-                <p className="text-white/70 text-xs">Content creator. Digital nomad.</p>
-              </motion.div>
-
-              {/* Education Widget */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0 }}
-                className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-2xl p-4 text-white"
-              >
-                <h4 className="text-sm font-semibold mb-2">Education</h4>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs font-medium">Design Systems</p>
-                    <p className="text-neutral-400 text-xs">Stanford University</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Right Column */}
-            <div className="flex-1 space-y-4">
-              {/* About Widget */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-2xl p-4 text-white"
-              >
-                <h4 className="text-sm font-semibold mb-2">About Me</h4>
-                <p className="text-neutral-300 text-xs leading-relaxed">
-                  I'm a passionate digital designer with over 5 years of experience creating meaningful user
-                  experiences.
-                </p>
-              </motion.div>
-
-              {/* Projects Widget */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1 }}
-                className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-2xl p-4 text-white"
-              >
-                <h4 className="text-sm font-semibold mb-3">Projects Portfolio</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-gradient-to-br from-purple-500/70 to-blue-500/70 rounded-lg p-2">
-                    <p className="text-xs font-medium">AI/ML</p>
-                    <p className="text-xs text-white/80 mt-1">Real-time insights...</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs">In Progress</span>
-                      <span className="text-xs font-bold">60%</span>
-                    </div>
-                  </div>
-                  <div className="bg-neutral-800/50 rounded-lg p-2">
-                    <p className="text-xs font-medium">Web Dev</p>
-                    <p className="text-xs text-neutral-400 mt-1">Complete overhaul...</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-blue-400">In Progress</span>
-                      <span className="text-xs font-bold">85%</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Phone Frame */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, x: 50 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        transition={{ duration: 1, delay: 0.7 }}
-        className="absolute -right-20 top-20 w-64 h-[500px] bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-[2.5rem] p-4 shadow-2xl border border-neutral-700"
-      >
-        {/* Phone Screen */}
-        <div className="bg-neutral-950 rounded-[2rem] h-full p-4 relative overflow-hidden">
-          {/* Status Bar */}
-          <div className="flex justify-between items-center mb-4 text-white text-xs">
-            <span>9:41</span>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-2 border border-white rounded-sm">
-                <div className="w-3 h-1 bg-white rounded-sm"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Portfolio Content */}
-          <div className="space-y-3">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2 }}
-              className="bg-gradient-to-br from-rose-400/40 to-rose-600/60 rounded-xl p-4 text-white"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/professional-woman-headshot.png" />
-                  <AvatarFallback>JW</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="text-sm font-bold">Jenny Wilson</h4>
-                  <p className="text-xs text-white/80">Designer</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4 }}
-              className="space-y-2"
-            >
-              <div className="bg-purple-600 text-white py-2 px-3 rounded-lg text-xs text-center">Portfolio</div>
-              <div className="bg-blue-600 text-white py-2 px-3 rounded-lg text-xs text-center">Projects ↓</div>
-              <div className="bg-green-600 text-white py-2 px-3 rounded-lg text-xs text-center">Skills</div>
-              <div className="bg-amber-600 text-white py-2 px-3 rounded-lg text-xs text-center">Contact</div>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  )
+  const floatingVariants = {
+    animate: {
+      y: [-10, 10, -10],
+      transition: {
+        duration: 6,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      },
+    },
+  }
 
   return (
     <AnimatePresence mode="wait">
       {!isTransitioning && (
         <motion.div
-          className="min-h-screen bg-neutral-950 relative overflow-hidden"
+          className="min-h-screen bg-black relative overflow-hidden"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
-          {/* Header comment */}
-          <div className="absolute top-6 left-6 right-6 z-10">
+          {/* Subtle background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-black to-neutral-950" />
+
+          {/* Floating elements for visual interest */}
+          <motion.div
+            variants={floatingVariants}
+            animate="animate"
+            className="absolute top-20 left-20 w-2 h-2 bg-purple-500/30 rounded-full blur-sm"
+          />
+          <motion.div
+            variants={floatingVariants}
+            animate="animate"
+            style={{ animationDelay: "2s" }}
+            className="absolute top-40 right-32 w-1 h-1 bg-pink-500/40 rounded-full blur-sm"
+          />
+          <motion.div
+            variants={floatingVariants}
+            animate="animate"
+            style={{ animationDelay: "4s" }}
+            className="absolute bottom-32 left-1/3 w-1.5 h-1.5 bg-blue-500/30 rounded-full blur-sm"
+          />
+
+          {/* Header */}
+          <motion.div variants={itemVariants} className="absolute top-8 left-8 right-8 z-10">
             <div className="flex justify-between items-center">
-              <div className="font-mono text-xs text-neutral-600">
-                <span className="text-neutral-500">01</span>
-                <span className="ml-6 text-neutral-500">
-                  {"<!--"} PROFESSIONAL PORTFOLIO BUILDER {"-->"}
-                </span>
-              </div>
+              <div className="text-white font-semibold text-xl tracking-tight">pathwai</div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300"
+                className="text-neutral-400 hover:text-white hover:bg-white/5 rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 border border-white/10 hover:border-white/20"
                 onClick={() => router.push("/auth")}
               >
                 Sign In
               </Button>
             </div>
-          </div>
-
-          <div className="flex min-h-screen">
-            {/* Left Content */}
-            <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 py-20">
-              <motion.div className="text-center max-w-2xl" variants={containerVariants}>
-                <motion.div className="flex items-center justify-center gap-2 mb-6" variants={itemVariants}>
-                  <div className="flex -space-x-2">
-                    {[
-                      "/professional-headshot.png",
-                      "/man-developer.png",
-                      "/woman-designer.png",
-                      "/woman-analyst.png",
-                    ].map((src, i) => (
-                      <Avatar key={i} className="w-8 h-8 border-2 border-neutral-950">
-                        <AvatarImage src={src || "/placeholder.svg"} className="object-cover" />
-                        <AvatarFallback className="bg-neutral-700 text-white text-xs">U</AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <div key={i} className="w-3 h-3 text-yellow-400 text-xs">
-                        ⭐
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-neutral-400 text-sm">10,000+ professionals</span>
-                </motion.div>
-
-                <motion.h1
-                  className="text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-tight"
-                  variants={itemVariants}
-                >
-                  Build your{" "}
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent [&:not(:has(.bg-clip-text))]:text-purple-400">
-                    professional
-                  </span>{" "}
-                  portfolio
-                </motion.h1>
-
-                <motion.p className="text-neutral-400 text-lg mb-8 leading-relaxed" variants={itemVariants}>
-                  Create stunning portfolio pages that showcase your skills, projects, and expertise. Connect with
-                  opportunities and grow your network.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                  <Button
-                    size="lg"
-                    className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-4 text-base font-medium transition-all duration-300 group"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started Free
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full px-8 py-4 text-base font-medium backdrop-blur-xl"
-                    onClick={() => router.push("/dashboard")}
-                  >
-                    View Examples
-                  </Button>
-                </motion.div>
-
-                <motion.div variants={itemVariants} className="text-neutral-500 text-sm">
-                  Join thousands of professionals already on pathwai
-                </motion.div>
-              </motion.div>
-            </div>
-
-            {/* Right Visual Area */}
-            <div className="flex-1 flex items-center justify-center relative min-h-screen p-8">
-              <DeviceMockup />
-            </div>
-          </div>
-
-          {/* Features Ticker */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5 }}
-            className="absolute bottom-20 left-0 right-0 bg-neutral-900/50 backdrop-blur-xl py-4 border-t border-b border-white/10"
-          >
-            <div className="flex items-center justify-center gap-12 text-neutral-300 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-purple-600 rounded-sm"></div>
-                <span>DRAG & DROP BUILDER</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-pink-600 rounded-sm"></div>
-                <span>FULLY CUSTOMIZABLE</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-                <span>LIVE IN MINUTES</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-600 rounded-sm"></div>
-                <span>PROFESSIONAL TEMPLATES</span>
-              </div>
-            </div>
           </motion.div>
 
-          {/* Footer comment */}
-          <div className="absolute bottom-6 left-6 right-6 z-10">
-            <div className="font-mono text-xs text-neutral-600">
-              <span className="text-neutral-500">02</span>
-              <span className="ml-6 text-neutral-500">
-                {"<!--"} START BUILDING {"-->"}
-              </span>
-            </div>
+          {/* Main Content */}
+          <div className="flex flex-col items-center justify-center min-h-screen px-8 py-20">
+            <motion.div className="text-center max-w-4xl" variants={containerVariants}>
+              {/* Badge */}
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mb-8 backdrop-blur-xl"
+              >
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span className="text-neutral-300 text-sm font-medium">Trusted by 10,000+ professionals</span>
+              </motion.div>
+
+              {/* Main Headline */}
+              <motion.h1
+                className="text-6xl lg:text-8xl font-black text-white mb-8 tracking-tight leading-[0.9]"
+                variants={itemVariants}
+              >
+                Your digital
+                <br />
+                <span className="text-purple-400">workroom</span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                className="text-neutral-400 text-xl lg:text-2xl mb-12 leading-relaxed font-light max-w-2xl mx-auto"
+                variants={itemVariants}
+              >
+                Build stunning portfolios that showcase your work and connect you with opportunities.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <Button
+                  size="lg"
+                  className="bg-white text-black hover:bg-neutral-100 rounded-full px-10 py-6 text-lg font-semibold transition-all duration-300 group shadow-2xl"
+                  onClick={handleGetStarted}
+                >
+                  Get Started
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full px-10 py-6 text-lg font-medium backdrop-blur-xl transition-all duration-300"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  View Examples
+                </Button>
+              </motion.div>
+
+              {/* Feature Cards */}
+              <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                  <Zap className="w-8 h-8 text-purple-400 mb-4" />
+                  <h3 className="text-white font-semibold text-lg mb-2">Lightning Fast</h3>
+                  <p className="text-neutral-400 text-sm">Build and deploy your portfolio in minutes, not hours.</p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                  <Sparkles className="w-8 h-8 text-pink-400 mb-4" />
+                  <h3 className="text-white font-semibold text-lg mb-2">Beautiful Design</h3>
+                  <p className="text-neutral-400 text-sm">Professional templates that make you stand out.</p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl hover:bg-white/10 transition-all duration-300">
+                  <Users className="w-8 h-8 text-blue-400 mb-4" />
+                  <h3 className="text-white font-semibold text-lg mb-2">Connect & Grow</h3>
+                  <p className="text-neutral-400 text-sm">Network with professionals and discover opportunities.</p>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
+
+          {/* Footer */}
+          <motion.div variants={itemVariants} className="absolute bottom-8 left-8 right-8 z-10">
+            <div className="flex justify-center">
+              <div className="text-neutral-500 text-sm font-light">© 2024 pathwai. Crafted for professionals.</div>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

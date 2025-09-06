@@ -5,7 +5,6 @@ import { Reorder, motion } from "framer-motion"
 import { Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
-import { useAutoSave } from "@/lib/hooks/useAutoSave"
 import {
   IdentityWidget,
   EducationWidget,
@@ -21,11 +20,8 @@ type Props = {
   identity: Identity
   onIdentityChange: (identity: Identity) => void
   onExportData?: (data: PortfolioExportData) => void
-  onSavePortfolio?: (data: any) => void
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
-  user?: any
-  portfolioId?: string
 }
 
 export type PortfolioExportData = {
@@ -43,11 +39,8 @@ export default function PortfolioBuilder({
   identity,
   onIdentityChange,
   onExportData,
-  onSavePortfolio,
   isLive = false,
   onToggleLive,
-  user,
-  portfolioId,
 }: Props) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
@@ -100,167 +93,7 @@ export default function PortfolioBuilder({
     },
   })
 
-  const [projectColors, setProjectColors] = useState<Record<string, string>>({
-    aiml: "purple",
-    mobile: "purple",
-  })
-  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
-    aiml: false,
-    mobile: false,
-  })
-
-  const [galleryGroups, setGalleryGroups] = useState<{
-    [key: string]: Array<{
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }>
-  }>({})
-
-  const [selectedGroup, setSelectedGroup] = useState<{
-    widgetId: string
-    groupId: string
-    group: {
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }
-  } | null>(null)
-
-  const projectColorOptions = [
-    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
-    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
-    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
-    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
-    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
-    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
-    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
-  ]
-
-  const GroupDetailView = () => {
-    if (!selectedGroup) return null
-
-    return (
-      <div className="fixed inset-0 bg-neutral-950 z-50 flex flex-col">
-        <div className="p-6 flex justify-between items-center">
-          <Button
-            onClick={() => setSelectedGroup(null)}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-
-          {!isPreviewMode && (
-            <Button
-              onClick={() => {
-                const input = document.createElement("input")
-                input.type = "file"
-                input.accept = "image/*"
-                input.multiple = true
-
-                input.onchange = (e) => {
-                  const files = (e.target as HTMLInputElement).files
-                  if (files) {
-                    Array.from(files).forEach((file) => {
-                      const reader = new FileReader()
-                      reader.onload = (e) => {
-                        const imageUrl = e.target?.result as string
-                        setGalleryGroups((prev) => ({
-                          ...prev,
-                          [selectedGroup.widgetId]:
-                            prev[selectedGroup.widgetId]?.map((group) =>
-                              group.id === selectedGroup.groupId
-                                ? { ...group, images: [...group.images, imageUrl] }
-                                : group,
-                            ) || [],
-                        }))
-
-                        setSelectedGroup((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                group: {
-                                  ...prev.group,
-                                  images: [...prev.group.images, imageUrl],
-                                },
-                              }
-                            : null,
-                        )
-                      }
-                      reader.readAsDataURL(file)
-                    })
-                  }
-                }
-
-                input.click()
-              }}
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Images
-            </Button>
-          )}
-        </div>
-
-        <div className="px-6 pb-6">
-          <h1 className="text-2xl font-bold text-white">{selectedGroup.group.name}</h1>
-          <p className="text-white/60 text-sm mt-1">
-            {selectedGroup.group.images.length} image{selectedGroup.group.images.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        <div className="flex-1 px-6 pb-6 overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
-            {selectedGroup.group.images.map((image, index) => (
-              <div key={index} className="bg-white/10 rounded-2xl overflow-hidden">
-                <img
-                  src={image || "/placeholder.svg"}
-                  alt={`${selectedGroup.group.name} ${index + 1}`}
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const { saveStatus, triggerSave } = useAutoSave({
-    data: {
-      id: portfolioId || `portfolio-${Date.now()}`,
-      name: identity.name,
-      title: "Portfolio",
-      email: `${(identity.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
-      location: "Location",
-      handle: identity.handle,
-      initials: identity.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase(),
-      selectedColor: identity.selectedColor,
-      widgets: {
-        left: leftWidgets,
-        right: rightWidgets,
-      },
-      content: widgetContent,
-      isTemplate: false,
-    },
-    user,
-    debounceMs: 1200,
-  })
-
+  // Ensure identity stays first if lists are reordered externally
   useEffect(() => {
     setLeftWidgets((prev) => {
       const rest = prev.filter((w) => w.id !== "identity")
@@ -574,6 +407,141 @@ export default function PortfolioBuilder({
       </div>
     </div>
   ) : null
+
+  const [projectColors, setProjectColors] = useState<Record<string, string>>({
+    aiml: "purple",
+    mobile: "purple",
+  })
+  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
+    aiml: false,
+    mobile: false,
+  })
+
+  const [galleryGroups, setGalleryGroups] = useState<{
+    [key: string]: Array<{
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }>
+  }>({})
+
+  const [selectedGroup, setSelectedGroup] = useState<{
+    widgetId: string
+    groupId: string
+    group: {
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }
+  } | null>(null)
+
+  const projectColorOptions = [
+    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
+    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
+    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
+    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
+    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
+    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
+    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
+  ]
+
+  const GroupDetailView = () => {
+    if (!selectedGroup) return null
+
+    return (
+      <div className="fixed inset-0 bg-neutral-950 z-50 flex flex-col">
+        <div className="p-6 flex justify-between items-center">
+          <Button
+            onClick={() => setSelectedGroup(null)}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
+          {!isPreviewMode && (
+            <Button
+              onClick={() => {
+                const input = document.createElement("input")
+                input.type = "file"
+                input.accept = "image/*"
+                input.multiple = true
+
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files
+                  if (files) {
+                    Array.from(files).forEach((file) => {
+                      const reader = new FileReader()
+                      reader.onload = (e) => {
+                        const imageUrl = e.target?.result as string
+                        setGalleryGroups((prev) => ({
+                          ...prev,
+                          [selectedGroup.widgetId]:
+                            prev[selectedGroup.widgetId]?.map((group) =>
+                              group.id === selectedGroup.groupId
+                                ? { ...group, images: [...group.images, imageUrl] }
+                                : group,
+                            ) || [],
+                        }))
+
+                        setSelectedGroup((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                group: {
+                                  ...prev.group,
+                                  images: [...prev.group.images, imageUrl],
+                                },
+                              }
+                            : null,
+                        )
+                      }
+                      reader.readAsDataURL(file)
+                    })
+                  }
+                }
+
+                input.click()
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Images
+            </Button>
+          )}
+        </div>
+
+        <div className="px-6 pb-6">
+          <h1 className="text-2xl font-bold text-white">{selectedGroup.group.name}</h1>
+          <p className="text-white/60 text-sm mt-1">
+            {selectedGroup.group.images.length} image{selectedGroup.group.images.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        <div className="flex-1 px-6 pb-6 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+            {selectedGroup.group.images.map((image, index) => (
+              <div key={index} className="bg-white/10 rounded-2xl overflow-hidden">
+                <img
+                  src={image || "/placeholder.svg"}
+                  alt={`${selectedGroup.group.name} ${index + 1}`}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>

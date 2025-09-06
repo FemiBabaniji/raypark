@@ -1,15 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { BackButton } from "@/components/ui/back-button"
 import { mockPortfolios } from "@/lib/portfolio-data"
 
 export default function NetworkPage() {
-  const router = useRouter()
-
   const networkMembers = [
     ...mockPortfolios,
     {
@@ -59,7 +56,7 @@ export default function NetworkPage() {
       >
         <div className="flex items-center space-x-4">
           <BackButton
-            onClick={() => router.push("/dashboard")}
+            onClick={() => window.history.back()}
             className="text-neutral-400 hover:text-white transition-colors"
           />
 

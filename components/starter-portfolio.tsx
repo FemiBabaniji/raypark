@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Reorder } from "framer-motion"
 import { Upload, Play, GripVertical, Palette, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,9 +9,6 @@ import PortfolioShell from "./portfolio/portfolio-shell"
 import OnboardingOverlay from "./onboarding-overlay"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
-import { useAutoSave } from "@/lib/hooks/useAutoSave"
-import { savePortfolioUniversal } from "@/lib/portfolio-service"
-import { SavePill } from "@/components/ui/save-pill"
 
 type Step = 0 | 1 | 2 | 3
 
@@ -111,9 +108,9 @@ export default function StarterPortfolio({
         id: `starter-${Date.now()}`,
         name: profileText.name,
         title: "Portfolio",
-        email: `${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
+        email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
         location: "Location",
-        handle: `@${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}`,
+        handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
         initials: profileText.name
           .split(" ")
           .map((n) => n[0])
@@ -717,48 +714,8 @@ export default function StarterPortfolio({
     )
   }
 
-  const portfolioData = {
-    id: `starter-${Date.now()}`,
-    name: profileText.name,
-    title: "Portfolio",
-    email: `${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
-    location: "Location",
-    handle: `@${(profileText.name || "user").toLowerCase().replace(/\s+/g, "")}`,
-    initials: profileText.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase(),
-    selectedColor: profileColorIdx,
-    widgets: {
-      left: leftWidgets,
-      right: rightWidgets,
-    },
-    content: {
-      profile: profileText,
-      about: aboutText,
-      projectColors,
-      galleryGroups,
-    },
-    isTemplate: true,
-  }
-
-  const saveCallback = useCallback(async (data: any, signal: AbortSignal) => {
-    await savePortfolioUniversal(data, signal)
-  }, [])
-
-  const { status } = useAutoSave({
-    key: `starter-portfolio:${profileText.name}`,
-    data: portfolioData,
-    save: saveCallback,
-    delay: 1200,
-    enabled: !showOnboarding, // Only autosave after onboarding is complete
-  })
-
   const rightSlot = (
-    <div className="relative flex items-center gap-2">
-      <SavePill status={status} />
+    <div className="relative">
       {showAddDropdown && (
         <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
           <div className="space-y-1">

@@ -50,7 +50,6 @@ export default function PortfolioCanvas({
             isPreviewMode={isPreviewMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
-            onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to PortfolioBuilder for auto-save
             isLive={isLive}
             onToggleLive={onToggleLive}
           />

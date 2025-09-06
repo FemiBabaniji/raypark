@@ -14,186 +14,187 @@ export interface PortfolioData {
 }
 
 // Client-side functions
-export async function savePortfolioUniversal(portfolio: UnifiedPortfolio, signal?: AbortSignal): Promise<void> {
+export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> {
+  console.log("[v0] Starting portfolio save for:", portfolio.name)
   const supabase = createClient()
 
-  const { data: auth } = await supabase.auth.getUser()
-  if (!auth?.user) throw new Error("Not authenticated")
+  // Get current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
-  console.log("[v0] Starting UUID-safe portfolio save for:", portfolio.name)
+  console.log("[v0] User authentication check:", { user: user?.id, error: userError })
 
-  // Upsert portfolio without id — rely on (user_id, slug) uniqueness
-  const base = {
-    user_id: auth.user.id,
-    name: portfolio.name,
-    slug: portfolio.id, // if you want a prettier slug, sanitize it
-    is_public: (portfolio as any).isLive ?? false,
-    is_demo: false,
-    theme_id: (portfolio as any).theme_id ?? null,
-  }
+  if (userError || !user) {
+    console.log("[v0] No authenticated user, saving as demo portfolio")
+    // For now, let's save demo portfolios with a placeholder user_id
+    const demoUserId = "demo-user"
 
-  const { data: upserted, error: upErr } = await supabase
-    .from("portfolios")
-    .upsert(base, { onConflict: "user_id,slug" })
-    .select("*")
-    .single()
-
-  if (upErr) {
-    console.error("[v0] Error upserting portfolio:", upErr)
-    throw upErr
-  }
-
-  const portfolioId = upserted!.id as string // DB-generated UUID
-  console.log("[v0] Portfolio upserted with UUID:", portfolioId)
-
-  // Ensure main page exists (key='main')
-  const { data: mainPage } = await supabase
-    .from("pages")
-    .select("*")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (!mainPage) {
-    const { error: pageErr } = await supabase.from("pages").insert({
-      portfolio_id: portfolioId,
-      key: "main",
-      title: portfolio.name,
-      route: "/",
-      is_demo: false,
-    })
-    if (pageErr) {
-      console.error("[v0] Error creating main page:", pageErr)
-      throw pageErr
+    const portfolioData: Partial<PortfolioData> = {
+      id: portfolio.id,
+      user_id: demoUserId,
+      name: portfolio.name,
+      slug: portfolio.id,
+      is_public: portfolio.isLive || false,
+      is_demo: true, // Mark as demo
     }
-    console.log("[v0] Created main page")
-  }
 
-  // Get page id for widget operations
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .single()
-  const pageId = page!.id
+    console.log("[v0] Saving demo portfolio data:", portfolioData)
 
-  // Get profile widget type id
-  const { data: profileType } = await supabase.from("widget_types").select("id").eq("key", "profile").single()
+    const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
+    if (portfolioError) {
+      console.error("[v0] Error saving demo portfolio:", portfolioError)
+      throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
+    }
 
-  if (!profileType) {
-    console.error("[v0] Profile widget type not found")
+    console.log("[v0] Demo portfolio saved successfully")
     return
   }
 
-  // Find existing profile instance or insert new one
-  const { data: existingProfile } = await supabase
-    .from("widget_instances")
-    .select("id")
-    .eq("page_id", pageId)
-    .eq("widget_type_id", profileType.id)
-    .maybeSingle()
-
-  const profileProps = {
+  // Save basic portfolio info
+  const portfolioData: Partial<PortfolioData> = {
+    id: portfolio.id,
+    user_id: user.id,
     name: portfolio.name,
-    title: portfolio.title,
-    email: portfolio.email,
-    location: portfolio.location,
-    handle: portfolio.handle,
-    initials: portfolio.initials,
-    selectedColor: portfolio.selectedColor,
+    slug: portfolio.id,
+    is_public: portfolio.isLive || false,
+    is_demo: false,
   }
 
-  if (existingProfile) {
-    await supabase.from("widget_instances").update({ props: profileProps }).eq("id", existingProfile.id)
-    console.log("[v0] Updated existing profile widget")
-  } else {
-    await supabase.from("widget_instances").insert({
-      page_id: pageId,
-      widget_type_id: profileType.id,
-      enabled: true,
-      props: profileProps,
-    })
-    console.log("[v0] Created new profile widget")
+  console.log("[v0] Saving authenticated portfolio data:", portfolioData)
+
+  const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
+  if (portfolioError) {
+    console.error("[v0] Error saving portfolio:", portfolioError)
+    throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
   }
 
-  // Handle template content if present
+  console.log("[v0] Portfolio saved successfully")
+
+  // Create or update the main page
+  const pageData = {
+    id: `${portfolio.id}-main`,
+    portfolio_id: portfolio.id,
+    key: "main",
+    title: portfolio.name,
+    route: "/",
+    is_demo: false,
+  }
+
+  console.log("[v0] Saving page data:", pageData)
+
+  const { error: pageError } = await supabase.from("pages").upsert(pageData)
+  if (pageError) {
+    console.error("[v0] Error saving page:", pageError)
+    throw new Error(`Failed to save page: ${pageError.message}`)
+  }
+
+  console.log("[v0] Page saved successfully")
+
+  // Save template data using RPC functions if it's a template portfolio
   if (portfolio.isTemplate && (portfolio as any).content) {
+    console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
-    console.log("[v0] Saving template content")
+    const pageId = `${portfolio.id}-main`
 
-    // Get widget types for template content
-    const { data: widgetTypes } = await supabase
-      .from("widget_types")
-      .select("id, key")
-      .in("key", ["description", "projects"])
+    try {
+      console.log("[v0] Using direct widget insertion instead of RPC")
 
-    const descriptionType = widgetTypes?.find((wt) => wt.key === "description")
-    const projectsType = widgetTypes?.find((wt) => wt.key === "projects")
+      // Get widget type IDs first
+      const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
 
-    // Save about/description widget
-    if (descriptionType && content.about) {
-      const { data: existingDesc } = await supabase
-        .from("widget_instances")
-        .select("id")
-        .eq("page_id", pageId)
-        .eq("widget_type_id", descriptionType.id)
-        .maybeSingle()
+      if (widgetTypesError) {
+        console.error("[v0] Error fetching widget types:", widgetTypesError)
+        throw new Error(`Failed to fetch widget types: ${widgetTypesError.message}`)
+      }
 
-      const descProps = { title: "About", content: content.about }
+      console.log("[v0] Available widget types:", widgetTypes)
 
-      if (existingDesc) {
-        await supabase.from("widget_instances").update({ props: descProps }).eq("id", existingDesc.id)
-      } else {
-        await supabase.from("widget_instances").insert({
+      const profileWidgetType = widgetTypes?.find((wt) => wt.key === "profile")
+      const descriptionWidgetType = widgetTypes?.find((wt) => wt.key === "description")
+      const projectsWidgetType = widgetTypes?.find((wt) => wt.key === "projects")
+
+      // Insert widgets directly
+      const widgets = []
+
+      if (profileWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-profile`,
           page_id: pageId,
-          widget_type_id: descriptionType.id,
+          widget_type_id: profileWidgetType.id,
+          props: {
+            name: portfolio.name,
+            title: portfolio.title,
+            email: portfolio.email,
+            location: portfolio.location,
+            handle: portfolio.handle,
+            initials: portfolio.initials,
+            selectedColor: portfolio.selectedColor,
+            profileText: content.profile,
+          },
           enabled: true,
-          props: descProps,
         })
       }
-    }
 
-    // Save projects widget
-    if (projectsType && (content.projectColors || content.galleryGroups)) {
-      const { data: existingProjects } = await supabase
-        .from("widget_instances")
-        .select("id")
-        .eq("page_id", pageId)
-        .eq("widget_type_id", projectsType.id)
-        .maybeSingle()
-
-      const projectProps = {
-        title: "Projects",
-        projectColors: content.projectColors || [],
-        galleryGroups: content.galleryGroups || [],
-      }
-
-      if (existingProjects) {
-        await supabase.from("widget_instances").update({ props: projectProps }).eq("id", existingProjects.id)
-      } else {
-        await supabase.from("widget_instances").insert({
+      if (descriptionWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-about`,
           page_id: pageId,
-          widget_type_id: projectsType.id,
+          widget_type_id: descriptionWidgetType.id,
+          props: {
+            title: "About",
+            content: content.about,
+          },
           enabled: true,
-          props: projectProps,
         })
       }
+
+      if (projectsWidgetType) {
+        widgets.push({
+          id: `${portfolio.id}-projects`,
+          page_id: pageId,
+          widget_type_id: projectsWidgetType.id,
+          props: {
+            title: "Projects",
+            projectColors: content.projectColors,
+            galleryGroups: content.galleryGroups,
+          },
+          enabled: true,
+        })
+      }
+
+      console.log("[v0] Inserting widgets:", widgets)
+
+      if (widgets.length > 0) {
+        const { error: widgetError } = await supabase.from("widget_instances").upsert(widgets)
+
+        if (widgetError) {
+          console.error("[v0] Error saving widgets:", widgetError)
+          throw new Error(`Failed to save widgets: ${widgetError.message}`)
+        }
+
+        console.log("[v0] Widgets saved successfully")
+      }
+    } catch (rpcError) {
+      console.error("[v0] Error saving template content:", rpcError)
+      throw new Error(`Failed to save portfolio widgets: ${rpcError}`)
     }
   }
 
   console.log("[v0] Portfolio save completed successfully")
 }
 
-export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
-  return savePortfolioUniversal(portfolio)
-}
-
-export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
+export async function loadUserPortfolios(): Promise<UnifiedPortfolio[]> {
   const supabase = createClient()
 
-  if (!user) {
-    console.log("[v0] No authenticated user, returning empty array")
+  // Get current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+  if (userError || !user) {
+    // Return demo portfolios if not authenticated
     return []
   }
 
@@ -218,8 +219,6 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     throw new Error(`Failed to load portfolios: ${portfolioError.message}`)
   }
 
-  console.log("[v0] Loaded portfolios from database:", portfolios?.length || 0)
-
   return (portfolios || []).map((portfolio: any): UnifiedPortfolio => {
     // Extract template data from widgets
     const mainPage = portfolio.pages?.find((p: any) => p.key === "main")
@@ -232,7 +231,7 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     const isTemplate = !!(profileWidget || aboutWidget || projectsWidget)
 
     return {
-      id: portfolio.slug, // Use slug as the client-side ID
+      id: portfolio.id,
       name: portfolio.name,
       title: profileWidget?.props?.title || "Portfolio",
       email: profileWidget?.props?.email || `${portfolio.slug}@example.com`,

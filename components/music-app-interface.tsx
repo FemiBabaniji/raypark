@@ -124,7 +124,7 @@ export default function MusicAppInterface({
       if (typeof color === "number") {
         idx = Math.max(0, Math.min(THEME_COLOR_OPTIONS.length - 1, color)) as ThemeIndex
       } else {
-        const find = THEME_COLOR_OPTIONS.findIndex((c) => c.name?.toLowerCase() === String(color).toLowerCase())
+        const find = THEME_COLOR_OPTIONS.findIndex((c) => c.name.toLowerCase() === String(color).toLowerCase())
         if (find >= 0) idx = find as ThemeIndex
       }
       if (idx !== null) {

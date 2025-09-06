@@ -58,14 +58,14 @@ export default function StarterPortfolio({
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
   const [profileText, setProfileText] = useState({
-    name: activeIdentity?.name || "your name",
+    name: activeIdentity?.name || "Your Name",
     title: "is a",
-    subtitle: "describe what you do (e.g., product designer / software engineer).",
+    subtitle: "Add your professional title here (e.g., Product Designer, Software Engineer, etc.)",
   })
   const [aboutText, setAboutText] = useState({
     title: "About Me",
-    description: "I specialize in creating unique digital experiences that solve real problems.",
-    subdescription: "I believe great design starts with understanding your users and their needs.",
+    description: "Write a brief introduction about yourself and what you do.",
+    subdescription: "Share your passion, experience, or what drives you professionally.",
   })
   const [galleryGroups, setGalleryGroups] = useState<Record<string, any[]>>({})
   const [selectedGroup, setSelectedGroup] = useState<any>(null)
@@ -328,14 +328,14 @@ export default function StarterPortfolio({
 
       <div className="space-y-4">
         <div className="bg-neutral-800/50 rounded-2xl p-4">
-          <h3 className="font-semibold text-white">MS Computer Science</h3>
-          <p className="text-neutral-300 text-sm">Stanford University</p>
-          <p className="text-neutral-400 text-xs">2020 • GPA: 3.8</p>
+          <h3 className="font-semibold text-white">Your Degree</h3>
+          <p className="text-neutral-300 text-sm">Your University</p>
+          <p className="text-neutral-400 text-xs">Year • GPA (optional)</p>
         </div>
         <div className="bg-neutral-800/50 rounded-2xl p-4">
-          <h3 className="font-semibold text-white">BS Software Engineering</h3>
-          <p className="text-neutral-300 text-sm">UC Berkeley</p>
-          <p className="text-neutral-400 text-xs">2018 • GPA: 3.7</p>
+          <h3 className="font-semibold text-white">Previous Degree</h3>
+          <p className="text-neutral-300 text-sm">Previous University</p>
+          <p className="text-neutral-400 text-xs">Year • GPA (optional)</p>
         </div>
       </div>
     </div>
@@ -371,26 +371,26 @@ export default function StarterPortfolio({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Web Development */}
+        {/* Project 1 */}
         <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">Web Development</span>
+            <span className="text-sm font-medium text-white">Project Name</span>
             <Upload className="w-4 h-4 text-neutral-400" />
           </div>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            Complete overhaul of user experience and backend architecture for scalable growth...
+            Brief description of your project and what it accomplishes...
           </p>
           <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">React</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Node.js</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Tech</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Stack</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-blue-400">In Progress</span>
-            <span className="text-2xl font-bold text-white">85%</span>
+            <span className="text-xs text-blue-400">Status</span>
+            <span className="text-2xl font-bold text-white">%</span>
           </div>
         </div>
 
-        {/* AI/ML with color picker */}
+        {/* Featured Project with color picker */}
         <div
           className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.aiml)?.gradient} rounded-2xl p-4 space-y-3 relative group/aiml`}
         >
@@ -425,57 +425,57 @@ export default function StarterPortfolio({
             </div>
           )}
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium bg-black/20 px-2 py-1 rounded text-white">AI/ML</span>
+            <span className="text-sm font-medium bg-black/20 px-2 py-1 rounded text-white">Featured</span>
             <Play className="w-4 h-4 text-white" />
           </div>
           <p className="text-xs text-white/80 leading-relaxed">
-            Machine learning models for predictive analytics and automation...
+            Your most important project - highlight your best work here...
           </p>
           <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-black/20 px-2 py-1 rounded text-white">Python</span>
-            <span className="text-xs bg-black/20 px-2 py-1 rounded text-white">TensorFlow</span>
+            <span className="text-xs bg-black/20 px-2 py-1 rounded text-white">Main</span>
+            <span className="text-xs bg-black/20 px-2 py-1 rounded text-white">Tech</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/80">Complete</span>
-            <span className="text-2xl font-bold text-white">100%</span>
+            <span className="text-xs text-white/80">Status</span>
+            <span className="text-2xl font-bold text-white">%</span>
           </div>
         </div>
 
-        {/* Mobile */}
+        {/* Project 3 */}
         <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">Mobile</span>
+            <span className="text-sm font-medium text-white">Another Project</span>
             <Upload className="w-4 h-4 text-neutral-400" />
           </div>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            Cross-platform mobile application with native performance...
+            Add details about another project you've worked on...
           </p>
           <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">React Native</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">TypeScript</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Tools</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Used</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-green-400">Testing</span>
-            <span className="text-2xl font-bold text-white">92%</span>
+            <span className="text-xs text-green-400">Status</span>
+            <span className="text-2xl font-bold text-white">%</span>
           </div>
         </div>
 
-        {/* DevOps */}
+        {/* Project 4 */}
         <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-white">DevOps</span>
+            <span className="text-sm font-medium text-white">Side Project</span>
             <Upload className="w-4 h-4 text-neutral-400" />
           </div>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            Infrastructure automation and CI/CD pipeline optimization...
+            Personal projects or experiments you're working on...
           </p>
           <div className="flex flex-wrap gap-1">
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Docker</span>
-            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">AWS</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Skills</span>
+            <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Learned</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-orange-400">Planning</span>
-            <span className="text-2xl font-bold text-white">25%</span>
+            <span className="text-xs text-orange-400">Status</span>
+            <span className="text-2xl font-bold text-white">%</span>
           </div>
         </div>
       </div>
@@ -507,11 +507,11 @@ export default function StarterPortfolio({
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xl font-bold text-white">As a digital designer,</h3>
+        <h3 className="text-xl font-bold text-white">What I offer,</h3>
         <p className="text-white leading-relaxed">
-          I specialize in creating unique visual identities for digital products.{" "}
+          Describe the services you provide or skills you offer to clients and collaborators.{" "}
           <span className="text-neutral-400">
-            I believe that a catchy design starts with common values, open communication, and respect for your audience.
+            Explain your approach, methodology, or what makes your work unique and valuable.
           </span>
         </p>
       </div>

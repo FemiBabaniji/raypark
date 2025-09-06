@@ -111,7 +111,7 @@ const SidePanel = ({ isVisible, isPreviewMode }: { isVisible: boolean; isPreview
         paddingBottom: BASE_PADDING,
       }}
       animate={{ x: isVisible ? "0%" : "100%" }}
-      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1], delay: 0.9 }} // Added delay to MusicAppInterface
     >
       <MusicAppInterface />
     </motion.div>

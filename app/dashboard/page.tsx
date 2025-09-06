@@ -179,6 +179,7 @@ export default function Home() {
               : "??",
             selectedColor: (index % 7) as ThemeIndex, // ⬅️ use all 7 theme colors
             isLive: false, // Default to not live
+            isDraft: false, // Added isDraft property for existing portfolios
           }))
           setPortfolios(portfolioCards)
           setSelectedPortfolioId(portfolioCards[0].id)
@@ -194,9 +195,22 @@ export default function Home() {
   }, [])
 
   const handleZoomOut = () => {
+    if (useStarterTemplate) {
+      // Show confirmation dialog if user has unsaved work
+      const hasUnsavedWork = localStorage.getItem(`starter-template-${activePortfolio?.id || "default"}`)
+      if (hasUnsavedWork) {
+        const shouldSave = confirm("You have unsaved changes. Would you like to save as draft before leaving?")
+        if (shouldSave) {
+          // Trigger save draft functionality
+          // This would need to be implemented with a ref or callback
+          return
+        }
+      }
+    }
+
     setViewMode("minimized")
     setIsPreviewMode(false)
-    setUseStarterTemplate(false) // Reset starter template when zooming out
+    setUseStarterTemplate(false)
   }
 
   const handlePortfolioSelect = (portfolioId: string) => {
@@ -221,6 +235,7 @@ export default function Home() {
       initials: "NP",
       selectedColor: Math.floor(Math.random() * 7) as ThemeIndex, // ⬅️ 0..6
       isLive: false, // Added isLive property for new portfolios
+      isDraft: true, // Added isDraft property for new portfolios
     }
     setPortfolios((prev) => [...prev, newPortfolio])
     setSelectedPortfolioId(newPortfolio.id)
@@ -252,6 +267,27 @@ export default function Home() {
 
   const handleToggleLive = (isLive: boolean) => {
     setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
+  }
+
+  const handleSavePortfolio = (portfolioData: UnifiedPortfolio) => {
+    setPortfolios((prev) => {
+      // Check if updating existing portfolio or creating new one
+      const existingIndex = prev.findIndex((p) => p.id === portfolioData.id)
+      if (existingIndex >= 0) {
+        // Update existing portfolio
+        const updated = [...prev]
+        updated[existingIndex] = portfolioData
+        return updated
+      } else {
+        // Add new portfolio
+        return [...prev, portfolioData]
+      }
+    })
+    setSelectedPortfolioId(portfolioData.id)
+
+    if (!portfolioData.isDraft) {
+      setUseStarterTemplate(false)
+    }
   }
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
@@ -350,11 +386,7 @@ export default function Home() {
                       }),
                     )
                   }}
-                  onSavePortfolio={(portfolioData) => {
-                    setPortfolios((prev) => [...prev, portfolioData])
-                    setSelectedPortfolioId(portfolioData.id)
-                    setUseStarterTemplate(false)
-                  }}
+                  onSavePortfolio={handleSavePortfolio} // Use new save handler
                   isLive={activePortfolio?.isLive || false}
                   onToggleLive={handleToggleLive}
                 />

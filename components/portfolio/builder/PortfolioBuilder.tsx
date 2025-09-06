@@ -193,7 +193,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <EducationWidget
               widgetId={w.id}
@@ -215,7 +215,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <ProjectsWidget
               widgetId={w.id}
@@ -240,7 +240,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <DescriptionWidget
               widgetId={w.id}
@@ -262,7 +262,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <ServicesWidget
               widgetId={w.id}
@@ -284,7 +284,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <GalleryWidget
               widgetId={w.id}
@@ -305,7 +305,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
           >
             <div className="p-4 bg-white/10 rounded-lg group relative">
               {!isPreviewMode && canDelete && (
@@ -530,89 +530,95 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
 
   return (
     <>
-      <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("left")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={leftWidgets}
-            onReorder={setLeftWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut", delay: 0.6 }}
+      >
+        <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
+          <div
+            className={`lg:w-1/2 relative transition-all duration-200 ${
+              dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOverColumn("left")
+            }}
+            onDragLeave={() => setDragOverColumn(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragOverColumn(null)
+            }}
           >
-            {leftWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: 2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {renderWidget(w, "left")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+            <Reorder.Group
+              axis="y"
+              values={leftWidgets}
+              onReorder={setLeftWidgets}
+              className="flex flex-col gap-4 sm:gap-6"
+            >
+              {leftWidgets.map((w) => (
+                <Reorder.Item
+                  key={w.id}
+                  value={w}
+                  className="list-none"
+                  whileDrag={{
+                    scale: 1.05,
+                    zIndex: 50,
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                    rotate: 2,
+                  }}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  {renderWidget(w, "left")}
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </div>
 
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("right")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={rightWidgets}
-            onReorder={setRightWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
+          <div
+            className={`lg:w-1/2 relative transition-all duration-200 ${
+              dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOverColumn("right")
+            }}
+            onDragLeave={() => setDragOverColumn(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragOverColumn(null)
+            }}
           >
-            {rightWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: -2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {renderWidget(w, "right")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
-      </PortfolioShell>
+            <Reorder.Group
+              axis="y"
+              values={rightWidgets}
+              onReorder={setRightWidgets}
+              className="flex flex-col gap-4 sm:gap-6"
+            >
+              {rightWidgets.map((w) => (
+                <Reorder.Item
+                  key={w.id}
+                  value={w}
+                  className="list-none"
+                  whileDrag={{
+                    scale: 1.05,
+                    zIndex: 50,
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                    rotate: -2,
+                  }}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  {renderWidget(w, "right")}
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </div>
+        </PortfolioShell>
+      </motion.div>
 
       <GroupDetailView />
     </>

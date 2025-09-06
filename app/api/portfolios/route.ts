@@ -17,32 +17,16 @@ export async function GET() {
     const supabase = await createClient()
 
     const { data: portfolios, error } = await supabase
-      .from("portfolios")
+      .from("public_portfolio_by_slug")
       .select("*")
-      .eq("is_public", true)
-      .order("created_at", { ascending: false })
+      .order("portfolio_id", { ascending: false })
 
     if (error) {
       console.error("Error fetching portfolios:", error)
       return NextResponse.json({ error: "Failed to fetch portfolios" }, { status: 500 })
     }
 
-    const portfoliosWithThemes = await Promise.all(
-      portfolios.map(async (portfolio) => {
-        if (portfolio.theme_id) {
-          const { data: theme } = await supabase
-            .from("themes")
-            .select("id, name, tokens")
-            .eq("id", portfolio.theme_id)
-            .single()
-
-          return { ...portfolio, theme }
-        }
-        return portfolio
-      }),
-    )
-
-    return NextResponse.json({ portfolios: portfoliosWithThemes })
+    return NextResponse.json({ portfolios })
   } catch (error) {
     console.error("API Error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

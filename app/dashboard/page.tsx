@@ -12,7 +12,8 @@ import type { Portfolio } from "@/lib/portfolio-data"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
-import PortfolioGrid from "@/components/home/PortfolioGrid" // Import PortfolioGrid component
+import PortfolioGrid from "@/components/home/PortfolioGrid"
+import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -77,25 +78,25 @@ const ExpandedViewNavigation = ({
 
 const PortfolioCanvasWrapper = ({
   isPreviewMode,
-  useStarterTemplate, // Added useStarterTemplate prop
+  useStarterTemplate,
   activeIdentity,
   onActiveIdentityChange,
-  onSavePortfolio, // Added onSavePortfolio prop
-  isLive, // Added isLive prop
-  onToggleLive, // Added onToggleLive prop
+  onSavePortfolio,
+  isLive,
+  onToggleLive,
 }: {
   isPreviewMode: boolean
-  useStarterTemplate?: boolean // Added useStarterTemplate prop type
+  useStarterTemplate?: boolean
   activeIdentity?: UnifiedPortfolio
   onActiveIdentityChange?: (next: Partial<UnifiedPortfolio>) => void
-  onSavePortfolio?: (portfolioData: UnifiedPortfolio) => void // Added onSavePortfolio prop type
-  isLive?: boolean // Added isLive prop type
-  onToggleLive?: (isLive: boolean) => void // Added onToggleLive prop type
+  onSavePortfolio?: (portfolioData: UnifiedPortfolio) => void
+  isLive?: boolean
+  onToggleLive?: (isLive: boolean) => void
 }) => {
   return (
     <PortfolioCanvas
       isPreviewMode={isPreviewMode}
-      useStarterTemplate={useStarterTemplate} // Pass useStarterTemplate to PortfolioCanvas
+      useStarterTemplate={useStarterTemplate}
       activeIdentity={
         activeIdentity
           ? {
@@ -104,7 +105,7 @@ const PortfolioCanvasWrapper = ({
               handle: activeIdentity.handle || "",
               avatarUrl: activeIdentity.avatarUrl,
               selectedColor: activeIdentity.selectedColor,
-              isLive: activeIdentity.isLive, // Pass isLive to PortfolioCanvas
+              isLive: activeIdentity.isLive,
             }
           : undefined
       }
@@ -120,9 +121,9 @@ const PortfolioCanvasWrapper = ({
             }
           : undefined
       }
-      onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to PortfolioCanvas
-      onToggleLive={onToggleLive} // Pass onToggleLive to PortfolioCanvas
-      isLive={isLive} // Pass isLive to PortfolioCanvas
+      onSavePortfolio={onSavePortfolio}
+      onToggleLive={onToggleLive}
+      isLive={isLive}
     />
   )
 }
@@ -146,23 +147,27 @@ const SidePanel = ({ isVisible, isPreviewMode }: { isVisible: boolean; isPreview
 }
 
 export default function Home() {
-  const [isPreviewMode, setIsPreviewMode] = useState(false) // Controls UI chrome visibility
-  const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized") // Default to minimized (grid view)
-  const [useStarterTemplate, setUseStarterTemplate] = useState(false) // Added useStarterTemplate state
+  const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized")
+  const [useStarterTemplate, setUseStarterTemplate] = useState(false)
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("jenny-wilson")
   const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([])
   const [publishedPortfolios, setPublishedPortfolios] = useState<Portfolio[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Fetch & map to UnifiedPortfolio, cycling across ALL 7 theme indices (0..6)
   useEffect(() => {
     const fetchPortfolios = async () => {
       try {
-        const data = await getPublishedPortfolios()
-        setPublishedPortfolios(data)
+        const userPortfolios = await loadUserPortfolios()
+        const demoData = await getPublishedPortfolios()
+        setPublishedPortfolios(demoData)
 
-        if (data.length > 0) {
-          const portfolioCards: UnifiedPortfolio[] = data.map((portfolio, index) => ({
+        let allPortfolios: UnifiedPortfolio[] = []
+
+        if (userPortfolios.length > 0) {
+          allPortfolios = userPortfolios
+        } else {
+          allPortfolios = demoData.map((portfolio, index) => ({
             id: portfolio.slug,
             name: portfolio.title,
             title: "Portfolio",
@@ -177,15 +182,47 @@ export default function Home() {
                   .slice(0, 2)
                   .toUpperCase()
               : "??",
-            selectedColor: (index % 7) as ThemeIndex, // ⬅️ use all 7 theme colors
-            isLive: false, // Default to not live
-            isTemplate: portfolio.isTemplate || false, // Added isTemplate property
+            selectedColor: (index % 7) as ThemeIndex,
+            isLive: false,
+            isTemplate: portfolio.isTemplate || false,
           }))
-          setPortfolios(portfolioCards)
-          setSelectedPortfolioId(portfolioCards[0].id)
+        }
+
+        setPortfolios(allPortfolios)
+        if (allPortfolios.length > 0) {
+          setSelectedPortfolioId(allPortfolios[0].id)
         }
       } catch (error) {
         console.error("Error fetching portfolios:", error)
+        try {
+          const demoData = await getPublishedPortfolios()
+          setPublishedPortfolios(demoData)
+          const portfolioCards: UnifiedPortfolio[] = demoData.map((portfolio, index) => ({
+            id: portfolio.slug,
+            name: portfolio.title,
+            title: "Portfolio",
+            email: `${portfolio.slug}@example.com`,
+            location: "Location",
+            handle: `@${portfolio.slug}`,
+            initials: portfolio.title
+              ? portfolio.title
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()
+              : "??",
+            selectedColor: (index % 7) as ThemeIndex,
+            isLive: false,
+            isTemplate: portfolio.isTemplate || false,
+          }))
+          setPortfolios(portfolioCards)
+          if (portfolioCards.length > 0) {
+            setSelectedPortfolioId(portfolioCards[0].id)
+          }
+        } catch (fallbackError) {
+          console.error("Error loading fallback portfolios:", fallbackError)
+        }
       } finally {
         setLoading(false)
       }
@@ -197,7 +234,7 @@ export default function Home() {
   const handleZoomOut = () => {
     setViewMode("minimized")
     setIsPreviewMode(false)
-    setUseStarterTemplate(false) // Reset starter template when zooming out
+    setUseStarterTemplate(false)
   }
 
   const handlePortfolioSelect = (portfolioId: string) => {
@@ -229,16 +266,31 @@ export default function Home() {
     setSelectedPortfolioId(newPortfolio.id)
   }
 
-  const handleDeletePortfolio = (portfolioId: string, e: React.MouseEvent) => {
+  const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    setPortfolios((prev) => {
-      if (prev.length <= 1) return prev
-      const next = prev.filter((p) => p.id !== portfolioId)
-      if (selectedPortfolioId === portfolioId && next.length > 0) {
-        setSelectedPortfolioId(next[0].id)
-      }
-      return next
-    })
+
+    try {
+      await deletePortfolio(portfolioId)
+
+      setPortfolios((prev) => {
+        if (prev.length <= 1) return prev
+        const next = prev.filter((p) => p.id !== portfolioId)
+        if (selectedPortfolioId === portfolioId && next.length > 0) {
+          setSelectedPortfolioId(next[0].id)
+        }
+        return next
+      })
+    } catch (error) {
+      console.error("Error deleting portfolio:", error)
+      setPortfolios((prev) => {
+        if (prev.length <= 1) return prev
+        const next = prev.filter((p) => p.id !== portfolioId)
+        if (selectedPortfolioId === portfolioId && next.length > 0) {
+          setSelectedPortfolioId(next[0].id)
+        }
+        return next
+      })
+    }
   }
 
   const togglePreview = () => setIsPreviewMode(!isPreviewMode)
@@ -250,11 +302,21 @@ export default function Home() {
 
   const handleChangeActivePortfolioColor = (colorIndex: ThemeIndex) => {
     setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, selectedColor: colorIndex } : p)))
-    // TODO: persist to DB here
   }
 
-  const handleToggleLive = (isLive: boolean) => {
-    setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
+  const handleToggleLive = async (isLive: boolean) => {
+    const updatedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
+    if (!updatedPortfolio) return
+
+    const newPortfolio = { ...updatedPortfolio, isLive }
+
+    try {
+      await savePortfolio(newPortfolio)
+      setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
+    } catch (error) {
+      console.error("Error updating portfolio live status:", error)
+      setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
+    }
   }
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
@@ -271,7 +333,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
-      {/* Fixed Nav */}
       <motion.nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{ height: NAV_H, paddingLeft: BASE_PADDING, paddingRight: BASE_PADDING }}
@@ -303,11 +364,8 @@ export default function Home() {
         <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
       )}
 
-      {/* Main Content */}
       <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : NAV_H }}>
-        {/* Left Column: Main Content */}
         <div className="flex-1 max-w-5xl mx-auto" style={{ padding: viewMode === "expanded" ? 0 : BASE_PADDING }}>
-          {/* Content Area */}
           <AnimatePresence mode="wait">
             {viewMode === "minimized" ? (
               <motion.div
@@ -343,19 +401,28 @@ export default function Home() {
                     setPortfolios((prev) =>
                       prev.map((p) => {
                         if (p.id !== selectedPortfolioId) return p
-                        return {
+                        const updated = {
                           ...p,
                           name: next.name ?? p.name,
                           handle: next.handle ?? p.handle,
                           avatarUrl: next.avatarUrl ?? p.avatarUrl,
                           selectedColor: (next.selectedColor ?? p.selectedColor) as ThemeIndex,
                         }
+                        savePortfolio(updated).catch(console.error)
+                        return updated
                       }),
                     )
                   }}
-                  onSavePortfolio={(portfolioData) => {
-                    setPortfolios((prev) => [...prev, portfolioData])
-                    setSelectedPortfolioId(portfolioData.id)
+                  onSavePortfolio={async (portfolioData) => {
+                    try {
+                      await savePortfolio(portfolioData)
+                      setPortfolios((prev) => [...prev, portfolioData])
+                      setSelectedPortfolioId(portfolioData.id)
+                    } catch (error) {
+                      console.error("Error saving portfolio:", error)
+                      setPortfolios((prev) => [...prev, portfolioData])
+                      setSelectedPortfolioId(portfolioData.id)
+                    }
                   }}
                   isLive={activePortfolio?.isLive || false}
                   onToggleLive={handleToggleLive}
@@ -365,7 +432,6 @@ export default function Home() {
           </AnimatePresence>
         </div>
 
-        {/* Right Column: Sidebar */}
         {hasSidebar && (
           <div className="w-96 h-screen" style={{ top: isPreviewMode ? 0 : NAV_H }}>
             <SidePanel isVisible={hasSidebar} isPreviewMode={isPreviewMode} />
@@ -373,7 +439,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Debug Panels */}
       {process.env.NODE_ENV === "development" && (
         <>
           <DebugPanel

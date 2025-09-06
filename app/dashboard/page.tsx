@@ -257,7 +257,7 @@ export default function Home() {
     setViewMode("expanded")
   }
 
-  const handleAddPortfolio = () => {
+  const handleAddPortfolio = async () => {
     const newPortfolio: UnifiedPortfolio = {
       id: crypto.randomUUID(),
       name: "New Portfolio",
@@ -270,8 +270,22 @@ export default function Home() {
       isLive: false,
       isTemplate: false,
     }
-    setPortfolios((prev) => [...prev, newPortfolio])
-    setSelectedPortfolioId(newPortfolio.id)
+
+    try {
+      // Save to database first
+      await savePortfolio(newPortfolio, user)
+      // Then add to local state
+      setPortfolios((prev) => [...prev, newPortfolio])
+      setSelectedPortfolioId(newPortfolio.id)
+      // Automatically open the new portfolio for editing
+      setViewMode("expanded")
+    } catch (error) {
+      console.error("Error creating portfolio:", error)
+      // Still add to local state as fallback
+      setPortfolios((prev) => [...prev, newPortfolio])
+      setSelectedPortfolioId(newPortfolio.id)
+      setViewMode("expanded")
+    }
   }
 
   const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {

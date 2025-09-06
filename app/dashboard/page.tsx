@@ -232,6 +232,9 @@ export default function Home() {
   }, [])
 
   const handleZoomOut = () => {
+    if (activePortfolio) {
+      savePortfolio(activePortfolio).catch(console.error)
+    }
     setViewMode("minimized")
     setIsPreviewMode(false)
     setUseStarterTemplate(false)

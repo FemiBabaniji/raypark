@@ -175,7 +175,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             id="widget-identity"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
+            transition={{ duration: 0.3, ease: "easeOut", delay: 0 }}
           >
             <IdentityWidget
               identity={identity}
@@ -193,7 +193,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <EducationWidget
               widgetId={w.id}
@@ -215,7 +215,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <ProjectsWidget
               widgetId={w.id}
@@ -240,7 +240,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <DescriptionWidget
               widgetId={w.id}
@@ -262,7 +262,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <ServicesWidget
               widgetId={w.id}
@@ -284,7 +284,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <GalleryWidget
               widgetId={w.id}
@@ -305,7 +305,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
           >
             <div className="p-4 bg-white/10 rounded-lg group relative">
               {!isPreviewMode && canDelete && (
@@ -533,7 +533,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: "easeOut", delay: 0.6 }}
+        transition={{ duration: 0.3, ease: "easeOut", delay: 0.4 }}
       >
         <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
           <div

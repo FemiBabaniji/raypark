@@ -1,0 +1,576 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { Reorder } from "framer-motion"
+import { Plus, X, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import PortfolioShell from "@/components/portfolio/portfolio-shell"
+import {
+  IdentityWidget,
+  EducationWidget,
+  ProjectsWidget,
+  DescriptionWidget,
+  ServicesWidget,
+  GalleryWidget,
+} from "./widgets"
+import type { Identity, WidgetDef } from "./types"
+
+type Props = {
+  isPreviewMode?: boolean
+  identity: Identity
+  onIdentityChange: (identity: Identity) => void
+  onExportData?: (data: PortfolioExportData) => void
+}
+
+export type PortfolioExportData = {
+  identity: Identity
+  leftWidgets: WidgetDef[]
+  rightWidgets: WidgetDef[]
+  metadata: {
+    createdAt: string
+    version: string
+  }
+}
+
+export default function PortfolioBuilder({ isPreviewMode = false, identity, onIdentityChange, onExportData }: Props) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
+
+  const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([
+    { id: "identity", type: "identity" },
+    { id: "education", type: "education" },
+  ])
+  const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([
+    { id: "description", type: "description" },
+    { id: "projects", type: "projects" },
+    { id: "services", type: "services" },
+  ])
+
+  const [showAddDropdown, setShowAddDropdown] = useState(false)
+  const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
+  const [editingField, setEditingField] = useState<string | null>(null)
+
+  const [widgetContent, setWidgetContent] = useState<Record<string, any>>({
+    education: {
+      title: "Education",
+      items: [
+        {
+          degree: "Bachelor of Design",
+          school: "University of Arts",
+          year: "2018-2022",
+          description: "Focused on digital product design and user experience",
+        },
+      ],
+    },
+    projects: {
+      title: "Featured Projects",
+      items: [
+        {
+          name: "E-commerce Platform",
+          description: "Complete redesign of shopping experience",
+          year: "2023",
+          tags: ["UI/UX", "Mobile", "Web"],
+        },
+      ],
+    },
+    services: {
+      title: "Services",
+      items: ["Product Design", "User Research", "Prototyping", "Design Systems"],
+    },
+    description: {
+      title: "About Me",
+      content:
+        "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
+    },
+  })
+
+  // Ensure identity stays first if lists are reordered externally
+  useEffect(() => {
+    setLeftWidgets((prev) => {
+      const rest = prev.filter((w) => w.id !== "identity")
+      return [{ id: "identity", type: "identity" }, ...rest]
+    })
+  }, [])
+
+  const deleteWidget = (widgetId: string, column: "left" | "right") => {
+    if (widgetId === "identity") return // Can't delete identity widget
+
+    if (column === "left") {
+      setLeftWidgets(leftWidgets.filter((widget) => widget.id !== widgetId))
+    } else {
+      setRightWidgets(rightWidgets.filter((widget) => widget.id !== widgetId))
+    }
+  }
+
+  const moveWidgetToColumn = (widget: WidgetDef, fromColumn: "left" | "right", toColumn: "left" | "right") => {
+    if (fromColumn === toColumn || widget.id === "identity") return
+
+    // Remove from source column
+    if (fromColumn === "left") {
+      setLeftWidgets((prev) => prev.filter((w) => w.id !== widget.id))
+    } else {
+      setRightWidgets((prev) => prev.filter((w) => w.id !== widget.id))
+    }
+
+    // Add to target column
+    if (toColumn === "left") {
+      setLeftWidgets((prev) => [...prev, widget])
+    } else {
+      setRightWidgets((prev) => [...prev, widget])
+    }
+  }
+
+  const addWidget = (type: string, column: "left" | "right") => {
+    const newWidget: WidgetDef = {
+      id: `${type}-${Date.now()}`,
+      type: type,
+    }
+
+    if (column === "left") {
+      setLeftWidgets([...leftWidgets, newWidget])
+    } else {
+      setRightWidgets([...rightWidgets, newWidget])
+    }
+
+    setSelectedWidgetType(null)
+    setShowAddDropdown(false)
+  }
+
+  const exportPortfolioData = () => {
+    const exportData: PortfolioExportData = {
+      identity,
+      leftWidgets,
+      rightWidgets,
+      metadata: {
+        createdAt: new Date().toISOString(),
+        version: "1.0.0",
+      },
+    }
+
+    if (onExportData) {
+      onExportData(exportData)
+    } else {
+      // Default export as JSON download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${identity.name || "portfolio"}-export.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const renderWidget = (w: WidgetDef, column: "left" | "right") => {
+    const canDelete = w.id !== "identity"
+    const canMove = w.id !== "identity"
+
+    switch (w.type) {
+      case "identity":
+        return (
+          <IdentityWidget
+            key={w.id}
+            identity={identity}
+            isPreviewMode={isPreviewMode}
+            onChange={onIdentityChange}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
+
+      case "education":
+        return (
+          <EducationWidget
+            key={w.id}
+            widgetId={w.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={widgetContent.education}
+            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, education: content }))}
+            onDelete={() => deleteWidget(w.id, column)}
+            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
+
+      case "projects":
+        return (
+          <ProjectsWidget
+            key={w.id}
+            widgetId={w.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={widgetContent.projects}
+            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, projects: content }))}
+            onDelete={() => deleteWidget(w.id, column)}
+            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+            projectColors={projectColors}
+            setProjectColors={setProjectColors}
+            showProjectColorPicker={showProjectColorPicker}
+            setShowProjectColorPicker={setShowProjectColorPicker}
+            projectColorOptions={projectColorOptions}
+          />
+        )
+
+      case "description":
+        return (
+          <DescriptionWidget
+            key={w.id}
+            widgetId={w.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={widgetContent.description}
+            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, description: content }))}
+            onDelete={() => deleteWidget(w.id, column)}
+            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
+
+      case "services":
+        return (
+          <ServicesWidget
+            key={w.id}
+            widgetId={w.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={widgetContent.services}
+            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, services: content }))}
+            onDelete={() => deleteWidget(w.id, column)}
+            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
+
+      case "gallery":
+        return (
+          <GalleryWidget
+            key={w.id}
+            widgetId={w.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            onDelete={() => deleteWidget(w.id, column)}
+            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+            galleryGroups={galleryGroups[w.id] || []}
+            onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
+            onGroupClick={(group) => setSelectedGroup({ widgetId: w.id, groupId: group.id, group })}
+          />
+        )
+
+      default:
+        return (
+          <div key={w.id} className="p-4 bg-white/10 rounded-lg group relative">
+            {!isPreviewMode && canDelete && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => deleteWidget(w.id, column)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+            Widget: {w.type}
+          </div>
+        )
+    }
+  }
+
+  const rightSlot = !isPreviewMode ? (
+    <div className="flex gap-2">
+      <Button
+        onClick={exportPortfolioData}
+        variant="outline"
+        size="sm"
+        className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+      >
+        Export
+      </Button>
+      <div className="relative">
+        <Button
+          onClick={() => setShowAddDropdown(!showAddDropdown)}
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add Widget
+        </Button>
+
+        {showAddDropdown && (
+          <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
+            <div className="space-y-1">
+              {selectedWidgetType ? (
+                <>
+                  <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                    <button onClick={() => setSelectedWidgetType(null)} className="text-neutral-300 hover:text-white">
+                      ←
+                    </button>
+                    Choose Column
+                  </div>
+                  <button
+                    onClick={() => addWidget(selectedWidgetType, "left")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                  >
+                    Add to Left Column
+                  </button>
+                  <button
+                    onClick={() => addWidget(selectedWidgetType, "right")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                  >
+                    Add to Right Column
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
+                    Select Widget Type
+                  </div>
+                  {["projects", "education", "description", "services", "gallery"].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setSelectedWidgetType(type)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors capitalize"
+                    >
+                      {type} Widget
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null
+
+  const [projectColors, setProjectColors] = useState<Record<string, string>>({
+    aiml: "purple",
+    mobile: "purple",
+  })
+  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
+    aiml: false,
+    mobile: false,
+  })
+
+  const [galleryGroups, setGalleryGroups] = useState<{
+    [key: string]: Array<{
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }>
+  }>({})
+
+  const [selectedGroup, setSelectedGroup] = useState<{
+    widgetId: string
+    groupId: string
+    group: {
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }
+  } | null>(null)
+
+  const projectColorOptions = [
+    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
+    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
+    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
+    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
+    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
+    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
+    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
+  ]
+
+  const GroupDetailView = () => {
+    if (!selectedGroup) return null
+
+    return (
+      <div className="fixed inset-0 bg-neutral-950 z-50 flex flex-col">
+        <div className="p-6 flex justify-between items-center">
+          <Button
+            onClick={() => setSelectedGroup(null)}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
+          {!isPreviewMode && (
+            <Button
+              onClick={() => {
+                const input = document.createElement("input")
+                input.type = "file"
+                input.accept = "image/*"
+                input.multiple = true
+
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files
+                  if (files) {
+                    Array.from(files).forEach((file) => {
+                      const reader = new FileReader()
+                      reader.onload = (e) => {
+                        const imageUrl = e.target?.result as string
+                        setGalleryGroups((prev) => ({
+                          ...prev,
+                          [selectedGroup.widgetId]:
+                            prev[selectedGroup.widgetId]?.map((group) =>
+                              group.id === selectedGroup.groupId
+                                ? { ...group, images: [...group.images, imageUrl] }
+                                : group,
+                            ) || [],
+                        }))
+
+                        setSelectedGroup((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                group: {
+                                  ...prev.group,
+                                  images: [...prev.group.images, imageUrl],
+                                },
+                              }
+                            : null,
+                        )
+                      }
+                      reader.readAsDataURL(file)
+                    })
+                  }
+                }
+
+                input.click()
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Images
+            </Button>
+          )}
+        </div>
+
+        <div className="px-6 pb-6">
+          <h1 className="text-2xl font-bold text-white">{selectedGroup.group.name}</h1>
+          <p className="text-white/60 text-sm mt-1">
+            {selectedGroup.group.images.length} image{selectedGroup.group.images.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        <div className="flex-1 px-6 pb-6 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+            {selectedGroup.group.images.map((image, index) => (
+              <div key={index} className="bg-white/10 rounded-2xl overflow-hidden">
+                <img
+                  src={image || "/placeholder.svg"}
+                  alt={`${selectedGroup.group.name} ${index + 1}`}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("left")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
+        >
+          <Reorder.Group
+            axis="y"
+            values={leftWidgets}
+            onReorder={setLeftWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {leftWidgets.map((w) => (
+              <Reorder.Item
+                key={w.id}
+                value={w}
+                className="list-none"
+                whileDrag={{
+                  scale: 1.05,
+                  zIndex: 50,
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                  rotate: 2,
+                }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(w, "left")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("right")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
+        >
+          <Reorder.Group
+            axis="y"
+            values={rightWidgets}
+            onReorder={setRightWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {rightWidgets.map((w) => (
+              <Reorder.Item
+                key={w.id}
+                value={w}
+                className="list-none"
+                whileDrag={{
+                  scale: 1.05,
+                  zIndex: 50,
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                  rotate: -2,
+                }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(w, "right")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+      </PortfolioShell>
+
+      <GroupDetailView />
+    </>
+  )
+}

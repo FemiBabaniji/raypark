@@ -4,7 +4,6 @@ import type React from "react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ZoomOut } from "lucide-react"
 import MusicAppInterface from "@/components/music-app-interface"
 import BackButton from "@/components/ui/back-button"
 import { getPublishedPortfolios } from "@/lib/portfolio-data"
@@ -36,22 +35,43 @@ const TopBarActions = ({
     )
   }
 
+  return null
+}
+
+const ExpandedViewNavigation = ({
+  onZoomOut,
+  onPreview,
+  isPreviewMode,
+}: {
+  onZoomOut: () => void
+  onPreview: () => void
+  isPreviewMode: boolean
+}) => {
+  if (isPreviewMode) {
+    return (
+      <div className="fixed top-6 left-6 z-50">
+        <BackButton onClick={() => onPreview()} />
+      </div>
+    )
+  }
+
   return (
-    <div className="flex justify-end gap-2 mb-4">
-      <button
-        onClick={onZoomOut}
-        className="flex items-center gap-2 px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors"
-      >
-        <ZoomOut size={16} />
-        Dashboard
-      </button>
-      <button
-        onClick={onPreview}
-        className="flex items-center gap-2 px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors"
-      >
-        Preview Mode
-      </button>
-    </div>
+    <>
+      {/* Back button in top left corner */}
+      <div className="fixed top-6 left-6 z-50">
+        <BackButton onClick={onZoomOut} aria-label="Back to Dashboard" />
+      </div>
+
+      {/* Preview button in top right corner */}
+      <div className="fixed top-6 right-6 z-50">
+        <button
+          onClick={onPreview}
+          className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
+        >
+          Preview
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -231,6 +251,8 @@ export default function Home() {
     )
   }
 
+  const shouldHideNav = isPreviewMode || viewMode === "expanded"
+
   return (
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
       {/* Fixed Nav */}
@@ -238,8 +260,8 @@ export default function Home() {
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{ height: NAV_H, paddingLeft: BASE_PADDING, paddingRight: BASE_PADDING }}
         animate={{
-          opacity: isPreviewMode ? 0 : 1,
-          y: isPreviewMode ? -20 : 0,
+          opacity: shouldHideNav ? 0 : 1,
+          y: shouldHideNav ? -20 : 0,
         }}
         transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
       >
@@ -261,15 +283,14 @@ export default function Home() {
         </div>
       </motion.nav>
 
+      {viewMode === "expanded" && (
+        <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
+      )}
+
       {/* Main Content */}
-      <div className="flex" style={{ paddingTop: isPreviewMode ? 0 : NAV_H }}>
+      <div className="flex" style={{ paddingTop: shouldHideNav ? 0 : NAV_H }}>
         {/* Left Column: Main Content */}
         <div className="flex-1" style={{ padding: BASE_PADDING }}>
-          {/* Top Bar Actions - now part of content flow */}
-          {viewMode === "expanded" && (
-            <TopBarActions onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
-          )}
-
           {/* Content Area */}
           <AnimatePresence mode="wait">
             {viewMode === "minimized" ? (
@@ -287,7 +308,7 @@ export default function Home() {
                   onAdd={handleAddPortfolio}
                   onDelete={handleDeletePortfolio}
                   onChangeColor={handleChangeCardColor}
-                  onStartStarter={handleStartStarter} // Pass handleStartStarter to PortfolioGrid
+                  onStartStarter={handleStartStarter}
                 />
               </motion.div>
             ) : (
@@ -319,7 +340,7 @@ export default function Home() {
                   onSavePortfolio={(portfolioData) => {
                     setPortfolios((prev) => [...prev, portfolioData])
                     setSelectedPortfolioId(portfolioData.id)
-                    setUseStarterTemplate(false) // Switch back to regular builder
+                    setUseStarterTemplate(false)
                   }}
                 />
               </motion.div>

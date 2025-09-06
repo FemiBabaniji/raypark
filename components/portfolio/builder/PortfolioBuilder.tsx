@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Reorder } from "framer-motion"
+import { Reorder, motion } from "framer-motion"
 import { Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
@@ -170,113 +170,157 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
     switch (w.type) {
       case "identity":
         return (
-          <IdentityWidget
+          <motion.div
             key={w.id}
-            identity={identity}
-            isPreviewMode={isPreviewMode}
-            onChange={onIdentityChange}
-            editingField={editingField}
-            setEditingField={setEditingField}
-          />
+            id="widget-identity"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
+          >
+            <IdentityWidget
+              identity={identity}
+              isPreviewMode={isPreviewMode}
+              onChange={onIdentityChange}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
         )
 
       case "education":
         return (
-          <EducationWidget
+          <motion.div
             key={w.id}
-            widgetId={w.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            content={widgetContent.education}
-            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, education: content }))}
-            onDelete={() => deleteWidget(w.id, column)}
-            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-            editingField={editingField}
-            setEditingField={setEditingField}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <EducationWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={widgetContent.education}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, education: content }))}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
         )
 
       case "projects":
         return (
-          <ProjectsWidget
+          <motion.div
             key={w.id}
-            widgetId={w.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            content={widgetContent.projects}
-            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, projects: content }))}
-            onDelete={() => deleteWidget(w.id, column)}
-            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-            projectColors={projectColors}
-            setProjectColors={setProjectColors}
-            showProjectColorPicker={showProjectColorPicker}
-            setShowProjectColorPicker={setShowProjectColorPicker}
-            projectColorOptions={projectColorOptions}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <ProjectsWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={widgetContent.projects}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, projects: content }))}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              projectColors={projectColors}
+              setProjectColors={setProjectColors}
+              showProjectColorPicker={showProjectColorPicker}
+              setShowProjectColorPicker={setShowProjectColorPicker}
+              projectColorOptions={projectColorOptions}
+            />
+          </motion.div>
         )
 
       case "description":
         return (
-          <DescriptionWidget
+          <motion.div
             key={w.id}
-            widgetId={w.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            content={widgetContent.description}
-            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, description: content }))}
-            onDelete={() => deleteWidget(w.id, column)}
-            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-            editingField={editingField}
-            setEditingField={setEditingField}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <DescriptionWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={widgetContent.description}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, description: content }))}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
         )
 
       case "services":
         return (
-          <ServicesWidget
+          <motion.div
             key={w.id}
-            widgetId={w.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            content={widgetContent.services}
-            onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, services: content }))}
-            onDelete={() => deleteWidget(w.id, column)}
-            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-            editingField={editingField}
-            setEditingField={setEditingField}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <ServicesWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={widgetContent.services}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, services: content }))}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
         )
 
       case "gallery":
         return (
-          <GalleryWidget
+          <motion.div
             key={w.id}
-            widgetId={w.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            onDelete={() => deleteWidget(w.id, column)}
-            onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-            galleryGroups={galleryGroups[w.id] || []}
-            onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
-            onGroupClick={(group) => setSelectedGroup({ widgetId: w.id, groupId: group.id, group })}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <GalleryWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              galleryGroups={galleryGroups[w.id] || []}
+              onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
+              onGroupClick={(group) => setSelectedGroup({ widgetId: w.id, groupId: group.id, group })}
+            />
+          </motion.div>
         )
 
       default:
         return (
-          <div key={w.id} className="p-4 bg-white/10 rounded-lg group relative">
-            {!isPreviewMode && canDelete && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => deleteWidget(w.id, column)}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            )}
-            Widget: {w.type}
-          </div>
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <div className="p-4 bg-white/10 rounded-lg group relative">
+              {!isPreviewMode && canDelete && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => deleteWidget(w.id, column)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
+              Widget: {w.type}
+            </div>
+          </motion.div>
         )
     }
   }

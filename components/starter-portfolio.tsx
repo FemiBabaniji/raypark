@@ -29,34 +29,8 @@ export default function StarterPortfolio({
 }) {
   const [step, setStep] = useState<Step>(0)
   const [showOnboarding, setShowOnboarding] = useState(true)
-
-  useEffect(() => {
-    const seen = localStorage.getItem("starter.onboarding.seen")
-    if (seen === "1") setShowOnboarding(false)
-  }, [])
-
-  useEffect(() => {
-    if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
-  }, [showOnboarding])
-
-  const handleNext = () => setStep((s) => Math.min(3, (s + 1) as Step))
-  const handleBack = () => setStep((s) => Math.max(0, (s - 1) as Step))
-  const handleSkip = () => setShowOnboarding(false)
-  const handleDone = () => setShowOnboarding(false)
-
   const [profileColorIdx, setProfileColorIdx] = useState<ThemeIndex>(activeIdentity?.selectedColor ?? 0)
   const [showColorPicker, setShowColorPicker] = useState(false)
-
-  const projectColorOptions = [
-    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
-    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
-    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
-    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
-    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
-    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
-    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
-  ]
-
   const [projectColors, setProjectColors] = useState({
     webdev: "blue",
     aiml: "purple",
@@ -69,36 +43,63 @@ export default function StarterPortfolio({
     mobile: false,
     devops: false,
   })
-
   const [leftWidgets, setLeftWidgets] = useState([
     { id: "profile", type: "profile" as const },
     { id: "education", type: "education" as const },
   ])
-
   const [rightWidgets, setRightWidgets] = useState([
     { id: "description", type: "description" as const },
     { id: "projects", type: "projects" as const },
     { id: "services", type: "services" as const },
   ])
-
   const [isDragging, setIsDragging] = useState(false)
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
-
   const [profileText, setProfileText] = useState({
     name: activeIdentity?.name || "your name",
     title: "is a",
     subtitle: "describe what you do (e.g., product designer / software engineer).",
   })
-
   const [aboutText, setAboutText] = useState({
     title: "About Me",
     description: "I specialize in creating unique digital experiences that solve real problems.",
     subdescription: "I believe great design starts with understanding your users and their needs.",
   })
-
   const [galleryGroups, setGalleryGroups] = useState<Record<string, any[]>>({})
   const [selectedGroup, setSelectedGroup] = useState<any>(null)
+  const [showAddDropdown, setShowAddDropdown] = useState(false)
+  const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
+
+  const projectColorOptions = [
+    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
+    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
+    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
+    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
+    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
+    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
+    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
+  ]
+
+  useEffect(() => {
+    const seen = localStorage.getItem("starter.onboarding.seen")
+    if (seen === "1") setShowOnboarding(false)
+  }, [])
+
+  useEffect(() => {
+    if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
+  }, [showOnboarding])
+
+  useEffect(() => {
+    setLeftWidgets((prev) => {
+      const without = prev.filter((w) => w.id !== "profile")
+      return [{ id: "profile", type: "profile" }, ...without]
+    })
+  }, [])
+
+  const handleNext = () => setStep((s) => Math.min(3, (s + 1) as Step))
+  const handleBack = () => setStep((s) => Math.max(0, (s - 1) as Step))
+  const handleSkip = () => setShowOnboarding(false)
+  const handleDone = () => setShowOnboarding(false)
 
   const handleColorChange = (colorIdx: ThemeIndex) => {
     setProfileColorIdx(colorIdx)
@@ -680,9 +681,6 @@ export default function StarterPortfolio({
     )
   }
 
-  const [showAddDropdown, setShowAddDropdown] = useState(false)
-  const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
-
   const rightSlot = (
     <div className="relative">
       {showAddDropdown && (
@@ -760,13 +758,6 @@ export default function StarterPortfolio({
         return null
     }
   }
-
-  useEffect(() => {
-    setLeftWidgets((prev) => {
-      const without = prev.filter((w) => w.id !== "profile")
-      return [{ id: "profile", type: "profile" }, ...without]
-    })
-  }, [])
 
   return (
     <>

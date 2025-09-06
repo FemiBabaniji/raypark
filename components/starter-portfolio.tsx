@@ -82,39 +82,10 @@ export default function StarterPortfolio({
     { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
   ]
 
-  const STORAGE_KEY = `starter-template-${activeIdentity?.id || "default"}`
-
-  useEffect(() => {
-    const savedState = localStorage.getItem(STORAGE_KEY)
-    if (savedState) {
-      try {
-        const parsed = JSON.parse(savedState)
-        setProfileText(parsed.profileText || profileText)
-        setAboutText(parsed.aboutText || aboutText)
-        setProjectColors(parsed.projectColors || projectColors)
-        setLeftWidgets(parsed.leftWidgets || leftWidgets)
-        setRightWidgets(parsed.rightWidgets || rightWidgets)
-        setGalleryGroups(parsed.galleryGroups || galleryGroups)
-        setProfileColorIdx(parsed.profileColorIdx || profileColorIdx)
-      } catch (error) {
-        console.error("Failed to load saved template state:", error)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    const stateToSave = {
-      profileText,
-      aboutText,
-      projectColors,
-      leftWidgets,
-      rightWidgets,
-      galleryGroups,
-      profileColorIdx,
-      lastSaved: Date.now(),
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave))
-  }, [profileText, aboutText, projectColors, leftWidgets, rightWidgets, galleryGroups, profileColorIdx])
+  // useEffect(() => {
+  //   const seen = localStorage.getItem("starter.onboarding.seen")
+  //   if (seen === "1") setShowOnboarding(false)
+  // }, [])
 
   useEffect(() => {
     if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
@@ -157,41 +128,7 @@ export default function StarterPortfolio({
           projectColors,
           galleryGroups,
         },
-        isLive: false, // Add isLive property to saved portfolio
-      }
-      onSavePortfolio(portfolioData)
-      localStorage.removeItem(STORAGE_KEY)
-    }
-  }
-
-  const handleSaveDraft = () => {
-    if (onSavePortfolio) {
-      const portfolioData = {
-        id: activeIdentity?.id || `draft-${Date.now()}`,
-        name: profileText.name,
-        title: "Portfolio (Draft)",
-        email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
-        location: "Location",
-        handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
-        initials: profileText.name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase(),
-        selectedColor: profileColorIdx,
-        widgets: {
-          left: leftWidgets,
-          right: rightWidgets,
-        },
-        content: {
-          profile: profileText,
-          about: aboutText,
-          projectColors,
-          galleryGroups,
-        },
-        isLive: false,
-        isDraft: true, // Mark as draft
+        isTemplate: true,
       }
       onSavePortfolio(portfolioData)
     }

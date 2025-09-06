@@ -1,8 +1,5 @@
 "use client"
 
-import type React from "react"
-
-import { useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { GripVertical, X } from "lucide-react"
 
@@ -35,20 +32,12 @@ export default function DescriptionWidget({
   editingField,
   setEditingField,
 }: Props) {
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({})
-
-  useEffect(() => {
-    if (editingField && inputRefs.current[editingField]) {
-      inputRefs.current[editingField]?.focus()
-    }
-  }, [editingField])
-
-  const handleKeyDown = (e: React.KeyboardEvent, field: string, isTextarea = false) => {
-    if (e.key === "Escape") {
-      setEditingField(null)
-    } else if (e.key === "Enter" && (!isTextarea || !e.shiftKey)) {
-      setEditingField(null)
-    }
+  const demoContent = {
+    title: "About me",
+    description:
+      "I'm a passionate digital designer with over 8 years of experience creating user-centered designs that solve real problems. I specialize in UI/UX design, product strategy, and design systems.",
+    subdescription:
+      "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools and techniques.",
   }
 
   return (
@@ -76,71 +65,59 @@ export default function DescriptionWidget({
         <h3 className="text-xl font-bold">
           {editingField === `${widgetId}-title` ? (
             <input
-              ref={(el) => (inputRefs.current[`${widgetId}-title`] = el)}
               type="text"
-              value={content.title}
+              value={demoContent.title}
               onChange={(e) => onContentChange({ ...content, title: e.target.value })}
               onBlur={() => setEditingField(null)}
-              onKeyDown={(e) => handleKeyDown(e, `${widgetId}-title`)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
               className="bg-transparent border-none outline-none text-xl font-bold text-white w-full"
-              aria-label="Edit title"
+              autoFocus
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-title`)}
               className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1 text-white" : "text-white"}
-              role={!isPreviewMode ? "button" : undefined}
-              tabIndex={!isPreviewMode ? 0 : undefined}
-              aria-label={!isPreviewMode ? "Click to edit title" : undefined}
             >
-              {content.title}
+              {demoContent.title}
             </span>
           )}
         </h3>
         <p className="text-white leading-relaxed">
           {editingField === `${widgetId}-description` ? (
             <textarea
-              ref={(el) => (inputRefs.current[`${widgetId}-description`] = el)}
-              value={content.description}
+              value={demoContent.description}
               onChange={(e) => onContentChange({ ...content, description: e.target.value })}
               onBlur={() => setEditingField(null)}
-              onKeyDown={(e) => handleKeyDown(e, `${widgetId}-description`, true)}
+              onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
               className="bg-transparent border-none outline-none text-white leading-relaxed w-full resize-none"
-              rows={3}
-              aria-label="Edit description"
+              rows={2}
+              autoFocus
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-description`)}
               className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-              role={!isPreviewMode ? "button" : undefined}
-              tabIndex={!isPreviewMode ? 0 : undefined}
-              aria-label={!isPreviewMode ? "Click to edit description" : undefined}
             >
-              {content.description}
+              {demoContent.description}
             </span>
           )}{" "}
           <span className="text-neutral-400">
             {editingField === `${widgetId}-subdescription` ? (
               <textarea
-                ref={(el) => (inputRefs.current[`${widgetId}-subdescription`] = el)}
-                value={content.subdescription}
+                value={demoContent.subdescription}
                 onChange={(e) => onContentChange({ ...content, subdescription: e.target.value })}
                 onBlur={() => setEditingField(null)}
-                onKeyDown={(e) => handleKeyDown(e, `${widgetId}-subdescription`, true)}
+                onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
                 className="bg-transparent border-none outline-none text-neutral-400 leading-relaxed w-full resize-none"
                 rows={2}
-                aria-label="Edit subdescription"
+                autoFocus
               />
             ) : (
               <span
                 onClick={() => !isPreviewMode && setEditingField(`${widgetId}-subdescription`)}
                 className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-                role={!isPreviewMode ? "button" : undefined}
-                tabIndex={!isPreviewMode ? 0 : undefined}
-                aria-label={!isPreviewMode ? "Click to edit subdescription" : undefined}
               >
-                {content.subdescription}
+                {demoContent.subdescription}
               </span>
             )}
           </span>

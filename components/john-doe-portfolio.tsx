@@ -80,9 +80,7 @@ export default function JohnDoePortfolio({ isPreviewMode = true }: { isPreviewMo
 
   const ProfileWidget = ({ widgetId, column }: { widgetId?: string; column?: "left" | "right" }) => (
     <div
-      className={`bg-gradient-to-br ${
-        colorOptions?.find((c) => c.name === profileColor)?.gradient || "from-rose-400/40 to-rose-600/60"
-      } backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}
+      className={`bg-gradient-to-br ${colorOptions.find((c) => c.name === profileColor)?.gradient} backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}
     >
       <div className="flex items-center justify-between mb-4">
         {!isPreviewMode && (
@@ -326,9 +324,7 @@ export default function JohnDoePortfolio({ isPreviewMode = true }: { isPreviewMo
 
         {/* Machine Learning */}
         <div
-          className={`bg-gradient-to-br ${
-            projectColorOptions?.find((c) => c.name === projectColors.ml)?.gradient || "from-blue-500/70 to-cyan-500/70"
-          } rounded-2xl p-4 space-y-3 relative group/ml`}
+          className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.ml)?.gradient} rounded-2xl p-4 space-y-3 relative group/ml`}
         >
           {!isPreviewMode && (
             <div className="absolute top-2 right-2">
@@ -381,10 +377,7 @@ export default function JohnDoePortfolio({ isPreviewMode = true }: { isPreviewMo
 
         {/* Data Analytics */}
         <div
-          className={`bg-gradient-to-br ${
-            projectColorOptions?.find((c) => c.name === projectColors.analytics)?.gradient ||
-            "from-purple-500/70 to-blue-500/70"
-          } rounded-2xl p-4 space-y-3 relative group/analytics`}
+          className={`bg-gradient-to-br ${projectColorOptions.find((c) => c.name === projectColors.analytics)?.gradient} rounded-2xl p-4 space-y-3 relative group/analytics`}
         >
           {!isPreviewMode && (
             <div className="absolute top-2 right-2">

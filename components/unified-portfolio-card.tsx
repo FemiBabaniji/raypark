@@ -16,6 +16,7 @@ export interface UnifiedPortfolio {
   initials?: string
   selectedColor: ThemeIndex
   isLive?: boolean
+  isTemplate?: boolean // Added isTemplate property to track template-based portfolios
 }
 
 type Props = {

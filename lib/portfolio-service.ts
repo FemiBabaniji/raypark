@@ -13,6 +13,9 @@ export interface PortfolioData {
   updated_at?: string
 }
 
+const isUUID = (v?: string) =>
+  typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)
+
 // Client-side functions
 export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
   console.log("[v0] Starting portfolio save for:", portfolio.name)
@@ -33,21 +36,20 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     // For now, let's save demo portfolios with a placeholder user_id
     const demoUserId = "demo-user"
 
-    const portfolioData: Partial<PortfolioData> = {
-      // If portfolio ID starts with "portfolio-" or "starter-", let database generate UUID
-      ...(portfolio.id.startsWith("portfolio-") || portfolio.id.startsWith("starter-") ? {} : { id: portfolio.id }),
+    const baseData: Partial<PortfolioData> = {
+      ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
       user_id: demoUserId,
       name: portfolio.name,
-      slug: portfolio.id,
+      slug: portfolio.id, // slugs can be any string
       is_public: portfolio.isLive || false,
       is_demo: true, // Mark as demo
     }
 
-    console.log("[v0] Saving demo portfolio data:", portfolioData)
+    console.log("[v0] upserting portfolio payload:", baseData)
 
     const { data: savedPortfolio, error: portfolioError } = await supabase
       .from("portfolios")
-      .upsert(portfolioData)
+      .upsert(baseData)
       .select()
       .single()
 
@@ -61,21 +63,20 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   }
 
   // Save basic portfolio info
-  const portfolioData: Partial<PortfolioData> = {
-    // If portfolio ID starts with "portfolio-" or "starter-", let database generate UUID
-    ...(portfolio.id.startsWith("portfolio-") || portfolio.id.startsWith("starter-") ? {} : { id: portfolio.id }),
+  const baseData: Partial<PortfolioData> = {
+    ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
     user_id: user.id,
     name: portfolio.name,
-    slug: portfolio.id,
+    slug: portfolio.id, // slugs can be any string
     is_public: portfolio.isLive || false,
     is_demo: false,
   }
 
-  console.log("[v0] Saving authenticated portfolio data:", portfolioData)
+  console.log("[v0] upserting portfolio payload:", baseData)
 
   const { data: savedPortfolio, error: portfolioError } = await supabase
     .from("portfolios")
-    .upsert(portfolioData)
+    .upsert(baseData)
     .select()
     .single()
 

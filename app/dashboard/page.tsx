@@ -288,9 +288,9 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 32 : 0) : NAV_H }}>
+      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 0) : NAV_H }}>
         {/* Left Column: Main Content */}
-        <div className="flex-1 max-w-6xl mx-auto" style={{ padding: BASE_PADDING }}>
+        <div className="flex-1 max-w-5xl mx-auto" style={{ padding: BASE_PADDING }}>
           {/* Content Area */}
           <AnimatePresence mode="wait">
             {viewMode === "minimized" ? (

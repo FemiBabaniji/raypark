@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { Reorder, motion } from "framer-motion"
 import { Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -544,79 +544,6 @@ export default function PortfolioBuilder({
       </div>
     )
   }
-
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
-  const [hasInitialized, setHasInitialized] = useState(false)
-
-  const debouncedSave = useCallback(() => {
-    if (!onSavePortfolio || !hasInitialized) return
-
-    if (saveTimeout) {
-      clearTimeout(saveTimeout)
-    }
-
-    const timeout = setTimeout(() => {
-      console.log("[v0] Auto-saving portfolio...")
-      const portfolioData = {
-        id: `portfolio-${Date.now()}`,
-        name: identity.name,
-        title: "Portfolio",
-        email: `${identity.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
-        location: "Location",
-        handle: identity.handle,
-        initials: identity.name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase(),
-        selectedColor: identity.selectedColor,
-        widgets: {
-          left: leftWidgets,
-          right: rightWidgets,
-        },
-        content: widgetContent,
-        isTemplate: false,
-      }
-      onSavePortfolio(portfolioData)
-    }, 2000) // 2 second debounce
-
-    setSaveTimeout(timeout)
-  }, [onSavePortfolio, hasInitialized, identity, leftWidgets, rightWidgets, widgetContent])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [identity, debouncedSave])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [leftWidgets, rightWidgets, debouncedSave])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [widgetContent, debouncedSave])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasInitialized(true)
-    }, 1000) // Wait 1 second before enabling auto-save
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeout) {
-        clearTimeout(saveTimeout)
-      }
-    }
-  }, [saveTimeout])
 
   return (
     <>

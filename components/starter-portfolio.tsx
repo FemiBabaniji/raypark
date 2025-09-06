@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Reorder } from "framer-motion"
 import { Upload, Play, GripVertical, Palette, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -71,6 +71,8 @@ export default function StarterPortfolio({
   const [selectedGroup, setSelectedGroup] = useState<any>(null)
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const projectColorOptions = [
     { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
@@ -791,6 +793,103 @@ export default function StarterPortfolio({
         return null
     }
   }
+
+  const debouncedSave = useCallback(() => {
+    if (!onSavePortfolio || !hasInitialized) return
+
+    if (saveTimeout) {
+      clearTimeout(saveTimeout)
+    }
+
+    const timeout = setTimeout(() => {
+      console.log("[v0] Auto-saving portfolio...")
+      const portfolioData = {
+        id: `starter-${Date.now()}`,
+        name: profileText.name,
+        title: "Portfolio",
+        email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+        location: "Location",
+        handle: `@${profileText.name.toLowerCase().replace(/\s+/g, "")}`,
+        initials: profileText.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase(),
+        selectedColor: profileColorIdx,
+        widgets: {
+          left: leftWidgets,
+          right: rightWidgets,
+        },
+        content: {
+          profile: profileText,
+          about: aboutText,
+          projectColors,
+          galleryGroups,
+        },
+        isTemplate: true,
+      }
+      onSavePortfolio(portfolioData)
+    }, 2000) // 2 second debounce
+
+    setSaveTimeout(timeout)
+  }, [
+    onSavePortfolio,
+    hasInitialized,
+    profileText,
+    aboutText,
+    profileColorIdx,
+    leftWidgets,
+    rightWidgets,
+    projectColors,
+    galleryGroups,
+  ])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [profileText, debouncedSave])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [aboutText, debouncedSave])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [profileColorIdx, projectColors, debouncedSave])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [leftWidgets, rightWidgets, debouncedSave])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [galleryGroups, debouncedSave])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasInitialized(true)
+    }, 1000) // Wait 1 second before enabling auto-save
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout)
+      }
+    }
+  }, [saveTimeout])
 
   return (
     <>

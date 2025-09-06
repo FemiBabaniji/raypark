@@ -15,6 +15,7 @@ export interface UnifiedPortfolio {
   avatarUrl?: string
   initials?: string
   selectedColor: ThemeIndex
+  isLive?: boolean
 }
 
 type Props = {
@@ -22,9 +23,10 @@ type Props = {
   onClick?: (id: string) => void
   onShare?: (id: string) => void
   onMore?: (id: string) => void
+  onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
 }
 
-export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore }: Props) {
+export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onChangeColor }: Props) {
   const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
 
   const initials = useMemo(() => {
@@ -43,6 +45,12 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore }: Pr
       className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer focus:outline-none
                  focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
     >
+      {portfolio.isLive && (
+        <div className="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full z-10 shadow-lg">
+          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
+        </div>
+      )}
+
       {/* Card background */}
       <div className={`h-full w-full bg-neutral-900 bg-gradient-to-br ${gradient} backdrop-blur-xl p-6 flex flex-col`}>
         {/* Top-right 'More' */}

@@ -20,6 +20,8 @@ type Props = {
   identity: Identity
   onIdentityChange: (identity: Identity) => void
   onExportData?: (data: PortfolioExportData) => void
+  isLive?: boolean
+  onToggleLive?: (isLive: boolean) => void
 }
 
 export type PortfolioExportData = {
@@ -32,7 +34,14 @@ export type PortfolioExportData = {
   }
 }
 
-export default function PortfolioBuilder({ isPreviewMode = false, identity, onIdentityChange, onExportData }: Props) {
+export default function PortfolioBuilder({
+  isPreviewMode = false,
+  identity,
+  onIdentityChange,
+  onExportData,
+  isLive = false,
+  onToggleLive,
+}: Props) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
 
@@ -327,14 +336,21 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
 
   const rightSlot = !isPreviewMode ? (
     <div className="flex gap-2">
-      <Button
-        onClick={exportPortfolioData}
-        variant="outline"
-        size="sm"
-        className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-      >
-        Export
-      </Button>
+      <div className="flex items-center gap-2">
+        <span className="text-white/70 text-sm">Live</span>
+        <button
+          onClick={() => onToggleLive?.(!isLive)}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 ${
+            isLive ? "bg-green-500" : "bg-white/20"
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              isLive ? "translate-x-6" : "translate-x-1"
+            }`}
+          />
+        </button>
+      </div>
       <div className="relative">
         <Button
           onClick={() => setShowAddDropdown(!showAddDropdown)}
@@ -342,8 +358,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
           size="sm"
           className="bg-white/10 border-white/20 text-white hover:bg-white/20"
         >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Widget
+          <Plus className="w-4 h-4" />
         </Button>
 
         {showAddDropdown && (

@@ -4,15 +4,16 @@ import type React from "react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ZoomOut, Plus, X } from "lucide-react"
+import { ZoomOut } from "lucide-react"
 import MusicAppInterface from "@/components/music-app-interface"
 import BackButton from "@/components/ui/back-button"
 import { getPublishedPortfolios } from "@/lib/portfolio-data"
 import { DebugPanel } from "@/components/debug-panel"
 import type { Portfolio } from "@/lib/types"
-import { UnifiedPortfolioCard, type UnifiedPortfolio } from "@/components/unified-portfolio-card"
+import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
+import PortfolioGrid from "@/components/home/PortfolioGrid" // Import PortfolioGrid component
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -54,68 +55,21 @@ const TopBarActions = ({
   )
 }
 
-const PortfolioGrid = ({
-  portfolios,
-  onSelect,
-  onAdd,
-  onDelete,
-  onChangeColor,
-}: {
-  portfolios: UnifiedPortfolio[]
-  onSelect: (id: string) => void
-  onAdd: () => void
-  onDelete: (id: string, e: React.MouseEvent) => void
-  onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
-}) => {
-  return (
-    <div className="max-w-7xl w-full space-y-12">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">Your Portfolios</h1>
-        <p className="text-neutral-400">Select a portfolio to edit or create a new one</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {portfolios.map((portfolio) => (
-          <div key={portfolio.id} className="w-full group relative">
-            <UnifiedPortfolioCard
-              portfolio={portfolio}
-              onClick={onSelect}
-              onShare={(id) => console.log("share portfolio:", id)}
-              onMore={(id) => console.log("more options:", id)}
-              onChangeColor={onChangeColor}
-            />
-            {portfolios.length > 1 && (
-              <button
-                onClick={(e) => onDelete(portfolio.id, e)}
-                className="absolute top-2 left-2 w-6 h-6 bg-black/20 hover:bg-red-500/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
-              >
-                <X size={12} className="text-white" />
-              </button>
-            )}
-          </div>
-        ))}
-
-        <div className="w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-neutral-700 hover:border-neutral-500 transition-colors cursor-pointer flex flex-col items-center justify-center group backdrop-blur-sm hover:scale-105 transition-all">
-          <BackButton onClick={onAdd} icon={Plus} />
-          <span className="text-neutral-400 font-medium text-sm mt-2">New Portfolio</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const PortfolioCanvasWrapper = ({
   isPreviewMode,
+  useStarterTemplate, // Added useStarterTemplate prop
   activeIdentity,
   onActiveIdentityChange,
 }: {
   isPreviewMode: boolean
+  useStarterTemplate?: boolean // Added useStarterTemplate prop type
   activeIdentity?: UnifiedPortfolio
   onActiveIdentityChange?: (next: Partial<UnifiedPortfolio>) => void
 }) => {
   return (
     <PortfolioCanvas
       isPreviewMode={isPreviewMode}
+      useStarterTemplate={useStarterTemplate} // Pass useStarterTemplate to PortfolioCanvas
       activeIdentity={
         activeIdentity
           ? {
@@ -163,7 +117,8 @@ const SidePanel = ({ isVisible, isPreviewMode }: { isVisible: boolean; isPreview
 
 export default function Home() {
   const [isPreviewMode, setIsPreviewMode] = useState(false) // Controls UI chrome visibility
-  const [viewMode, setViewMode] = useState<"expanded" | "minimized">("expanded") // Controls layout mode
+  const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized") // Default to minimized (grid view)
+  const [useStarterTemplate, setUseStarterTemplate] = useState(false) // Added useStarterTemplate state
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("jenny-wilson")
   const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([
     {
@@ -222,14 +177,20 @@ export default function Home() {
   const handleZoomOut = () => {
     setViewMode("minimized")
     setIsPreviewMode(false)
+    setUseStarterTemplate(false) // Reset starter template when zooming out
   }
 
   const handlePortfolioSelect = (portfolioId: string) => {
     setSelectedPortfolioId(portfolioId)
     setViewMode("expanded")
+    setUseStarterTemplate(false) // Use regular portfolio builder for existing portfolios
   }
 
-  // Randomize across ALL 7 colors (0..6)
+  const handleStartStarter = () => {
+    setUseStarterTemplate(true)
+    setViewMode("expanded")
+  }
+
   const handleAddPortfolio = () => {
     const newPortfolio: UnifiedPortfolio = {
       id: `portfolio-${Date.now()}`,
@@ -334,6 +295,7 @@ export default function Home() {
                   onAdd={handleAddPortfolio}
                   onDelete={handleDeletePortfolio}
                   onChangeColor={handleChangeCardColor}
+                  onStartStarter={handleStartStarter} // Pass handleStartStarter to PortfolioGrid
                 />
               </motion.div>
             ) : (
@@ -346,6 +308,7 @@ export default function Home() {
               >
                 <PortfolioCanvasWrapper
                   isPreviewMode={isPreviewMode}
+                  useStarterTemplate={useStarterTemplate} // Pass useStarterTemplate to wrapper
                   activeIdentity={activePortfolio}
                   onActiveIdentityChange={(next) => {
                     setPortfolios((prev) =>

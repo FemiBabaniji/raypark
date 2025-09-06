@@ -12,18 +12,28 @@ export default function PortfolioGrid({
   onAdd,
   onDelete,
   onChangeColor,
+  onStartStarter, // Added onStartStarter prop for template button
 }: {
   portfolios: UnifiedPortfolio[]
   onSelect: (id: string) => void
   onAdd: () => void
   onDelete: (id: string, e: React.MouseEvent) => void
   onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
+  onStartStarter: () => void // Added onStartStarter prop type
 }) {
   return (
     <div className="max-w-7xl w-full space-y-12">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">Your Portfolios</h1>
-        <p className="text-neutral-400">Select a portfolio to edit or create a new one</p>
+      <div className="flex items-center justify-between">
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl font-bold text-white mb-1">Your Portfolios</h1>
+          <p className="text-neutral-400">Select a portfolio to edit or create a new one</p>
+        </div>
+        <button
+          onClick={onStartStarter}
+          className="px-4 py-2 rounded-xl bg-neutral-900/80 text-white hover:bg-neutral-800/80 backdrop-blur-xl transition-colors"
+        >
+          Start with template
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

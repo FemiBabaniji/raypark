@@ -1,11 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Reorder } from "framer-motion"
 import { Upload, Play, GripVertical, Palette, Plus, X, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/ui/back-button"
 import PortfolioShell from "./portfolio-shell"
+import OnboardingOverlay from "./onboarding-overlay" // Import OnboardingOverlay component
+
+type Step = 0 | 1 | 2 | 3 // Added Step type for onboarding
 
 /**
  * StarterPortfolio — a friendlier template for first-time users.
@@ -15,6 +18,23 @@ import PortfolioShell from "./portfolio-shell"
  * - Same 7-color translucent theme & interactions as your current build
  */
 export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewMode?: boolean }) {
+  const [step, setStep] = useState<Step>(0)
+  const [showOnboarding, setShowOnboarding] = useState(true)
+
+  useEffect(() => {
+    const seen = localStorage.getItem("starter.onboarding.seen")
+    if (seen === "1") setShowOnboarding(false)
+  }, [])
+
+  useEffect(() => {
+    if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
+  }, [showOnboarding])
+
+  const handleNext = () => setStep((s) => Math.min(3, (s + 1) as Step))
+  const handleBack = () => setStep((s) => Math.max(0, (s - 1) as Step))
+  const handleSkip = () => setShowOnboarding(false)
+  const handleDone = () => setShowOnboarding(false)
+
   /** THEME (same 7-color translucent scheme you chose) */
   const colorOptions = [
     { name: "rose", gradient: "from-rose-400/40 to-rose-600/60" },
@@ -92,7 +112,10 @@ export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewM
       <div className="flex items-center justify-between mb-4">
         {!isPreviewMode && (
           <div className={`transition-opacity ${isDragging ? "opacity-100" : "opacity-60 group-hover:opacity-100"}`}>
-            <GripVertical className="w-5 h-5 text-white/70" />
+            <GripVertical
+              className="w-5 h-5 text-white/70"
+              data-coach={step === 0 ? "drag" : undefined} // Added data-coach attribute for step 0
+            />
           </div>
         )}
         {isPreviewMode && <div />}
@@ -132,6 +155,7 @@ export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewM
                 variant="ghost"
                 className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/30 text-white p-2"
                 onClick={() => setShowColorPicker(!showColorPicker)}
+                data-coach={step === 2 ? "palette" : undefined} // Added data-coach attribute for step 2
               >
                 <Palette className="w-4 h-4" />
               </Button>
@@ -172,6 +196,7 @@ export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewM
             <span
               onClick={() => !isPreviewMode && setEditingField("profile-name")}
               className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+              data-coach={step === 1 ? "edit-name" : undefined} // Added data-coach attribute for step 1
             >
               {profileText.name}
             </span>
@@ -533,7 +558,11 @@ export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewM
           </div>
         </div>
       )}
-      <BackButton onClick={() => setShowAddDropdown(!showAddDropdown)} icon={Plus} />
+      <BackButton
+        onClick={() => setShowAddDropdown(!showAddDropdown)}
+        icon={Plus}
+        data-coach={step === 2 ? "add-widget" : undefined} // Added data-coach attribute for step 2
+      />
     </div>
   )
 
@@ -555,80 +584,92 @@ export default function StarterPortfolio({ isPreviewMode = false }: { isPreviewM
 
   /** LAYOUT */
   return (
-    <PortfolioShell title="your portfolio." isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
-      {/* Left Column */}
-      <div
-        className={`lg:w-1/2 relative transition-all duration-200 ${
-          dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragOverColumn("left")
-        }}
-        onDragLeave={() => setDragOverColumn(null)}
-        onDrop={(e) => {
-          e.preventDefault()
-          setDragOverColumn(null)
-        }}
-      >
-        <Reorder.Group
-          axis="y"
-          values={leftWidgets}
-          onReorder={setLeftWidgets}
-          className="flex flex-col gap-4 sm:gap-6"
+    <>
+      <PortfolioShell title="your portfolio." isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
+        {/* Left Column */}
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("left")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
         >
-          {leftWidgets.map((widget) => (
-            <Reorder.Item
-              key={widget.id}
-              value={widget}
-              className="list-none"
-              whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", rotate: 2 }}
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={() => setIsDragging(false)}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              {renderWidget(widget, "left")}
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
-      </div>
+          <Reorder.Group
+            axis="y"
+            values={leftWidgets}
+            onReorder={setLeftWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {leftWidgets.map((widget) => (
+              <Reorder.Item
+                key={widget.id}
+                value={widget}
+                className="list-none"
+                whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", rotate: 2 }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(widget, "left")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
 
-      {/* Right Column */}
-      <div
-        className={`lg:w-1/2 relative transition-all duration-200 ${
-          dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragOverColumn("right")
-        }}
-        onDragLeave={() => setDragOverColumn(null)}
-        onDrop={(e) => {
-          e.preventDefault()
-          setDragOverColumn(null)
-        }}
-      >
-        <Reorder.Group
-          axis="y"
-          values={rightWidgets}
-          onReorder={setRightWidgets}
-          className="flex flex-col gap-4 sm:gap-6"
+        {/* Right Column */}
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("right")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
         >
-          {rightWidgets.map((widget) => (
-            <Reorder.Item
-              key={widget.id}
-              value={widget}
-              className="list-none"
-              whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", rotate: -2 }}
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={() => setIsDragging(false)}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              {renderWidget(widget, "right")}
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
-      </div>
-    </PortfolioShell>
+          <Reorder.Group
+            axis="y"
+            values={rightWidgets}
+            onReorder={setRightWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {rightWidgets.map((widget) => (
+              <Reorder.Item
+                key={widget.id}
+                value={widget}
+                className="list-none"
+                whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: "0 20px 40px rgba(0,0,0,0.4)", rotate: -2 }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(widget, "right")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+      </PortfolioShell>
+
+      {showOnboarding && (
+        <OnboardingOverlay
+          step={step}
+          onNext={handleNext}
+          onBack={handleBack}
+          onSkip={handleSkip}
+          onDone={handleDone}
+        />
+      )}
+    </>
   )
 }

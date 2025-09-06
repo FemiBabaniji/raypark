@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Reorder, motion } from "framer-motion"
 import { Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import PortfolioShell from "@/components/portfolio/portfolio-shell"
+import PortfolioBuilderNav from "./PortfolioBuilderNav"
 import {
   IdentityWidget,
   EducationWidget,
@@ -325,73 +325,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
     }
   }
 
-  const rightSlot = !isPreviewMode ? (
-    <div className="flex gap-2">
-      <Button
-        onClick={exportPortfolioData}
-        variant="outline"
-        size="sm"
-        className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-      >
-        Export
-      </Button>
-      <div className="relative">
-        <Button
-          onClick={() => setShowAddDropdown(!showAddDropdown)}
-          variant="outline"
-          size="sm"
-          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Widget
-        </Button>
-
-        {showAddDropdown && (
-          <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
-            <div className="space-y-1">
-              {selectedWidgetType ? (
-                <>
-                  <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider flex items-center gap-2">
-                    <button onClick={() => setSelectedWidgetType(null)} className="text-neutral-300 hover:text-white">
-                      ←
-                    </button>
-                    Choose Column
-                  </div>
-                  <button
-                    onClick={() => addWidget(selectedWidgetType, "left")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                  >
-                    Add to Left Column
-                  </button>
-                  <button
-                    onClick={() => addWidget(selectedWidgetType, "right")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                  >
-                    Add to Right Column
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
-                    Select Widget Type
-                  </div>
-                  {["projects", "education", "description", "services", "gallery"].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setSelectedWidgetType(type)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors capitalize"
-                    >
-                      {type} Widget
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  ) : null
+  const rightSlot = null
 
   const [projectColors, setProjectColors] = useState<Record<string, string>>({
     aiml: "purple",
@@ -531,94 +465,157 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
   return (
     <>
       <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut", delay: 0.9 }}
+      >
+        <PortfolioBuilderNav
+          onBack={() => window.history.back()}
+          onExport={exportPortfolioData}
+          onAddWidget={() => setShowAddDropdown(!showAddDropdown)}
+          isPreviewMode={isPreviewMode}
+        />
+      </motion.div>
+
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: "easeOut", delay: 0.9 }}
       >
-        <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
-          <div
-            className={`lg:w-1/2 relative transition-all duration-200 ${
-              dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault()
-              setDragOverColumn("left")
-            }}
-            onDragLeave={() => setDragOverColumn(null)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragOverColumn(null)
-            }}
-          >
-            <Reorder.Group
-              axis="y"
-              values={leftWidgets}
-              onReorder={setLeftWidgets}
-              className="flex flex-col gap-4 sm:gap-6"
-            >
-              {leftWidgets.map((w) => (
-                <Reorder.Item
-                  key={w.id}
-                  value={w}
-                  className="list-none"
-                  whileDrag={{
-                    scale: 1.05,
-                    zIndex: 50,
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                    rotate: 2,
-                  }}
-                  onDragStart={() => setIsDragging(true)}
-                  onDragEnd={() => setIsDragging(false)}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  {renderWidget(w, "left")}
-                </Reorder.Item>
-              ))}
-            </Reorder.Group>
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-white mb-2">{identity.name || "your name"}.</h1>
           </div>
 
-          <div
-            className={`lg:w-1/2 relative transition-all duration-200 ${
-              dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault()
-              setDragOverColumn("right")
-            }}
-            onDragLeave={() => setDragOverColumn(null)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragOverColumn(null)
-            }}
-          >
-            <Reorder.Group
-              axis="y"
-              values={rightWidgets}
-              onReorder={setRightWidgets}
-              className="flex flex-col gap-4 sm:gap-6"
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            <div
+              className={`lg:w-1/2 relative transition-all duration-200 ${
+                dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOverColumn("left")
+              }}
+              onDragLeave={() => setDragOverColumn(null)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragOverColumn(null)
+              }}
             >
-              {rightWidgets.map((w) => (
-                <Reorder.Item
-                  key={w.id}
-                  value={w}
-                  className="list-none"
-                  whileDrag={{
-                    scale: 1.05,
-                    zIndex: 50,
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                    rotate: -2,
-                  }}
-                  onDragStart={() => setIsDragging(true)}
-                  onDragEnd={() => setIsDragging(false)}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  {renderWidget(w, "right")}
-                </Reorder.Item>
-              ))}
-            </Reorder.Group>
+              <Reorder.Group
+                axis="y"
+                values={leftWidgets}
+                onReorder={setLeftWidgets}
+                className="flex flex-col gap-4 sm:gap-6"
+              >
+                {leftWidgets.map((w) => (
+                  <Reorder.Item
+                    key={w.id}
+                    value={w}
+                    className="list-none"
+                    whileDrag={{
+                      scale: 1.05,
+                      zIndex: 50,
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      rotate: 2,
+                    }}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={() => setIsDragging(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    {renderWidget(w, "left")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+
+            <div
+              className={`lg:w-1/2 relative transition-all duration-200 ${
+                dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOverColumn("right")
+              }}
+              onDragLeave={() => setDragOverColumn(null)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragOverColumn(null)
+              }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={rightWidgets}
+                onReorder={setRightWidgets}
+                className="flex flex-col gap-4 sm:gap-6"
+              >
+                {rightWidgets.map((w) => (
+                  <Reorder.Item
+                    key={w.id}
+                    value={w}
+                    className="list-none"
+                    whileDrag={{
+                      scale: 1.05,
+                      zIndex: 50,
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      rotate: -2,
+                    }}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={() => setIsDragging(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    {renderWidget(w, "right")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
           </div>
-        </PortfolioShell>
+        </div>
       </motion.div>
+
+      {showAddDropdown && (
+        <div className="fixed top-20 right-6 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
+          <div className="space-y-1">
+            {selectedWidgetType ? (
+              <>
+                <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                  <button onClick={() => setSelectedWidgetType(null)} className="text-neutral-300 hover:text-white">
+                    ←
+                  </button>
+                  Choose Column
+                </div>
+                <button
+                  onClick={() => addWidget(selectedWidgetType, "left")}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                >
+                  Add to Left Column
+                </button>
+                <button
+                  onClick={() => addWidget(selectedWidgetType, "right")}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                >
+                  Add to Right Column
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
+                  Select Widget Type
+                </div>
+                {["projects", "education", "description", "services", "gallery"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setSelectedWidgetType(type)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors capitalize"
+                  >
+                    {type} Widget
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <GroupDetailView />
     </>

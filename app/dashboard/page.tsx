@@ -15,7 +15,6 @@ import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import PortfolioGrid from "@/components/home/PortfolioGrid"
 import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
-import { crypto } from "crypto"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -257,9 +256,9 @@ export default function Home() {
     setViewMode("expanded")
   }
 
-  const handleAddPortfolio = async () => {
+  const handleAddPortfolio = () => {
     const newPortfolio: UnifiedPortfolio = {
-      id: crypto.randomUUID(),
+      id: `portfolio-${Date.now()}`,
       name: "New Portfolio",
       title: "Portfolio",
       email: "new@example.com",
@@ -270,22 +269,8 @@ export default function Home() {
       isLive: false,
       isTemplate: false,
     }
-
-    try {
-      // Save to database first
-      await savePortfolio(newPortfolio, user)
-      // Then add to local state
-      setPortfolios((prev) => [...prev, newPortfolio])
-      setSelectedPortfolioId(newPortfolio.id)
-      // Automatically open the new portfolio for editing
-      setViewMode("expanded")
-    } catch (error) {
-      console.error("Error creating portfolio:", error)
-      // Still add to local state as fallback
-      setPortfolios((prev) => [...prev, newPortfolio])
-      setSelectedPortfolioId(newPortfolio.id)
-      setViewMode("expanded")
-    }
+    setPortfolios((prev) => [...prev, newPortfolio])
+    setSelectedPortfolioId(newPortfolio.id)
   }
 
   const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {

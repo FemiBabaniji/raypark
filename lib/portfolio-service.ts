@@ -26,21 +26,17 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     const demoUserId = "demo-user"
 
     const portfolioData: Partial<PortfolioData> = {
-      ...(portfolio.id.startsWith("portfolio-") ? {} : { id: portfolio.id }),
+      id: portfolio.id,
       user_id: demoUserId,
       name: portfolio.name,
-      slug: portfolio.id.startsWith("portfolio-") ? `demo-${Date.now()}` : portfolio.id,
+      slug: portfolio.id,
       is_public: portfolio.isLive || false,
       is_demo: true, // Mark as demo
     }
 
     console.log("[v0] Saving demo portfolio data:", portfolioData)
 
-    const { data: savedPortfolio, error: portfolioError } = await supabase
-      .from("portfolios")
-      .upsert(portfolioData)
-      .select()
-      .single()
+    const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
     if (portfolioError) {
       console.error("[v0] Error saving demo portfolio:", portfolioError)
       throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
@@ -52,33 +48,28 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   // Save basic portfolio info
   const portfolioData: Partial<PortfolioData> = {
-    ...(portfolio.id.startsWith("portfolio-") ? {} : { id: portfolio.id }),
+    id: portfolio.id,
     user_id: user.id,
     name: portfolio.name,
-    slug: portfolio.id.startsWith("portfolio-") ? `${user.id}-${Date.now()}` : portfolio.id,
+    slug: portfolio.id,
     is_public: portfolio.isLive || false,
     is_demo: false,
   }
 
   console.log("[v0] Saving authenticated portfolio data:", portfolioData)
 
-  const { data: savedPortfolio, error: portfolioError } = await supabase
-    .from("portfolios")
-    .upsert(portfolioData)
-    .select()
-    .single()
+  const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
   if (portfolioError) {
     console.error("[v0] Error saving portfolio:", portfolioError)
     throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
   }
 
-  console.log("[v0] Portfolio saved successfully with ID:", savedPortfolio.id)
-
-  const actualPortfolioId = savedPortfolio.id
+  console.log("[v0] Portfolio saved successfully")
 
   // Create or update the main page
   const pageData = {
-    portfolio_id: actualPortfolioId,
+    id: `${portfolio.id}-main`,
+    portfolio_id: portfolio.id,
     key: "main",
     title: portfolio.name,
     route: "/",
@@ -87,22 +78,22 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   console.log("[v0] Saving page data:", pageData)
 
-  const { data: savedPage, error: pageError } = await supabase.from("pages").upsert(pageData).select().single()
+  const { error: pageError } = await supabase.from("pages").upsert(pageData)
   if (pageError) {
     console.error("[v0] Error saving page:", pageError)
     throw new Error(`Failed to save page: ${pageError.message}`)
   }
 
-  console.log("[v0] Page saved successfully with ID:", savedPage.id)
+  console.log("[v0] Page saved successfully")
 
-  // Save template data using direct widget insertion if it's a template portfolio
+  // Save template data using RPC functions if it's a template portfolio
   if (portfolio.isTemplate && (portfolio as any).content) {
     console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
-    const pageId = savedPage.id
+    const pageId = `${portfolio.id}-main`
 
     try {
-      console.log("[v0] Using direct widget insertion")
+      console.log("[v0] Using direct widget insertion instead of RPC")
 
       // Get widget type IDs first
       const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
@@ -123,6 +114,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (profileWidgetType) {
         widgets.push({
+          id: `${portfolio.id}-profile`,
           page_id: pageId,
           widget_type_id: profileWidgetType.id,
           props: {
@@ -141,6 +133,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (descriptionWidgetType) {
         widgets.push({
+          id: `${portfolio.id}-about`,
           page_id: pageId,
           widget_type_id: descriptionWidgetType.id,
           props: {
@@ -153,6 +146,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (projectsWidgetType) {
         widgets.push({
+          id: `${portfolio.id}-projects`,
           page_id: pageId,
           widget_type_id: projectsWidgetType.id,
           props: {

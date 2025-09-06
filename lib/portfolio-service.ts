@@ -318,28 +318,44 @@ export async function addWidgetToPage(
 ): Promise<string> {
   const supabase = createClient()
 
-  const { data, error } = await supabase.rpc("add_widget_to_page", {
-    p_page_id: pageId,
-    p_widget_key: widgetKey,
-    p_props: props,
-    p_column: column,
-    p_position: position,
-  })
+  // Get the widget type ID first
+  const { data: widgetType, error: widgetTypeError } = await supabase
+    .from("widget_types")
+    .select("id")
+    .eq("key", widgetKey)
+    .single()
+
+  if (widgetTypeError || !widgetType) {
+    console.error("Error finding widget type:", widgetTypeError)
+    throw new Error(`Widget type '${widgetKey}' not found`)
+  }
+
+  // Insert the widget instance directly
+  const widgetData = {
+    page_id: pageId,
+    widget_type_id: widgetType.id,
+    props: {
+      ...props,
+      column,
+      position: position || 0,
+    },
+    enabled: true,
+  }
+
+  const { data, error } = await supabase.from("widget_instances").insert(widgetData).select("id").single()
 
   if (error) {
     console.error("Error adding widget:", error)
     throw new Error(`Failed to add widget: ${error.message}`)
   }
 
-  return data
+  return data.id
 }
 
 export async function removeWidgetFromPage(instanceId: string): Promise<void> {
   const supabase = createClient()
 
-  const { error } = await supabase.rpc("remove_widget_from_page", {
-    p_instance_id: instanceId,
-  })
+  const { error } = await supabase.from("widget_instances").delete().eq("id", instanceId)
 
   if (error) {
     console.error("Error removing widget:", error)

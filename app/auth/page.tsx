@@ -43,19 +43,20 @@ export default function AuthPage() {
         {/* App Icon */}
         <div className="flex justify-center mb-8">
           <div className="w-24 h-24 bg-zinc-800 rounded-3xl flex items-center justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-pink-400 via-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-zinc-900 rounded-full"></div>
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-400 via-purple-500 to-pink-600 rounded-2xl flex items-center justify-center p-2">
+              <div className="grid grid-cols-2 gap-1 w-full h-full">
+                <div className="bg-white/20 rounded-sm"></div>
+                <div className="bg-white/30 rounded-sm"></div>
+                <div className="bg-white/25 rounded-sm"></div>
+                <div className="bg-white/35 rounded-sm"></div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Title */}
         <div className="text-center mb-12">
-          <h1 className="text-white text-xl font-medium leading-tight">
-            A sacred place for your
-            <br />
-            work-in-progress portfolio
-          </h1>
+          <h1 className="text-white text-xl font-medium leading-tight">Your digital workroom to grow and connect</h1>
         </div>
 
         {/* Authentication Options */}

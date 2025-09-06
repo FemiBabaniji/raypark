@@ -9,10 +9,7 @@ export default function PortfolioCanvas({
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
-  onSavePortfolio,
-  onBack,
-  onPreview,
-  onMenu,
+  onSavePortfolio, // Added onSavePortfolio prop
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean
@@ -31,10 +28,7 @@ export default function PortfolioCanvas({
       selectedColor: ThemeIndex
     }>,
   ) => void
-  onSavePortfolio?: (portfolioData: any) => void
-  onBack?: () => void
-  onPreview?: () => void
-  onMenu?: () => void
+  onSavePortfolio?: (portfolioData: any) => void // Added onSavePortfolio prop type
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
@@ -43,7 +37,7 @@ export default function PortfolioCanvas({
           isPreviewMode={isPreviewMode}
           activeIdentity={activeIdentity}
           onActiveIdentityChange={onActiveIdentityChange}
-          onSavePortfolio={onSavePortfolio}
+          onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to StarterPortfolio
         />
       ) : (
         activeIdentity &&
@@ -52,9 +46,6 @@ export default function PortfolioCanvas({
             isPreviewMode={isPreviewMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
-            onBack={onBack}
-            onPreview={onPreview}
-            onMenu={onMenu}
           />
         )
       )}

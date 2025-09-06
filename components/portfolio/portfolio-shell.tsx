@@ -43,7 +43,7 @@ export default function PortfolioShell({
   return (
     <div className={`min-h-screen bg-neutral-950 text-white ${className ?? ""}`}>
       {/* Top Nav (consistent across all portfolios) */}
-      <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-6xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
         {/* Left: Title (or Back if supplied) */}
         <div className="flex items-center gap-3">
           {onBack ? <BackButton onClick={onBack} /> : null}
@@ -60,7 +60,7 @@ export default function PortfolioShell({
       </div>
 
       {/* Content area — two columns by default (matches your pages) */}
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {children}
       </div>
     </div>

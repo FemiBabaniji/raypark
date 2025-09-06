@@ -14,6 +14,7 @@ import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import PortfolioGrid from "@/components/home/PortfolioGrid"
 import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
+import { useAuth } from "@/lib/auth"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -147,6 +148,7 @@ const SidePanel = ({ isVisible, isPreviewMode }: { isVisible: boolean; isPreview
 }
 
 export default function Home() {
+  const { user, loading: authLoading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized")
   const [useStarterTemplate, setUseStarterTemplate] = useState(false)
@@ -156,9 +158,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (authLoading) return
+
     const fetchPortfolios = async () => {
       try {
-        const userPortfolios = await loadUserPortfolios()
+        const userPortfolios = await loadUserPortfolios(user)
         const demoData = await getPublishedPortfolios()
         setPublishedPortfolios(demoData)
 
@@ -229,9 +233,12 @@ export default function Home() {
     }
 
     fetchPortfolios()
-  }, [])
+  }, [authLoading, user])
 
   const handleZoomOut = () => {
+    if (activePortfolio) {
+      savePortfolio(activePortfolio, user).catch(console.error)
+    }
     setViewMode("minimized")
     setIsPreviewMode(false)
     setUseStarterTemplate(false)
@@ -311,7 +318,7 @@ export default function Home() {
     const newPortfolio = { ...updatedPortfolio, isLive }
 
     try {
-      await savePortfolio(newPortfolio)
+      await savePortfolio(newPortfolio, user)
       setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
     } catch (error) {
       console.error("Error updating portfolio live status:", error)
@@ -321,7 +328,7 @@ export default function Home() {
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-white">Loading portfolios...</div>
@@ -408,14 +415,14 @@ export default function Home() {
                           avatarUrl: next.avatarUrl ?? p.avatarUrl,
                           selectedColor: (next.selectedColor ?? p.selectedColor) as ThemeIndex,
                         }
-                        savePortfolio(updated).catch(console.error)
+                        savePortfolio(updated, user).catch(console.error)
                         return updated
                       }),
                     )
                   }}
                   onSavePortfolio={async (portfolioData) => {
                     try {
-                      await savePortfolio(portfolioData)
+                      await savePortfolio(portfolioData, user)
                       setPortfolios((prev) => [...prev, portfolioData])
                       setSelectedPortfolioId(portfolioData.id)
                     } catch (error) {

@@ -14,19 +14,13 @@ export interface PortfolioData {
 }
 
 // Client-side functions
-export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> {
+export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
   console.log("[v0] Starting portfolio save for:", portfolio.name)
   const supabase = createClient()
 
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
+  console.log("[v0] User from parameter:", { user: user?.id })
 
-  console.log("[v0] User authentication check:", { user: user?.id, error: userError })
-
-  if (userError || !user) {
+  if (!user) {
     console.log("[v0] No authenticated user, saving as demo portfolio")
     // For now, let's save demo portfolios with a placeholder user_id
     const demoUserId = "demo-user"
@@ -185,16 +179,13 @@ export async function savePortfolio(portfolio: UnifiedPortfolio): Promise<void> 
   console.log("[v0] Portfolio save completed successfully")
 }
 
-export async function loadUserPortfolios(): Promise<UnifiedPortfolio[]> {
+export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
   const supabase = createClient()
 
-  // Get current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-  if (userError || !user) {
-    // Return demo portfolios if not authenticated
+  console.log("[v0] Loading portfolios for user:", user?.id)
+
+  if (!user) {
+    console.log("[v0] No authenticated user, returning empty array")
     return []
   }
 
@@ -218,6 +209,8 @@ export async function loadUserPortfolios(): Promise<UnifiedPortfolio[]> {
     console.error("Error loading portfolios:", portfolioError)
     throw new Error(`Failed to load portfolios: ${portfolioError.message}`)
   }
+
+  console.log("[v0] Loaded portfolios from database:", portfolios?.length || 0)
 
   return (portfolios || []).map((portfolio: any): UnifiedPortfolio => {
     // Extract template data from widgets

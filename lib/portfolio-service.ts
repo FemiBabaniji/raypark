@@ -16,7 +16,15 @@ export interface PortfolioData {
 // Client-side functions
 export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
   console.log("[v0] Starting portfolio save for:", portfolio.name)
-  const supabase = createClient()
+
+  let supabase
+  try {
+    supabase = createClient()
+    console.log("[v0] Supabase client created successfully")
+  } catch (error) {
+    console.error("[v0] Failed to create Supabase client:", error)
+    throw new Error(`Supabase configuration error: ${error}`)
+  }
 
   console.log("[v0] User from parameter:", { user: user?.id })
 
@@ -26,7 +34,8 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     const demoUserId = "demo-user"
 
     const portfolioData: Partial<PortfolioData> = {
-      id: portfolio.id,
+      // If portfolio ID starts with "portfolio-" or "starter-", let database generate UUID
+      ...(portfolio.id.startsWith("portfolio-") || portfolio.id.startsWith("starter-") ? {} : { id: portfolio.id }),
       user_id: demoUserId,
       name: portfolio.name,
       slug: portfolio.id,
@@ -36,19 +45,25 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
     console.log("[v0] Saving demo portfolio data:", portfolioData)
 
-    const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
+    const { data: savedPortfolio, error: portfolioError } = await supabase
+      .from("portfolios")
+      .upsert(portfolioData)
+      .select()
+      .single()
+
     if (portfolioError) {
       console.error("[v0] Error saving demo portfolio:", portfolioError)
       throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
     }
 
-    console.log("[v0] Demo portfolio saved successfully")
+    console.log("[v0] Demo portfolio saved successfully with ID:", savedPortfolio?.id)
     return
   }
 
   // Save basic portfolio info
   const portfolioData: Partial<PortfolioData> = {
-    id: portfolio.id,
+    // If portfolio ID starts with "portfolio-" or "starter-", let database generate UUID
+    ...(portfolio.id.startsWith("portfolio-") || portfolio.id.startsWith("starter-") ? {} : { id: portfolio.id }),
     user_id: user.id,
     name: portfolio.name,
     slug: portfolio.id,
@@ -58,18 +73,25 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   console.log("[v0] Saving authenticated portfolio data:", portfolioData)
 
-  const { error: portfolioError } = await supabase.from("portfolios").upsert(portfolioData)
+  const { data: savedPortfolio, error: portfolioError } = await supabase
+    .from("portfolios")
+    .upsert(portfolioData)
+    .select()
+    .single()
+
   if (portfolioError) {
     console.error("[v0] Error saving portfolio:", portfolioError)
     throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
   }
 
-  console.log("[v0] Portfolio saved successfully")
+  console.log("[v0] Portfolio saved successfully with ID:", savedPortfolio?.id)
+
+  const actualPortfolioId = savedPortfolio?.id || portfolio.id
 
   // Create or update the main page
   const pageData = {
-    id: `${portfolio.id}-main`,
-    portfolio_id: portfolio.id,
+    id: `${actualPortfolioId}-main`,
+    portfolio_id: actualPortfolioId,
     key: "main",
     title: portfolio.name,
     route: "/",
@@ -90,7 +112,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   if (portfolio.isTemplate && (portfolio as any).content) {
     console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
-    const pageId = `${portfolio.id}-main`
+    const pageId = `${actualPortfolioId}-main`
 
     try {
       console.log("[v0] Using direct widget insertion instead of RPC")
@@ -114,7 +136,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (profileWidgetType) {
         widgets.push({
-          id: `${portfolio.id}-profile`,
+          id: `${actualPortfolioId}-profile`,
           page_id: pageId,
           widget_type_id: profileWidgetType.id,
           props: {
@@ -133,7 +155,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (descriptionWidgetType) {
         widgets.push({
-          id: `${portfolio.id}-about`,
+          id: `${actualPortfolioId}-about`,
           page_id: pageId,
           widget_type_id: descriptionWidgetType.id,
           props: {
@@ -146,7 +168,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (projectsWidgetType) {
         widgets.push({
-          id: `${portfolio.id}-projects`,
+          id: `${actualPortfolioId}-projects`,
           page_id: pageId,
           widget_type_id: projectsWidgetType.id,
           props: {
@@ -180,7 +202,14 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 }
 
 export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
-  const supabase = createClient()
+  let supabase
+  try {
+    supabase = createClient()
+    console.log("[v0] Supabase client created successfully for loading portfolios")
+  } catch (error) {
+    console.error("[v0] Failed to create Supabase client:", error)
+    return []
+  }
 
   console.log("[v0] Loading portfolios for user:", user?.id)
 

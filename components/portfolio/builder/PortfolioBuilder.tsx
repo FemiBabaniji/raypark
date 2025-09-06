@@ -64,10 +64,25 @@ export default function PortfolioBuilder({
       title: "Education",
       items: [
         {
-          degree: "Bachelor of Design",
-          school: "University of Arts",
-          year: "2018-2022",
-          description: "Focused on digital product design and user experience",
+          degree: "MS Computer Science",
+          school: "Stanford University",
+          year: "2020 • GPA: 3.8",
+          description: "",
+          certified: false,
+        },
+        {
+          degree: "BS Software Engineering",
+          school: "UC Berkeley",
+          year: "2018 • GPA: 3.7",
+          description: "",
+          certified: false,
+        },
+        {
+          degree: "AWS Solutions Architect",
+          school: "Coursera",
+          year: "2021",
+          description: "",
+          certified: true,
         },
       ],
     },
@@ -84,12 +99,16 @@ export default function PortfolioBuilder({
     },
     services: {
       title: "Services",
-      items: ["Product Design", "User Research", "Prototyping", "Design Systems"],
+      description:
+        "As a digital designer, I offer a comprehensive range of services to help bring your vision to life. From initial concept to final implementation, I work closely with clients to create meaningful and impactful digital experiences.",
+      items: ["Product Design", "User Research", "Prototyping", "Design Systems", "Brand Identity", "Web Development"],
     },
     description: {
       title: "About Me",
-      content:
-        "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
+      description:
+        "I'm a passionate digital designer with over 8 years of experience creating user-centered designs that solve real problems. I specialize in UI/UX design, product strategy, and design systems.",
+      subdescription:
+        "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools and techniques.",
     },
   })
 
@@ -234,11 +253,8 @@ export default function PortfolioBuilder({
               onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, projects: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-              projectColors={projectColors}
-              setProjectColors={setProjectColors}
-              showProjectColorPicker={showProjectColorPicker}
-              setShowProjectColorPicker={setShowProjectColorPicker}
-              projectColorOptions={projectColorOptions}
+              editingField={editingField}
+              setEditingField={setEditingField}
             />
           </motion.div>
         )
@@ -301,9 +317,8 @@ export default function PortfolioBuilder({
               isPreviewMode={isPreviewMode}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-              galleryGroups={galleryGroups[w.id] || []}
-              onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
-              onGroupClick={(group) => setSelectedGroup({ widgetId: w.id, groupId: group.id, group })}
+              editingField={editingField}
+              setEditingField={setEditingField}
             />
           </motion.div>
         )
@@ -408,15 +423,6 @@ export default function PortfolioBuilder({
     </div>
   ) : null
 
-  const [projectColors, setProjectColors] = useState<Record<string, string>>({
-    aiml: "purple",
-    mobile: "purple",
-  })
-  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
-    aiml: false,
-    mobile: false,
-  })
-
   const [galleryGroups, setGalleryGroups] = useState<{
     [key: string]: Array<{
       id: string
@@ -438,16 +444,6 @@ export default function PortfolioBuilder({
       isVideo?: boolean
     }
   } | null>(null)
-
-  const projectColorOptions = [
-    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
-    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
-    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
-    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
-    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
-    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
-    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
-  ]
 
   const GroupDetailView = () => {
     if (!selectedGroup) return null

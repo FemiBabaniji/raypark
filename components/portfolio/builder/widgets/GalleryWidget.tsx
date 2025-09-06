@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { GripVertical, ArrowLeft, ArrowRight, X, Plus, Upload } from "lucide-react"
 
@@ -35,6 +37,13 @@ export default function GalleryWidget({
 }: Props) {
   const [showAddGroup, setShowAddGroup] = useState(false)
   const [newGroupName, setNewGroupName] = useState("")
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (showAddGroup && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [showAddGroup])
 
   const addGroup = () => {
     if (!newGroupName.trim()) return
@@ -50,6 +59,15 @@ export default function GalleryWidget({
     onGroupsChange([...galleryGroups, newGroup])
     setNewGroupName("")
     setShowAddGroup(false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      addGroup()
+    } else if (e.key === "Escape") {
+      setShowAddGroup(false)
+      setNewGroupName("")
+    }
   }
 
   const removeGroup = (groupId: string) => {
@@ -112,13 +130,14 @@ export default function GalleryWidget({
             {showAddGroup ? (
               <div className="flex gap-2">
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder="Group name..."
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40"
-                  onKeyPress={(e) => e.key === "Enter" && addGroup()}
-                  autoFocus
+                  onKeyDown={handleKeyDown}
+                  aria-label="Enter group name"
                 />
                 <Button onClick={addGroup} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                   Add

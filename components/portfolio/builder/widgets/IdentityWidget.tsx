@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
 import { GripVertical, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
@@ -22,6 +24,21 @@ export default function IdentityWidget({
   setEditingField,
 }: Props) {
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+
+  useEffect(() => {
+    if (editingField && inputRefs.current[editingField]) {
+      inputRefs.current[editingField]?.focus()
+    }
+  }, [editingField])
+
+  const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
+    if (e.key === "Enter") {
+      setEditingField?.(null)
+    } else if (e.key === "Escape") {
+      setEditingField?.(null)
+    }
+  }
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
 
@@ -84,18 +101,22 @@ export default function IdentityWidget({
         <h1 className="text-3xl font-bold leading-tight text-white">
           {editingField === "identity-name" ? (
             <input
+              ref={(el) => (inputRefs.current["identity-name"] = el)}
               type="text"
               value={identity.name || ""}
               onChange={(e) => onChange({ name: e.target.value })}
               onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
+              onKeyDown={(e) => handleKeyDown(e, "identity-name")}
               className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
-              autoFocus
+              aria-label="Edit name"
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField?.("identity-name")}
               className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+              role={!isPreviewMode ? "button" : undefined}
+              tabIndex={!isPreviewMode ? 0 : undefined}
+              aria-label={!isPreviewMode ? "Click to edit name" : undefined}
             >
               {identity.name || "jenny wilson"}
             </span>
@@ -103,18 +124,22 @@ export default function IdentityWidget({
           <br />
           {editingField === "identity-title" ? (
             <input
+              ref={(el) => (inputRefs.current["identity-title"] = el)}
               type="text"
               value={identity.title || ""}
               onChange={(e) => onChange({ title: e.target.value })}
               onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
+              onKeyDown={(e) => handleKeyDown(e, "identity-title")}
               className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
-              autoFocus
+              aria-label="Edit title"
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField?.("identity-title")}
               className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+              role={!isPreviewMode ? "button" : undefined}
+              tabIndex={!isPreviewMode ? 0 : undefined}
+              aria-label={!isPreviewMode ? "Click to edit title" : undefined}
             >
               {identity.title || "is a digital product designer"}
             </span>
@@ -123,18 +148,22 @@ export default function IdentityWidget({
           <span className="text-white/70">
             {editingField === "identity-subtitle" ? (
               <input
+                ref={(el) => (inputRefs.current["identity-subtitle"] = el)}
                 type="text"
                 value={identity.subtitle || ""}
                 onChange={(e) => onChange({ subtitle: e.target.value })}
                 onBlur={() => setEditingField?.(null)}
-                onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
+                onKeyDown={(e) => handleKeyDown(e, "identity-subtitle")}
                 className="bg-transparent border-none outline-none text-3xl font-bold text-white/70 w-full"
-                autoFocus
+                aria-label="Edit subtitle"
               />
             ) : (
               <span
                 onClick={() => !isPreviewMode && setEditingField?.("identity-subtitle")}
                 className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+                role={!isPreviewMode ? "button" : undefined}
+                tabIndex={!isPreviewMode ? 0 : undefined}
+                aria-label={!isPreviewMode ? "Click to edit subtitle" : undefined}
               >
                 {identity.subtitle || "currently designing at acme."}
               </span>

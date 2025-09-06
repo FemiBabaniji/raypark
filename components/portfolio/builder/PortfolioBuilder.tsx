@@ -175,7 +175,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             id="widget-identity"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut", delay: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
           >
             <IdentityWidget
               identity={identity}
@@ -193,7 +193,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <EducationWidget
               widgetId={w.id}
@@ -215,7 +215,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <ProjectsWidget
               widgetId={w.id}
@@ -240,7 +240,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <DescriptionWidget
               widgetId={w.id}
@@ -262,7 +262,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <ServicesWidget
               widgetId={w.id}
@@ -284,7 +284,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <GalleryWidget
               widgetId={w.id}
@@ -305,7 +305,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
             key={w.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <div className="p-4 bg-white/10 rounded-lg group relative">
               {!isPreviewMode && canDelete && (
@@ -531,13 +531,10 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
   return (
     <>
       <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
-        <motion.div
+        <div
           className={`lg:w-1/2 relative transition-all duration-200 ${
             dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
           }`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
           onDragOver={(e) => {
             e.preventDefault()
             setDragOverColumn("left")
@@ -573,15 +570,12 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
               </Reorder.Item>
             ))}
           </Reorder.Group>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className={`lg:w-1/2 relative transition-all duration-200 ${
             dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
           }`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.9 }}
           onDragOver={(e) => {
             e.preventDefault()
             setDragOverColumn("right")
@@ -617,7 +611,7 @@ export default function PortfolioBuilder({ isPreviewMode = false, identity, onId
               </Reorder.Item>
             ))}
           </Reorder.Group>
-        </motion.div>
+        </div>
       </PortfolioShell>
 
       <GroupDetailView />

@@ -52,9 +52,9 @@ export default function AuthPage() {
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-white text-xl font-medium leading-tight">
-            A sacred place for your
+            A  place for your
             <br />
-            work-in-progress portfolio
+            digital workspace
           </h1>
         </div>
 

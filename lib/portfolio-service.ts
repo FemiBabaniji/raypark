@@ -93,10 +93,24 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
       is_demo: true,
     }
 
-    console.log("[v0] Inserting demo portfolio with retry logic:", baseData)
+    console.log("[v0] Upserting demo portfolio:", baseData)
 
-    const savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
-    console.log("[v0] Demo portfolio saved successfully with ID:", savedPortfolio?.id)
+    if (isUUID(portfolio.id)) {
+      const { data: savedPortfolio, error } = await supabase
+        .from("portfolios")
+        .upsert(baseData, { onConflict: "id" })
+        .select()
+        .single()
+
+      if (error) {
+        console.error("[v0] Error upserting demo portfolio:", error)
+        throw new Error(`Failed to save portfolio: ${error.message}`)
+      }
+      console.log("[v0] Demo portfolio upserted successfully with ID:", savedPortfolio?.id)
+    } else {
+      const savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
+      console.log("[v0] Demo portfolio inserted successfully with ID:", savedPortfolio?.id)
+    }
     return
   }
 
@@ -109,10 +123,25 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     is_demo: false,
   }
 
-  console.log("[v0] Inserting portfolio with retry logic:", baseData)
+  let savedPortfolio
 
-  const savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
-  console.log("[v0] Portfolio saved successfully with ID:", savedPortfolio?.id)
+  if (isUUID(portfolio.id)) {
+    console.log("[v0] Upserting existing portfolio:", baseData)
+
+    const { data, error } = await supabase.from("portfolios").upsert(baseData, { onConflict: "id" }).select().single()
+
+    if (error) {
+      console.error("[v0] Error upserting portfolio:", error)
+      throw new Error(`Failed to save portfolio: ${error.message}`)
+    }
+
+    savedPortfolio = data
+    console.log("[v0] Portfolio upserted successfully with ID:", savedPortfolio?.id)
+  } else {
+    console.log("[v0] Inserting new portfolio with retry logic:", baseData)
+    savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
+    console.log("[v0] Portfolio inserted successfully with ID:", savedPortfolio?.id)
+  }
 
   const actualPortfolioId = savedPortfolio?.id || portfolio.id
 
@@ -207,10 +236,12 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
         })
       }
 
-      console.log("[v0] Inserting widgets:", widgets)
+      console.log("[v0] Upserting widgets:", widgets)
 
       if (widgets.length > 0) {
-        const { error: widgetError } = await supabase.from("widget_instances").upsert(widgets)
+        const { error: widgetError } = await supabase
+          .from("widget_instances")
+          .upsert(widgets, { onConflict: "page_id,widget_type_id" })
 
         if (widgetError) {
           console.error("[v0] Error saving widgets:", widgetError)

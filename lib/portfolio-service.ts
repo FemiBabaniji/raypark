@@ -116,9 +116,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   const actualPortfolioId = savedPortfolio?.id || portfolio.id
 
-  // Create or update the main page
   const pageData = {
-    id: `${actualPortfolioId}-main`,
     portfolio_id: actualPortfolioId,
     key: "main",
     title: portfolio.name,
@@ -128,22 +126,27 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   console.log("[v0] Saving page data:", pageData)
 
-  const { error: pageError } = await supabase.from("pages").upsert(pageData)
+  const { data: savedPage, error: pageError } = await supabase
+    .from("pages")
+    .upsert(pageData, { onConflict: "portfolio_id,key" })
+    .select()
+    .single()
+
   if (pageError) {
     console.error("[v0] Error saving page:", pageError)
     throw new Error(`Failed to save page: ${pageError.message}`)
   }
 
-  console.log("[v0] Page saved successfully")
+  console.log("[v0] Page saved successfully with ID:", savedPage?.id)
 
-  // Save template data using RPC functions if it's a template portfolio
+  // Save template data using direct widget insertion
   if (portfolio.isTemplate && (portfolio as any).content) {
     console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
-    const pageId = `${actualPortfolioId}-main`
+    const pageId = savedPage?.id // Use actual saved page ID
 
     try {
-      console.log("[v0] Using direct widget insertion instead of RPC")
+      console.log("[v0] Using direct widget insertion")
 
       // Get widget type IDs first
       const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
@@ -159,12 +162,10 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
       const descriptionWidgetType = widgetTypes?.find((wt) => wt.key === "description")
       const projectsWidgetType = widgetTypes?.find((wt) => wt.key === "projects")
 
-      // Insert widgets directly
       const widgets = []
 
       if (profileWidgetType) {
         widgets.push({
-          id: `${actualPortfolioId}-profile`,
           page_id: pageId,
           widget_type_id: profileWidgetType.id,
           props: {
@@ -183,7 +184,6 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (descriptionWidgetType) {
         widgets.push({
-          id: `${actualPortfolioId}-about`,
           page_id: pageId,
           widget_type_id: descriptionWidgetType.id,
           props: {
@@ -196,7 +196,6 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
       if (projectsWidgetType) {
         widgets.push({
-          id: `${actualPortfolioId}-projects`,
           page_id: pageId,
           widget_type_id: projectsWidgetType.id,
           props: {
@@ -242,11 +241,66 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
   console.log("[v0] Loading portfolios for user:", user?.id)
 
   if (!user) {
-    console.log("[v0] No authenticated user, returning empty array")
-    return []
+    console.log("[v0] No authenticated user, loading demo portfolios") // Load demo portfolios instead of empty array
+
+    const { data: demoPortfolios, error: demoError } = await supabase
+      .from("portfolios")
+      .select(`
+        *,
+        pages (
+          *,
+          widget_instances (
+            *,
+            widget_types (*)
+          )
+        )
+      `)
+      .eq("is_demo", true)
+      .order("updated_at", { ascending: false })
+      .limit(5)
+
+    if (demoError) {
+      console.error("[v0] Error loading demo portfolios:", demoError)
+      return []
+    }
+
+    console.log("[v0] Loaded demo portfolios:", demoPortfolios?.length || 0)
+
+    return (demoPortfolios || []).map((portfolio: any): UnifiedPortfolio => {
+      // ... existing mapping logic ...
+      const mainPage = portfolio.pages?.find((p: any) => p.key === "main")
+      const widgets = mainPage?.widget_instances || []
+
+      const profileWidget = widgets.find((w: any) => w.widget_types?.key === "profile")
+      const aboutWidget = widgets.find((w: any) => w.widget_types?.key === "description")
+      const projectsWidget = widgets.find((w: any) => w.widget_types?.key === "projects")
+
+      const isTemplate = !!(profileWidget || aboutWidget || projectsWidget)
+
+      return {
+        id: portfolio.id,
+        name: portfolio.name,
+        title: profileWidget?.props?.title || "Portfolio",
+        email: profileWidget?.props?.email || `${portfolio.slug}@example.com`,
+        location: profileWidget?.props?.location || "Location",
+        handle: profileWidget?.props?.handle || `@${portfolio.slug}`,
+        initials: profileWidget?.props?.initials || portfolio.name.slice(0, 2).toUpperCase(),
+        selectedColor: (profileWidget?.props?.selectedColor || 0) as any,
+        isLive: portfolio.is_public || false,
+        isTemplate,
+        ...(isTemplate && {
+          content: {
+            profile: profileWidget?.props?.profileText || "",
+            about: aboutWidget?.props?.content || "",
+            projectColors: projectsWidget?.props?.projectColors || [],
+            galleryGroups: projectsWidget?.props?.galleryGroups || [],
+          },
+        }),
+      }
+    })
   }
 
-  // Load portfolios with their pages and widgets
+  // Load portfolios with their pages and widgets for authenticated users
   const { data: portfolios, error: portfolioError } = await supabase
     .from("portfolios")
     .select(`

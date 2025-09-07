@@ -14,7 +14,6 @@ import {
   GalleryWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
-import { crypto } from "crypto"
 
 type Props = {
   isPreviewMode?: boolean
@@ -559,13 +558,12 @@ export default function PortfolioBuilder({
     const timeout = setTimeout(() => {
       console.log("[v0] Auto-saving portfolio...")
       const portfolioData = {
-        id: crypto.randomUUID(),
-        name: identity.name,
+        name: identity.name || "Untitled Portfolio",
         title: "Portfolio",
-        email: `${identity.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
+        email: `${(identity.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
         location: "Location",
-        handle: identity.handle,
-        initials: identity.name
+        handle: identity.handle || "@user",
+        initials: (identity.name || "User")
           .split(" ")
           .map((n) => n[0])
           .join("")

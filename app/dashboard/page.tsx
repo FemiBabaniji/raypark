@@ -15,7 +15,7 @@ import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import PortfolioGrid from "@/components/home/PortfolioGrid"
 import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
-import { crypto } from "crypto"
+import { safeUUID } from "@/lib/utils"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -259,7 +259,6 @@ export default function Home() {
 
   const handleAddPortfolio = () => {
     const newPortfolio: UnifiedPortfolio = {
-      id: crypto.randomUUID(),
       name: "New Portfolio",
       title: "Portfolio",
       email: "new@example.com",
@@ -271,7 +270,8 @@ export default function Home() {
       isTemplate: false,
     }
     setPortfolios((prev) => [...prev, newPortfolio])
-    setSelectedPortfolioId(newPortfolio.id)
+    const tempId = safeUUID()
+    setSelectedPortfolioId(tempId)
   }
 
   const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {

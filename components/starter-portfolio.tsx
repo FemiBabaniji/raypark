@@ -9,9 +9,7 @@ import PortfolioShell from "./portfolio/portfolio-shell"
 import OnboardingOverlay from "./onboarding-overlay"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
-import { crypto } from "crypto"
-
-type Step = 0 | 1 | 2 | 3
+import { safeUUID } from "@/lib/utils"
 
 /**
  * StarterPortfolio — a full-fledged template matching Jenny Wilson's setup
@@ -106,7 +104,6 @@ export default function StarterPortfolio({
     setShowOnboarding(false)
     if (onSavePortfolio) {
       const portfolioData = {
-        id: crypto.randomUUID(),
         name: profileText.name,
         title: "Portfolio",
         email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
@@ -151,7 +148,7 @@ export default function StarterPortfolio({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
-    const newWidget = { id: crypto.randomUUID(), type }
+    const newWidget = { id: safeUUID(), type }
     if (column === "left") setLeftWidgets((p) => [...p, newWidget as any])
     else setRightWidgets((p) => [...p, newWidget as any])
     setSelectedWidgetType(null)
@@ -887,3 +884,5 @@ export default function StarterPortfolio({
     </>
   )
 }
+
+type Step = 0 | 1 | 2 | 3

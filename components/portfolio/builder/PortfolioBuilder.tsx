@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { Reorder, motion } from "framer-motion"
 import { Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
+import { useAuth } from "@/lib/auth"
+import { createPortfolioOnce, updatePortfolioById } from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -23,6 +25,7 @@ type Props = {
   onSavePortfolio?: (data: any) => void
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
+  initialPortfolio?: { id?: string; name?: string; description?: string; theme_id?: string }
 }
 
 export type PortfolioExportData = {
@@ -35,6 +38,13 @@ export type PortfolioExportData = {
   }
 }
 
+type EditorState = {
+  name: string
+  description?: string
+  theme_id?: string
+  is_public?: boolean
+}
+
 export default function PortfolioBuilder({
   isPreviewMode = false,
   identity,
@@ -43,9 +53,58 @@ export default function PortfolioBuilder({
   onSavePortfolio,
   isLive = false,
   onToggleLive,
+  initialPortfolio,
 }: Props) {
+  const { user } = useAuth()
   const [isDragging, setIsDragging] = useState(false)
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
+
+  const [state, setState] = useState<EditorState>({
+    name: initialPortfolio?.name || identity.name || "Untitled Portfolio",
+    description: initialPortfolio?.description || "",
+    theme_id: initialPortfolio?.theme_id,
+    is_public: isLive,
+  })
+
+  const [portfolioId, setPortfolioId] = useState<string | null>(initialPortfolio?.id ?? null)
+  const createInFlight = useRef<Promise<string> | null>(null)
+
+  const draftKey = useMemo(
+    () => `pf-draft:${user?.id ?? "anon"}:${initialPortfolio?.id ?? "new"}`,
+    [user?.id, initialPortfolio?.id],
+  )
+
+  useEffect(() => {
+    try {
+      const cached = typeof window !== "undefined" ? localStorage.getItem(draftKey) : null
+      if (cached && !portfolioId) setPortfolioId(cached)
+    } catch {}
+  }, [draftKey, portfolioId])
+
+  useEffect(() => {
+    try {
+      if (portfolioId) localStorage.setItem(draftKey, portfolioId)
+    } catch {}
+  }, [draftKey, portfolioId])
+
+  async function ensurePortfolioId(): Promise<string> {
+    if (portfolioId) return portfolioId
+    if (!user?.id) throw new Error("Must be signed in to create a portfolio")
+
+    if (!createInFlight.current) {
+      createInFlight.current = (async () => {
+        const created = await createPortfolioOnce({
+          userId: user.id,
+          name: state.name || "Untitled Portfolio",
+          theme_id: state.theme_id || "default-theme",
+          description: state.description,
+        })
+        setPortfolioId(created.id)
+        return created.id
+      })()
+    }
+    return createInFlight.current
+  }
 
   const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([
     { id: "identity", type: "identity" },
@@ -94,6 +153,65 @@ export default function PortfolioBuilder({
         "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
     },
   })
+
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      name: identity.name || "Untitled Portfolio",
+      is_public: isLive,
+    }))
+  }, [identity.name, isLive])
+
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
+
+  const debouncedSave = useCallback(async () => {
+    if (!hasInitialized || !user?.id) return
+
+    if (saveTimeout) {
+      clearTimeout(saveTimeout)
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        console.log("[v0] Auto-saving portfolio...")
+        const id = await ensurePortfolioId()
+        await updatePortfolioById(id, {
+          name: state.name?.trim() || "Untitled Portfolio",
+          description: state.description?.trim(),
+          theme_id: state.theme_id,
+          is_public: !!state.is_public,
+        })
+        console.log("[v0] Portfolio auto-saved successfully")
+      } catch (error) {
+        console.error("[v0] Auto-save failed:", error)
+      }
+    }, 800) // 800ms debounce
+
+    setSaveTimeout(timeout)
+  }, [hasInitialized, user?.id, state])
+
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
+    }
+  }, [state, hasInitialized, debouncedSave])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasInitialized(true)
+    }, 1000) // Wait 1 second before enabling auto-save
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout)
+      }
+    }
+  }, [saveTimeout])
 
   // Ensure identity stays first if lists are reordered externally
   useEffect(() => {
@@ -544,66 +662,6 @@ export default function PortfolioBuilder({
       </div>
     )
   }
-
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
-  const [hasInitialized, setHasInitialized] = useState(false)
-
-  const debouncedSave = useCallback(() => {
-    if (!onSavePortfolio || !hasInitialized) return
-
-    if (saveTimeout) {
-      clearTimeout(saveTimeout)
-    }
-
-    const timeout = setTimeout(() => {
-      console.log("[v0] Auto-saving portfolio...")
-      const portfolioData = {
-        name: identity.name || "Untitled Portfolio",
-        title: "Portfolio",
-        email: `${(identity.name || "user").toLowerCase().replace(/\s+/g, "")}@example.com`,
-        location: "Location",
-        handle: identity.handle || "@user",
-        initials: (identity.name || "User")
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase(),
-        selectedColor: identity.selectedColor,
-        widgets: {
-          left: leftWidgets,
-          right: rightWidgets,
-        },
-        content: widgetContent,
-        isTemplate: false,
-      }
-      onSavePortfolio(portfolioData)
-    }, 2000) // 2 second debounce
-
-    setSaveTimeout(timeout)
-  }, [onSavePortfolio, hasInitialized, identity, leftWidgets, rightWidgets, widgetContent])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [identity, leftWidgets, rightWidgets, widgetContent, hasInitialized])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasInitialized(true)
-    }, 1000) // Wait 1 second before enabling auto-save
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeout) {
-        clearTimeout(saveTimeout)
-      }
-    }
-  }, [saveTimeout])
 
   return (
     <>

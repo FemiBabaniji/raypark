@@ -23,7 +23,110 @@ const toSlug = (name: string) =>
     .replace(/(^-|-$)/g, "")
     .slice(0, 64)
 
-const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars
+export async function createPortfolioOnce(params: {
+  userId: string
+  name: string
+  theme_id: string
+  description?: string
+}) {
+  const supabase = createClient()
+  // slug is decided ONCE at creation; do not recompute on edits
+  const slug = toSlug(params.name)
+
+  const { data, error } = await supabase
+    .from("portfolios")
+    .insert({
+      user_id: params.userId,
+      name: params.name.trim(),
+      slug,
+      description: params.description?.trim() || `${params.name}'s portfolio`,
+      theme_id: params.theme_id,
+      is_public: false,
+      is_demo: false,
+    })
+    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .single()
+
+  if (error) {
+    // if slug is globally unique and already taken, you may see 23505; handle if needed
+    throw new Error(`Failed to create portfolio: ${error.message}`)
+  }
+
+  // Optional: seed a main page + layout for the editor to bind to
+  const { data: page, error: pageErr } = await supabase
+    .from("pages")
+    .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
+    .select("id")
+    .single()
+  if (!page && pageErr) console.warn("[seed] page create failed:", pageErr?.message)
+
+  const { error: layoutErr } = await supabase
+    .from("page_layouts")
+    .insert({ page_id: page?.id, layout: { columns: { left: [], right: [] } } })
+  if (layoutErr) console.warn("[seed] layout create failed:", layoutErr?.message)
+
+  return data
+}
+
+export async function updatePortfolioById(
+  portfolioId: string,
+  patch: {
+    name?: string
+    description?: string
+    theme_id?: string
+    is_public?: boolean
+    // intentionally no slug here — slug changes should be explicit via a separate function/flow
+  },
+) {
+  if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
+
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("portfolios")
+    .update(patch)
+    .eq("id", portfolioId)
+    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .single()
+
+  if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
+  return data
+}
+
+export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
+  const supabase = createClient()
+  if (!user?.id) return []
+
+  const { data, error } = await supabase
+    .from("portfolios")
+    .select("id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+
+  if (error) throw new Error(`Failed to load portfolios: ${error.message}`)
+
+  const seen = new Set<string>()
+  const deduped = []
+  for (const p of data ?? []) {
+    const key = p.slug || p.id
+    if (seen.has(key)) continue
+    seen.add(key)
+    deduped.push(p)
+  }
+  return deduped.map(
+    (portfolio: any): UnifiedPortfolio => ({
+      id: portfolio.id,
+      name: portfolio.name,
+      title: "Portfolio",
+      email: `${portfolio.slug}@example.com`,
+      location: "Location",
+      handle: `@${portfolio.slug}`,
+      initials: portfolio.name.slice(0, 2).toUpperCase(),
+      selectedColor: 0 as any,
+      isLive: portfolio.is_public || false,
+      isTemplate: false,
+    }),
+  )
+}
 
 async function insertPortfolioWithRetry(
   supabase: any,
@@ -259,136 +362,6 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   console.log("[v0] Portfolio save completed successfully")
 }
 
-export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
-  let supabase
-  try {
-    supabase = createClient()
-    console.log("[v0] Supabase client created successfully for loading portfolios")
-  } catch (error) {
-    console.error("[v0] Failed to create Supabase client:", error)
-    return []
-  }
-
-  console.log("[v0] Loading portfolios for user:", user?.id)
-
-  if (!user) {
-    console.log("[v0] No authenticated user, loading demo portfolios") // Load demo portfolios instead of empty array
-
-    const { data: demoPortfolios, error: demoError } = await supabase
-      .from("portfolios")
-      .select(`
-        *,
-        pages (
-          *,
-          widget_instances (
-            *,
-            widget_types (*)
-          )
-        )
-      `)
-      .eq("is_demo", true)
-      .order("updated_at", { ascending: false })
-      .limit(5)
-
-    if (demoError) {
-      console.error("[v0] Error loading demo portfolios:", demoError)
-      return []
-    }
-
-    console.log("[v0] Loaded demo portfolios:", demoPortfolios?.length || 0)
-
-    return (demoPortfolios || []).map((portfolio: any): UnifiedPortfolio => {
-      // ... existing mapping logic ...
-      const mainPage = portfolio.pages?.find((p: any) => p.key === "main")
-      const widgets = mainPage?.widget_instances || []
-
-      const profileWidget = widgets.find((w: any) => w.widget_types?.key === "profile")
-      const aboutWidget = widgets.find((w: any) => w.widget_types?.key === "description")
-      const projectsWidget = widgets.find((w: any) => w.widget_types?.key === "projects")
-
-      const isTemplate = !!(profileWidget || aboutWidget || projectsWidget)
-
-      return {
-        id: portfolio.id,
-        name: portfolio.name,
-        title: profileWidget?.props?.title || "Portfolio",
-        email: profileWidget?.props?.email || `${portfolio.slug}@example.com`,
-        location: profileWidget?.props?.location || "Location",
-        handle: profileWidget?.props?.handle || `@${portfolio.slug}`,
-        initials: profileWidget?.props?.initials || portfolio.name.slice(0, 2).toUpperCase(),
-        selectedColor: (profileWidget?.props?.selectedColor || 0) as any,
-        isLive: portfolio.is_public || false,
-        isTemplate,
-        ...(isTemplate && {
-          content: {
-            profile: profileWidget?.props?.profileText || "",
-            about: aboutWidget?.props?.content || "",
-            projectColors: projectsWidget?.props?.projectColors || [],
-            galleryGroups: projectsWidget?.props?.galleryGroups || [],
-          },
-        }),
-      }
-    })
-  }
-
-  // Load portfolios with their pages and widgets for authenticated users
-  const { data: portfolios, error: portfolioError } = await supabase
-    .from("portfolios")
-    .select(`
-      *,
-      pages (
-        *,
-        widget_instances (
-          *,
-          widget_types (*)
-        )
-      )
-    `)
-    .eq("user_id", user.id)
-    .order("updated_at", { ascending: false })
-
-  if (portfolioError) {
-    console.error("Error loading portfolios:", portfolioError)
-    throw new Error(`Failed to load portfolios: ${portfolioError.message}`)
-  }
-
-  console.log("[v0] Loaded portfolios from database:", portfolios?.length || 0)
-
-  return (portfolios || []).map((portfolio: any): UnifiedPortfolio => {
-    // Extract template data from widgets
-    const mainPage = portfolio.pages?.find((p: any) => p.key === "main")
-    const widgets = mainPage?.widget_instances || []
-
-    const profileWidget = widgets.find((w: any) => w.widget_types?.key === "profile")
-    const aboutWidget = widgets.find((w: any) => w.widget_types?.key === "description")
-    const projectsWidget = widgets.find((w: any) => w.widget_types?.key === "projects")
-
-    const isTemplate = !!(profileWidget || aboutWidget || projectsWidget)
-
-    return {
-      id: portfolio.id,
-      name: portfolio.name,
-      title: profileWidget?.props?.title || "Portfolio",
-      email: profileWidget?.props?.email || `${portfolio.slug}@example.com`,
-      location: profileWidget?.props?.location || "Location",
-      handle: profileWidget?.props?.handle || `@${portfolio.slug}`,
-      initials: profileWidget?.props?.initials || portfolio.name.slice(0, 2).toUpperCase(),
-      selectedColor: (profileWidget?.props?.selectedColor || 0) as any,
-      isLive: portfolio.is_public || false,
-      isTemplate,
-      // Include template content if it exists
-      ...(isTemplate && {
-        content: {
-          profile: profileWidget?.props?.profileText || "",
-          about: aboutWidget?.props?.content || "",
-          projectColors: projectsWidget?.props?.projectColors || [],
-          galleryGroups: projectsWidget?.props?.galleryGroups || [],
-        },
-      }),
-    }
-  })
-}
-
 export async function deletePortfolio(portfolioId: string): Promise<void> {
   const supabase = createClient()
 
@@ -475,3 +448,5 @@ export async function removeWidgetFromPage(instanceId: string): Promise<void> {
     throw new Error(`Failed to remove widget: ${error.message}`)
   }
 }
+
+const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

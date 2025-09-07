@@ -16,6 +16,54 @@ export interface PortfolioData {
 const isUUID = (v?: string) =>
   typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)
 
+const toSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 64)
+
+const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars
+
+async function insertPortfolioWithRetry(
+  supabase: any,
+  payload: {
+    user_id: string
+    name: string
+    slug: string
+    description?: string
+    theme_id?: string
+    is_public?: boolean
+    is_demo?: boolean
+    id?: string
+  },
+) {
+  // try base, then slug-<n>, then slug-<random>
+  const candidates = [payload.slug]
+  for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
+  candidates.push(`${payload.slug}-${makeSuffix()}`)
+
+  for (const slug of candidates) {
+    const { data, error } = await supabase
+      .from("portfolios")
+      .insert({ ...payload, slug })
+      .select()
+      .single()
+
+    if (!error) return data
+
+    // 23505 unique violation on portfolios_slug_idx → try next
+    if (error.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
+      console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
+      continue
+    }
+
+    // other errors: bubble up
+    throw error
+  }
+  throw new Error("Could not create a unique slug after several attempts")
+}
+
 // Client-side functions
 export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
   console.log("[v0] Starting portfolio save for:", portfolio.name)
@@ -31,60 +79,39 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   console.log("[v0] User from parameter:", { user: user?.id })
 
+  const baseSlug = toSlug(portfolio.name)
+
   if (!user) {
     console.log("[v0] No authenticated user, saving as demo portfolio")
-    // For now, let's save demo portfolios with a placeholder user_id
-    const demoUserId = "demo-user"
 
-    const baseData: Partial<PortfolioData> = {
+    const baseData = {
       ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
-      user_id: demoUserId,
+      user_id: "demo-user",
       name: portfolio.name,
-      slug: portfolio.id, // slugs can be any string
+      slug: baseSlug,
       is_public: portfolio.isLive || false,
-      is_demo: true, // Mark as demo
+      is_demo: true,
     }
 
-    console.log("[v0] upserting portfolio payload:", baseData)
+    console.log("[v0] Inserting demo portfolio with retry logic:", baseData)
 
-    const { data: savedPortfolio, error: portfolioError } = await supabase
-      .from("portfolios")
-      .upsert(baseData)
-      .select()
-      .single()
-
-    if (portfolioError) {
-      console.error("[v0] Error saving demo portfolio:", portfolioError)
-      throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
-    }
-
+    const savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
     console.log("[v0] Demo portfolio saved successfully with ID:", savedPortfolio?.id)
     return
   }
 
-  // Save basic portfolio info
-  const baseData: Partial<PortfolioData> = {
+  const baseData = {
     ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
     user_id: user.id,
     name: portfolio.name,
-    slug: portfolio.id, // slugs can be any string
+    slug: baseSlug,
     is_public: portfolio.isLive || false,
     is_demo: false,
   }
 
-  console.log("[v0] upserting portfolio payload:", baseData)
+  console.log("[v0] Inserting portfolio with retry logic:", baseData)
 
-  const { data: savedPortfolio, error: portfolioError } = await supabase
-    .from("portfolios")
-    .upsert(baseData)
-    .select()
-    .single()
-
-  if (portfolioError) {
-    console.error("[v0] Error saving portfolio:", portfolioError)
-    throw new Error(`Failed to save portfolio: ${portfolioError.message}`)
-  }
-
+  const savedPortfolio = await insertPortfolioWithRetry(supabase, baseData)
   console.log("[v0] Portfolio saved successfully with ID:", savedPortfolio?.id)
 
   const actualPortfolioId = savedPortfolio?.id || portfolio.id

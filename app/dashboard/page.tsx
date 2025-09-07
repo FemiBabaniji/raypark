@@ -13,7 +13,7 @@ import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import PortfolioGrid from "@/components/home/PortfolioGrid"
-import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
+import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
 
@@ -252,26 +252,111 @@ export default function Home() {
     setUseStarterTemplate(selectedPortfolio?.isTemplate || false)
   }
 
-  const handleStartStarter = () => {
-    setUseStarterTemplate(true)
-    setViewMode("expanded")
+  const handleStartStarter = async () => {
+    if (!user?.id) {
+      // For unauthenticated users, use template mode without database creation
+      setUseStarterTemplate(true)
+      setViewMode("expanded")
+      return
+    }
+
+    try {
+      const portfolioData = await createPortfolioOnce({
+        userId: user.id,
+        name: "New Template Portfolio",
+        theme_id: "template",
+        description: "A portfolio created from template",
+      })
+
+      const templatePortfolio: UnifiedPortfolio = {
+        id: portfolioData.id,
+        name: portfolioData.name,
+        title: "Portfolio",
+        email: `${portfolioData.slug}@example.com`,
+        location: "Location",
+        handle: `@${portfolioData.slug}`,
+        initials: portfolioData.name.slice(0, 2).toUpperCase(),
+        selectedColor: 0 as ThemeIndex,
+        isLive: portfolioData.is_public || false,
+        isTemplate: true,
+      }
+
+      setPortfolios((prev) => [...prev, templatePortfolio])
+      setSelectedPortfolioId(portfolioData.id)
+      setUseStarterTemplate(true)
+      setViewMode("expanded")
+    } catch (error) {
+      console.error("Error creating template portfolio:", error)
+      // Fallback to template mode without database creation
+      setUseStarterTemplate(true)
+      setViewMode("expanded")
+    }
   }
 
-  const handleAddPortfolio = () => {
-    const newPortfolio: UnifiedPortfolio = {
-      name: "New Portfolio",
-      title: "Portfolio",
-      email: "new@example.com",
-      location: "Location",
-      handle: "@newuser",
-      initials: "NP",
-      selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
-      isLive: false,
-      isTemplate: false,
+  const handleAddPortfolio = async () => {
+    if (!user?.id) {
+      // For unauthenticated users, create local portfolio
+      const newPortfolio: UnifiedPortfolio = {
+        id: safeUUID(),
+        name: "New Portfolio",
+        title: "Portfolio",
+        email: "new@example.com",
+        location: "Location",
+        handle: "@newuser",
+        initials: "NP",
+        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
+        isLive: false,
+        isTemplate: false,
+      }
+      setPortfolios((prev) => [...prev, newPortfolio])
+      setSelectedPortfolioId(newPortfolio.id)
+      setViewMode("expanded")
+      return
     }
-    setPortfolios((prev) => [...prev, newPortfolio])
-    const tempId = safeUUID()
-    setSelectedPortfolioId(tempId)
+
+    try {
+      const portfolioData = await createPortfolioOnce({
+        userId: user.id,
+        name: "New Portfolio",
+        theme_id: "default",
+        description: "A new portfolio",
+      })
+
+      const newPortfolio: UnifiedPortfolio = {
+        id: portfolioData.id,
+        name: portfolioData.name,
+        title: "Portfolio",
+        email: `${portfolioData.slug}@example.com`,
+        location: "Location",
+        handle: `@${portfolioData.slug}`,
+        initials: portfolioData.name.slice(0, 2).toUpperCase(),
+        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
+        isLive: portfolioData.is_public || false,
+        isTemplate: false,
+      }
+
+      setPortfolios((prev) => [...prev, newPortfolio])
+      setSelectedPortfolioId(portfolioData.id)
+      setViewMode("expanded")
+    } catch (error) {
+      console.error("Error creating portfolio:", error)
+      // Fallback to local portfolio creation
+      const newPortfolio: UnifiedPortfolio = {
+        id: safeUUID(),
+        name: "New Portfolio",
+        title: "Portfolio",
+        email: "new@example.com",
+        location: "Location",
+        handle: "@newuser",
+        initials: "NP",
+        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
+        isLive: false,
+        isTemplate: false,
+      }
+      setPortfolios((prev) => [...prev, newPortfolio])
+      setSelectedPortfolioId(newPortfolio.id)
+      setViewMode("expanded")
+    }
   }
 
   const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {
@@ -423,13 +508,25 @@ export default function Home() {
                   }}
                   onSavePortfolio={async (portfolioData) => {
                     try {
-                      await savePortfolio(portfolioData, user)
-                      setPortfolios((prev) => [...prev, portfolioData])
-                      setSelectedPortfolioId(portfolioData.id)
+                      if (portfolioData.id && portfolioData.id !== selectedPortfolioId) {
+                        // This is a new portfolio from template completion
+                        await savePortfolio(portfolioData, user)
+                        setPortfolios((prev) => [...prev, portfolioData])
+                        setSelectedPortfolioId(portfolioData.id)
+                      } else {
+                        // This is updating an existing template portfolio
+                        await savePortfolio(portfolioData, user)
+                        setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? portfolioData : p)))
+                      }
                     } catch (error) {
                       console.error("Error saving portfolio:", error)
-                      setPortfolios((prev) => [...prev, portfolioData])
-                      setSelectedPortfolioId(portfolioData.id)
+                      // Fallback to local state update
+                      if (portfolioData.id && portfolioData.id !== selectedPortfolioId) {
+                        setPortfolios((prev) => [...prev, portfolioData])
+                        setSelectedPortfolioId(portfolioData.id)
+                      } else {
+                        setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? portfolioData : p)))
+                      }
                     }
                   }}
                   isLive={activePortfolio?.isLive || false}

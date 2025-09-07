@@ -103,7 +103,10 @@ export default function StarterPortfolio({
   const handleDone = () => {
     setShowOnboarding(false)
     if (onSavePortfolio) {
+      const portfolioId = activeIdentity?.id || safeUUID()
+
       const portfolioData = {
+        id: portfolioId, // Maintain the same ID throughout the session
         name: profileText.name,
         title: "Portfolio",
         email: `${profileText.name.toLowerCase().replace(/\s+/g, "")}@example.com`,
@@ -127,6 +130,7 @@ export default function StarterPortfolio({
           galleryGroups,
         },
         isTemplate: true,
+        isLive: false,
       }
       onSavePortfolio(portfolioData)
     }

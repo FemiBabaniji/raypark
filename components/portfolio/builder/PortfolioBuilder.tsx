@@ -181,6 +181,16 @@ export default function PortfolioBuilder({
           description: state.description?.trim(),
           theme_id: state.theme_id,
           is_public: !!state.is_public,
+          identity: {
+            name: identity.name,
+            title: identity.title,
+            subtitle: identity.subtitle,
+            selectedColor: identity.selectedColor,
+            initials: identity.initials,
+            email: identity.email,
+            location: identity.location,
+            handle: identity.handle,
+          },
         })
         console.log("[v0] Portfolio auto-saved successfully")
       } catch (error) {
@@ -189,7 +199,7 @@ export default function PortfolioBuilder({
     }, 800) // 800ms debounce
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state])
+  }, [hasInitialized, user?.id, state, identity]) // Added identity to dependencies
 
   useEffect(() => {
     if (hasInitialized) {

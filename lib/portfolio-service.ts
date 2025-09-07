@@ -75,20 +75,79 @@ export async function updatePortfolioById(
     description?: string
     theme_id?: string
     is_public?: boolean
+    identity?: {
+      name?: string
+      title?: string
+      subtitle?: string
+      selectedColor?: number
+      initials?: string
+      email?: string
+      location?: string
+      handle?: string
+    }
     // intentionally no slug here — slug changes should be explicit via a separate function/flow
   },
 ) {
   if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
 
   const supabase = createClient()
+
+  const { identity, ...portfolioPatch } = patch
+
   const { data, error } = await supabase
     .from("portfolios")
-    .update(patch)
+    .update(portfolioPatch)
     .eq("id", portfolioId)
     .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
     .single()
 
   if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
+
+  if (identity) {
+    console.log("[v0] Updating identity data including selectedColor:", identity.selectedColor)
+
+    // Get the main page for this portfolio
+    const { data: page } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("portfolio_id", portfolioId)
+      .eq("key", "main")
+      .single()
+
+    if (page) {
+      // Get the profile widget type
+      const { data: widgetType } = await supabase.from("widget_types").select("id").eq("key", "profile").single()
+
+      if (widgetType) {
+        // Update or create the profile widget with identity data
+        const { error: widgetError } = await supabase.from("widget_instances").upsert(
+          {
+            page_id: page.id,
+            widget_type_id: widgetType.id,
+            props: {
+              name: identity.name,
+              title: identity.title,
+              subtitle: identity.subtitle,
+              selectedColor: identity.selectedColor,
+              initials: identity.initials,
+              email: identity.email,
+              location: identity.location,
+              handle: identity.handle,
+            },
+            enabled: true,
+          },
+          { onConflict: "page_id,widget_type_id" },
+        )
+
+        if (widgetError) {
+          console.error("[v0] Error updating profile widget:", widgetError)
+        } else {
+          console.log("[v0] Profile widget updated with selectedColor:", identity.selectedColor)
+        }
+      }
+    }
+  }
+
   return data
 }
 
@@ -98,11 +157,54 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
 
   const { data, error } = await supabase
     .from("portfolios")
-    .select("id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at")
+    .select(`
+      id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at,
+      pages!inner(
+        id,
+        widget_instances!inner(
+          props,
+          widget_types!inner(key)
+        )
+      )
+    `)
     .eq("user_id", user.id)
+    .eq("pages.key", "main")
+    .eq("pages.widget_instances.widget_types.key", "profile")
     .order("updated_at", { ascending: false })
 
-  if (error) throw new Error(`Failed to load portfolios: ${error.message}`)
+  if (error) {
+    console.error("[v0] Error loading portfolios with colors:", error)
+    const { data: basicData, error: basicError } = await supabase
+      .from("portfolios")
+      .select("id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+
+    if (basicError) throw new Error(`Failed to load portfolios: ${basicError.message}`)
+
+    const seen = new Set<string>()
+    const deduped = []
+    for (const p of basicData ?? []) {
+      const key = p.slug || p.id
+      if (seen.has(key)) continue
+      seen.add(key)
+      deduped.push(p)
+    }
+    return deduped.map(
+      (portfolio: any): UnifiedPortfolio => ({
+        id: portfolio.id,
+        name: portfolio.name,
+        title: "Portfolio",
+        email: `${portfolio.slug}@example.com`,
+        location: "Location",
+        handle: `@${portfolio.slug}`,
+        initials: portfolio.name.slice(0, 2).toUpperCase(),
+        selectedColor: 0 as any, // Default fallback
+        isLive: portfolio.is_public || false,
+        isTemplate: false,
+      }),
+    )
+  }
 
   const seen = new Set<string>()
   const deduped = []
@@ -112,8 +214,14 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     seen.add(key)
     deduped.push(p)
   }
-  return deduped.map(
-    (portfolio: any): UnifiedPortfolio => ({
+
+  return deduped.map((portfolio: any): UnifiedPortfolio => {
+    const profileWidget = portfolio.pages?.[0]?.widget_instances?.[0]
+    const selectedColor = profileWidget?.props?.selectedColor ?? 0
+
+    console.log("[v0] Loading portfolio with selectedColor:", selectedColor, "for portfolio:", portfolio.name)
+
+    return {
       id: portfolio.id,
       name: portfolio.name,
       title: "Portfolio",
@@ -121,11 +229,11 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
       location: "Location",
       handle: `@${portfolio.slug}`,
       initials: portfolio.name.slice(0, 2).toUpperCase(),
-      selectedColor: 0 as any,
+      selectedColor: selectedColor as any,
       isLive: portfolio.is_public || false,
       isTemplate: false,
-    }),
-  )
+    }
+  })
 }
 
 async function insertPortfolioWithRetry(

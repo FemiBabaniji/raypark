@@ -587,19 +587,7 @@ export default function PortfolioBuilder({
     if (hasInitialized) {
       debouncedSave()
     }
-  }, [identity, debouncedSave])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [leftWidgets, rightWidgets, debouncedSave])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [widgetContent, debouncedSave])
+  }, [identity, leftWidgets, rightWidgets, widgetContent, hasInitialized])
 
   useEffect(() => {
     const timer = setTimeout(() => {

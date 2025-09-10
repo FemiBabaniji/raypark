@@ -47,7 +47,7 @@ export default function NetworkPage() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl mx-auto">
         <div className="absolute top-6 left-6">
-          <BackButton onClick={() => router.push("/")} aria-label="Back to home" />
+          <BackButton onClick={() => router.push("/portfolio")} aria-label="Back to portfolio" />
         </div>
 
         <div className="flex justify-center mb-8">

@@ -149,7 +149,7 @@ export default function CommunityHubPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                    className="bg-zinc-700/30 rounded-xl p-4 hover:bg-zinc-700/50 transition-colors cursor-pointer relative"
+                    className="bg-zinc-700/50 rounded-xl p-4 hover:bg-zinc-700/70 transition-colors cursor-pointer relative"
                   >
                     <div className="absolute top-4 right-4 text-xs text-zinc-500 bg-zinc-600/50 px-2 py-1 rounded">
                       Preview
@@ -175,7 +175,7 @@ export default function CommunityHubPage() {
                 <h2 className="text-lg font-medium text-white">Upcoming Events</h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {community.events.map((event, index) => (
                   <motion.div
                     key={event.id}
@@ -183,7 +183,7 @@ export default function CommunityHubPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
                     onClick={() => router.push(`/network/${communityId}/events/${event.id}`)}
-                    className="bg-zinc-700/30 rounded-xl p-4 hover:bg-zinc-700/50 transition-colors cursor-pointer"
+                    className="bg-zinc-700/50 rounded-xl p-4 hover:bg-zinc-700/70 transition-colors cursor-pointer"
                   >
                     <div className="mb-3">
                       <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">{event.date}</span>
@@ -210,7 +210,7 @@ export default function CommunityHubPage() {
             className="space-y-6"
           >
             {/* Community Stats */}
-            <div className="bg-zinc-800/30 rounded-2xl p-6">
+            <div className="bg-zinc-800/50 rounded-2xl p-6">
               <h3 className="text-lg font-medium text-white mb-4">Community Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -233,7 +233,7 @@ export default function CommunityHubPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-zinc-800/30 rounded-2xl p-6">
+            <div className="bg-zinc-800/50 rounded-2xl p-6">
               <h3 className="text-lg font-medium text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button
@@ -255,7 +255,7 @@ export default function CommunityHubPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-zinc-800/30 rounded-2xl p-6">
+            <div className="bg-zinc-800/50 rounded-2xl p-6">
               <h3 className="text-lg font-medium text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">

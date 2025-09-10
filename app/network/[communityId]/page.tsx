@@ -118,7 +118,7 @@ export default function CommunityHubPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => router.push("/network")}
@@ -147,7 +147,7 @@ export default function CommunityHubPage() {
                 {community.announcements.map((announcement) => (
                   <div
                     key={announcement.id}
-                    className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 hover:bg-zinc-800/70 transition-colors"
+                    className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6 hover:bg-zinc-800/50 transition-colors"
                   >
                     <h3 className="text-white font-medium mb-2">{announcement.title}</h3>
                     <div className="text-zinc-400 text-sm mb-3">
@@ -167,13 +167,13 @@ export default function CommunityHubPage() {
                 <h2 className="text-white text-lg font-medium">Upcoming Events</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {community.events.map((event) => (
                   <motion.button
                     key={event.id}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => router.push(`/network/${communityId}/events/${event.id}`)}
-                    className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 hover:bg-zinc-800/70 transition-all text-left"
+                    className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6 hover:bg-zinc-800/50 transition-all text-left"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="bg-blue-500/20 text-blue-400 text-xs font-medium px-3 py-1 rounded-full">
@@ -199,7 +199,7 @@ export default function CommunityHubPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
+            <div className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6">
               <h3 className="text-white font-medium mb-4">Community Stats</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -221,7 +221,7 @@ export default function CommunityHubPage() {
               </div>
             </div>
 
-            <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
+            <div className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6">
               <h3 className="text-white font-medium mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button
@@ -231,19 +231,19 @@ export default function CommunityHubPage() {
                   <Users className="w-4 h-4" />
                   View Members
                 </button>
-                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
+                <button className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Create Event
                 </button>
-                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
+                <button className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Post Announcement
                 </button>
-                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
+                <button className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Invite Members
                 </button>
               </div>
             </div>
 
-            <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
+            <div className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6">
               <h3 className="text-white font-medium mb-4">Settings</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -267,7 +267,7 @@ export default function CommunityHubPage() {
               </div>
             </div>
 
-            <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
+            <div className="bg-zinc-800/30 backdrop-blur-xl rounded-2xl p-6">
               <h3 className="text-white font-medium mb-4">Recent Activity</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">

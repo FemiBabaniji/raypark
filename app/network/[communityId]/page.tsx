@@ -2,7 +2,6 @@
 
 import { useRouter, useParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
 import { Calendar, Users, MessageSquare, Clock, ArrowLeft } from "lucide-react"
 
 const communityData = {
@@ -225,31 +224,46 @@ export default function CommunityHubPage() {
             <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
               <h3 className="text-white font-medium mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <Button
+                <button
                   onClick={() => router.push(`/network/${communityId}/members`)}
-                  className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 rounded-xl py-3"
+                  className="w-full bg-white hover:bg-gray-100 text-black font-medium rounded-2xl py-3 px-4 transition-colors flex items-center justify-center gap-2"
                 >
-                  <Users className="w-4 h-4 mr-2" />
+                  <Users className="w-4 h-4" />
                   View Members
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white border-zinc-600 rounded-xl py-3"
-                >
+                </button>
+                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Create Event
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white border-zinc-600 rounded-xl py-3"
-                >
+                </button>
+                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Post Announcement
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full bg-zinc-700/50 hover:bg-zinc-700/70 text-white border-zinc-600 rounded-xl py-3"
-                >
+                </button>
+                <button className="w-full bg-zinc-700/80 hover:bg-zinc-700 text-white font-medium rounded-2xl py-3 px-4 transition-colors">
                   Invite Members
-                </Button>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-zinc-800/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6">
+              <h3 className="text-white font-medium mb-4">Settings</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-300 text-sm">Email Notifications</span>
+                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-green-500 transition-colors">
+                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-300 text-sm">Event Reminders</span>
+                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-600 transition-colors">
+                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-300 text-sm">Community Updates</span>
+                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-green-500 transition-colors">
+                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -118,7 +118,7 @@ export default function CommunityHubPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
           <BackButton onClick={() => router.push("/network")} aria-label="Back to communities" />
           <div>
@@ -127,7 +127,7 @@ export default function CommunityHubPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-8">
           {/* Left Column: Announcements + Events */}
           <div className="space-y-8">
             {/* Latest Announcements */}
@@ -175,7 +175,7 @@ export default function CommunityHubPage() {
                 <h2 className="text-lg font-medium text-white">Upcoming Events</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {community.events.map((event, index) => (
                   <motion.div
                     key={event.id}

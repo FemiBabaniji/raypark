@@ -1,51 +1,47 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { BackButton } from "@/components/ui/back-button"
-import { mockPortfolios } from "@/lib/portfolio-data"
+import { Laptop, Palette, Rocket, Users } from "lucide-react"
+
+const communities = [
+  {
+    id: "tech-innovators-sf",
+    name: "Tech Innovators SF",
+    memberCount: 247,
+    icon: Laptop,
+    gradient: "from-blue-500/80 to-cyan-500/80",
+    description: "Building the future of technology in San Francisco",
+  },
+  {
+    id: "creative-collective-nyc",
+    name: "Creative Collective NYC",
+    memberCount: 183,
+    icon: Palette,
+    gradient: "from-green-500/80 to-emerald-500/80",
+    description: "Artists, designers, and creative professionals in NYC",
+  },
+  {
+    id: "startup-founders-la",
+    name: "Startup Founders LA",
+    memberCount: 156,
+    icon: Rocket,
+    gradient: "from-pink-500/80 to-orange-500/80",
+    description: "Entrepreneurial community in Los Angeles",
+  },
+  {
+    id: "black-entrepreneurship-alliance",
+    name: "Black Entrepreneurship Alliance",
+    memberCount: 312,
+    icon: Users,
+    gradient: "from-purple-500/80 to-indigo-500/80",
+    description: "Empowering Black entrepreneurs and business leaders",
+  },
+]
 
 export default function NetworkPage() {
   const router = useRouter()
-
-  const networkMembers = [
-    ...mockPortfolios,
-    {
-      id: "sarah-chen",
-      name: "Sarah Chen",
-      title: "Frontend Developer",
-      email: "sarah@techstartup.io",
-      location: "San Francisco, CA",
-      handle: "@sarahcodes",
-      avatarUrl: "/professional-headshot.png",
-      initials: "SC",
-      selectedColor: 3,
-    },
-    {
-      id: "mike-rodriguez",
-      name: "Mike Rodriguez",
-      title: "Product Manager",
-      email: "mike@innovationlabs.com",
-      location: "Austin, TX",
-      handle: "@mikepm",
-      avatarUrl: "/man-developer.png",
-      initials: "MR",
-      selectedColor: 4,
-    },
-    {
-      id: "alex-thompson",
-      name: "Alex Thompson",
-      title: "Software Engineer",
-      email: "alex@techsolutions.com",
-      location: "Seattle, WA",
-      handle: "@alexdev",
-      avatarUrl: "/man-developer.png",
-      initials: "AT",
-      selectedColor: 2,
-    },
-  ]
 
   return (
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
@@ -63,7 +59,6 @@ export default function NetworkPage() {
             className="text-neutral-400 hover:text-white transition-colors"
           />
 
-          {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="w-6 h-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
               <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -72,85 +67,63 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        {/* User actions */}
         <div className="flex items-center space-x-6">
           <button className="text-sm text-neutral-500 hover:text-white transition-colors duration-300">ai</button>
-
-          <Link href="/network" className="text-sm text-white font-medium">
-            network
-          </Link>
-
+          <span className="text-sm text-white font-medium">network</span>
           <div className="w-6 h-6 bg-neutral-800 rounded-full flex items-center justify-center">
             <span className="text-xs font-medium">U</span>
           </div>
         </div>
       </motion.nav>
 
-      <div className="pt-20">
-        <div className="flex gap-4 p-4 lg:gap-6 lg:p-6 xl:gap-8 xl:p-8 2xl:gap-12 2xl:p-12">
-          <motion.div
-            className="flex-1 lg:pr-80 xl:pr-96 2xl:pr-[28rem]"
-            animate={{
-              x: "0rem",
-              scale: 1,
-            }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                {networkMembers.map((member) => (
-                  <div key={member.id} className="w-full">
-                    <UnifiedPortfolioCard
-                      portfolio={member}
-                      onClick={() => {
-                        if (member.id === "john-doe") {
-                          window.location.href = "/network/john-doe"
-                        } else {
-                          console.log("open portfolio:", member.id)
-                        }
-                      }}
-                      onShare={() => console.log("share portfolio:", member.id)}
-                      onMore={() => console.log("more options:", member.id)}
-                    />
+      <div className="pt-32 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center mb-12">
+          <h1 className="text-4xl font-bold text-white mb-4">Choose Your Community</h1>
+          <p className="text-neutral-400 text-lg">
+            Select the community you're part of to access your network and events
+          </p>
+        </div>
+
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {communities.map((community, index) => {
+              const IconComponent = community.icon
+              return (
+                <motion.div
+                  key={community.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => router.push(`/network/${community.id}`)}
+                  className="relative group cursor-pointer"
+                >
+                  <div
+                    className={`
+                    relative h-48 rounded-3xl overflow-hidden
+                    bg-gradient-to-br ${community.gradient}
+                    backdrop-blur-xl border border-white/10
+                    hover:scale-[1.02] transition-all duration-300
+                    flex flex-col items-center justify-center p-8
+                  `}
+                  >
+                    <div className="absolute inset-0 bg-black/20"></div>
+
+                    <div className="relative z-10 text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center">
+                        <IconComponent className="w-8 h-8 text-white" />
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-white mb-2">{community.name}</h3>
+
+                      <p className="text-white/90 text-sm mb-3">{community.description}</p>
+
+                      <div className="text-white/80 text-sm font-medium">{community.memberCount} active members</div>
+                    </div>
                   </div>
-                ))}
-
-                <div className="w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-neutral-700 hover:border-neutral-500 transition-colors cursor-pointer flex flex-col items-center justify-center group backdrop-blur-sm hover:scale-105 transition-all">
-                  <BackButton
-                    onClick={() => console.log("invite")}
-                    icon={() => <span className="text-base text-white">+</span>}
-                  />
-                  <span className="text-neutral-400 font-medium text-sm">Invite</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="fixed right-0 top-16 w-80 lg:w-96 2xl:w-[28rem] h-full p-4 lg:p-6 xl:p-8 2xl:p-12"
-            animate={{
-              x: "0%",
-            }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <div className="bg-neutral-900/50 backdrop-blur-xl rounded-3xl p-8 border border-neutral-800/50 sticky top-6">
-              <h2 className="text-2xl font-bold mb-4 text-white">Your Network</h2>
-              <p className="text-neutral-300 mb-6 leading-relaxed">
-                Meet the talented individuals who make our work possible. Each card represents a unique professional
-                with their own expertise and background.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-sm text-neutral-400">5 Active Members</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-sm text-neutral-400">3 Industries</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+                </motion.div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

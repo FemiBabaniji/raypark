@@ -2,7 +2,8 @@
 
 import { useRouter, useParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Calendar, Users, MessageSquare, Clock, ArrowLeft } from "lucide-react"
+import { Calendar, Users, MessageSquare, Clock } from "lucide-react"
+import { BackButton } from "@/components/ui/back-button"
 
 const communityData = {
   "tech-innovators-sf": {
@@ -120,13 +121,7 @@ export default function CommunityHubPage() {
     <div className="min-h-screen bg-zinc-950 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => router.push("/network")}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors bg-zinc-800/50 backdrop-blur-xl rounded-2xl px-4 py-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
+          <BackButton onClick={() => router.push("/network")} aria-label="Back to communities" />
           <div>
             <h1 className="text-white text-2xl font-medium">{community.name}</h1>
             <p className="text-zinc-400 text-sm">{community.subtitle}</p>

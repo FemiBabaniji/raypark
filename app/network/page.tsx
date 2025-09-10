@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Laptop, Palette, Rocket, Users } from "lucide-react"
+import { BackButton } from "@/components/ui/back-button"
 
 const communities = [
   {
@@ -45,6 +46,10 @@ export default function NetworkPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl mx-auto">
+        <div className="absolute top-6 left-6">
+          <BackButton onClick={() => router.push("/")} aria-label="Back to home" />
+        </div>
+
         <div className="flex justify-center mb-8">
           <div className="w-24 h-24 bg-zinc-800 rounded-3xl flex items-center justify-center">
             <div className="w-16 h-16 bg-gradient-to-br from-pink-400 via-purple-500 to-pink-600 rounded-full flex items-center justify-center">

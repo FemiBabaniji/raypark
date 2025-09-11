@@ -426,33 +426,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
-      <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
-        style={{ height: NAV_H, paddingLeft: BASE_PADDING, paddingRight: BASE_PADDING }}
-        animate={{
-          opacity: shouldHideNav ? 0 : 1,
-          y: shouldHideNav ? -20 : 0,
-        }}
-        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-      >
-        <div className="flex items-center space-x-3">
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-          </div>
-          <span className="text-sm font-medium text-neutral-400">pathwai</span>
-        </div>
-
-        <div className="flex items-center space-x-6">
-          <button className="text-sm text-neutral-500 hover:text-white transition-colors duration-300">ai</button>
-          <Link href="/network" className="text-sm text-neutral-500 hover:text-white transition-colors duration-300">
-            network
-          </Link>
-          <div className="w-6 h-6 bg-neutral-800 rounded-full flex items-center justify-center">
-            <span className="text-xs font-medium">U</span>
-          </div>
-        </div>
-      </motion.nav>
-
       {viewMode === "expanded" && (
         <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
       )}

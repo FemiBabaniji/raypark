@@ -2,6 +2,9 @@
 
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from "@/components/ui/button"
+import MembersPage from "@/components/members-page"
+import { mockPortfolios } from "@/lib/portfolio-data"
+import { useState } from "react"
 
 interface Community {
   name: string
@@ -28,6 +31,8 @@ interface CommunityDetailProps {
 }
 
 export function CommunityDetail({ selectedCommunity, setNetworkView, setSelectedEvent }: CommunityDetailProps) {
+  const [showMembers, setShowMembers] = useState(false)
+
   const events = [
     {
       title: "AI & Machine Learning Workshop",
@@ -57,6 +62,43 @@ export function CommunityDetail({ selectedCommunity, setNetworkView, setSelected
       gradient: "from-green-500/70 to-emerald-500/70",
     },
   ]
+
+  const communityMembers = [
+    ...mockPortfolios,
+    {
+      id: "sarah-chen",
+      name: "Sarah Chen",
+      title: "Frontend Developer",
+      email: "sarah@techstartup.io",
+      location: "San Francisco, CA",
+      handle: "@sarahcodes",
+      avatarUrl: "/professional-headshot.png",
+      initials: "SC",
+      selectedColor: 3,
+    },
+    {
+      id: "mike-rodriguez",
+      name: "Mike Rodriguez",
+      title: "Product Manager",
+      email: "mike@innovationlabs.com",
+      location: "Austin, TX",
+      handle: "@mikepm",
+      avatarUrl: "/man-developer.png",
+      initials: "MR",
+      selectedColor: 4,
+    },
+  ]
+
+  if (showMembers) {
+    return (
+      <MembersPage
+        title={`${selectedCommunity?.name} Members`}
+        members={communityMembers}
+        onBack={() => setShowMembers(false)}
+        showInvite={true}
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950 pt-16">
@@ -163,7 +205,10 @@ export function CommunityDetail({ selectedCommunity, setNetworkView, setSelected
             <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-6">
               <h3 className="text-white font-bold mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <Button className="w-full bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl">
+                <Button
+                  className="w-full bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl"
+                  onClick={() => setShowMembers(true)}
+                >
                   View Members
                 </Button>
                 <Button

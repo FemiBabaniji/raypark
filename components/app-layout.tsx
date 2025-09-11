@@ -47,7 +47,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
   }
 
-  const isPortfolioBuilder = pathname === "/"
+  const isPortfolioBuilder = pathname === "/" || pathname.startsWith("/portfolio")
   const shouldShowNavigation = !isPortfolioBuilder
 
   return (

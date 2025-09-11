@@ -47,7 +47,7 @@ export function Navigation({
   }, [isUserDropdownOpen, setIsUserDropdownOpen])
 
   return (
-    <div className="border-b border-zinc-800 fixed top-0 left-0 right-0 bg-zinc-900 z-50">
+    <div className="fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center justify-between p-4 max-w-[calc(4*20rem+3*1.5rem)] mx-auto">
         <div
           className={`flex items-center gap-3 ${

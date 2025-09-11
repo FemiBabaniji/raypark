@@ -1,6 +1,7 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react"
+import { BackButton } from "@/components/ui/back-button"
+import { Button } from "@/components/ui/button"
 
 interface Event {
   title: string
@@ -25,7 +26,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "Digital Product Designer",
       email: "jenny@acme.com",
       location: "New York, NY",
-      gradient: "from-cyan-500 to-blue-500",
+      gradient: "from-cyan-500/70 to-blue-500/70",
     },
     {
       initials: "JD",
@@ -33,7 +34,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "Data Scientist",
       email: "john@datascience.edu",
       location: "Boston, MA",
-      gradient: "from-emerald-500 to-green-500",
+      gradient: "from-emerald-500/70 to-green-500/70",
     },
     {
       initials: "SC",
@@ -41,7 +42,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "Frontend Developer",
       email: "sarah@startuptech.io",
       location: "San Francisco, CA",
-      gradient: "from-orange-500 to-red-500",
+      gradient: "from-orange-500/70 to-red-500/70",
     },
     {
       initials: "MR",
@@ -49,7 +50,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "Product Manager",
       email: "mike@innovationlabs.com",
       location: "Austin, TX",
-      gradient: "from-zinc-400 to-zinc-600",
+      gradient: "from-neutral-500/70 to-neutral-600/70",
     },
     {
       initials: "AT",
@@ -57,7 +58,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "Software Engineer",
       email: "alex@codesolutions.com",
       location: "Seattle, WA",
-      gradient: "from-cyan-500 to-blue-500",
+      gradient: "from-cyan-500/70 to-blue-500/70",
     },
     {
       initials: "LM",
@@ -65,64 +66,62 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       title: "UX Researcher",
       email: "lisa@researchstudio.co",
       location: "Portland, OR",
-      gradient: "from-emerald-500 to-green-500",
+      gradient: "from-emerald-500/70 to-green-500/70",
     },
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-900 pt-16">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => setNetworkView("detail")}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-300 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Events
-          </button>
-        </div>
+    <div className="min-h-screen bg-neutral-950 pt-16">
+      <div className="absolute top-6 left-6">
+        <BackButton onClick={() => setNetworkView("detail")} aria-label="Back to community" />
+      </div>
 
+      <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Event Header */}
-        <div className={`bg-gradient-to-br ${selectedEvent?.gradient} rounded-lg p-8 mb-8 text-center text-white`}>
-          <h1 className="text-4xl mb-4">{selectedEvent?.title}</h1>
-          <p className="text-lg mb-6 opacity-90">
+        <div
+          className={`bg-gradient-to-br ${selectedEvent?.gradient} backdrop-blur-xl rounded-3xl p-8 mb-8 text-center text-white`}
+        >
+          <h1 className="text-4xl font-bold mb-4">{selectedEvent?.title}</h1>
+          <p className="text-lg mb-6 text-white/90">
             {selectedEvent?.date} • {selectedEvent?.time} • {selectedEvent?.location}
           </p>
 
           <div className="flex items-center justify-center gap-4">
-            <button className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">RSVP Now</button>
-            <button className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+            <Button className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl">RSVP Now</Button>
+            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl">
               Add to Calendar
-            </button>
-            <button className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
+            </Button>
+            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl">
               Share Event
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Event Attendees */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-6 bg-purple-600 rounded-lg flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-sm"></div>
+            <div className="w-6 h-6 bg-neutral-600 rounded flex items-center justify-center">
+              <div className="w-3 h-3 border border-neutral-400 rounded-sm"></div>
             </div>
-            <h2 className="text-xl text-white">Event Attendees</h2>
+            <h2 className="text-xl font-bold text-white">Event Attendees</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {attendees.map((attendee, index) => (
-              <div key={index} className={`bg-gradient-to-br ${attendee.gradient} rounded-lg p-4 text-white relative`}>
+              <div
+                key={index}
+                className={`bg-gradient-to-br ${attendee.gradient} backdrop-blur-xl rounded-3xl p-6 text-white relative hover:scale-105 transition-all duration-300`}
+              >
                 {/* Icon in top right */}
                 <div className="absolute top-3 right-3 w-5 h-5 bg-white/20 rounded flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
 
                 {/* Large Initials */}
-                <div className="text-3xl mb-3">{attendee.initials}</div>
+                <div className="text-3xl font-bold mb-3">{attendee.initials}</div>
 
                 {/* Name and Title */}
-                <h3 className="text-sm mb-1">{attendee.name}</h3>
+                <h3 className="text-sm font-medium mb-1">{attendee.name}</h3>
                 <p className="text-xs text-white/80 mb-3">{attendee.title}</p>
 
                 {/* Contact Info */}

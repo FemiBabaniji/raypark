@@ -25,27 +25,27 @@ export function CommunitySelection({ setSelectedCommunity, setNetworkView }: Com
       name: "Tech Innovators SF",
       subtitle: "Community Hub • Announcements & Events",
       members: "247 active members",
-      gradient: "from-blue-600 to-cyan-600",
+      gradient: "from-blue-500/70 to-cyan-500/70",
       icon: "💻",
     },
     {
       name: "Creative Collective NYC",
       subtitle: "Community Hub • Announcements & Events",
       members: "183 active members",
-      gradient: "from-emerald-600 to-green-600",
+      gradient: "from-emerald-500/70 to-green-500/70",
       icon: "🎨",
     },
     {
       name: "Startup Founders LA",
       subtitle: "Community Hub • Announcements & Events",
       members: "156 active members",
-      gradient: "from-orange-500 to-red-500",
+      gradient: "from-orange-500/70 to-red-500/70",
       icon: "🚀",
     },
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-900 pt-16">
+    <div className="min-h-screen bg-neutral-950 pt-16">
       <div className="max-w-4xl mx-auto px-6 py-16">
         <div className="absolute top-6 left-6">
           <BackButton onClick={() => router.push("/dashboard")} aria-label="Back to dashboard" />
@@ -53,14 +53,14 @@ export function CommunitySelection({ setSelectedCommunity, setNetworkView }: Com
 
         <div className="text-center mb-16">
           <h1 className="text-5xl text-white mb-6">Choose Your Community</h1>
-          <p className="text-zinc-400 text-xl">Select the community you're part of to access your network and events</p>
+          <p className="text-white/70 text-xl">Select the community you're part of to access your network and events</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {communities.map((community, index) => (
             <Card
               key={index}
-              className={`bg-gradient-to-br ${community.gradient} border-none text-white cursor-pointer hover:scale-105 transition-transform h-80 relative overflow-hidden`}
+              className={`bg-gradient-to-br ${community.gradient} backdrop-blur-xl border-none text-white cursor-pointer hover:scale-105 transition-all duration-300 h-80 relative overflow-hidden rounded-3xl`}
               onClick={() => {
                 setSelectedCommunity(community)
                 setNetworkView("detail")

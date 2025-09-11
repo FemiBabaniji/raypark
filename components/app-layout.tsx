@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { Navigation } from "./global-navigation"
+import { Navigation } from "./navigation"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -20,6 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   useEffect(() => {
     if (pathname === "/") setCurrentView("dashboard")
+    else if (pathname === "/dashboard") setCurrentView("dashboard")
     else if (pathname === "/network") setCurrentView("network")
     else if (pathname === "/discover") setCurrentView("discover")
     else if (pathname.startsWith("/network/")) setCurrentView("network")
@@ -30,7 +31,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     setCurrentView(view)
     switch (view) {
       case "dashboard":
-        router.push("/")
+        router.push("/dashboard")
         break
       case "portfolio":
         router.push("/")
@@ -46,7 +47,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
   }
 
-  const isPortfolioBuilder = pathname === "/" && currentView === "dashboard"
+  const isPortfolioBuilder = pathname === "/"
   const shouldShowNavigation = !isPortfolioBuilder
 
   return (
@@ -63,7 +64,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setIsLoggedIn={setIsLoggedIn}
         />
       )}
-      {children}
+      <div className={shouldShowNavigation ? "pt-16" : ""}>{children}</div>
     </>
   )
 }

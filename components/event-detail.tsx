@@ -130,7 +130,13 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
               <div key={attendee.id} className="w-full">
                 <UnifiedPortfolioCard
                   portfolio={attendee}
-                  onClick={() => console.log("view attendee:", attendee.id)}
+                  onClick={(id) => {
+                    if (id === "john-doe") {
+                      window.location.href = "/network/john-doe"
+                    } else {
+                      console.log("view attendee:", id)
+                    }
+                  }}
                   onShare={() => console.log("share attendee:", attendee.id)}
                   onMore={() => console.log("more options:", attendee.id)}
                 />

@@ -150,7 +150,13 @@ export default function EventDetailPage() {
               <UnifiedPortfolioCard
                 key={attendee.id}
                 portfolio={attendee}
-                onClick={(id) => console.log("View attendee profile:", id)}
+                onClick={(id) => {
+                  if (id === "john-doe") {
+                    router.push("/network/john-doe")
+                  } else {
+                    console.log("View attendee profile:", id)
+                  }
+                }}
                 onShare={(id) => console.log("Share attendee:", id)}
                 onMore={(id) => console.log("More options for attendee:", id)}
               />

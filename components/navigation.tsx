@@ -3,7 +3,6 @@
 import { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Bell } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 interface NavigationProps {
   currentView: string
@@ -120,7 +119,6 @@ export function Navigation({
               </div>
             )}
           </div>
-          <ThemeToggle />
           <button className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
             <Bell className="w-4 h-4" />
           </button>

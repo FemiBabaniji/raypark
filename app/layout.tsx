@@ -5,12 +5,11 @@ import "./globals.css"
 import { AuthProvider } from "@/lib/auth"
 import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from "@/components/app-layout"
-import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Portfolio Builder",
+  title: "Portfolio Builder", // Updated title from "Skills Portfolio"
   description: "Build and manage your professional portfolio",
     generator: 'v0.app'
 }
@@ -23,12 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange={false}>
-          <AuthProvider>
-            <AppLayout>{children}</AppLayout>
-            <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <AppLayout>{children}</AppLayout>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   )

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Users, Plus, BarChart3, Rocket, Activity, ChevronRight, X } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { useUserSkills } from "@/context/use-user-skills"
+import { BackButton } from "@/components/ui/back-button"
 
 // Node colors with iridescent/holographic effects
 const nodeColors = [
@@ -294,6 +295,14 @@ export default function HomeTab() {
 
   return (
     <div className="h-full overflow-y-auto">
+      <div className="absolute top-6 left-6 z-10">
+        <BackButton
+          onClick={() => window.history.back()}
+          className="text-white/80 hover:text-white transition-colors"
+          aria-label="Back to network"
+        />
+      </div>
+
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Welcome + Profile Row */}
         <motion.div

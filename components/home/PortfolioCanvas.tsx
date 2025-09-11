@@ -2,6 +2,7 @@
 
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
 import StarterPortfolio from "@/components/starter-portfolio"
+import { BackButton } from "@/components/ui/back-button"
 import type { ThemeIndex } from "@/lib/theme"
 
 export default function PortfolioCanvas({
@@ -9,9 +10,10 @@ export default function PortfolioCanvas({
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
-  onSavePortfolio, // Added onSavePortfolio prop
+  onSavePortfolio,
   isLive = false,
   onToggleLive,
+  onBack, // Added onBack prop for navigation
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean
@@ -30,18 +32,29 @@ export default function PortfolioCanvas({
       selectedColor: ThemeIndex
     }>,
   ) => void
-  onSavePortfolio?: (portfolioData: any) => void // Added onSavePortfolio prop type
+  onSavePortfolio?: (portfolioData: any) => void
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
+  onBack?: () => void // Added onBack prop type
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
+      {!isPreviewMode && onBack && (
+        <div className="absolute top-6 left-6 z-10">
+          <BackButton
+            onClick={onBack}
+            className="text-white/80 hover:text-white transition-colors"
+            aria-label="Back to portfolio grid"
+          />
+        </div>
+      )}
+
       {useStarterTemplate ? (
         <StarterPortfolio
           isPreviewMode={isPreviewMode}
           activeIdentity={activeIdentity}
           onActiveIdentityChange={onActiveIdentityChange}
-          onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to StarterPortfolio
+          onSavePortfolio={onSavePortfolio}
         />
       ) : (
         activeIdentity &&
@@ -50,7 +63,7 @@ export default function PortfolioCanvas({
             isPreviewMode={isPreviewMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
-            onSavePortfolio={onSavePortfolio} // Pass onSavePortfolio to PortfolioBuilder for auto-save
+            onSavePortfolio={onSavePortfolio}
             isLive={isLive}
             onToggleLive={onToggleLive}
           />

@@ -1,5 +1,5 @@
-import LandingPage from "@/components/landing-page"
+import SkillsPortfolio from "@/components/skills-portfolio"
 
 export default function Page() {
-  return <LandingPage />
+  return <SkillsPortfolio />
 }

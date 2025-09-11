@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Navigation } from "./navigation"
+import { useAuth } from "@/lib/auth"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -14,7 +15,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [currentView, setCurrentView] = useState("dashboard")
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const { user, loading } = useAuth()
+  const isLoggedIn = !!user && !loading
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
 
@@ -49,7 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isPortfolioBuilder = pathname === "/" || pathname.startsWith("/portfolio")
   const isAuthPage = pathname === "/auth" || pathname === "/login" || pathname.startsWith("/auth/")
-  const shouldShowNavigation = !isPortfolioBuilder && !isAuthPage
+  const shouldShowNavigation = isLoggedIn && !isPortfolioBuilder && !isAuthPage
 
   return (
     <>
@@ -62,7 +64,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setCurrentView={handleSetCurrentView}
           setIsSearchExpanded={setIsSearchExpanded}
           setIsUserDropdownOpen={setIsUserDropdownOpen}
-          setIsLoggedIn={setIsLoggedIn}
+          setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
         />
       )}
       <div className={shouldShowNavigation ? "pt-16" : ""}>{children}</div>

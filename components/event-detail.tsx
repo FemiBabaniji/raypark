@@ -30,7 +30,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@jennywilson",
       avatarUrl: "/woman-designer.png",
       initials: "JW",
-      selectedColor: 1,
+      selectedColor: 0, // Using rose gradient from identity widget theme
     },
     {
       id: "john-doe",
@@ -41,7 +41,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@johndoe",
       avatarUrl: "/man-developer.png",
       initials: "JD",
-      selectedColor: 2,
+      selectedColor: 1, // Using blue gradient from identity widget theme
     },
     {
       id: "sarah-chen",
@@ -52,7 +52,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@sarahcodes",
       avatarUrl: "/professional-headshot.png",
       initials: "SC",
-      selectedColor: 3,
+      selectedColor: 2, // Using purple gradient from identity widget theme
     },
     {
       id: "mike-rodriguez",
@@ -63,7 +63,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@mikepm",
       avatarUrl: "/man-developer.png",
       initials: "MR",
-      selectedColor: 4,
+      selectedColor: 3, // Using green gradient from identity widget theme
     },
     {
       id: "alex-thompson",
@@ -74,7 +74,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@alexdev",
       avatarUrl: "/man-developer.png",
       initials: "AT",
-      selectedColor: 5,
+      selectedColor: 4, // Using orange gradient from identity widget theme
     },
     {
       id: "lisa-martinez",
@@ -85,7 +85,7 @@ export function EventDetail({ selectedEvent, setNetworkView }: EventDetailProps)
       handle: "@lisamartinez",
       avatarUrl: "/woman-analyst.png",
       initials: "LM",
-      selectedColor: 6,
+      selectedColor: 5, // Using teal gradient from identity widget theme
     },
   ]
 

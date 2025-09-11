@@ -101,20 +101,20 @@ export default function MembersPage({
             }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
-            <div className="bg-neutral-900/50 backdrop-blur-xl rounded-3xl p-8 border border-neutral-800/50 sticky top-6">
+            <div className="bg-gradient-to-br from-neutral-400/40 to-neutral-600/60 backdrop-blur-xl rounded-3xl p-8 border border-white/20 sticky top-6">
               <h2 className="text-2xl font-bold mb-4 text-white">{title}</h2>
-              <p className="text-neutral-300 mb-6 leading-relaxed">
+              <p className="text-white/90 mb-6 leading-relaxed">
                 Meet the talented individuals who make our work possible. Each card represents a unique professional
                 with their own expertise and background.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-sm text-neutral-400">{members.length} Active Members</span>
+                  <div className="w-2 h-2 bg-rose-400 rounded-full"></div>
+                  <span className="text-sm text-white/70">{members.length} Active Members</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-sm text-neutral-400">Multiple Industries</span>
+                  <span className="text-sm text-white/70">Multiple Industries</span>
                 </div>
               </div>
             </div>

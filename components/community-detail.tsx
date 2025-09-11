@@ -74,7 +74,7 @@ export function CommunityDetail({ selectedCommunity, setNetworkView, setSelected
       handle: "@sarahcodes",
       avatarUrl: "/professional-headshot.png",
       initials: "SC",
-      selectedColor: 3,
+      selectedColor: 2, // Using purple gradient from identity widget theme
     },
     {
       id: "mike-rodriguez",
@@ -85,7 +85,7 @@ export function CommunityDetail({ selectedCommunity, setNetworkView, setSelected
       handle: "@mikepm",
       avatarUrl: "/man-developer.png",
       initials: "MR",
-      selectedColor: 4,
+      selectedColor: 3, // Using green gradient from identity widget theme
     },
   ]
 

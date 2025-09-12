@@ -67,7 +67,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
         />
       )}
-      <div className={shouldShowNavigation ? "pt-16" : ""}>{children}</div>
+      <div className={`${shouldShowNavigation ? "pt-16" : ""} min-h-screen bg-background`}>{children}</div>
     </>
   )
 }

@@ -16,6 +16,7 @@ import PortfolioGrid from "@/components/home/PortfolioGrid"
 import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
+import { Navigation } from "@/components/navigation"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -426,11 +427,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 overflow-hidden">
+      {!shouldHideNav && (
+        <Navigation
+          currentView="dashboard"
+          isLoggedIn={!!user}
+          isSearchExpanded={false}
+          isUserDropdownOpen={false}
+          setCurrentView={() => {}}
+          setIsSearchExpanded={() => {}}
+          setIsUserDropdownOpen={() => {}}
+          setIsLoggedIn={() => {}}
+        />
+      )}
+
       {viewMode === "expanded" && (
         <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
       )}
 
-      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : NAV_H }}>
+      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : 80 }}>
         <div className="flex-1 max-w-5xl mx-auto" style={{ padding: viewMode === "expanded" ? 0 : BASE_PADDING }}>
           <AnimatePresence mode="wait">
             {viewMode === "minimized" ? (

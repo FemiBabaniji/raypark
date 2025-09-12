@@ -84,11 +84,11 @@ export default function GalleryWidget({
   }
 
   return (
-    <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 group relative">
+    <div className="bg-card backdrop-blur-xl rounded-3xl p-6 group relative">
       {!isPreviewMode && (
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-          <GripVertical className="w-4 h-4 text-white/70" />
-          <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-white/20 hover:bg-white/30">
+          <GripVertical className="w-4 h-4 text-card-foreground/70" />
+          <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-muted hover:bg-muted/80">
             {column === "left" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
           </Button>
           <Button
@@ -103,7 +103,7 @@ export default function GalleryWidget({
       )}
 
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-white">Image Gallery</h3>
+        <h3 className="text-xl font-bold text-card-foreground">Image Gallery</h3>
       </div>
 
       <div className="space-y-3">
@@ -116,7 +116,7 @@ export default function GalleryWidget({
                   placeholder="Group name..."
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40"
+                  className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-sm text-card-foreground placeholder-muted-foreground focus:outline-none focus:border-ring"
                   onKeyPress={(e) => e.key === "Enter" && addGroup()}
                   autoFocus
                 />
@@ -130,7 +130,7 @@ export default function GalleryWidget({
                   }}
                   size="sm"
                   variant="ghost"
-                  className="text-white/70 hover:text-white"
+                  className="text-muted-foreground hover:text-card-foreground"
                 >
                   ×
                 </Button>
@@ -154,7 +154,7 @@ export default function GalleryWidget({
             {galleryGroups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white/5 rounded-xl p-3 relative group/group cursor-pointer hover:bg-white/10 transition-colors"
+                className="bg-muted/50 rounded-xl p-3 relative group/group cursor-pointer hover:bg-muted transition-colors"
                 onClick={() => onGroupClick(group)}
               >
                 {!isPreviewMode && (
@@ -166,7 +166,7 @@ export default function GalleryWidget({
                       }}
                       size="sm"
                       variant="ghost"
-                      className="bg-white/20 hover:bg-white/30 text-white p-1 h-6 w-6"
+                      className="bg-muted hover:bg-muted/80 text-card-foreground p-1 h-6 w-6"
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
@@ -185,7 +185,7 @@ export default function GalleryWidget({
                 )}
 
                 {group.images.length > 0 ? (
-                  <div className="aspect-video bg-white/10 rounded-lg overflow-hidden mb-2">
+                  <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-2">
                     <img
                       src={group.images[0] || "/placeholder.svg"}
                       alt={`${group.name} main`}
@@ -193,14 +193,14 @@ export default function GalleryWidget({
                     />
                   </div>
                 ) : (
-                  <div className="aspect-video bg-white/5 rounded-lg border border-dashed border-white/20 flex items-center justify-center mb-2">
-                    <Upload className="w-4 h-4 text-white/50" />
+                  <div className="aspect-video bg-muted/50 rounded-lg border border-dashed border-border flex items-center justify-center mb-2">
+                    <Upload className="w-4 h-4 text-muted-foreground" />
                   </div>
                 )}
 
                 <div>
-                  <h4 className="font-medium text-white text-sm truncate">{group.name}</h4>
-                  <p className="text-white/60 text-xs">
+                  <h4 className="font-medium text-card-foreground text-sm truncate">{group.name}</h4>
+                  <p className="text-muted-foreground text-xs">
                     {group.images.length} image{group.images.length !== 1 ? "s" : ""}
                   </p>
                 </div>
@@ -210,8 +210,8 @@ export default function GalleryWidget({
         )}
 
         {galleryGroups.length === 0 && (
-          <div className="text-center py-6 text-white/60">
-            <div className="w-12 h-12 bg-white/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
+          <div className="text-center py-6 text-muted-foreground">
+            <div className="w-12 h-12 bg-muted rounded-xl mx-auto mb-3 flex items-center justify-center">
               <Upload className="w-6 h-6" />
             </div>
             <p className="text-sm">Create groups to organize your gallery</p>

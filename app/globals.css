@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Set background to white in OKLCH format */
+  /* Light mode colors - white background, #f3f3f3 widgets */
   --background: oklch(1 0 0); /* White background */
   --foreground: oklch(0.09 0 0); /* Dark text */
   --card: oklch(0.953 0 0); /* #f3f3f3 for widgets */
@@ -41,10 +41,10 @@
 }
 
 .dark {
-  /* Dark mode colors - darker background, darker widgets */
-  --background: oklch(0.18 0 0); /* #1f1f1f */
+  /* Restored original dark mode colors - keeping existing #1f1f1f background */
+  --background: oklch(0.122 0 0); /* Original #1f1f1f background */
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0); /* #1a1a1a for widgets */
+  --card: oklch(0.122 0 0); /* Same as background for widgets */
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);

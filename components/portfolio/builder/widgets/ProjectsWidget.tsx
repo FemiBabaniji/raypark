@@ -56,15 +56,15 @@ export default function ProjectsWidget({
     <>
       <motion.div
         layoutId={layoutId}
-        className="bg-card backdrop-blur-xl rounded-3xl p-8 cursor-pointer group relative"
+        className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 cursor-pointer group relative"
         onClick={() => setOpen(true)}
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-muted rounded flex items-center justify-center">
-              <div className="w-3 h-3 border border-muted-foreground rounded-sm"></div>
+            <div className="w-6 h-6 bg-neutral-600 rounded flex items-center justify-center">
+              <div className="w-3 h-3 border border-neutral-400 rounded-sm"></div>
             </div>
-            <h2 className="text-xl font-bold text-card-foreground">Projects Portfolio</h2>
+            <h2 className="text-xl font-bold text-white">Projects Portfolio</h2>
           </div>
           {!isPreviewMode && (
             <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function ProjectsWidget({
                 <X className="w-4 h-4" />
               </Button>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <GripVertical className="w-5 h-5 text-muted-foreground" />
+                <GripVertical className="w-5 h-5 text-neutral-400" />
               </div>
             </div>
           )}
@@ -88,22 +88,22 @@ export default function ProjectsWidget({
 
         <div className="grid grid-cols-2 gap-4">
           {/* Web Development */}
-          <div className="bg-muted/50 rounded-2xl p-4 space-y-3">
+          <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-card-foreground">Web Development</span>
-              <Upload className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-white">Web Development</span>
+              <Upload className="w-4 h-4 text-neutral-400" />
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-neutral-400 leading-relaxed">
               Complete overhaul of user experience and backend architecture for scalable growth...
             </p>
             <div className="flex flex-wrap gap-1">
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">React</span>
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">Node.js</span>
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">AWS</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">React</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Node.js</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">AWS</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-blue-400">In Progress</span>
-              <span className="text-2xl font-bold text-card-foreground">85%</span>
+              <span className="text-2xl font-bold text-white">85%</span>
             </div>
           </div>
 
@@ -114,14 +114,14 @@ export default function ProjectsWidget({
             {!isPreviewMode && (
               <div className="absolute top-2 right-2">
                 {showProjectColorPicker.aiml && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-card/95 backdrop-blur-xl rounded-2xl p-4 z-50 min-w-[200px] border border-border">
+                  <div className="absolute bottom-full right-0 mb-2 bg-neutral-900/95 backdrop-blur-xl rounded-2xl p-4 z-50 min-w-[200px]">
                     <div className="grid grid-cols-3 gap-3">
                       {projectColorOptions.map((color) => (
                         <button
                           key={color.name}
                           className={`w-10 h-10 rounded-full bg-gradient-to-br ${color.gradient} ${
-                            projectColors.aiml === color.name ? "ring-2 ring-foreground" : ""
-                          } hover:ring-2 hover:ring-foreground/50 transition-all`}
+                            projectColors.aiml === color.name ? "ring-2 ring-white" : ""
+                          } hover:ring-2 hover:ring-white/50 transition-all`}
                           onClick={(e) => {
                             e.stopPropagation()
                             setProjectColors({ ...projectColors, aiml: color.name })
@@ -222,22 +222,22 @@ export default function ProjectsWidget({
           </div>
 
           {/* DevOps */}
-          <div className="bg-muted/50 rounded-2xl p-4 space-y-3">
+          <div className="bg-neutral-800/50 rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-card-foreground">DevOps</span>
-              <Upload className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-white">DevOps</span>
+              <Upload className="w-4 h-4 text-neutral-400" />
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-neutral-400 leading-relaxed">
               Scalable cloud architecture implementation with automated deployment pipelines a...
             </p>
             <div className="flex flex-wrap gap-1">
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">AWS</span>
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">Terraform</span>
-              <span className="text-xs bg-muted px-2 py-1 rounded text-card-foreground">Kubernetes</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">AWS</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Terraform</span>
+              <span className="text-xs bg-neutral-700/50 px-2 py-1 rounded text-white">Kubernetes</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-green-400">Completed</span>
-              <span className="text-2xl font-bold text-card-foreground">100%</span>
+              <span className="text-2xl font-bold text-white">100%</span>
             </div>
           </div>
         </div>

@@ -41,7 +41,7 @@ export default function DescriptionWidget({
   }
 
   return (
-    <div className="bg-card backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
       <div className="flex items-center justify-between mb-4">
         <div></div>
         {!isPreviewMode && (
@@ -55,14 +55,14 @@ export default function DescriptionWidget({
               <X className="w-4 h-4" />
             </Button>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical className="w-5 h-5 text-muted-foreground" />
+              <GripVertical className="w-5 h-5 text-neutral-400" />
             </div>
           </div>
         )}
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xl font-bold text-card-foreground">
+        <h3 className="text-xl font-bold">
           {editingField === `${widgetId}-title` ? (
             <input
               type="text"
@@ -70,56 +70,52 @@ export default function DescriptionWidget({
               onChange={(e) => onContentChange({ ...content, title: e.target.value })}
               onBlur={() => setEditingField(null)}
               onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
-              className="bg-transparent border-none outline-none text-xl font-bold text-card-foreground w-full"
+              className="bg-transparent border-none outline-none text-xl font-bold text-white w-full"
               autoFocus
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-title`)}
-              className={
-                !isPreviewMode
-                  ? "cursor-text hover:bg-muted rounded px-1 -mx-1 text-card-foreground"
-                  : "text-card-foreground"
-              }
+              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1 text-white" : "text-white"}
             >
               {demoContent.title}
             </span>
           )}
         </h3>
-        <p className="text-card-foreground leading-relaxed">
+        <p className="text-white leading-relaxed">
           {editingField === `${widgetId}-description` ? (
             <textarea
               value={demoContent.description}
               onChange={(e) => onContentChange({ ...content, description: e.target.value })}
               onBlur={() => setEditingField(null)}
               onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
-              className="bg-transparent border-none outline-none text-card-foreground leading-relaxed w-full resize-none"
+              className="bg-transparent border-none outline-none text-white leading-relaxed w-full resize-none"
               rows={2}
               autoFocus
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-description`)}
-              className={!isPreviewMode ? "cursor-text hover:bg-muted rounded px-1 -mx-1" : ""}
+              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
             >
               {demoContent.description}
             </span>
           )}{" "}
-          <span className="text-muted-foreground">
+          <span className="text-neutral-400">
             {editingField === `${widgetId}-subdescription` ? (
               <textarea
                 value={demoContent.subdescription}
                 onChange={(e) => onContentChange({ ...content, subdescription: e.target.value })}
                 onBlur={() => setEditingField(null)}
                 onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
-                className="bg-transparent border-none outline-none text-muted-foreground leading-relaxed w-full resize-none"
+                className="bg-transparent border-none outline-none text-neutral-400 leading-relaxed w-full resize-none"
                 rows={2}
                 autoFocus
               />
             ) : (
               <span
                 onClick={() => !isPreviewMode && setEditingField(`${widgetId}-subdescription`)}
-                className={!isPreviewMode ? "cursor-text hover:bg-muted rounded px-1 -mx-1" : ""}
+                className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
               >
                 {demoContent.subdescription}
               </span>

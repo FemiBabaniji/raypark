@@ -173,50 +173,50 @@ export default function MusicAppInterface({
 
   /** -------------------- UI -------------------- */
   return (
-    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-foreground pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
+    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
       {/* Profile card */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="bg-card backdrop-blur-xl rounded-3xl p-6 text-center border border-border">
+        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
           {/* Node graphic with theme gradient */}
           <div
-            className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-border mx-auto mb-3 relative overflow-hidden`}
+            className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
           >
-            <div className="absolute inset-1 rounded-full bg-foreground/20" />
+            <div className="absolute inset-1 rounded-full bg-white/20" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 bg-foreground/90 rounded-full" />
+              <div className="w-4 h-4 bg-white/90 rounded-full" />
             </div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-foreground/20 to-transparent opacity-60" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
           </div>
 
           {/* Compact profile summary */}
-          <h2 className="text-lg font-medium text-card-foreground mb-1">{draft.name || "your name"}</h2>
-          <p className="text-muted-foreground text-sm mb-2">{draft.title || "your role"}</p>
-          <p className="text-muted-foreground text-xs mb-3 leading-relaxed line-clamp-2">
+          <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
+          <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
+          <p className="text-neutral-300 text-xs mb-3 leading-relaxed line-clamp-2">
             {draft.subtitle || "short tagline"}
           </p>
 
           {/* Action row */}
           <div className="flex items-center gap-2">
             <button
-              className="flex-1 py-2 px-3 bg-muted hover:bg-muted/80 text-card-foreground text-sm rounded-xl transition-colors"
+              className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
               onClick={() => setEditOpen((s) => !s)}
             >
               {editOpen ? "close" : "edit profile"}
             </button>
             <div className="relative">
               <button
-                className="py-2 px-3 bg-muted hover:bg-muted/80 text-card-foreground text-sm rounded-xl transition-colors"
+                className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
                 onClick={() => setShowPalette((s) => !s)}
                 aria-label="Change theme color"
               >
                 <Palette className="w-4 h-4" />
               </button>
               {showPalette && (
-                <div className="absolute right-0 mt-2 z-50 bg-card/95 border border-border rounded-2xl p-3 grid grid-cols-4 gap-2">
+                <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
                   {THEME_COLOR_OPTIONS.map((c, idx) => (
                     <button
                       key={c.name}
@@ -227,8 +227,8 @@ export default function MusicAppInterface({
                       }}
                       className={`w-8 h-8 rounded-full bg-gradient-to-br ${c.gradient} ${
                         draft.selectedColor === (idx as ThemeIndex)
-                          ? "ring-2 ring-foreground"
-                          : "hover:ring-2 hover:ring-foreground/60"
+                          ? "ring-2 ring-white"
+                          : "hover:ring-2 hover:ring-white/60"
                       } transition-all`}
                       aria-label={`Set theme ${c.name}`}
                     />
@@ -243,21 +243,21 @@ export default function MusicAppInterface({
             <div className="text-left mt-4 space-y-3">
               <Field label="Name">
                 <input
-                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                   value={draft.name ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
                 />
               </Field>
               <Field label="Title">
                 <input
-                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                   value={draft.title ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
                 />
               </Field>
               <Field label="Subtitle">
                 <input
-                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                   value={draft.subtitle ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
                 />
@@ -265,14 +265,14 @@ export default function MusicAppInterface({
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Handle">
                   <input
-                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                     value={draft.handle ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, handle: e.target.value }))}
                   />
                 </Field>
                 <Field label="Avatar URL">
                   <input
-                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                     value={draft.avatarUrl ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, avatarUrl: e.target.value }))}
                   />
@@ -281,14 +281,14 @@ export default function MusicAppInterface({
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Email">
                   <input
-                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                     value={draft.email ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
                   />
                 </Field>
                 <Field label="Location">
                   <input
-                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground"
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
                     value={draft.location ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
                   />
@@ -297,7 +297,7 @@ export default function MusicAppInterface({
 
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
-                  className="px-3 py-2 text-sm rounded-lg bg-muted hover:bg-muted/80 text-card-foreground"
+                  className="px-3 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20"
                   onClick={() => {
                     setDraft(identity ?? {})
                     setEditOpen(false)
@@ -307,7 +307,7 @@ export default function MusicAppInterface({
                   Cancel
                 </button>
                 <button
-                  className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="px-3 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90"
                   onClick={() => {
                     onIdentityChange?.(draft)
                     setEditOpen(false)
@@ -328,14 +328,14 @@ export default function MusicAppInterface({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.25 }}
       >
-        <div className="bg-card backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-border">
+        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
           <div className="flex items-center gap-2 mb-2">
-            <Bot className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground text-sm">Portfolio Co-pilot</span>
+            <Bot className="w-4 h-4 text-zinc-400" />
+            <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>
             {onTogglePreview && (
               <button
                 onClick={onTogglePreview}
-                className="ml-auto text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-card-foreground"
+                className="ml-auto text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-white/20"
               >
                 Toggle Preview
               </button>
@@ -346,13 +346,13 @@ export default function MusicAppInterface({
             {msgs.map((m, i) => (
               <div
                 key={i}
-                className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-muted-foreground" : "text-card-foreground"}`}
+                className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
               >
                 {m.text}
               </div>
             ))}
             {loading && (
-              <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <div className="text-sm text-zinc-400 flex items-center gap-2">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Working…
               </div>
@@ -366,13 +366,9 @@ export default function MusicAppInterface({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder='Try: add gallery right, theme purple, rename "Oliver"'
-              className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-ring text-card-foreground placeholder-muted-foreground"
+              className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
             />
-            <button
-              onClick={handleSend}
-              className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-card-foreground"
-              aria-label="Send"
-            >
+            <button onClick={handleSend} className="p-2 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
               <Send className="w-4 h-4" />
             </button>
           </div>
@@ -386,7 +382,7 @@ export default function MusicAppInterface({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{label}</div>
+      <div className="text-[11px] uppercase tracking-wide text-white/60 mb-1">{label}</div>
       {children}
     </label>
   )

@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { Plus, X } from "lucide-react"
-import BackButton from "@/components/ui/back-button"
+import { X } from "lucide-react"
+import AddButton from "@/components/ui/add-button"
 import { UnifiedPortfolioCard, type UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 
@@ -91,10 +91,7 @@ export default function PortfolioGrid({
             </div>
           ))}
 
-          <div className="w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-neutral-700 hover:border-neutral-500 transition-colors cursor-pointer flex flex-col items-center justify-center group backdrop-blur-sm hover:scale-105 transition-all">
-            <BackButton onClick={onAdd} icon={Plus} />
-            <span className="text-neutral-400 font-medium text-sm mt-2">New Portfolio</span>
-          </div>
+          <AddButton onClick={onAdd} label="New Portfolio" variant="card" aria-label="Create new portfolio" />
         </div>
       </div>
     </div>

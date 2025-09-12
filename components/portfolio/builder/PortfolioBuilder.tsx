@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { Reorder, motion } from "framer-motion"
-import { Plus, X, ArrowLeft } from "lucide-react"
+import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
 import { createPortfolioOnce, updatePortfolioById } from "@/lib/portfolio-service"
@@ -482,14 +483,13 @@ export default function PortfolioBuilder({
         </button>
       </div>
       <div className="relative">
-        <Button
+        <AddButton
           onClick={() => setShowAddDropdown(!showAddDropdown)}
-          variant="outline"
+          variant="icon"
           size="sm"
-          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
+          className="bg-white/10 border border-white/20 text-white hover:bg-white/20"
+          aria-label="Add widget"
+        />
 
         {showAddDropdown && (
           <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
@@ -596,7 +596,7 @@ export default function PortfolioBuilder({
           </Button>
 
           {!isPreviewMode && (
-            <Button
+            <AddButton
               onClick={() => {
                 const input = document.createElement("input")
                 input.type = "file"
@@ -639,13 +639,11 @@ export default function PortfolioBuilder({
 
                 input.click()
               }}
-              variant="ghost"
+              variant="compact"
               size="sm"
+              label="Add Images"
               className="text-white hover:bg-white/10"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Images
-            </Button>
+            />
           )}
         </div>
 

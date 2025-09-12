@@ -73,7 +73,7 @@ export default function UserCard({
       className={`bg-gradient-to-br ${color.gradient} rounded-3xl p-6 flex flex-col h-full min-h-[400px] ${className}`}
     >
       {/* Profile image */}
-      <div className="w-16 h-16 rounded-full overflow-hidden bg-foreground/20 flex items-center justify-center mb-4 mx-auto">
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mb-4 mx-auto">
         {imageUrl ? (
           <img src={imageUrl || "/placeholder.svg"} alt={name} className="w-full h-full object-cover" />
         ) : (
@@ -113,7 +113,7 @@ export default function UserCard({
       </div>
 
       {/* Connect button at bottom */}
-      <button className="w-full bg-foreground/20 hover:bg-foreground/30 text-white py-3 rounded-lg text-sm font-medium transition-colors border border-foreground/20">
+      <button className="w-full bg-white/20 hover:bg-white/30 text-white py-3 rounded-lg text-sm font-medium transition-colors border border-white/20">
         Connect with {name ? name.split(" ")[0] : "User"}
       </button>
     </div>

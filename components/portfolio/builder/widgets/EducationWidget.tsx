@@ -61,9 +61,9 @@ export default function EducationWidget({
   ]
 
   return (
-    <div className="bg-card border border-border rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-foreground">
+        <h2 className="text-xl font-bold text-white">
           {editingField === `${widgetId}-title` ? (
             <input
               type="text"
@@ -71,17 +71,13 @@ export default function EducationWidget({
               onChange={(e) => onContentChange({ ...content, title: e.target.value })}
               onBlur={() => setEditingField(null)}
               onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
-              className="bg-transparent border-none outline-none text-xl font-bold text-foreground w-full"
+              className="bg-transparent border-none outline-none text-xl font-bold text-white w-full"
               autoFocus
             />
           ) : (
             <span
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-title`)}
-              className={
-                !isPreviewMode
-                  ? "cursor-text hover:bg-foreground/10 rounded px-1 -mx-1 text-foreground"
-                  : "text-foreground"
-              }
+              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1 text-white" : "text-white"}
             >
               {content.title}
             </span>
@@ -98,7 +94,7 @@ export default function EducationWidget({
               <X className="w-4 h-4" />
             </Button>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical className="w-5 h-5 text-muted-foreground" />
+              <GripVertical className="w-5 h-5 text-neutral-400" />
             </div>
           </div>
         )}
@@ -106,12 +102,12 @@ export default function EducationWidget({
 
       <div className="space-y-4">
         {demoEducation.map((item, idx) => (
-          <div key={idx} className="bg-secondary rounded-2xl p-4">
+          <div key={idx} className="bg-neutral-800/50 rounded-2xl p-4">
             <div className={item.certified ? "flex justify-between items-start" : ""}>
               <div>
-                <h3 className="font-semibold text-foreground">{item.degree}</h3>
-                <p className="text-muted-foreground text-sm">{item.school}</p>
-                <p className="text-muted-foreground/80 text-xs">{item.year}</p>
+                <h3 className="font-semibold text-white">{item.degree}</h3>
+                <p className="text-neutral-300 text-sm">{item.school}</p>
+                <p className="text-neutral-400 text-xs">{item.year}</p>
               </div>
               {item.certified && (
                 <div className="flex flex-col items-end gap-1">

@@ -56,7 +56,7 @@ export default function ProjectsWidget({
     <>
       <motion.div
         layoutId={layoutId}
-        className="bg-[#393939] backdrop-blur-xl rounded-3xl p-8 cursor-pointer group relative"
+        className="bg-[#252525] backdrop-blur-xl rounded-3xl p-8 cursor-pointer group relative"
         onClick={() => setOpen(true)}
       >
         <div className="flex items-center justify-between mb-6">

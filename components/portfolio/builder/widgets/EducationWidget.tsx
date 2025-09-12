@@ -61,7 +61,7 @@ export default function EducationWidget({
   ]
 
   return (
-    <div className="bg-[#393939] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div className="bg-[#252525] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white">
           {editingField === `${widgetId}-title` ? (

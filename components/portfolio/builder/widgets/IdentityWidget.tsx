@@ -24,9 +24,12 @@ export default function IdentityWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
+  const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#252525]"
 
   return (
-    <div className={`bg-[#393939] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}>
+    <div
+      className={`${backgroundStyle} backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}
+    >
       <div className="flex items-center justify-between mb-4">
         {!isPreviewMode && (
           <div className="opacity-60 group-hover:opacity-100 transition-opacity">

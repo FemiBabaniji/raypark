@@ -24,7 +24,7 @@ export default function IdentityWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
-  const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#252525]"
+  const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
 
   return (
     <div

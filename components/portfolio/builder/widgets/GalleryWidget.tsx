@@ -84,7 +84,7 @@ export default function GalleryWidget({
   }
 
   return (
-    <div className="bg-[#252525] backdrop-blur-xl rounded-3xl p-6 group relative">
+    <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 group relative">
       {!isPreviewMode && (
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
           <GripVertical className="w-4 h-4 text-white/70" />

@@ -33,7 +33,7 @@ export default function ServicesWidget({
   setEditingField,
 }: Props) {
   return (
-    <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div className="bg-[#393939] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
       <div className="flex items-center justify-between mb-4">
         <div></div>
         {!isPreviewMode && (

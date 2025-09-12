@@ -65,7 +65,7 @@ export function PortfolioCard({
           <div className="text-white">{portfolio.email}</div>
           <div className="text-white/90">{portfolio.location}</div>
           <div className="flex items-center justify-between">
-            <Badge className="bg-white/20 text-white border-none hover:bg-white/30 px-4 py-2 rounded-full">
+            <Badge className="bg-foreground/20 text-white border-none hover:bg-foreground/30 px-4 py-2 rounded-full">
               {portfolio.handle}
             </Badge>
             <button
@@ -73,7 +73,7 @@ export function PortfolioCard({
                 e.stopPropagation()
                 onShare?.(portfolio.id)
               }}
-              className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              className="w-10 h-10 bg-foreground/20 rounded-full flex items-center justify-center hover:bg-foreground/30 transition-colors"
             >
               <Share className="w-5 h-5 text-white" />
             </button>

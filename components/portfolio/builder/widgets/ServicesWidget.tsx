@@ -33,7 +33,7 @@ export default function ServicesWidget({
   setEditingField,
 }: Props) {
   return (
-    <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div className="bg-card border border-border rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
       <div className="flex items-center justify-between mb-4">
         <div></div>
         {!isPreviewMode && (
@@ -47,21 +47,21 @@ export default function ServicesWidget({
               <X className="w-4 h-4" />
             </Button>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical className="w-5 h-5 text-neutral-400" />
+              <GripVertical className="w-5 h-5 text-muted-foreground" />
             </div>
           </div>
         )}
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xl font-bold text-white">Services</h3>
+        <h3 className="text-xl font-bold text-foreground">Services</h3>
         <div className="space-y-4">
-          <p className="text-white leading-relaxed">
+          <p className="text-foreground leading-relaxed">
             As a digital designer, I offer a comprehensive range of services to help bring your vision to life. From
             initial concept to final implementation, I work closely with clients to create meaningful and impactful
             digital experiences.
           </p>
-          <p className="text-white/80 leading-relaxed">
+          <p className="text-foreground/80 leading-relaxed">
             My approach combines strategic thinking with creative execution, ensuring that every project not only looks
             great but also serves its intended purpose effectively.
           </p>

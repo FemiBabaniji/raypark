@@ -17,7 +17,7 @@ type PortfolioShellProps = {
 
 export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
   return (
-    <div className="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+    <div className="relative px-6 py-3 rounded-2xl bg-card/80 backdrop-blur-xl border border-border shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-50" />
       {/* Use next/image if your project is already using it, otherwise <img> is fine */}
       <Image
@@ -41,7 +41,7 @@ export default function PortfolioShell({
   className,
 }: PortfolioShellProps) {
   return (
-    <div className={`min-h-screen bg-neutral-950 text-white ${className ?? ""}`}>
+    <div className={`min-h-screen bg-background text-foreground ${className ?? ""}`}>
       {/* Top Nav (consistent across all portfolios) */}
       <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
         {/* Left: Title (or Back if supplied) */}

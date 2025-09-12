@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="bg-background">
+    <html lang="en">
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
           <AppLayout>{children}</AppLayout>

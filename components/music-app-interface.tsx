@@ -173,7 +173,7 @@ export default function MusicAppInterface({
 
   /** -------------------- UI -------------------- */
   return (
-    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-[#1f1f1f] text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
+    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
       {/* Profile card */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}

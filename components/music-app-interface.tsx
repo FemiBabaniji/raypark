@@ -173,14 +173,14 @@ export default function MusicAppInterface({
 
   /** -------------------- UI -------------------- */
   return (
-    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-zinc-950 text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
+    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-[#1f1f1f] text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
       {/* Profile card */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-6 text-center">
+        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
           {/* Node graphic with theme gradient */}
           <div
             className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
@@ -216,7 +216,7 @@ export default function MusicAppInterface({
                 <Palette className="w-4 h-4" />
               </button>
               {showPalette && (
-                <div className="absolute right-0 mt-2 z-50 bg-neutral-900/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
                   {THEME_COLOR_OPTIONS.map((c, idx) => (
                     <button
                       key={c.name}
@@ -328,7 +328,7 @@ export default function MusicAppInterface({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.25 }}
       >
-        <div className="bg-gradient-to-br from-zinc-900/50 to-zinc-800/50 backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh]">
+        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
           <div className="flex items-center gap-2 mb-2">
             <Bot className="w-4 h-4 text-zinc-400" />
             <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>

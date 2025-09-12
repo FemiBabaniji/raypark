@@ -1,7 +1,7 @@
 "use client"
 
-import { NetworkContainer } from "@/components/network-container"
+import EventsPage from "@/components/events-page"
 
 export default function NetworkPage() {
-  return <NetworkContainer />
+  return <EventsPage />
 }

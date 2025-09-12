@@ -52,7 +52,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isPortfolioBuilder = pathname.startsWith("/portfolio")
   const isAuthPage = pathname === "/auth" || pathname === "/login" || pathname.startsWith("/auth/")
   const isDashboard = pathname === "/" || pathname === "/dashboard"
-  const shouldShowNavigation = isLoggedIn && !isPortfolioBuilder && !isAuthPage
+  const isNetworkWorkflow = pathname.startsWith("/network")
+  const shouldShowNavigation = isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow
 
   return (
     <>
@@ -68,7 +69,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
         />
       )}
-      <div className={shouldShowNavigation && !isDashboard ? "pt-16" : ""}>{children}</div>
+      <div className={shouldShowNavigation && !isDashboard && !isNetworkWorkflow ? "pt-16" : ""}>{children}</div>
     </>
   )
 }

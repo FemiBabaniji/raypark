@@ -29,11 +29,11 @@ export function CommunitySelection({ setSelectedCommunity, setNetworkView }: Com
       icon: "💻",
     },
     {
-      name: "Creative Collective NYC",
+      name: "Black Entrepreneurship Alliance",
       subtitle: "Community Hub • Announcements & Events",
-      members: "183 active members",
-      gradient: "from-emerald-500/70 to-green-500/70",
-      icon: "🎨",
+      members: "312 active members",
+      gradient: "from-purple-500/70 to-pink-500/70",
+      icon: "🚀",
     },
     {
       name: "Startup Founders LA",

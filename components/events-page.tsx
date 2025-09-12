@@ -57,9 +57,7 @@ const eventData = {
   },
 }
 
-export { default as NetworkPage } from "./network-page"
-
-export default function NetworkPage() {
+export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
 
   const handleEventClick = (eventId: string) => {

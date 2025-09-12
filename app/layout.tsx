@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="bg-background">
+      <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
           <AppLayout>{children}</AppLayout>
           <Toaster />

@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Bell } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface NavigationProps {
   currentView: string
@@ -47,7 +48,7 @@ export function Navigation({
   }, [isUserDropdownOpen, setIsUserDropdownOpen])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-zinc-950">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left - Logo */}
         <div className="flex items-center gap-3">
@@ -55,7 +56,7 @@ export function Navigation({
             <AvatarImage src="/placeholder.svg" />
             <AvatarFallback className="bg-purple-600 text-white text-sm">P</AvatarFallback>
           </Avatar>
-          <span className="text-white font-medium">PathwAI</span>
+          <span className="text-foreground font-medium">PathwAI</span>
         </div>
 
         {/* Center - Main Navigation */}
@@ -63,7 +64,7 @@ export function Navigation({
           <button
             onClick={() => setCurrentView("dashboard")}
             className={`text-sm transition-colors ${
-              currentView === "dashboard" ? "text-white" : "text-zinc-400 hover:text-white"
+              currentView === "dashboard" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Dashboard
@@ -71,7 +72,7 @@ export function Navigation({
           <button
             onClick={() => setCurrentView("portfolio")}
             className={`text-sm transition-colors ${
-              currentView === "portfolio" ? "text-white" : "text-zinc-400 hover:text-white"
+              currentView === "portfolio" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Projects
@@ -79,7 +80,7 @@ export function Navigation({
           <button
             onClick={() => setCurrentView("discover")}
             className={`text-sm transition-colors ${
-              currentView === "discover" ? "text-white" : "text-zinc-400 hover:text-white"
+              currentView === "discover" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Discover
@@ -87,7 +88,7 @@ export function Navigation({
           <a
             href="/network"
             className={`text-sm transition-colors ${
-              currentView === "network" ? "text-white" : "text-zinc-400 hover:text-white"
+              currentView === "network" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Network
@@ -99,19 +100,19 @@ export function Navigation({
           <div className="relative flex items-center">
             <button
               onClick={() => setIsSearchExpanded(true)}
-              className={`w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors ${isSearchExpanded ? "opacity-0" : "opacity-100"}`}
+              className={`w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors ${isSearchExpanded ? "opacity-0" : "opacity-100"}`}
             >
               <Search className="w-4 h-4" />
             </button>
             {isSearchExpanded && (
               <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     placeholder="Search"
-                    className="w-[244px] pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                    className="w-[244px] pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-ring"
                     onBlur={() => setIsSearchExpanded(false)}
                     autoFocus
                   />
@@ -119,9 +120,10 @@ export function Navigation({
               </div>
             )}
           </div>
-          <button className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
+          <button className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
             <Bell className="w-4 h-4" />
           </button>
+          <ThemeToggle />
           <div className="relative user-dropdown">
             <button
               onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -133,11 +135,11 @@ export function Navigation({
               </Avatar>
             </button>
             {isUserDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50">
                 <div className="py-2">
                   <button
                     onClick={() => setIsUserDropdownOpen(false)}
-                    className="w-full px-4 py-2 text-left text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors text-sm"
+                    className="w-full px-4 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent transition-colors text-sm"
                   >
                     Settings
                   </button>
@@ -147,7 +149,7 @@ export function Navigation({
                       setCurrentView("landing")
                       setIsUserDropdownOpen(false)
                     }}
-                    className="w-full px-4 py-2 text-left text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors text-sm"
+                    className="w-full px-4 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent transition-colors text-sm"
                   >
                     Logout
                   </button>

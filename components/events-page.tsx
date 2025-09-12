@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Search, Home } from "lucide-react"
-import BackButton from "@/components/back-button"
+import { BackButton } from "@/components/ui/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 
@@ -77,10 +77,10 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {!selectedEvent && (
-        <header className="h-14 flex items-center">
-          <BackButton onClick={handleBackClick} className="ml-6" />
-          <div className="flex-1">
-            <div className="max-w-6xl mx-auto px-6">
+        <header className="h-14 flex items-center px-6">
+          <BackButton onClick={handleBackClick} />
+          <div className="flex-1 ml-6">
+            <div className="max-w-6xl mx-auto">
               <div
                 className="relative h-10 w-full max-w-md rounded-2xl"
                 style={{ backgroundColor: "oklch(0.145 0 0)" }}
@@ -96,7 +96,7 @@ export default function EventsPage() {
           </div>
           <button
             onClick={() => (window.location.href = "/")}
-            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors mr-6"
+            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
           >
             <Home className="w-5 h-5" fill="white" />
           </button>
@@ -119,11 +119,11 @@ export default function EventsPage() {
               ></div>
 
               <motion.nav
-                className="relative z-50 p-6 flex items-center justify-between"
+                className="absolute top-6 left-6 z-50"
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <BackButton onClick={handleBackClick} className="text-white/80 hover:text-white transition-colors" />
+                <BackButton onClick={handleBackClick} />
               </motion.nav>
 
               <div className="relative z-10 px-6 pb-12 pt-4 text-center">

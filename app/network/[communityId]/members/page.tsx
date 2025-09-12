@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation"
 import { NetworkPage, type Person } from "@/components/network-page"
+import { BackButton } from "@/components/ui/back-button"
 
 const communityMembers = {
   "tech-innovators-sf": [
@@ -125,12 +126,7 @@ export default function CommunityMembersPage() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => router.push(`/network/${communityId}`)}
-          className="text-zinc-400 hover:text-white transition-colors text-sm flex items-center gap-2"
-        >
-          ← Back
-        </button>
+        <BackButton onClick={() => router.push(`/network/${communityId}`)} aria-label="Back to community hub" />
       </div>
 
       <NetworkPage

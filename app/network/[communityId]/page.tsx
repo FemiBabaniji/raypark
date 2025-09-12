@@ -1,8 +1,10 @@
 "use client"
 
 import { useRouter, useParams } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
+import { ChevronDown } from "lucide-react"
+import { useState } from "react"
 
 const communityData = {
   "tech-innovators-sf": {
@@ -109,11 +111,38 @@ export default function CommunityHubPage() {
   const router = useRouter()
   const params = useParams()
   const communityId = params.communityId as string
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
 
   const community = communityData[communityId as keyof typeof communityData]
 
   if (!community) {
     return <div>Community not found</div>
+  }
+
+  const enhancedEvents = community.events.map((event) => ({
+    ...event,
+    host:
+      event.id === "founder-networking"
+        ? "Founder's Circle Network"
+        : event.id === "ai-ml-workshop"
+          ? "Tech Innovation Lab"
+          : "Design Collective",
+    fullLocation:
+      event.id === "founder-networking"
+        ? "Rooftop Lounge, Downtown"
+        : event.id === "ai-ml-workshop"
+          ? "Innovation Centre, Floor 3"
+          : "Design Studio, Creative District",
+    tags:
+      event.id === "founder-networking"
+        ? ["Networking", "Founders", "Social", "Food & Drinks"]
+        : event.id === "ai-ml-workshop"
+          ? ["Workshop", "AI/ML", "Technical", "Learning"]
+          : ["Design", "UX/UI", "Masterclass", "Creative"],
+  }))
+
+  const toggleEventExpansion = (eventId: string) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId)
   }
 
   return (
@@ -175,29 +204,99 @@ export default function CommunityHubPage() {
                 <h2 className="text-lg font-medium text-white">Upcoming Events</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {community.events.map((event, index) => (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                    onClick={() => router.push(`/network/${communityId}/events/${event.id}`)}
-                    className="bg-zinc-700/50 rounded-xl p-4 hover:bg-zinc-700/70 transition-colors cursor-pointer"
-                  >
-                    <div className="mb-3">
-                      <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">{event.date}</span>
-                    </div>
+              <div className="space-y-4">
+                {enhancedEvents.map((event, index) => {
+                  const isExpanded = expandedEvent === event.id
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                      className={`bg-zinc-700/50 rounded-xl transition-all duration-300 cursor-pointer ${
+                        isExpanded ? "ring-2 ring-blue-500/50" : "hover:bg-zinc-700/70"
+                      }`}
+                    >
+                      <div onClick={() => toggleEventExpansion(event.id)} className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium">
+                                {event.date}
+                              </span>
+                              <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                                <ChevronDown className="w-4 h-4 text-zinc-400" />
+                              </motion.div>
+                            </div>
 
-                    <h3 className="text-white font-medium mb-2 leading-tight">{event.title}</h3>
-                    <p className="text-zinc-400 text-sm mb-3 leading-relaxed">{event.description}</p>
+                            <h3 className="text-white font-medium mb-2 leading-tight">{event.title}</h3>
+                            <p className="text-zinc-400 text-sm mb-3 leading-relaxed">{event.description}</p>
 
-                    <div className="space-y-1">
-                      <p className="text-zinc-400 text-sm">{event.time}</p>
-                      <p className="text-zinc-500 text-sm">{event.attendeeCount} attending</p>
-                    </div>
-                  </motion.div>
-                ))}
+                            <div className="flex items-center justify-between">
+                              <p className="text-zinc-400 text-sm">{event.time}</p>
+                              <div className="bg-zinc-600/50 px-2 py-1 rounded text-xs text-zinc-300">
+                                {event.attendeeCount} attending
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 border-t border-zinc-600/50 pt-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="bg-zinc-800/50 rounded-lg p-3">
+                                  <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Location</p>
+                                  <p className="text-white font-medium">{event.fullLocation}</p>
+                                </div>
+                                <div className="bg-zinc-800/50 rounded-lg p-3">
+                                  <p className="text-zinc-500 text-xs uppercase tracking-wide mb-1">Host</p>
+                                  <p className="text-white font-medium">{event.host}</p>
+                                </div>
+                              </div>
+
+                              <div className="mb-4">
+                                <div className="flex flex-wrap gap-2">
+                                  {event.tags.map((tag, tagIndex) => (
+                                    <span
+                                      key={tagIndex}
+                                      className="px-3 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex gap-3">
+                                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                  RSVP
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    router.push(`/network/${communityId}/events/${event.id}`)
+                                  }}
+                                  className="flex-1 border border-zinc-600 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                >
+                                  View Details
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  )
+                })}
               </div>
             </motion.div>
           </div>

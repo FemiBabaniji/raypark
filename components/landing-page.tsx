@@ -60,7 +60,7 @@ export default function HomePage() {
     <AnimatePresence mode="wait">
       {!isTransitioning && (
         <motion.div
-          className="min-h-screen relative overflow-hidden"
+          className="min-h-screen bg-neutral-950 relative overflow-hidden"
           variants={containerVariants}
           initial="hidden"
           animate="visible"

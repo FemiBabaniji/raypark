@@ -41,7 +41,7 @@ export default function PortfolioShell({
   className,
 }: PortfolioShellProps) {
   return (
-    <div className={`min-h-screen bg-neutral-950 text-white ${className ?? ""}`}>
+    <div className={`min-h-screen bg-background text-white ${className ?? ""}`}>
       {/* Top Nav (consistent across all portfolios) */}
       <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
         {/* Left: Title (or Back if supplied) */}

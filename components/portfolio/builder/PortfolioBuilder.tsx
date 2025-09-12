@@ -447,7 +447,7 @@ export default function PortfolioBuilder({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
-            <div className="p-4 bg-white/10 rounded-lg group relative">
+            <div className="p-4 bg-white/5 backdrop-blur-sm rounded-lg group relative border border-white/10 hover:border-white/20 transition-colors">
               {!isPreviewMode && canDelete && (
                 <Button
                   size="sm"
@@ -458,7 +458,7 @@ export default function PortfolioBuilder({
                   <X className="w-3 h-3" />
                 </Button>
               )}
-              Widget: {w.type}
+              <span className="text-white">Widget: {w.type}</span>
             </div>
           </motion.div>
         )
@@ -492,7 +492,7 @@ export default function PortfolioBuilder({
         />
 
         {showAddDropdown && (
-          <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
+          <div className="absolute top-full right-0 mt-2 bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl p-2 z-50 min-w-[220px]">
             <div className="space-y-1">
               {selectedWidgetType ? (
                 <>
@@ -504,13 +504,13 @@ export default function PortfolioBuilder({
                   </div>
                   <button
                     onClick={() => addWidget(selectedWidgetType, "left")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors"
                   >
                     Add to Left Column
                   </button>
                   <button
                     onClick={() => addWidget(selectedWidgetType, "right")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors"
                   >
                     Add to Right Column
                   </button>
@@ -524,7 +524,7 @@ export default function PortfolioBuilder({
                     <button
                       key={type}
                       onClick={() => setSelectedWidgetType(type)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors capitalize"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
                     >
                       {type} Widget
                     </button>
@@ -583,7 +583,7 @@ export default function PortfolioBuilder({
     if (!selectedGroup) return null
 
     return (
-      <div className="fixed inset-0 bg-neutral-950 z-50 flex flex-col">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
         <div className="p-6 flex justify-between items-center">
           <Button
             onClick={() => setSelectedGroup(null)}
@@ -657,7 +657,10 @@ export default function PortfolioBuilder({
         <div className="flex-1 px-6 pb-6 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
             {selectedGroup.group.images.map((image, index) => (
-              <div key={index} className="bg-white/10 rounded-2xl overflow-hidden">
+              <div
+                key={index}
+                className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-colors"
+              >
                 <img
                   src={image || "/placeholder.svg"}
                   alt={`${selectedGroup.group.name} ${index + 1}`}

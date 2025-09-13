@@ -41,7 +41,7 @@ export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
 
   if (isBEALogo) {
     return (
-      <Link href="/network/black-entrepreneurship-alliance" className="cursor-pointer" onClick={handleBEAClick}>
+      <Link href="/network/black-entrepreneurship-alliance" className="block cursor-pointer" onClick={handleBEAClick}>
         {pillContent}
       </Link>
     )

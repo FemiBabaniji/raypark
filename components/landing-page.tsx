@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth"
+// import { useAuth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import NetworkAnimation from "@/components/network-animation"
 import { ArrowRight } from "lucide-react"
 
 export default function HomePage() {
-  const { user, loading } = useAuth()
+  const user = null
+  const loading = false
+
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)

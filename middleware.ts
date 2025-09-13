@@ -1,7 +1,8 @@
-import { updateSession } from "@/lib/supabase/middleware"
+// import { updateSession } from "@/lib/supabase/middleware"
 
 export async function middleware(request: any) {
-  return await updateSession(request)
+  // return await updateSession(request)
+  return
 }
 
 export const config = {

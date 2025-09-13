@@ -1191,7 +1191,7 @@ export default function JennyWilsonPortfolio({ isPreviewMode = false }: { isPrev
   }
 
   return (
-    <PortfolioShell title="jenny wilson." isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
+    <PortfolioShell title="jenny wilson." isPreviewMode={isPreviewMode} rightSlot={rightSlot} logoHref="/network">
       {/* Left Column */}
       <div
         className={`lg:w-1/2 relative transition-all duration-200 ${

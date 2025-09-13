@@ -676,7 +676,12 @@ export default function PortfolioBuilder({
 
   return (
     <>
-      <PortfolioShell title={`${identity.name || "your name"}.`} isPreviewMode={isPreviewMode} rightSlot={rightSlot}>
+      <PortfolioShell
+        title={`${identity.name || "your name"}.`}
+        isPreviewMode={isPreviewMode}
+        rightSlot={rightSlot}
+        logoHref="/network"
+      >
         <div
           className={`lg:w-1/2 relative transition-all duration-200 ${
             dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""

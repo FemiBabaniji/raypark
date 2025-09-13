@@ -589,7 +589,7 @@ export default function JohnDoePortfolio({ isPreviewMode = true }: { isPreviewMo
   }
 
   return (
-    <PortfolioShell title="john doe." isPreviewMode={isPreviewMode}>
+    <PortfolioShell title="john doe." isPreviewMode={isPreviewMode} logoHref="/network">
       {/* Left Column */}
       <div
         className={`lg:w-1/2 relative transition-all duration-200 ${

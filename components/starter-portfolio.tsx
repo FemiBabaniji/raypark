@@ -800,6 +800,7 @@ export default function StarterPortfolio({
         title={`${profileText.name || "your portfolio"}.`}
         isPreviewMode={isPreviewMode}
         rightSlot={rightSlot}
+        logoHref="/network"
       >
         {/* Left Column */}
         <div

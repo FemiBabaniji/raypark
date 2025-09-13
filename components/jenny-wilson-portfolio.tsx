@@ -1357,6 +1357,7 @@ export default function JennyWilsonPortfolio({
         title={`${activeIdentity?.name || "jenny wilson"}.`}
         isPreviewMode={isPreviewMode}
         rightSlot={!isPreviewMode ? rightSlot : null}
+        logoHref="/network"
       >
         <Reorder.Group
           axis="y"

@@ -17,6 +17,7 @@ import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
 import { Navigation } from "@/components/navigation"
+import ExpandedNavbar from "@/components/expanded-navbar"
 
 const NAV_H = 80
 const BASE_PADDING = 32 // 8 * 4 = p-8
@@ -40,43 +41,6 @@ const TopBarActions = ({
   }
 
   return null
-}
-
-const ExpandedViewNavigation = ({
-  onZoomOut,
-  onPreview,
-  isPreviewMode,
-}: {
-  onZoomOut: () => void
-  onPreview: () => void
-  isPreviewMode: boolean
-}) => {
-  if (isPreviewMode) {
-    return (
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={() => onPreview()} />
-      </div>
-    )
-  }
-
-  return (
-    <>
-      {/* Back button in top left corner */}
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={onZoomOut} aria-label="Back to Dashboard" />
-      </div>
-
-      {/* Preview button in top right corner */}
-      <div className="fixed top-8 right-8 z-50">
-        <button
-          onClick={onPreview}
-          className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
-        >
-          Preview
-        </button>
-      </div>
-    </>
-  )
 }
 
 const PortfolioCanvasWrapper = ({
@@ -441,7 +405,7 @@ export default function Home() {
       )}
 
       {viewMode === "expanded" && (
-        <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
+        <ExpandedNavbar onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
       )}
 
       <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : 80 }}>

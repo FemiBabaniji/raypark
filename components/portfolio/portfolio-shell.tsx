@@ -3,7 +3,7 @@
 
 import type React from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { BackButton } from "@/components/ui/back-button"
 
 type PortfolioShellProps = {
@@ -17,26 +17,16 @@ type PortfolioShellProps = {
 }
 
 export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
-  const router = useRouter()
   const isBEALogo = src === "/bea-logo.svg"
 
   const handleBEAClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
     console.log("[v0] BEA badge clicked, navigating to:", "/network/black-entrepreneurship-alliance")
     console.log("[v0] Current logo src:", src)
     console.log("[v0] Is BEA logo:", isBEALogo)
-
-    if (isBEALogo) {
-      router.push("/network/black-entrepreneurship-alliance")
-    }
   }
 
   const pillContent = (
-    <div
-      className={`relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${isBEALogo ? "cursor-pointer" : ""}`}
-      onClick={isBEALogo ? handleBEAClick : undefined}
-    >
+    <div className="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-50" />
       {/* Use next/image if your project is already using it, otherwise <img> is fine */}
       <Image
@@ -48,6 +38,14 @@ export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
       />
     </div>
   )
+
+  if (isBEALogo) {
+    return (
+      <Link href="/network/black-entrepreneurship-alliance" className="block cursor-pointer" onClick={handleBEAClick}>
+        {pillContent}
+      </Link>
+    )
+  }
 
   return pillContent
 }

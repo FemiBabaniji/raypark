@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Navigation } from "./navigation"
-// import { useAuth } from "@/lib/auth"
+import { useAuth } from "@/lib/auth"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -15,8 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [currentView, setCurrentView] = useState("dashboard")
-  const user = null
-  const loading = false
+  const { user, loading } = useAuth()
   const isLoggedIn = !!user && !loading
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)

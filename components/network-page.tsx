@@ -1,10 +1,10 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Search, Home } from "lucide-react"
 import BackButton from "@/components/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
+import NetworkNavbar from "@/components/network-navbar"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -74,40 +74,15 @@ export default function NetworkPage() {
     }
   }
 
+  const handleHomeClick = () => {
+    window.location.href = "/"
+  }
+
   const selectedEventData = selectedEvent ? eventData[selectedEvent as keyof typeof eventData] : null
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {!selectedEvent && (
-        <>
-          {/* Back button in top left corner - matches ExpandedViewNavigation */}
-          <div className="fixed top-8 left-8 z-50">
-            <BackButton onClick={handleBackClick} />
-          </div>
-
-          {/* Home button in top right corner - matches ExpandedViewNavigation preview button position */}
-          <div className="fixed top-8 right-8 z-50">
-            <button
-              onClick={() => (window.location.href = "/")}
-              className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
-            >
-              <Home className="w-5 h-5" fill="white" />
-            </button>
-          </div>
-
-          {/* Search bar centered - matches ExpandedViewNavigation center positioning */}
-          <div className="fixed top-8 left-1/2 -translate-x-1/2 z-40">
-            <div className="relative h-10 w-full max-w-md rounded-2xl" style={{ backgroundColor: "oklch(0.145 0 0)" }}>
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
-              <input
-                placeholder="Search"
-                className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
-                style={{ color: "#FFFFFF" }}
-              />
-            </div>
-          </div>
-        </>
-      )}
+      {!selectedEvent && <NetworkNavbar onBackClick={handleBackClick} onHomeClick={handleHomeClick} />}
 
       {selectedEvent && selectedEventData ? (
         <motion.div
@@ -198,7 +173,7 @@ export default function NetworkPage() {
           </div>
         </motion.div>
       ) : (
-        <main className="px-6 py-4" style={{ paddingTop: "5rem" }}>
+        <main className="px-6 py-4" style={{ paddingTop: 80 }}>
           <div className="max-w-6xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div

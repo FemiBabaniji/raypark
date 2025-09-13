@@ -1,7 +1,6 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import BackButton from "@/components/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import NetworkNavbar from "@/components/network-navbar"
@@ -82,7 +81,7 @@ export default function NetworkPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {!selectedEvent && <NetworkNavbar onBackClick={handleBackClick} onHomeClick={handleHomeClick} />}
+      <NetworkNavbar onBackClick={handleBackClick} onHomeClick={handleHomeClick} />
 
       {selectedEvent && selectedEventData ? (
         <motion.div
@@ -99,15 +98,7 @@ export default function NetworkPage() {
                 style={{ backgroundColor: "oklch(0.145 0 0)" }}
               ></div>
 
-              <motion.nav
-                className="relative z-50 p-6 flex items-center justify-between"
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <BackButton onClick={handleBackClick} className="text-white/80 hover:text-white transition-colors" />
-              </motion.nav>
-
-              <div className="relative z-10 px-6 pb-12 pt-4 text-center">
+              <div className="relative z-10 px-6 pb-12 pt-4 text-center" style={{ paddingTop: 80 }}>
                 <h1 className="text-4xl font-bold text-white mb-4">{selectedEventData.title}</h1>
                 <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
                   <div className="flex items-center gap-2">

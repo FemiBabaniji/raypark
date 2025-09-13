@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Upload, Play, GripVertical, Palette, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Reorder } from "framer-motion"
-import PortfolioShell from "./portfolio-shell"
+import PortfolioShell from "./portfolio/portfolio-shell"
 import { BackButton } from "@/components/ui/back-button"
 
 export default function JennyWilsonPortfolio({ isPreviewMode = false }: { isPreviewMode?: boolean }) {

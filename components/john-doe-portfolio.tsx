@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Upload, Play, GripVertical, Palette, X } from "lucide-react"
 import { useState } from "react"
 import { Reorder } from "framer-motion"
-import PortfolioShell from "./portfolio/portfolio-shell"
+import PortfolioShell from "./portfolio-shell"
 import { useRouter } from "next/navigation"
 
 export default function JohnDoePortfolio({ isPreviewMode = true }: { isPreviewMode?: boolean }) {

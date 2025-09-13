@@ -19,6 +19,12 @@ type PortfolioShellProps = {
 export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
   const isBEALogo = src === "/bea-logo.svg"
 
+  const handleBEAClick = (e: React.MouseEvent) => {
+    console.log("[v0] BEA badge clicked, navigating to:", "/network/black-entrepreneurship-alliance")
+    console.log("[v0] Current logo src:", src)
+    console.log("[v0] Is BEA logo:", isBEALogo)
+  }
+
   const pillContent = (
     <div className="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-50" />
@@ -35,7 +41,7 @@ export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
 
   if (isBEALogo) {
     return (
-      <Link href="/network/black-entrepreneurship-alliance" className="cursor-pointer">
+      <Link href="/network/black-entrepreneurship-alliance" className="cursor-pointer" onClick={handleBEAClick}>
         {pillContent}
       </Link>
     )

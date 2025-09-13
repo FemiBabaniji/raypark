@@ -3,6 +3,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Search, Home } from "lucide-react"
 import { BackButton } from "@/components/ui/back-button"
+import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 
@@ -15,10 +16,47 @@ const eventData = {
     description:
       "Join us for an intensive workshop on the latest AI and machine learning technologies. Learn hands-on techniques and network with industry experts.",
     attendees: [
-      { name: "Sarah Chen", role: "AI Engineer", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Marcus Johnson", role: "Data Scientist", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Elena Rodriguez", role: "ML Researcher", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "David Kim", role: "Tech Lead", avatar: "/placeholder.svg?height=32&width=32" },
+      {
+        id: "sarah-chen",
+        name: "Sarah Chen",
+        title: "AI Engineer",
+        email: "sarah@techstartup.io",
+        location: "San Francisco, CA",
+        handle: "@sarahcodes",
+        initials: "SC",
+        selectedColor: 3,
+        avatarUrl: "/professional-headshot.png",
+      },
+      {
+        id: "marcus-johnson",
+        name: "Marcus Johnson",
+        title: "Data Scientist",
+        email: "marcus@datascience.edu",
+        location: "Boston, MA",
+        handle: "@marcusdata",
+        initials: "MJ",
+        selectedColor: 1,
+      },
+      {
+        id: "elena-rodriguez",
+        name: "Elena Rodriguez",
+        title: "ML Researcher",
+        email: "elena@researchlab.com",
+        location: "Austin, TX",
+        handle: "@elenaml",
+        initials: "ER",
+        selectedColor: 2,
+      },
+      {
+        id: "david-kim",
+        name: "David Kim",
+        title: "Tech Lead",
+        email: "david@innovationlabs.com",
+        location: "Seattle, WA",
+        handle: "@davidtech",
+        initials: "DK",
+        selectedColor: 4,
+      },
     ],
     gradient: "from-sky-400/35 to-blue-600/20",
     accent: "#0EA5E9",
@@ -31,10 +69,47 @@ const eventData = {
     description:
       "Connect with fellow entrepreneurs and startup founders in a relaxed networking environment. Share experiences and build valuable connections.",
     attendees: [
-      { name: "Alex Thompson", role: "Startup Founder", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Jessica Wu", role: "CEO", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Michael Brown", role: "Co-founder", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Lisa Park", role: "Entrepreneur", avatar: "/placeholder.svg?height=32&width=32" },
+      {
+        id: "alex-thompson",
+        name: "Alex Thompson",
+        title: "Startup Founder",
+        email: "alex@startupventure.com",
+        location: "New York, NY",
+        handle: "@alexfounder",
+        initials: "AT",
+        selectedColor: 2,
+      },
+      {
+        id: "jessica-wu",
+        name: "Jessica Wu",
+        title: "CEO",
+        email: "jessica@techcorp.io",
+        location: "San Francisco, CA",
+        handle: "@jessicaceo",
+        initials: "JW",
+        selectedColor: 5,
+        avatarUrl: "/woman-designer.png",
+      },
+      {
+        id: "michael-brown",
+        name: "Michael Brown",
+        title: "Co-founder",
+        email: "michael@innovationstudio.com",
+        location: "Los Angeles, CA",
+        handle: "@michaelco",
+        initials: "MB",
+        selectedColor: 3,
+      },
+      {
+        id: "lisa-park",
+        name: "Lisa Park",
+        title: "Entrepreneur",
+        email: "lisa@entrepreneurhub.co",
+        location: "Portland, OR",
+        handle: "@lisaentrepreneur",
+        initials: "LP",
+        selectedColor: 1,
+      },
     ],
     gradient: "from-emerald-400/35 to-teal-600/20",
     accent: "#10B981",
@@ -47,10 +122,47 @@ const eventData = {
     description:
       "Master the art of product design with hands-on workshops covering user research, prototyping, and design systems from industry veterans.",
     attendees: [
-      { name: "Emma Wilson", role: "UX Designer", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Ryan Martinez", role: "Product Designer", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "Sophie Taylor", role: "Design Lead", avatar: "/placeholder.svg?height=32&width=32" },
-      { name: "James Anderson", role: "Creative Director", avatar: "/placeholder.svg?height=32&width=32" },
+      {
+        id: "emma-wilson",
+        name: "Emma Wilson",
+        title: "UX Designer",
+        email: "emma@designstudio.co",
+        location: "Chicago, IL",
+        handle: "@emmaux",
+        initials: "EW",
+        selectedColor: 4,
+      },
+      {
+        id: "ryan-martinez",
+        name: "Ryan Martinez",
+        title: "Product Designer",
+        email: "ryan@productdesign.io",
+        location: "Denver, CO",
+        handle: "@ryandesign",
+        initials: "RM",
+        selectedColor: 0,
+      },
+      {
+        id: "sophie-taylor",
+        name: "Sophie Taylor",
+        title: "Design Lead",
+        email: "sophie@creativestudio.com",
+        location: "Miami, FL",
+        handle: "@sophielead",
+        initials: "ST",
+        selectedColor: 5,
+        avatarUrl: "/woman-analyst.png",
+      },
+      {
+        id: "james-anderson",
+        name: "James Anderson",
+        title: "Creative Director",
+        email: "james@creativedirection.co",
+        location: "Nashville, TN",
+        handle: "@jamescreative",
+        initials: "JA",
+        selectedColor: 2,
+      },
     ],
     gradient: "from-violet-400/35 to-purple-600/20",
     accent: "#8B5CF6",
@@ -78,8 +190,10 @@ export default function EventsPage() {
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {!selectedEvent && (
         <header className="h-14 flex items-center px-6">
-          <BackButton onClick={handleBackClick} />
-          <div className="flex-1 ml-6">
+          <div className="absolute top-6 left-6">
+            <BackButton onClick={handleBackClick} />
+          </div>
+          <div className="flex-1 ml-20">
             <div className="max-w-6xl mx-auto">
               <div
                 className="relative h-10 w-full max-w-md rounded-2xl"
@@ -165,26 +279,16 @@ export default function EventsPage() {
               <div className="max-w-7xl mx-auto">
                 <h2 className="text-2xl font-bold text-white mb-8">Event Attendees</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {selectedEventData.attendees.map((attendee, index) => (
-                    <div
-                      key={index}
-                      className="rounded-xl p-4 backdrop-blur-sm"
-                      style={{ backgroundColor: "oklch(0.145 0 0)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={attendee.avatar || "/placeholder.svg"}
-                          alt={attendee.name}
-                          className="w-12 h-12 rounded-full"
-                        />
-                        <div>
-                          <div className="font-medium text-white">{attendee.name}</div>
-                          <div className="text-sm" style={{ color: "#B3B3B3" }}>
-                            {attendee.role}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {selectedEventData.attendees.map((attendee) => (
+                    <UnifiedPortfolioCard
+                      key={attendee.id}
+                      portfolio={attendee}
+                      onClick={(id) => {
+                        console.log("View attendee profile:", id)
+                      }}
+                      onShare={(id) => console.log("Share attendee:", id)}
+                      onMore={(id) => console.log("More options for attendee:", id)}
+                    />
                   ))}
                 </div>
               </div>

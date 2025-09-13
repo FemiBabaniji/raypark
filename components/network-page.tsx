@@ -198,8 +198,8 @@ export default function NetworkPage() {
           </div>
         </motion.div>
       ) : (
-        <main className="px-6 py-4" style={{ paddingTop: "6rem" }}>
-          <div className="max-w-6xl mx-auto relative overflow-hidden">
+        <main className="px-6 py-4" style={{ paddingTop: "5rem" }}>
+          <div className="max-w-5xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div
                 className="flex-1"

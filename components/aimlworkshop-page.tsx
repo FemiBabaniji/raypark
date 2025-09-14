@@ -5,34 +5,29 @@ import BackButton from "@/components/back-button"
 export default function AIMLWorkshopPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#191919", color: "#FFFFFF" }}>
-      {/* Back button in top left corner - matches ExpandedViewNavigation */}
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={() => window.history.back()} />
-      </div>
-
-      {/* Home button in top right corner - matches ExpandedViewNavigation preview button position */}
-      <div className="fixed top-8 right-8 z-50">
+      <header className="h-14 flex items-center">
+        <BackButton onClick={() => window.history.back()} className="ml-6" />
+        <div className="flex-1">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="relative h-10 w-full max-w-md rounded-2xl" style={{ backgroundColor: "#393939" }}>
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
+              <input
+                placeholder="Search"
+                className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
+                style={{ color: "#FFFFFF" }}
+              />
+            </div>
+          </div>
+        </div>
         <button
           onClick={() => (window.location.href = "/")}
-          className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
+          className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors mr-6"
         >
           <Home className="w-5 h-5" fill="white" />
         </button>
-      </div>
+      </header>
 
-      {/* Search bar centered - matches ExpandedViewNavigation center positioning */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-40">
-        <div className="relative h-10 w-full max-w-md rounded-2xl" style={{ backgroundColor: "#393939" }}>
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
-          <input
-            placeholder="Search"
-            className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
-            style={{ color: "#FFFFFF" }}
-          />
-        </div>
-      </div>
-
-      <main className="px-6 py-4" style={{ paddingTop: "5rem" }}>
+      <main className="px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-400/80 via-blue-600/80 to-blue-800/80 p-8 md:p-12">
             <div className="relative z-10">

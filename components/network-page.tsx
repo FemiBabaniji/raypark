@@ -1,9 +1,10 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { Search, Home } from "lucide-react"
+import BackButton from "@/components/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
-import NetworkNavbar from "@/components/network-navbar"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -73,15 +74,36 @@ export default function NetworkPage() {
     }
   }
 
-  const handleHomeClick = () => {
-    window.location.href = "/"
-  }
-
   const selectedEventData = selectedEvent ? eventData[selectedEvent as keyof typeof eventData] : null
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <NetworkNavbar onBackClick={handleBackClick} onHomeClick={handleHomeClick} />
+      {!selectedEvent && (
+        <header className="h-14 flex items-center">
+          <BackButton onClick={handleBackClick} className="ml-6" />
+          <div className="flex-1">
+            <div className="max-w-6xl mx-auto px-6">
+              <div
+                className="relative h-10 w-full max-w-md rounded-2xl"
+                style={{ backgroundColor: "oklch(0.145 0 0)" }}
+              >
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
+                <input
+                  placeholder="Search"
+                  className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
+                  style={{ color: "#FFFFFF" }}
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors mr-6"
+          >
+            <Home className="w-5 h-5" fill="white" />
+          </button>
+        </header>
+      )}
 
       {selectedEvent && selectedEventData ? (
         <motion.div
@@ -98,7 +120,15 @@ export default function NetworkPage() {
                 style={{ backgroundColor: "oklch(0.145 0 0)" }}
               ></div>
 
-              <div className="relative z-10 px-6 pb-12 pt-4 text-center" style={{ paddingTop: 80 }}>
+              <motion.nav
+                className="relative z-50 p-6 flex items-center justify-between"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <BackButton onClick={handleBackClick} className="text-white/80 hover:text-white transition-colors" />
+              </motion.nav>
+
+              <div className="relative z-10 px-6 pb-12 pt-4 text-center">
                 <h1 className="text-4xl font-bold text-white mb-4">{selectedEventData.title}</h1>
                 <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
                   <div className="flex items-center gap-2">
@@ -164,7 +194,7 @@ export default function NetworkPage() {
           </div>
         </motion.div>
       ) : (
-        <main className="px-6 py-4" style={{ paddingTop: 80 }}>
+        <main className="px-6 py-4">
           <div className="max-w-6xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div

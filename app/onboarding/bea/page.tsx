@@ -220,32 +220,53 @@ export default function BEAOnboardingPage() {
 
                   {/* Industry Focus */}
                   <div>
-                    <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                    <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
                       Industry Focus
                     </label>
-                    <select
-                      value={profileData.industry}
-                      onChange={(e) => setProfileData((prev) => ({ ...prev, industry: e.target.value }))}
-                      className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
-                      style={{
-                        backgroundColor: "oklch(0.145 0 0)",
-                        borderColor: "oklch(0.145 0 0)",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      <option value="" style={{ backgroundColor: "oklch(0.145 0 0)", color: "#B3B3B3" }}>
-                        Select your industry
-                      </option>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {industries.map((industry) => (
-                        <option
+                        <button
                           key={industry}
-                          value={industry}
-                          style={{ backgroundColor: "oklch(0.145 0 0)", color: "#FFFFFF" }}
+                          type="button"
+                          onClick={() =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              industry: prev.industry === industry ? "" : industry,
+                            }))
+                          }
+                          className={`relative overflow-hidden rounded-xl p-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02] ${
+                            profileData.industry === industry
+                              ? "ring-2 ring-blue-500 shadow-lg shadow-blue-500/20"
+                              : "hover:shadow-md"
+                          }`}
+                          style={{
+                            backgroundColor: profileData.industry === industry ? "oklch(0.18 0 0)" : "oklch(0.145 0 0)",
+                            border:
+                              profileData.industry === industry ? "1px solid #3b82f6" : "1px solid oklch(0.2 0 0)",
+                            color: "#FFFFFF",
+                          }}
                         >
-                          {industry}
-                        </option>
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/5 transition-opacity duration-300 ${
+                              profileData.industry === industry ? "opacity-100" : "opacity-0 hover:opacity-50"
+                            }`}
+                          ></div>
+                          <div className="relative flex items-center justify-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                profileData.industry === industry
+                                  ? "bg-blue-500 shadow-lg shadow-blue-500/50"
+                                  : "bg-gray-500"
+                              }`}
+                            ></div>
+                            <span className="text-center leading-tight">{industry}</span>
+                          </div>
+                          {profileData.industry === industry && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                          )}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   </div>
 
                   {/* Skills */}

@@ -260,10 +260,14 @@ export default function EventsPage() {
 
                 <div className="flex items-center justify-center gap-4">
                   <button
+                    onClick={() => {
+                      console.log("[v0] RSVP clicked - unlocking attendee list and AI matching")
+                      // This will be enhanced with AI matching functionality
+                    }}
                     className="px-6 py-2 rounded-lg font-medium text-white transition-colors"
                     style={{ backgroundColor: selectedEventData.accent }}
                   >
-                    RSVP Now
+                    RSVP Now - Unlock AI Matches
                   </button>
                   <button className="border border-white/30 text-white hover:bg-white/10 bg-transparent px-6 py-2 rounded-lg transition-colors">
                     Add to Calendar

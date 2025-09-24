@@ -107,7 +107,9 @@ const widgetTypes = [
 ]
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState<"welcome" | "template" | "details" | "widgets" | "creating">("welcome")
+  const [step, setStep] = useState<"welcome" | "community-select" | "template" | "details" | "widgets" | "creating">(
+    "welcome",
+  )
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [portfolioName, setPortfolioName] = useState("")
   const [portfolioDescription, setPortfolioDescription] = useState("")
@@ -303,12 +305,30 @@ export default function OnboardingPage() {
                             Let's create your professional portfolio in just a few steps
                           </p>
                           <button
-                            onClick={() => setStep("template")}
+                            onClick={() => setStep("community-select")}
                             className="flex items-center gap-2 mx-auto px-8 py-4 bg-white text-black rounded-2xl hover:bg-neutral-200 transition-colors font-medium"
                           >
                             Get Started
                             <ArrowRight size={20} />
                           </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {step === "community-select" && (
+                      <motion.div
+                        key="community-select"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="min-h-screen"
+                      >
+                        <div className="w-full h-full">
+                          <iframe
+                            src="/community-selection"
+                            className="w-full h-screen border-0"
+                            title="Community Selection Interface"
+                          />
                         </div>
                       </motion.div>
                     )}

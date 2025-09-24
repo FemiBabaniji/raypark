@@ -366,7 +366,7 @@ export default function BEAOnboardingPage() {
 
                 <div className="text-center">
                   <Button
-                    onClick={() => router.push("/network/bea-founders-connect")}
+                    onClick={() => router.push("/bea")}
                     className="px-8 py-4 bg-white text-black rounded-2xl hover:bg-neutral-200 transition-colors font-medium"
                   >
                     Explore BEA Community

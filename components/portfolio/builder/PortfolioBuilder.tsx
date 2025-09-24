@@ -15,6 +15,7 @@ import {
   DescriptionWidget,
   ServicesWidget,
   GalleryWidget,
+  StartupWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 
@@ -439,6 +440,26 @@ export default function PortfolioBuilder({
           </motion.div>
         )
 
+      case "startup":
+        return (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <StartupWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
+        )
+
       default:
         return (
           <motion.div
@@ -520,7 +541,7 @@ export default function PortfolioBuilder({
                   <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
                     Select Widget Type
                   </div>
-                  {["projects", "education", "description", "services", "gallery"].map((type) => (
+                  {["projects", "education", "description", "services", "gallery", "startup"].map((type) => (
                     <button
                       key={type}
                       onClick={() => setSelectedWidgetType(type)}

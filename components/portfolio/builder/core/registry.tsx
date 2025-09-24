@@ -9,6 +9,7 @@ import {
   DescriptionWidget,
   ServicesWidget,
   GalleryWidget,
+  StartupWidget, // Added StartupWidget import
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -125,6 +126,21 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           galleryGroups={deps.galleryGroups[w.id] || []}
           onGroupsChange={(groups) => deps.setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
           onGroupClick={() => {}}
+        />
+      )
+    case "startup": // Added startup widget case
+      return (
+        <StartupWidget
+          key={w.id}
+          widgetId={w.id}
+          column={column}
+          isPreviewMode={deps.isPreviewMode}
+          content={deps.widgetContent.startup}
+          onContentChange={(c) => deps.onContentChange("startup", c)}
+          onDelete={del}
+          onMove={move}
+          editingField={deps.editingField}
+          setEditingField={deps.setEditingField}
         />
       )
     default:

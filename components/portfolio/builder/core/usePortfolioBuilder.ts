@@ -3,10 +3,11 @@
 import { useCallback, useMemo, useState } from "react"
 import { nanoid } from "nanoid"
 import type { ThemeIndex } from "@/lib/theme"
+import type { PortfolioExportData } from "@/lib/portfolioExportData" // Declare the PortfolioExportData variable
 
 /** ---------- Types ---------- */
 export type Column = "left" | "right"
-export type WidgetType = "identity" | "education" | "projects" | "description" | "services" | "gallery"
+export type WidgetType = "identity" | "education" | "projects" | "description" | "services" | "gallery" | "startup"
 
 export type WidgetDef = { id: string; type: WidgetType }
 
@@ -39,19 +40,52 @@ export type WidgetContent = {
     title: string
     content: string
   }
+  startup: {
+    title: string
+    slides: {
+      identity: {
+        companyName: string
+        tagline: string
+        stage: string
+        ask: string
+        logoUrl?: string
+      }
+      problem: {
+        title: string
+        description: string
+      }
+      solution: {
+        title: string
+        description: string
+        links: Array<{ name: string; url: string }>
+      }
+      market: {
+        title: string
+        targetCustomer: string
+        marketSize: string
+        useCase: string
+      }
+      traction: {
+        title: string
+        milestones: Array<{ text: string; completed: boolean }>
+        metrics: string
+      }
+      team: {
+        title: string
+        members: Array<{ name: string; role: string; linkedinUrl?: string }>
+      }
+      cta: {
+        title: string
+        asks: Array<{ text: string; active: boolean }>
+        contact: string
+      }
+    }
+  }
   // gallery keyed by widgetId -> per-widget groups
   gallery: Record<
     string,
     Array<{ id: string; name: string; description?: string; images: string[]; isVideo?: boolean }>
   >
-}
-
-export type PortfolioExportData = {
-  identity: Identity
-  leftWidgets: WidgetDef[]
-  rightWidgets: WidgetDef[]
-  widgetContent: WidgetContent
-  metadata: { createdAt: string; version: string }
 }
 
 /** ---------- Defaults ---------- */
@@ -89,6 +123,53 @@ const DEFAULT_CONTENT: WidgetContent = {
   description: {
     title: "About Me",
     content: "I build calm, pragmatic interfaces that convert and delight.",
+  },
+  startup: {
+    title: "Startup Pitch",
+    slides: {
+      identity: {
+        companyName: "Your Startup",
+        tagline: "We're building X for Y",
+        stage: "Seed",
+        ask: "$50K seed funding",
+      },
+      problem: {
+        title: "Problem",
+        description: "Describe the problem you're solving...",
+      },
+      solution: {
+        title: "Solution",
+        description: "Describe your solution...",
+        links: [],
+      },
+      market: {
+        title: "Market",
+        targetCustomer: "Your target customers",
+        marketSize: "$X billion market",
+        useCase: "How customers use your product",
+      },
+      traction: {
+        title: "Traction",
+        milestones: [
+          { text: "Prototype built", completed: true },
+          { text: "First customers", completed: false },
+        ],
+        metrics: "Key metrics and growth",
+      },
+      team: {
+        title: "Team",
+        members: [{ name: "Your Name", role: "CEO" }],
+      },
+      cta: {
+        title: "Call to Action",
+        asks: [
+          { text: "Funding", active: true },
+          { text: "Mentorship", active: true },
+          { text: "Partnerships", active: false },
+        ],
+        contact: "hello@yourcompany.com",
+      },
+    },
   },
   gallery: {},
 }

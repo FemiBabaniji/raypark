@@ -36,7 +36,7 @@ export default function NetworkPage() {
               <div
                 className="border rounded-lg w-32 h-20 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300"
                 style={{
-                  backgroundColor: "oklch(0.18 0 0)",
+                  backgroundColor: "oklch(0.145 0 0)", // Updated background to match widget color instead of main background
                   borderColor: "oklch(0.25 0 0)",
                 }}
               >
@@ -65,7 +65,7 @@ export default function NetworkPage() {
               <p className="text-sm" style={{ color: "#B3B3B3" }}>
                 342 active members
               </p>
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
             </div>
           </div>
 
@@ -82,7 +82,7 @@ export default function NetworkPage() {
               <div
                 className="border rounded-lg w-32 h-20 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300"
                 style={{
-                  backgroundColor: "oklch(0.18 0 0)",
+                  backgroundColor: "oklch(0.145 0 0)", // Updated background to match widget color instead of main background
                   borderColor: "oklch(0.25 0 0)",
                 }}
               >
@@ -126,7 +126,7 @@ export default function NetworkPage() {
               <div
                 className="border rounded-lg w-32 h-20 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300"
                 style={{
-                  backgroundColor: "oklch(0.18 0 0)",
+                  backgroundColor: "oklch(0.145 0 0)", // Updated background to match widget color instead of main background
                   borderColor: "oklch(0.25 0 0)",
                 }}
               >

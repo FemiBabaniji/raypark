@@ -3,11 +3,10 @@
 import { useCallback, useMemo, useState } from "react"
 import { nanoid } from "nanoid"
 import type { ThemeIndex } from "@/lib/theme"
-import type { PortfolioExportData } from "@/lib/portfolioExportData" // Import PortfolioExportData
 
 /** ---------- Types ---------- */
 export type Column = "left" | "right"
-export type WidgetType = "identity" | "education" | "projects" | "description" | "services" | "gallery" | "startup"
+export type WidgetType = "identity" | "education" | "projects" | "description" | "services" | "gallery"
 
 export type WidgetDef = { id: string; type: WidgetType }
 
@@ -45,32 +44,14 @@ export type WidgetContent = {
     string,
     Array<{ id: string; name: string; description?: string; images: string[]; isVideo?: boolean }>
   >
-  startup: {
-    name: string
-    tagline: string
-    stage: "Idea" | "Prototype" | "Pilot" | "Growth" | "Scaling"
-    ask: string
-    problem: string
-    solution: string
-    market: string
-    targetCustomer: string
-    marketSize: string
-    traction: string[]
-    team: Array<{ name: string; role: string; linkedin?: string }>
-    callToAction: {
-      funding: boolean
-      mentorship: boolean
-      partnerships: boolean
-      hiring: boolean
-      pilotCustomers: boolean
-    }
-    links: {
-      github?: string
-      website?: string
-      demo?: string
-      deck?: string
-    }
-  }
+}
+
+export type PortfolioExportData = {
+  identity: Identity
+  leftWidgets: WidgetDef[]
+  rightWidgets: WidgetDef[]
+  widgetContent: WidgetContent
+  metadata: { createdAt: string; version: string }
 }
 
 /** ---------- Defaults ---------- */
@@ -110,35 +91,6 @@ const DEFAULT_CONTENT: WidgetContent = {
     content: "I build calm, pragmatic interfaces that convert and delight.",
   },
   gallery: {},
-  startup: {
-    name: "NexaAI",
-    tagline: "AI mentor for student founders",
-    stage: "Pilot",
-    ask: "$50K seed + partnerships",
-    problem: "Founders lack structured mentorship and visibility in their communities.",
-    solution: "A portfolio-based app that syncs events, showcases startups, and provides AI co-pilot mentorship.",
-    market: "University incubators, bootcamps, and entrepreneurship communities.",
-    targetCustomer: "Student founders and early-stage entrepreneurs",
-    marketSize: "$2.5B education/mentor SaaS market",
-    traction: ["1,200 beta testers", "5 paid pilots", "1 community partner (BEA)"],
-    team: [
-      { name: "Jane Doe", role: "CEO", linkedin: "https://linkedin.com/in/janedoe" },
-      { name: "John Smith", role: "CTO", linkedin: "https://linkedin.com/in/johnsmith" },
-      { name: "Priya Patel", role: "Designer" },
-    ],
-    callToAction: {
-      mentorship: true,
-      pilotCustomers: true,
-      funding: false,
-      partnerships: true,
-      hiring: false,
-    },
-    links: {
-      github: "https://github.com/startup",
-      website: "https://nexa.ai",
-      demo: "https://figma.com/demo",
-    },
-  },
 }
 
 /** ---------- Hook ---------- */

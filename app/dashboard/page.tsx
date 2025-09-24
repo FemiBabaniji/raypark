@@ -266,6 +266,7 @@ export default function Home() {
         userId: user.id,
         name: "New Template Portfolio",
         theme_id: "template",
+        description: "A portfolio created from template",
       })
 
       const templatePortfolio: UnifiedPortfolio = {
@@ -319,6 +320,7 @@ export default function Home() {
         userId: user.id,
         name: "New Portfolio",
         theme_id: "default",
+        description: "A new portfolio",
       })
 
       const newPortfolio: UnifiedPortfolio = {

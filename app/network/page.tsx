@@ -30,18 +30,11 @@ export default function NetworkPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative p-8 text-center">
               <div className="rounded-lg w-32 h-20 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-neutral-900/30 to-neutral-800/20">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/bea-logo.svg"
-                    alt="Black Entrepreneurship Alliance"
-                    className="h-12 w-auto group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="text-sm font-semibold leading-tight" style={{ color: "#FFFFFF" }}>
-                    <div>Black</div>
-                    <div>Entrepreneurship</div>
-                    <div>Alliance.</div>
-                  </div>
-                </div>
+                <img
+                  src="/bea-logo.svg"
+                  alt="Black Entrepreneurship Alliance"
+                  className="h-12 w-auto group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
               <h3
                 className="text-xl font-semibold mb-2 group-hover:text-blue-300 transition-colors duration-300"

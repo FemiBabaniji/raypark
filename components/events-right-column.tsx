@@ -2,9 +2,28 @@
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
+import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
+import { useAuth } from "@/lib/auth"
+import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 
 export default function EventsRightColumn() {
   const [isQuickActionsExpanded, setIsQuickActionsExpanded] = useState(false)
+  const { user, loading } = useAuth()
+
+  const userPortfolio: UnifiedPortfolio | null = user
+    ? {
+        id: user.id,
+        name: user.name,
+        title: user.role || "Portfolio",
+        email: user.email,
+        location: "Location", // Default location since not in auth
+        handle: user.name.toLowerCase().replace(/\s+/g, ""),
+        avatarUrl: user.imageUrl,
+        initials: user.name.slice(0, 2).toUpperCase(),
+        selectedColor: 3, // Default orange theme
+        isLive: true,
+      }
+    : null
 
   return (
     <div className="fixed top-14 right-6 w-80 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6">
@@ -40,16 +59,31 @@ export default function EventsRightColumn() {
         </Panel>
       </Panel>
 
-      {/* profile card */}
       <Panel variant="widget" className="p-6" style={{ backgroundColor: "#1F1F1F", boxShadow: "none" }}>
-        <div className="rounded-3xl p-5 bg-gradient-to-br from-[#ff9b4a] to-[#ff3d83] text-white shadow-lg">
-          <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white">NP</div>
-          <div className="mt-3 text-base font-semibold text-white">Jenny Wilson</div>
-          <div className="text-sm text-white/90">Portfolio</div>
-          <div className="mt-2 text-xs text-white/90">new@example.com</div>
-          <div className="text-xs text-white/90">Location</div>
-          <div className="mt-3 text-xs text-white/90">@newuser</div>
-        </div>
+        {loading ? (
+          <div className="rounded-3xl p-5 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg animate-pulse">
+            <div className="h-10 w-10 rounded-full bg-white/20"></div>
+            <div className="mt-3 h-4 bg-white/20 rounded w-3/4"></div>
+            <div className="mt-2 h-3 bg-white/20 rounded w-1/2"></div>
+          </div>
+        ) : userPortfolio ? (
+          <div className="h-64">
+            <UnifiedPortfolioCard
+              portfolio={userPortfolio}
+              onClick={(id) => console.log("View profile:", id)}
+              onShare={(id) => console.log("Share profile:", id)}
+              onMore={(id) => console.log("More options:", id)}
+            />
+          </div>
+        ) : (
+          <div className="rounded-3xl p-5 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg">
+            <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white">?</div>
+            <div className="mt-3 text-base font-semibold text-white">Guest User</div>
+            <div className="text-sm text-white/90">Portfolio</div>
+            <div className="mt-2 text-xs text-white/90">Sign in to see your profile</div>
+          </div>
+        )}
+
         <div className="mt-3 text-center text-xs" style={{ color: "#B3B3B3" }}>
           edit profile
         </div>

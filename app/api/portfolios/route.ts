@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         name: name.trim(),
         slug,
-        description: description || `${name}'s portfolio`,
         theme_id,
         is_public: false,
         is_demo: false,

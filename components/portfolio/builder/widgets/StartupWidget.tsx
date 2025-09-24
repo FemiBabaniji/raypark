@@ -241,24 +241,26 @@ export default function StartupWidget({
                   { name: "Jane Doe", role: "CEO" },
                   { name: "John Smith", role: "CTO" },
                 ]
-              ).map((member, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-medium">{member.name}</p>
-                    <p className="text-white/60 text-sm">{member.role}</p>
+              ).map((member, idx) =>
+                member ? (
+                  <div key={idx} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">{member.name || "Team Member"}</p>
+                      <p className="text-white/60 text-sm">{member.role || "Role"}</p>
+                    </div>
+                    {member.linkedin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/60 hover:text-white"
+                        onClick={() => window.open(member.linkedin, "_blank")}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  {member.linkedin && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white/60 hover:text-white"
-                      onClick={() => window.open(member.linkedin, "_blank")}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                ) : null,
+              )}
             </div>
           </div>
         )

@@ -39,12 +39,11 @@ export async function createPortfolioOnce(params: {
       user_id: params.userId,
       name: params.name.trim(),
       slug,
-      description: params.description?.trim() || `${params.name}'s portfolio`,
       theme_id: params.theme_id,
       is_public: false,
       is_demo: false,
     })
-    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .select("id, name, slug, theme_id, is_public, is_demo, created_at, updated_at")
     .single()
 
   if (error) {
@@ -81,11 +80,12 @@ export async function updatePortfolioById(
   if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
 
   const supabase = createClient()
+  const { description, ...validPatch } = patch
   const { data, error } = await supabase
     .from("portfolios")
-    .update(patch)
+    .update(validPatch)
     .eq("id", portfolioId)
-    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .select("id, name, slug, theme_id, is_public, is_demo, created_at, updated_at")
     .single()
 
   if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
@@ -146,10 +146,12 @@ async function insertPortfolioWithRetry(
   for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
   candidates.push(`${payload.slug}-${makeSuffix()}`)
 
+  const { description, ...validPayload } = payload
+
   for (const slug of candidates) {
     const { data, error } = await supabase
       .from("portfolios")
-      .insert({ ...payload, slug })
+      .insert({ ...validPayload, slug })
       .select()
       .single()
 

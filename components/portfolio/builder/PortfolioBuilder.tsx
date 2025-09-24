@@ -15,6 +15,7 @@ import {
   DescriptionWidget,
   ServicesWidget,
   GalleryWidget,
+  StartupWidget, // Added StartupWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 
@@ -152,6 +153,86 @@ export default function PortfolioBuilder({
       title: "About Me",
       content:
         "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
+    },
+    startup: {
+      companyName: "Your Startup",
+      tagline: "Revolutionizing the future",
+      slides: [
+        {
+          id: "identity",
+          title: "Company Identity",
+          content: {
+            companyName: "Your Startup",
+            tagline: "Revolutionizing the future",
+            logo: "",
+            founded: "2024",
+            location: "San Francisco, CA",
+          },
+        },
+        {
+          id: "problem",
+          title: "Problem",
+          content: {
+            title: "The Problem We're Solving",
+            description: "Describe the key problem your startup addresses",
+            painPoints: ["Pain point 1", "Pain point 2", "Pain point 3"],
+          },
+        },
+        {
+          id: "solution",
+          title: "Solution",
+          content: {
+            title: "Our Solution",
+            description: "How your product solves the problem",
+            features: ["Key feature 1", "Key feature 2", "Key feature 3"],
+          },
+        },
+        {
+          id: "market",
+          title: "Market",
+          content: {
+            title: "Market Opportunity",
+            description: "Size and scope of your target market",
+            marketSize: "$X billion market",
+            targetAudience: "Your target customers",
+          },
+        },
+        {
+          id: "traction",
+          title: "Traction",
+          content: {
+            title: "Our Traction",
+            description: "Key metrics and achievements",
+            metrics: [
+              { label: "Users", value: "10K+" },
+              { label: "Revenue", value: "$100K+" },
+              { label: "Growth", value: "20% MoM" },
+            ],
+          },
+        },
+        {
+          id: "team",
+          title: "Team",
+          content: {
+            title: "Our Team",
+            description: "Meet the founding team",
+            members: [
+              { name: "Founder 1", role: "CEO", bio: "Background and expertise" },
+              { name: "Founder 2", role: "CTO", bio: "Background and expertise" },
+            ],
+          },
+        },
+        {
+          id: "cta",
+          title: "Call to Action",
+          content: {
+            title: "Join Us",
+            description: "How investors or partners can get involved",
+            ctaText: "Get in touch",
+            contact: "hello@yourstartup.com",
+          },
+        },
+      ],
     },
   })
 
@@ -439,6 +520,28 @@ export default function PortfolioBuilder({
           </motion.div>
         )
 
+      case "startup":
+        return (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <StartupWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={widgetContent.startup}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, startup: content }))}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
+        )
+
       default:
         return (
           <motion.div
@@ -520,7 +623,7 @@ export default function PortfolioBuilder({
                   <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
                     Select Widget Type
                   </div>
-                  {["projects", "education", "description", "services", "gallery"].map((type) => (
+                  {["projects", "education", "description", "services", "gallery", "startup"].map((type) => (
                     <button
                       key={type}
                       onClick={() => setSelectedWidgetType(type)}

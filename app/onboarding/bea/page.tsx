@@ -129,9 +129,7 @@ export default function BEAOnboardingPage() {
         transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="flex items-center space-x-3">
-          <div className="w-6 h-6 bg-gradient-to-br from-sky-400/35 to-blue-600/20 rounded-lg flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-          </div>
+          <img src="/bea-logo.svg" alt="Black Entrepreneurship Alliance" className="h-8 w-auto" />
           <span className="text-sm font-medium" style={{ color: "#B3B3B3" }}>
             pathwai × BEA
           </span>

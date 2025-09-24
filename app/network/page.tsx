@@ -29,22 +29,13 @@ export default function NetworkPage() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative p-8 text-center">
-              <div className="rounded-lg w-32 h-20 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-neutral-900/30 to-neutral-800/20">
+              <div className="rounded-lg w-40 h-32 flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-neutral-900/30 to-neutral-800/20">
                 <img
                   src="/bea-logo.svg"
                   alt="Black Entrepreneurship Alliance"
-                  className="h-12 w-auto group-hover:scale-105 transition-transform duration-300"
+                  className="h-16 w-auto group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3
-                className="text-xl font-semibold mb-2 group-hover:text-blue-300 transition-colors duration-300"
-                style={{ color: "#FFFFFF" }}
-              >
-                Black Entrepreneurship Alliance
-              </h3>
-              <p className="text-sm" style={{ color: "#B3B3B3" }}>
-                342 active members
-              </p>
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
             </div>
           </div>

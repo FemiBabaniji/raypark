@@ -1,16 +1,25 @@
 "use client"
 import { useState, useEffect } from "react"
+import type React from "react"
+
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Users, Calendar, MessageCircle, QrCode } from "lucide-react"
+import { ArrowRight, Users, Calendar, MessageCircle, QrCode, ChevronLeft, ChevronRight } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import JennyWilsonPortfolio from "@/components/jenny-wilson-portfolio"
 
 interface ProfileData {
   name: string
+  role: string
   industry: string
   skills: string[]
   businessNeeds: string[]
+  goals: string
+  linkedinUrl: string
+  portfolioUrl: string
+  websiteUrl: string
+  avatarFile?: File
   portfolioFile?: File
 }
 
@@ -49,14 +58,30 @@ const businessNeedOptions = [
   "Service Provider",
 ]
 
+const formSteps = [
+  { id: "basic", title: "Basic Info", fields: ["name", "role"] },
+  { id: "industry", title: "Industry & Skills", fields: ["industry", "skills"] },
+  { id: "goals", title: "Goals & Needs", fields: ["goals", "businessNeeds"] },
+  { id: "links", title: "Links & Portfolio", fields: ["linkedinUrl", "portfolioUrl", "websiteUrl"] },
+  { id: "uploads", title: "Avatar & Resume", fields: ["avatarFile", "portfolioFile"] },
+]
+
 export default function BEAOnboardingPage() {
-  const [step, setStep] = useState<"welcome" | "profile" | "dashboard" | "complete">("welcome")
+  const [step, setStep] = useState<"welcome" | "form" | "dashboard" | "complete">("welcome")
+  const [currentFormStep, setCurrentFormStep] = useState(0)
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
+    role: "",
     industry: "",
     skills: [],
     businessNeeds: [],
+    goals: "",
+    linkedinUrl: "",
+    portfolioUrl: "",
+    websiteUrl: "",
   })
+  const [avatarPreview, setAvatarPreview] = useState<string>("")
+
   const { user, loading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -84,6 +109,16 @@ export default function BEAOnboardingPage() {
     }))
   }
 
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setProfileData((prev) => ({ ...prev, avatarFile: file }))
+      const reader = new FileReader()
+      reader.onload = (e) => setAvatarPreview(e.target?.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleCreateProfile = async () => {
     if (!user) return
 
@@ -107,9 +142,46 @@ export default function BEAOnboardingPage() {
       setStep("dashboard")
     } catch (error) {
       console.error("Error creating community profile:", error)
-      // Continue to dashboard even if API fails
       setStep("dashboard")
     }
+  }
+
+  const nextFormStep = () => {
+    if (currentFormStep < formSteps.length - 1) {
+      setCurrentFormStep(currentFormStep + 1)
+    } else {
+      handleCreateProfile()
+    }
+  }
+
+  const prevFormStep = () => {
+    if (currentFormStep > 0) {
+      setCurrentFormStep(currentFormStep - 1)
+    }
+  }
+
+  const isCurrentStepValid = () => {
+    const currentStep = formSteps[currentFormStep]
+    switch (currentStep.id) {
+      case "basic":
+        return profileData.name.trim() && profileData.role.trim()
+      case "industry":
+        return profileData.industry && profileData.skills.length > 0
+      case "goals":
+        return profileData.goals.trim() && profileData.businessNeeds.length > 0
+      case "links":
+        return true // Optional fields
+      case "uploads":
+        return true // Optional fields
+      default:
+        return true
+    }
+  }
+
+  const activeIdentity = {
+    name: profileData.name || "Your Name",
+    selectedColor: 0,
+    avatarUrl: avatarPreview || "/professional-woman-headshot.png",
   }
 
   if (loading) {
@@ -169,7 +241,7 @@ export default function BEAOnboardingPage() {
                   the BEA ecosystem.
                 </p>
                 <button
-                  onClick={() => setStep("profile")}
+                  onClick={() => setStep("form")}
                   className="flex items-center gap-2 mx-auto px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors font-medium"
                   style={{ backgroundColor: "#0EA5E9", color: "#FFFFFF" }}
                 >
@@ -180,183 +252,385 @@ export default function BEAOnboardingPage() {
             </motion.div>
           )}
 
-          {step === "profile" && (
+          {step === "form" && (
             <motion.div
-              key="profile"
+              key="form"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="min-h-screen flex items-center justify-center p-8"
+              className="min-h-screen flex"
             >
-              <div className="max-w-4xl w-full">
-                <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold mb-4" style={{ color: "#FFFFFF" }}>
-                    Create Your Professional ID
-                  </h2>
-                  <p style={{ color: "#B3B3B3" }}>Build a dynamic profile that showcases your expertise and goals</p>
-                </div>
-
-                <div className="space-y-8">
-                  {/* Name */}
-                  <div>
-                    <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.name}
-                      onChange={(e) => setProfileData((prev) => ({ ...prev, name: e.target.value }))}
-                      placeholder="e.g., Malik Johnson"
-                      className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
-                      style={{
-                        backgroundColor: "oklch(0.145 0 0)",
-                        borderColor: "oklch(0.145 0 0)",
-                        color: "#FFFFFF",
-                      }}
-                    />
-                  </div>
-
-                  {/* Industry Focus */}
-                  <div>
-                    <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
-                      Industry Focus
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {industries.map((industry) => (
-                        <button
-                          key={industry}
-                          type="button"
-                          onClick={() =>
-                            setProfileData((prev) => ({
-                              ...prev,
-                              industry: prev.industry === industry ? "" : industry,
-                            }))
-                          }
-                          className={`relative overflow-hidden rounded-xl p-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02] ${
-                            profileData.industry === industry
-                              ? "ring-2 ring-blue-500 shadow-lg shadow-blue-500/20"
-                              : "hover:shadow-md"
-                          }`}
-                          style={{
-                            backgroundColor: profileData.industry === industry ? "oklch(0.18 0 0)" : "oklch(0.145 0 0)",
-                            border:
-                              profileData.industry === industry ? "1px solid #3b82f6" : "1px solid oklch(0.2 0 0)",
-                            color: "#FFFFFF",
-                          }}
-                        >
-                          <div
-                            className={`absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/5 transition-opacity duration-300 ${
-                              profileData.industry === industry ? "opacity-100" : "opacity-0 hover:opacity-50"
-                            }`}
-                          ></div>
-                          <div className="relative flex items-center justify-center gap-2">
-                            <div
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                profileData.industry === industry
-                                  ? "bg-blue-500 shadow-lg shadow-blue-500/50"
-                                  : "bg-gray-500"
-                              }`}
-                            ></div>
-                            <span className="text-center leading-tight">{industry}</span>
-                          </div>
-                          {profileData.industry === industry && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                          )}
-                        </button>
-                      ))}
+              <div className="w-1/2 p-8 overflow-y-auto">
+                <div className="max-w-lg mx-auto">
+                  {/* Progress indicator */}
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>
+                        {formSteps[currentFormStep].title}
+                      </h2>
+                      <span className="text-sm" style={{ color: "#B3B3B3" }}>
+                        {currentFormStep + 1} of {formSteps.length}
+                      </span>
                     </div>
-                  </div>
-
-                  {/* Skills */}
-                  <div>
-                    <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
-                      Skills & Expertise
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {skillOptions.map((skill) => (
-                        <button
-                          key={skill}
-                          onClick={() => handleSkillToggle(skill)}
-                          className={`px-4 py-2 rounded-2xl border transition-all text-sm ${
-                            profileData.skills.includes(skill)
-                              ? "border-white/30"
-                              : "border-white/10 hover:border-white/20"
-                          }`}
-                          style={{
-                            backgroundColor: profileData.skills.includes(skill) ? "oklch(0.145 0 0)" : "transparent",
-                            color: profileData.skills.includes(skill) ? "#FFFFFF" : "#B3B3B3",
-                          }}
-                        >
-                          {skill}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Business Needs */}
-                  <div>
-                    <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
-                      What are you looking for?
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {businessNeedOptions.map((need) => (
-                        <button
-                          key={need}
-                          onClick={() => handleBusinessNeedToggle(need)}
-                          className={`px-4 py-2 rounded-2xl border transition-all text-sm ${
-                            profileData.businessNeeds.includes(need)
-                              ? "border-white/30"
-                              : "border-white/10 hover:border-white/20"
-                          }`}
-                          style={{
-                            backgroundColor: profileData.businessNeeds.includes(need)
-                              ? "oklch(0.145 0 0)"
-                              : "transparent",
-                            color: profileData.businessNeeds.includes(need) ? "#FFFFFF" : "#B3B3B3",
-                          }}
-                        >
-                          {need}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Portfolio Upload */}
-                  <div>
-                    <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
-                      Portfolio / Resume (Optional)
-                    </label>
-                    <div
-                      className="border-2 border-dashed rounded-2xl p-8 text-center hover:border-white/20 transition-colors"
-                      style={{ borderColor: "oklch(0.145 0 0)" }}
-                    >
-                      <input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => setProfileData((prev) => ({ ...prev, portfolioFile: e.target.files?.[0] }))}
-                        className="hidden"
-                        id="portfolio-upload"
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${((currentFormStep + 1) / formSteps.length) * 100}%` }}
                       />
-                      <label htmlFor="portfolio-upload" className="cursor-pointer">
-                        <div className="mb-2" style={{ color: "#B3B3B3" }}>
-                          Drop your file here or click to browse
-                        </div>
-                        <div className="text-sm" style={{ color: "#B3B3B3" }}>
-                          PDF, DOC, or DOCX up to 10MB
-                        </div>
-                      </label>
                     </div>
                   </div>
 
-                  <div className="text-center pt-6">
+                  {/* Form Steps */}
+                  <div className="space-y-6">
+                    {/* Basic Info */}
+                    {currentFormStep === 0 && (
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Full Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={profileData.name}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Malik Johnson"
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Professional Role *
+                          </label>
+                          <input
+                            type="text"
+                            value={profileData.role}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, role: e.target.value }))}
+                            placeholder="e.g., Product Manager, Founder, Developer"
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Industry & Skills */}
+                    {currentFormStep === 1 && (
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
+                            Industry Focus *
+                          </label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {industries.map((industry) => (
+                              <button
+                                key={industry}
+                                type="button"
+                                onClick={() =>
+                                  setProfileData((prev) => ({
+                                    ...prev,
+                                    industry: prev.industry === industry ? "" : industry,
+                                  }))
+                                }
+                                className={`relative overflow-hidden rounded-xl p-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02] ${
+                                  profileData.industry === industry
+                                    ? "ring-2 ring-blue-500 shadow-lg shadow-blue-500/20"
+                                    : "hover:shadow-md"
+                                }`}
+                                style={{
+                                  backgroundColor:
+                                    profileData.industry === industry ? "oklch(0.18 0 0)" : "oklch(0.145 0 0)",
+                                  border:
+                                    profileData.industry === industry
+                                      ? "1px solid #3b82f6"
+                                      : "1px solid oklch(0.2 0 0)",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                <div
+                                  className={`absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/5 transition-opacity duration-300 ${
+                                    profileData.industry === industry ? "opacity-100" : "opacity-0 hover:opacity-50"
+                                  }`}
+                                ></div>
+                                <div className="relative flex items-center justify-center gap-2">
+                                  <div
+                                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                      profileData.industry === industry
+                                        ? "bg-blue-500 shadow-lg shadow-blue-500/50"
+                                        : "bg-gray-500"
+                                    }`}
+                                  ></div>
+                                  <span className="text-center leading-tight">{industry}</span>
+                                </div>
+                                {profileData.industry === industry && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
+                            Skills & Expertise *
+                          </label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {skillOptions.map((skill) => (
+                              <button
+                                key={skill}
+                                onClick={() => handleSkillToggle(skill)}
+                                className={`px-4 py-2 rounded-2xl border transition-all text-sm ${
+                                  profileData.skills.includes(skill)
+                                    ? "border-white/30"
+                                    : "border-white/10 hover:border-white/20"
+                                }`}
+                                style={{
+                                  backgroundColor: profileData.skills.includes(skill)
+                                    ? "oklch(0.145 0 0)"
+                                    : "transparent",
+                                  color: profileData.skills.includes(skill) ? "#FFFFFF" : "#B3B3B3",
+                                }}
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Goals & Needs */}
+                    {currentFormStep === 2 && (
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Professional Goals *
+                          </label>
+                          <textarea
+                            value={profileData.goals}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, goals: e.target.value }))}
+                            placeholder="Describe your professional goals and what you're working towards..."
+                            rows={4}
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors resize-none"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-medium mb-4" style={{ color: "#FFFFFF" }}>
+                            What are you looking for? *
+                          </label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {businessNeedOptions.map((need) => (
+                              <button
+                                key={need}
+                                onClick={() => handleBusinessNeedToggle(need)}
+                                className={`px-4 py-2 rounded-2xl border transition-all text-sm ${
+                                  profileData.businessNeeds.includes(need)
+                                    ? "border-white/30"
+                                    : "border-white/10 hover:border-white/20"
+                                }`}
+                                style={{
+                                  backgroundColor: profileData.businessNeeds.includes(need)
+                                    ? "oklch(0.145 0 0)"
+                                    : "transparent",
+                                  color: profileData.businessNeeds.includes(need) ? "#FFFFFF" : "#B3B3B3",
+                                }}
+                              >
+                                {need}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Links & Portfolio */}
+                    {currentFormStep === 3 && (
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            LinkedIn URL
+                          </label>
+                          <input
+                            type="url"
+                            value={profileData.linkedinUrl}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, linkedinUrl: e.target.value }))}
+                            placeholder="https://linkedin.com/in/yourprofile"
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Portfolio URL
+                          </label>
+                          <input
+                            type="url"
+                            value={profileData.portfolioUrl}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, portfolioUrl: e.target.value }))}
+                            placeholder="https://yourportfolio.com"
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Website URL
+                          </label>
+                          <input
+                            type="url"
+                            value={profileData.websiteUrl}
+                            onChange={(e) => setProfileData((prev) => ({ ...prev, websiteUrl: e.target.value }))}
+                            placeholder="https://yourwebsite.com"
+                            className="w-full px-4 py-3 border rounded-2xl focus:outline-none transition-colors"
+                            style={{
+                              backgroundColor: "oklch(0.145 0 0)",
+                              borderColor: "oklch(0.145 0 0)",
+                              color: "#FFFFFF",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Avatar & Resume */}
+                    {currentFormStep === 4 && (
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Profile Avatar
+                          </label>
+                          <div
+                            className="border-2 border-dashed rounded-2xl p-6 text-center hover:border-white/20 transition-colors"
+                            style={{ borderColor: "oklch(0.145 0 0)" }}
+                          >
+                            {avatarPreview ? (
+                              <div className="space-y-4">
+                                <img
+                                  src={avatarPreview || "/placeholder.svg"}
+                                  alt="Avatar preview"
+                                  className="w-20 h-20 rounded-full mx-auto object-cover"
+                                />
+                                <button
+                                  onClick={() => document.getElementById("avatar-upload")?.click()}
+                                  className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                                  style={{ color: "#0EA5E9" }}
+                                >
+                                  Change Avatar
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleAvatarUpload}
+                                  className="hidden"
+                                  id="avatar-upload"
+                                />
+                                <label htmlFor="avatar-upload" className="cursor-pointer">
+                                  <div className="mb-2" style={{ color: "#B3B3B3" }}>
+                                    Drop your avatar here or click to browse
+                                  </div>
+                                  <div className="text-sm" style={{ color: "#B3B3B3" }}>
+                                    JPG, PNG up to 5MB
+                                  </div>
+                                </label>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-medium mb-2" style={{ color: "#FFFFFF" }}>
+                            Portfolio / Resume
+                          </label>
+                          <div
+                            className="border-2 border-dashed rounded-2xl p-6 text-center hover:border-white/20 transition-colors"
+                            style={{ borderColor: "oklch(0.145 0 0)" }}
+                          >
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={(e) =>
+                                setProfileData((prev) => ({ ...prev, portfolioFile: e.target.files?.[0] }))
+                              }
+                              className="hidden"
+                              id="portfolio-upload"
+                            />
+                            <label htmlFor="portfolio-upload" className="cursor-pointer">
+                              <div className="mb-2" style={{ color: "#B3B3B3" }}>
+                                {profileData.portfolioFile
+                                  ? profileData.portfolioFile.name
+                                  : "Drop your file here or click to browse"}
+                              </div>
+                              <div className="text-sm" style={{ color: "#B3B3B3" }}>
+                                PDF, DOC, or DOCX up to 10MB
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Navigation buttons */}
+                  <div className="flex justify-between pt-8">
                     <button
-                      onClick={handleCreateProfile}
-                      disabled={!profileData.name.trim() || !profileData.industry}
-                      className="px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={prevFormStep}
+                      disabled={currentFormStep === 0}
+                      className="flex items-center gap-2 px-6 py-3 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: "oklch(0.145 0 0)", color: "#FFFFFF" }}
+                    >
+                      <ChevronLeft size={20} />
+                      Previous
+                    </button>
+                    <button
+                      onClick={nextFormStep}
+                      disabled={!isCurrentStepValid()}
+                      className="flex items-center gap-2 px-6 py-3 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ backgroundColor: "#0EA5E9", color: "#FFFFFF" }}
                     >
-                      Create My Professional ID
+                      {currentFormStep === formSteps.length - 1 ? "Create Profile" : "Next"}
+                      <ChevronRight size={20} />
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-1/2 p-8 overflow-y-auto">
+                <div className="sticky top-0">
+                  <div className="mb-4 text-center">
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: "#FFFFFF" }}>
+                      Live Preview
+                    </h3>
+                    <p className="text-sm" style={{ color: "#B3B3B3" }}>
+                      See how your portfolio looks as you type
+                    </p>
+                  </div>
+                  <div className="transform scale-75 origin-top">
+                    <JennyWilsonPortfolio isPreviewMode={true} activeIdentity={activeIdentity} />
                   </div>
                 </div>
               </div>

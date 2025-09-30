@@ -134,37 +134,6 @@ export default function OnboardingOverlay({ step, onNext, onBack, onSkip, onDone
       }
     : null
 
-  const dialogPosition = rect
-    ? (() => {
-        const dialogWidth = 560
-        const dialogHeight = 200 // approximate
-        const gap = 16 // gap between element and dialog
-        const viewportWidth = window.innerWidth
-        const viewportHeight = window.innerHeight
-
-        // Try to position below the element first
-        let top = rect.bottom + gap
-        let left = rect.left + rect.width / 2 - dialogWidth / 2
-
-        // If dialog goes off bottom of screen, position above
-        if (top + dialogHeight > viewportHeight - 20) {
-          top = rect.top - dialogHeight - gap
-        }
-
-        // If dialog goes off right side, align to right edge
-        if (left + dialogWidth > viewportWidth - 20) {
-          left = viewportWidth - dialogWidth - 20
-        }
-
-        // If dialog goes off left side, align to left edge
-        if (left < 20) {
-          left = 20
-        }
-
-        return { top, left }
-      })()
-    : { top: window.innerHeight / 2, left: window.innerWidth / 2 - 280 }
-
   // Allow clicking the spotlighted element (pass-through)
   const spotlightPointerEvents = spot ? "none" : "auto"
 
@@ -220,14 +189,7 @@ export default function OnboardingOverlay({ step, onNext, onBack, onSkip, onDone
         />
       )}
 
-      <div
-        className="pointer-events-auto absolute w-[min(560px,92vw)]"
-        style={{
-          top: `${dialogPosition.top}px`,
-          left: `${dialogPosition.left}px`,
-          transition: "all 200ms ease",
-        }}
-      >
+      <div className="pointer-events-auto fixed bottom-8 left-1/2 -translate-x-1/2 w-[min(560px,92vw)]">
         <div className="bg-neutral-900/95 border border-white/10 rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-base sm:text-lg font-semibold text-white">{steps[step].title}</h3>

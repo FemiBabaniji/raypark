@@ -82,13 +82,65 @@ export default function StartupWidget({
 }: Props) {
   const [currentSlide, setCurrentSlide] = useState(0)
 
+  const safeContent = content || {
+    title: "Startup Pitch",
+    slides: {
+      identity: {
+        companyName: "Your Startup",
+        tagline: "We're building X for Y",
+        stage: "Seed",
+        ask: "$50K seed funding",
+      },
+      problem: {
+        title: "Problem",
+        description: "Describe the problem you're solving...",
+      },
+      solution: {
+        title: "Solution",
+        description: "Describe your solution...",
+        links: [],
+      },
+      market: {
+        title: "Market",
+        targetCustomer: "Your target customers",
+        marketSize: "$X billion market",
+        useCase: "How customers use your product",
+      },
+      traction: {
+        title: "Traction",
+        milestones: [
+          { text: "Prototype built", completed: true },
+          { text: "First customers", completed: false },
+        ],
+        metrics: "Key metrics and growth",
+      },
+      team: {
+        title: "Team",
+        members: [{ name: "Your Name", role: "CEO" }],
+      },
+      cta: {
+        title: "Call to Action",
+        asks: [
+          { text: "Funding", active: true },
+          { text: "Mentorship", active: true },
+          { text: "Partnerships", active: false },
+        ],
+        contact: "hello@yourcompany.com",
+      },
+    },
+  }
+
+  console.log("[v0] StartupWidget content:", content)
+  console.log("[v0] StartupWidget safeContent:", safeContent)
+
   const updateSlideContent = (slideKey: keyof StartupContent["slides"], updates: any) => {
+    console.log("[v0] Updating slide content:", slideKey, updates)
     onContentChange({
-      ...content,
+      ...safeContent,
       slides: {
-        ...content.slides,
+        ...safeContent.slides,
         [slideKey]: {
-          ...content.slides[slideKey],
+          ...safeContent.slides[slideKey],
           ...updates,
         },
       },
@@ -162,22 +214,30 @@ export default function StartupWidget({
 
   const renderSlideContent = () => {
     const slide = slideNames[currentSlide]
-    const slideData = content.slides[slide.key]
+    const slideData = safeContent.slides[slide.key]
+
+    console.log("[v0] Rendering slide:", slide.key, slideData)
 
     switch (slide.key) {
       case "identity":
+        const identityData = slideData || {
+          companyName: "Your Startup",
+          tagline: "We're building X for Y",
+          stage: "Seed",
+          ask: "$50K seed funding",
+        }
         return (
           <div className="space-y-4">
             <div className="text-center">
               <EditableField
-                value={slideData.companyName}
+                value={identityData.companyName || ""}
                 onChange={(value) => updateSlideContent("identity", { companyName: value })}
                 fieldKey="identity-companyName"
                 placeholder="Company Name"
                 className="text-2xl font-bold text-center w-full"
               />
               <EditableField
-                value={slideData.tagline}
+                value={identityData.tagline || ""}
                 onChange={(value) => updateSlideContent("identity", { tagline: value })}
                 fieldKey="identity-tagline"
                 placeholder="Your tagline here"
@@ -188,7 +248,7 @@ export default function StartupWidget({
               <div>
                 <span className="text-white/50">Stage:</span>
                 <EditableField
-                  value={slideData.stage}
+                  value={identityData.stage || ""}
                   onChange={(value) => updateSlideContent("identity", { stage: value })}
                   fieldKey="identity-stage"
                   placeholder="Seed, Series A, etc."
@@ -198,7 +258,7 @@ export default function StartupWidget({
               <div>
                 <span className="text-white/50">Ask:</span>
                 <EditableField
-                  value={slideData.ask}
+                  value={identityData.ask || ""}
                   onChange={(value) => updateSlideContent("identity", { ask: value })}
                   fieldKey="identity-ask"
                   placeholder="$50K seed funding"
@@ -210,10 +270,11 @@ export default function StartupWidget({
         )
 
       case "problem":
+        const problemData = slideData || { title: "Problem", description: "" }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={problemData.title || ""}
               onChange={(value) => updateSlideContent("problem", { title: value })}
               fieldKey="problem-title"
               placeholder="Problem"
@@ -221,7 +282,7 @@ export default function StartupWidget({
             />
             <div className="border-t border-white/20 pt-4">
               <EditableField
-                value={slideData.description}
+                value={problemData.description || ""}
                 onChange={(value) => updateSlideContent("problem", { description: value })}
                 fieldKey="problem-description"
                 placeholder="Describe the problem you're solving..."
@@ -233,10 +294,11 @@ export default function StartupWidget({
         )
 
       case "solution":
+        const solutionData = slideData || { title: "Solution", description: "", links: [] }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={solutionData.title || ""}
               onChange={(value) => updateSlideContent("solution", { title: value })}
               fieldKey="solution-title"
               placeholder="Solution"
@@ -244,7 +306,7 @@ export default function StartupWidget({
             />
             <div className="border-t border-white/20 pt-4">
               <EditableField
-                value={slideData.description}
+                value={solutionData.description || ""}
                 onChange={(value) => updateSlideContent("solution", { description: value })}
                 fieldKey="solution-description"
                 placeholder="Describe your solution..."
@@ -252,10 +314,10 @@ export default function StartupWidget({
                 className="w-full"
               />
             </div>
-            {slideData.links.length > 0 && (
+            {(solutionData.links || []).length > 0 && (
               <div className="space-y-2">
                 <span className="text-white/70 text-sm">Links:</span>
-                {slideData.links.map((link, index) => (
+                {(solutionData.links || []).map((link, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <span className="text-blue-400">{link.name}</span>
                     {!isPreviewMode && (
@@ -263,7 +325,7 @@ export default function StartupWidget({
                         size="sm"
                         variant="ghost"
                         onClick={() => {
-                          const newLinks = slideData.links.filter((_, i) => i !== index)
+                          const newLinks = (solutionData.links || []).filter((_, i) => i !== index)
                           updateSlideContent("solution", { links: newLinks })
                         }}
                         className="p-1 h-6 w-6 text-red-400 hover:bg-red-500/20"
@@ -280,7 +342,7 @@ export default function StartupWidget({
                 size="sm"
                 variant="ghost"
                 onClick={() => {
-                  const newLinks = [...slideData.links, { name: "New Link", url: "" }]
+                  const newLinks = [...(solutionData.links || []), { name: "New Link", url: "" }]
                   updateSlideContent("solution", { links: newLinks })
                 }}
                 className="text-white/70 hover:bg-white/10"
@@ -293,10 +355,11 @@ export default function StartupWidget({
         )
 
       case "market":
+        const marketData = slideData || { title: "Market", targetCustomer: "", marketSize: "", useCase: "" }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={marketData.title || ""}
               onChange={(value) => updateSlideContent("market", { title: value })}
               fieldKey="market-title"
               placeholder="Market"
@@ -306,7 +369,7 @@ export default function StartupWidget({
               <div>
                 <span className="text-white/50 text-sm">Target Customer:</span>
                 <EditableField
-                  value={slideData.targetCustomer}
+                  value={marketData.targetCustomer || ""}
                   onChange={(value) => updateSlideContent("market", { targetCustomer: value })}
                   fieldKey="market-targetCustomer"
                   placeholder="University incubators, bootcamps..."
@@ -316,7 +379,7 @@ export default function StartupWidget({
               <div>
                 <span className="text-white/50 text-sm">Market Size:</span>
                 <EditableField
-                  value={slideData.marketSize}
+                  value={marketData.marketSize || ""}
                   onChange={(value) => updateSlideContent("market", { marketSize: value })}
                   fieldKey="market-marketSize"
                   placeholder="$2.5B education/mentor SaaS"
@@ -328,17 +391,18 @@ export default function StartupWidget({
         )
 
       case "traction":
+        const tractionData = slideData || { title: "Traction", milestones: [], metrics: "" }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={tractionData.title || ""}
               onChange={(value) => updateSlideContent("traction", { title: value })}
               fieldKey="traction-title"
               placeholder="Traction"
               className="text-xl font-semibold w-full"
             />
             <div className="border-t border-white/20 pt-4 space-y-3">
-              {slideData.milestones.map((milestone, index) => (
+              {(tractionData.milestones || []).map((milestone, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div
                     className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer ${
@@ -346,7 +410,7 @@ export default function StartupWidget({
                     }`}
                     onClick={() => {
                       if (!isPreviewMode) {
-                        const newMilestones = [...slideData.milestones]
+                        const newMilestones = [...(tractionData.milestones || [])]
                         newMilestones[index].completed = !newMilestones[index].completed
                         updateSlideContent("traction", { milestones: newMilestones })
                       }
@@ -355,9 +419,9 @@ export default function StartupWidget({
                     {milestone.completed && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <EditableField
-                    value={milestone.text}
+                    value={milestone.text || ""}
                     onChange={(value) => {
-                      const newMilestones = [...slideData.milestones]
+                      const newMilestones = [...(tractionData.milestones || [])]
                       newMilestones[index].text = value
                       updateSlideContent("traction", { milestones: newMilestones })
                     }}
@@ -370,7 +434,7 @@ export default function StartupWidget({
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        const newMilestones = slideData.milestones.filter((_, i) => i !== index)
+                        const newMilestones = (tractionData.milestones || []).filter((_, i) => i !== index)
                         updateSlideContent("traction", { milestones: newMilestones })
                       }}
                       className="p-1 h-6 w-6 text-red-400 hover:bg-red-500/20"
@@ -385,7 +449,10 @@ export default function StartupWidget({
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    const newMilestones = [...slideData.milestones, { text: "New milestone", completed: false }]
+                    const newMilestones = [
+                      ...(tractionData.milestones || []),
+                      { text: "New milestone", completed: false },
+                    ]
                     updateSlideContent("traction", { milestones: newMilestones })
                   }}
                   className="text-white/70 hover:bg-white/10"
@@ -399,23 +466,24 @@ export default function StartupWidget({
         )
 
       case "team":
+        const teamData = slideData || { title: "Team", members: [] }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={teamData.title || ""}
               onChange={(value) => updateSlideContent("team", { title: value })}
               fieldKey="team-title"
               placeholder="Team"
               className="text-xl font-semibold w-full"
             />
             <div className="border-t border-white/20 pt-4 space-y-3">
-              {slideData.members.map((member, index) => (
+              {(teamData.members || []).map((member, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center gap-2">
                     <EditableField
-                      value={member.name}
+                      value={member.name || ""}
                       onChange={(value) => {
-                        const newMembers = [...slideData.members]
+                        const newMembers = [...(teamData.members || [])]
                         newMembers[index].name = value
                         updateSlideContent("team", { members: newMembers })
                       }}
@@ -425,9 +493,9 @@ export default function StartupWidget({
                     />
                     <span className="text-white/50">–</span>
                     <EditableField
-                      value={member.role}
+                      value={member.role || ""}
                       onChange={(value) => {
-                        const newMembers = [...slideData.members]
+                        const newMembers = [...(teamData.members || [])]
                         newMembers[index].role = value
                         updateSlideContent("team", { members: newMembers })
                       }}
@@ -440,7 +508,7 @@ export default function StartupWidget({
                         size="sm"
                         variant="ghost"
                         onClick={() => {
-                          const newMembers = slideData.members.filter((_, i) => i !== index)
+                          const newMembers = (teamData.members || []).filter((_, i) => i !== index)
                           updateSlideContent("team", { members: newMembers })
                         }}
                         className="p-1 h-6 w-6 text-red-400 hover:bg-red-500/20"
@@ -456,7 +524,7 @@ export default function StartupWidget({
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    const newMembers = [...slideData.members, { name: "New Member", role: "Role" }]
+                    const newMembers = [...(teamData.members || []), { name: "New Member", role: "Role" }]
                     updateSlideContent("team", { members: newMembers })
                   }}
                   className="text-white/70 hover:bg-white/10"
@@ -470,17 +538,18 @@ export default function StartupWidget({
         )
 
       case "cta":
+        const ctaData = slideData || { title: "Call to Action", asks: [], contact: "" }
         return (
           <div className="space-y-4">
             <EditableField
-              value={slideData.title}
+              value={ctaData.title || ""}
               onChange={(value) => updateSlideContent("cta", { title: value })}
               fieldKey="cta-title"
               placeholder="Call to Action"
               className="text-xl font-semibold w-full"
             />
             <div className="border-t border-white/20 pt-4 space-y-3">
-              {slideData.asks.map((ask, index) => (
+              {(ctaData.asks || []).map((ask, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div
                     className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer ${
@@ -488,7 +557,7 @@ export default function StartupWidget({
                     }`}
                     onClick={() => {
                       if (!isPreviewMode) {
-                        const newAsks = [...slideData.asks]
+                        const newAsks = [...(ctaData.asks || [])]
                         newAsks[index].active = !newAsks[index].active
                         updateSlideContent("cta", { asks: newAsks })
                       }
@@ -497,9 +566,9 @@ export default function StartupWidget({
                     {ask.active && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <EditableField
-                    value={ask.text}
+                    value={ask.text || ""}
                     onChange={(value) => {
-                      const newAsks = [...slideData.asks]
+                      const newAsks = [...(ctaData.asks || [])]
                       newAsks[index].text = value
                       updateSlideContent("cta", { asks: newAsks })
                     }}
@@ -512,7 +581,7 @@ export default function StartupWidget({
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        const newAsks = slideData.asks.filter((_, i) => i !== index)
+                        const newAsks = (ctaData.asks || []).filter((_, i) => i !== index)
                         updateSlideContent("cta", { asks: newAsks })
                       }}
                       className="p-1 h-6 w-6 text-red-400 hover:bg-red-500/20"
@@ -527,7 +596,7 @@ export default function StartupWidget({
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    const newAsks = [...slideData.asks, { text: "New ask", active: true }]
+                    const newAsks = [...(ctaData.asks || []), { text: "New ask", active: true }]
                     updateSlideContent("cta", { asks: newAsks })
                   }}
                   className="text-white/70 hover:bg-white/10"
@@ -539,7 +608,7 @@ export default function StartupWidget({
               <div className="pt-2 border-t border-white/10">
                 <span className="text-white/50 text-sm">Contact:</span>
                 <EditableField
-                  value={slideData.contact}
+                  value={ctaData.contact || ""}
                   onChange={(value) => updateSlideContent("cta", { contact: value })}
                   fieldKey="cta-contact"
                   placeholder="hello@yourcompany.com"
@@ -589,8 +658,8 @@ export default function StartupWidget({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <EditableField
-            value={content.title}
-            onChange={(value) => onContentChange({ ...content, title: value })}
+            value={safeContent.title || ""}
+            onChange={(value) => onContentChange({ ...safeContent, title: value })}
             fieldKey="title"
             placeholder="Startup Pitch"
             className="text-lg font-semibold"

@@ -626,23 +626,18 @@ export default function StartupWidget({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-cyan-500/20 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-white/20 transition-colors group relative overflow-hidden"
+      className="fixed top-20 right-6 w-[380px] max-h-[calc(100vh-120px)] bg-gradient-to-br from-blue-600/30 via-indigo-600/30 to-purple-600/30 backdrop-blur-xl rounded-2xl border border-white/20 hover:border-white/30 transition-colors group overflow-hidden shadow-2xl z-40"
     >
-      {/* Widget Controls */}
-      {!isPreviewMode && (
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onMove}
-            className="p-1 h-7 w-7 bg-white/10 hover:bg-white/20 text-white"
-            title={`Move to ${column === "left" ? "right" : "left"} column`}
-          >
-            <ArrowRight className="w-3 h-3" />
-          </Button>
+      {/* BEA logo header */}
+      <div className="bg-gradient-to-r from-blue-600/40 to-indigo-600/40 px-6 py-3 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img src="/bea-logo.svg" alt="BEA" className="h-8 w-auto" />
+          <span className="text-white/90 text-sm font-medium">Startup Showcase</span>
+        </div>
+        {!isPreviewMode && (
           <Button
             size="sm"
             variant="ghost"
@@ -651,24 +646,10 @@ export default function StartupWidget({
           >
             <X className="w-3 h-3" />
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <EditableField
-            value={safeContent.title || ""}
-            onChange={(value) => onContentChange({ ...safeContent, title: value })}
-            fieldKey="title"
-            placeholder="Startup Pitch"
-            className="text-lg font-semibold"
-          />
-          <div className="text-sm text-white/50">
-            {currentSlide + 1} / {slideNames.length}
-          </div>
-        </div>
-
+      <div className="p-6 overflow-y-auto max-h-[calc(100vh-240px)]">
         {/* Slide Content */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -682,31 +663,24 @@ export default function StartupWidget({
             {renderSlideContent()}
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+      {/* Navigation */}
+      <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 px-6 py-4 border-t border-white/10">
+        <div className="flex items-center justify-between mb-3">
           <Button
             size="sm"
             variant="ghost"
             onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
             disabled={currentSlide === 0}
-            className="text-white hover:bg-white/10 disabled:opacity-30"
+            className="text-white hover:bg-white/10 disabled:opacity-30 text-xs px-2 py-1 h-7"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
+            <ArrowLeft className="w-3 h-3 mr-1" />
+            Prev
           </Button>
 
-          {/* Slide Indicators */}
-          <div className="flex gap-2">
-            {slideNames.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentSlide ? "bg-white" : "bg-white/30"
-                }`}
-              />
-            ))}
+          <div className="text-xs text-white/50 font-medium">
+            {slideNames[currentSlide].label} ({currentSlide + 1}/{slideNames.length})
           </div>
 
           <Button
@@ -714,11 +688,25 @@ export default function StartupWidget({
             variant="ghost"
             onClick={() => setCurrentSlide(Math.min(slideNames.length - 1, currentSlide + 1))}
             disabled={currentSlide === slideNames.length - 1}
-            className="text-white hover:bg-white/10 disabled:opacity-30"
+            className="text-white hover:bg-white/10 disabled:opacity-30 text-xs px-2 py-1 h-7"
           >
             Next
-            <ArrowRight className="w-4 h-4 ml-2" />
+            <ArrowRight className="w-3 h-3 ml-1" />
           </Button>
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="flex gap-1.5 justify-center">
+          {slideNames.map((slide, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`h-1.5 rounded-full transition-all ${
+                index === currentSlide ? "bg-white w-6" : "bg-white/30 w-1.5"
+              }`}
+              title={slide.label}
+            />
+          ))}
         </div>
       </div>
     </motion.div>

@@ -745,7 +745,7 @@ function TraitQuestionnaireOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 md:p-8 lg:p-12"
           onClick={onClose}
         >
           <motion.div
@@ -753,12 +753,12 @@ function TraitQuestionnaireOverlay({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#1a1a1a] rounded-3xl p-8 md:p-10 lg:p-12 max-w-4xl w-full border border-white/10 max-h-[90vh] overflow-y-auto"
+            className="bg-[#1a1a1a] rounded-3xl p-6 md:p-8 lg:p-10 max-w-3xl w-full border border-white/10 max-h-[85vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
-                <Brain className="w-6 h-6 text-purple-400" />
-                <h2 className="text-xl md:text-2xl font-semibold text-white">Leadership Assessment</h2>
+                <Brain className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
+                <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white">Leadership Assessment</h2>
               </div>
               <button
                 onClick={onClose}
@@ -770,8 +770,8 @@ function TraitQuestionnaireOverlay({
             </div>
 
             {/* Progress bar */}
-            <div className="mb-10">
-              <div className="flex items-center justify-between text-sm text-white/60 mb-3">
+            <div className="mb-8 md:mb-10">
+              <div className="flex items-center justify-between text-xs md:text-sm text-white/60 mb-3">
                 <span>
                   Question {currentQuestion + 1} of {questions.length}
                 </span>
@@ -788,18 +788,18 @@ function TraitQuestionnaireOverlay({
             </div>
 
             {/* Question */}
-            <div className="mb-10">
+            <div className="mb-8 md:mb-10">
               <motion.p
                 key={currentQuestion}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-xl md:text-2xl text-white leading-relaxed text-center"
+                className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed text-center px-2"
               >
                 {questions[currentQuestion].text}
               </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-6 md:mb-8">
               {[
                 { value: 5, label: "Strongly Agree" },
                 { value: 4, label: "Agree" },
@@ -810,30 +810,30 @@ function TraitQuestionnaireOverlay({
                 <button
                   key={option.value}
                   onClick={() => handleAnswer(option.value)}
-                  className={`py-4 px-4 rounded-xl text-center transition-all ${
+                  className={`py-3 md:py-4 px-3 md:px-4 rounded-xl text-center transition-all ${
                     answers[currentQuestion] === option.value
                       ? "bg-purple-500/30 border-purple-500/50 text-white scale-105"
                       : "bg-white/5 hover:bg-white/10 border-white/10 text-white/80 hover:scale-105"
                   } border`}
                 >
-                  <div className="text-sm md:text-base font-medium">{option.label}</div>
+                  <div className="text-xs md:text-sm font-medium">{option.label}</div>
                 </button>
               ))}
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between pt-6 border-t border-white/10">
+            <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-white/10">
               <button
                 onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
                 disabled={currentQuestion === 0}
-                className="px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                className="px-4 md:px-6 py-2 md:py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium"
               >
                 Previous
               </button>
               {isComplete ? (
                 <button
                   onClick={handleComplete}
-                  className="px-8 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium transition-all text-sm shadow-lg shadow-purple-500/30"
+                  className="px-6 md:px-8 py-2 md:py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium transition-all text-xs md:text-sm shadow-lg shadow-purple-500/30"
                 >
                   Complete Assessment
                 </button>
@@ -841,7 +841,7 @@ function TraitQuestionnaireOverlay({
                 <button
                   onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
                   disabled={currentQuestion === questions.length - 1}
-                  className="px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  className="px-4 md:px-6 py-2 md:py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium"
                 >
                   Next
                 </button>

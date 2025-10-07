@@ -2,8 +2,9 @@
 import { useState } from "react"
 import { ChevronDown, Search } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
+import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
-const FILTERS = ["Events", "Projects", "Members", "Unsaved"]
+const FILTERS = ["Events", "Projects", "Members"]
 
 function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -288,11 +289,88 @@ function AnnouncementItem({
   )
 }
 
+const mockMembers = [
+  {
+    id: "sarah-chen",
+    name: "Sarah Chen",
+    title: "AI Engineer",
+    email: "sarah@techstartup.io",
+    location: "San Francisco, CA",
+    handle: "@sarahcodes",
+    initials: "SC",
+    selectedColor: 3 as const,
+    avatarUrl: "/professional-headshot.png",
+    role: "Developer",
+  },
+  {
+    id: "marcus-johnson",
+    name: "Marcus Johnson",
+    title: "Product Designer",
+    email: "marcus@designstudio.com",
+    location: "New York, NY",
+    handle: "@marcusdesign",
+    initials: "MJ",
+    selectedColor: 1 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Designer",
+  },
+  {
+    id: "elena-rodriguez",
+    name: "Elena Rodriguez",
+    title: "Marketing Manager",
+    email: "elena@marketingpro.com",
+    location: "Austin, TX",
+    handle: "@elenamarketing",
+    initials: "ER",
+    selectedColor: 2 as const,
+    avatarUrl: "/woman-analyst.png",
+    role: "Manager",
+  },
+  {
+    id: "david-kim",
+    name: "David Kim",
+    title: "Full Stack Developer",
+    email: "david@techsolutions.com",
+    location: "Seattle, WA",
+    handle: "@daviddev",
+    initials: "DK",
+    selectedColor: 4 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Developer",
+  },
+  {
+    id: "jessica-wu",
+    name: "Jessica Wu",
+    title: "UX Designer",
+    email: "jessica@uxstudio.io",
+    location: "Los Angeles, CA",
+    handle: "@jessicaux",
+    initials: "JW",
+    selectedColor: 5 as const,
+    avatarUrl: "/woman-designer.png",
+    role: "Designer",
+  },
+  {
+    id: "alex-thompson",
+    name: "Alex Thompson",
+    title: "Data Scientist",
+    email: "alex@datascience.com",
+    location: "Boston, MA",
+    handle: "@alexdata",
+    initials: "AT",
+    selectedColor: 0 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Developer",
+  },
+]
+
 export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
   const [active, setActive] = useState("Events")
   const [showPastEvents, setShowPastEvents] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [memberSearchQuery, setMemberSearchQuery] = useState("")
+  const [selectedMemberRole, setSelectedMemberRole] = useState("all")
 
   const pastEvents = [
     {
@@ -370,8 +448,22 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
     })
   }
 
+  const filterMembers = () => {
+    return mockMembers.filter((member) => {
+      const matchesSearch =
+        member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.title.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.email?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.location?.toLowerCase().includes(memberSearchQuery.toLowerCase())
+
+      if (selectedMemberRole === "all") return matchesSearch
+      return matchesSearch && member.role === selectedMemberRole
+    })
+  }
+
   const filteredUpcomingEvents = filterEvents(upcomingEvents)
   const filteredPastEvents = filterEvents(pastEvents)
+  const filteredMembers = filterMembers()
 
   return (
     <div className="w-full">
@@ -381,132 +473,193 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         ))}
       </div>
 
-      <div className="mt-8 space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Search workshops by name, description, or tags..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
-          />
-        </div>
-
-        {/* Category Filters */}
-        <div className="flex gap-2">
-          {[
-            { key: "all", label: "All Workshops" },
-            { key: "technical", label: "Technical" },
-            { key: "design", label: "Design" },
-            { key: "networking", label: "Networking" },
-          ].map((filter) => (
-            <button
-              key={filter.key}
-              onClick={() => setSelectedCategory(filter.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                selectedCategory === filter.key
-                  ? "bg-white text-zinc-900"
-                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-8 flex items-center gap-8 text-sm">
-        <button onClick={() => setShowPastEvents(false)} className="relative transition-colors duration-200">
-          <div className={`font-semibold text-xl py-0.5 ${!showPastEvents ? "text-white" : "text-gray-400"}`}>
-            Upcoming
-          </div>
-          {!showPastEvents && <div className="absolute left-0 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
-        </button>
-        <button onClick={() => setShowPastEvents(true)} className="relative transition-colors duration-200">
-          <div className={`text-xl px-14 py-2 ${showPastEvents ? "text-white font-semibold" : "text-gray-400"}`}>
-            Past
-          </div>
-          {showPastEvents && <div className="absolute left-14 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
-        </button>
-      </div>
-
-      <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
-        {!showPastEvents ? (
-          filteredUpcomingEvents.length > 0 ? (
-            filteredUpcomingEvents.map((event, index) => (
-              <CardSkeleton
-                key={index}
-                title={event.title}
-                date={event.date}
-                description={event.description}
-                time={event.time}
-                attending={event.attending}
-                dateLabel={event.dateLabel}
-                location={event.location}
-                instructor={event.instructor}
-                tags={event.tags}
-                onEventClick={onEventClick}
-              />
-            ))
-          ) : (
-            <div className="w-full text-center py-12">
-              <p className="text-zinc-500">No workshops found matching your criteria.</p>
-            </div>
-          )
-        ) : filteredPastEvents.length > 0 ? (
-          filteredPastEvents.map((event, index) => (
-            <CardSkeleton
-              key={index}
-              title={event.title}
-              date={event.date}
-              description={event.description}
-              time={event.time}
-              attending={event.attending}
-              location={event.location}
-              instructor={event.instructor}
-              tags={event.tags}
-              onEventClick={onEventClick}
+      {active === "Members" && (
+        <div className="mt-8 space-y-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Search members by name, role, or location..."
+              value={memberSearchQuery}
+              onChange={(e) => setMemberSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
             />
-          ))
-        ) : (
-          <div className="w-full text-center py-12">
-            <p className="text-zinc-500">No past workshops found matching your criteria.</p>
           </div>
-        )}
-      </div>
 
-      <section className="mt-12">
-        <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
-          Announcements
-        </h2>
+          {/* Role Filters */}
+          <div className="flex gap-2">
+            {[
+              { key: "all", label: "All" },
+              { key: "Designer", label: "Designers" },
+              { key: "Developer", label: "Developers" },
+              { key: "Manager", label: "Managers" },
+            ].map((filter) => (
+              <button
+                key={filter.key}
+                onClick={() => setSelectedMemberRole(filter.key)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  selectedMemberRole === filter.key
+                    ? "bg-white text-zinc-900"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="space-y-4">
-          <AnnouncementItem
-            title="New Partnership with TechCorp"
-            content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
-            author="Admin"
-            timeAgo="2 hours ago"
-            avatarColor="#8B5CF6"
-            isImportant={true}
-          />
-          <AnnouncementItem
-            title="Upcoming Hackathon Registration"
-            content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
-            author="Events Team"
-            timeAgo="1 day ago"
-            avatarColor="#10B981"
-          />
-          <AnnouncementItem
-            title="New Workspace Hours"
-            content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
-            author="Facilities"
-            timeAgo="3 days ago"
-            avatarColor="#F59E0B"
-          />
+          {/* Members Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
+                <UnifiedPortfolioCard
+                  key={member.id}
+                  portfolio={member}
+                  onClick={(id) => console.log("View member profile:", id)}
+                  onShare={(id) => console.log("Share member:", id)}
+                  onMore={(id) => console.log("More options for member:", id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-zinc-500">No members found matching your criteria.</p>
+              </div>
+            )}
+          </div>
         </div>
-      </section>
+      )}
+
+      {active === "Events" && (
+        <>
+          <div className="mt-8 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search workshops by name, description, or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
+              />
+            </div>
+
+            {/* Category Filters */}
+            <div className="flex gap-2">
+              {[
+                { key: "all", label: "All Workshops" },
+                { key: "technical", label: "Technical" },
+                { key: "design", label: "Design" },
+                { key: "networking", label: "Networking" },
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setSelectedCategory(filter.key)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    selectedCategory === filter.key
+                      ? "bg-white text-zinc-900"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center gap-8 text-sm">
+            <button onClick={() => setShowPastEvents(false)} className="relative transition-colors duration-200">
+              <div className={`font-semibold text-xl py-0.5 ${!showPastEvents ? "text-white" : "text-gray-400"}`}>
+                Upcoming
+              </div>
+              {!showPastEvents && <div className="absolute left-0 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
+            </button>
+            <button onClick={() => setShowPastEvents(true)} className="relative transition-colors duration-200">
+              <div className={`text-xl px-14 py-2 ${showPastEvents ? "text-white font-semibold" : "text-gray-400"}`}>
+                Past
+              </div>
+              {showPastEvents && <div className="absolute left-14 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
+            </button>
+          </div>
+
+          <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
+            {!showPastEvents ? (
+              filteredUpcomingEvents.length > 0 ? (
+                filteredUpcomingEvents.map((event, index) => (
+                  <CardSkeleton
+                    key={index}
+                    title={event.title}
+                    date={event.date}
+                    description={event.description}
+                    time={event.time}
+                    attending={event.attending}
+                    dateLabel={event.dateLabel}
+                    location={event.location}
+                    instructor={event.instructor}
+                    tags={event.tags}
+                    onEventClick={onEventClick}
+                  />
+                ))
+              ) : (
+                <div className="w-full text-center py-12">
+                  <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                </div>
+              )
+            ) : filteredPastEvents.length > 0 ? (
+              filteredPastEvents.map((event, index) => (
+                <CardSkeleton
+                  key={index}
+                  title={event.title}
+                  date={event.date}
+                  description={event.description}
+                  time={event.time}
+                  attending={event.attending}
+                  location={event.location}
+                  instructor={event.instructor}
+                  tags={event.tags}
+                  onEventClick={onEventClick}
+                />
+              ))
+            ) : (
+              <div className="w-full text-center py-12">
+                <p className="text-zinc-500">No past workshops found matching your criteria.</p>
+              </div>
+            )}
+          </div>
+
+          <section className="mt-12">
+            <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
+              Announcements
+            </h2>
+
+            <div className="space-y-4">
+              <AnnouncementItem
+                title="New Partnership with TechCorp"
+                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
+                author="Admin"
+                timeAgo="2 hours ago"
+                avatarColor="#8B5CF6"
+                isImportant={true}
+              />
+              <AnnouncementItem
+                title="Upcoming Hackathon Registration"
+                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
+                author="Events Team"
+                timeAgo="1 day ago"
+                avatarColor="#10B981"
+              />
+              <AnnouncementItem
+                title="New Workspace Hours"
+                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
+                author="Facilities"
+                timeAgo="3 days ago"
+                avatarColor="#F59E0B"
+              />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

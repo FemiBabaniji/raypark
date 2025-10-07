@@ -192,366 +192,7 @@ export default function MusicAppInterface({
 
   /** -------------------- UI -------------------- */
   return (
-    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
-      {/* Profile card */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-      >
-        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
-          {/* Node graphic with theme gradient */}
-          <div
-            className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
-          >
-            <div className="absolute inset-1 rounded-full bg-white/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 bg-white/90 rounded-full" />
-            </div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
-          </div>
-
-          {/* Compact profile summary */}
-          <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
-          <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
-
-          {/* Trait scores preview */}
-          {draft.traitScores && (
-            <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Profile</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                <div className="text-left">
-                  <div className="text-white/50">Enterprising</div>
-                  <div className="text-white/90 font-medium">{draft.traitScores.enterprisingPotential}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-white/50">EQ</div>
-                  <div className="text-white/90 font-medium">{draft.traitScores.emotionalQuotient}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-white/50">Independence</div>
-                  <div className="text-white/90 font-medium">{draft.traitScores.independencePotential}</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-white/50">People</div>
-                  <div className="text-white/90 font-medium">{draft.traitScores.peopleOrientation}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {draft.skills && draft.skills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 justify-center mb-3">
-              {draft.skills.slice(0, 4).map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10"
-                >
-                  {skill}
-                </span>
-              ))}
-              {draft.skills.length > 4 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">
-                  +{draft.skills.length - 4}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Action row */}
-          <div className="flex items-center gap-2">
-            <button
-              className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
-              onClick={() => setEditOpen((s) => !s)}
-            >
-              {editOpen ? "close" : "edit profile"}
-            </button>
-            <div className="relative">
-              <button
-                className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
-                onClick={() => setShowPalette((s) => !s)}
-                aria-label="Change theme color"
-              >
-                <Palette className="w-4 h-4" />
-              </button>
-              {showPalette && (
-                <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
-                  {THEME_COLOR_OPTIONS.map((c, idx) => (
-                    <button
-                      key={c.name}
-                      onClick={() => {
-                        setDraft((d) => ({ ...d, selectedColor: idx as ThemeIndex }))
-                        onIdentityChange?.({ selectedColor: idx as ThemeIndex })
-                        setShowPalette(false)
-                      }}
-                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${c.gradient} ${
-                        draft.selectedColor === (idx as ThemeIndex)
-                          ? "ring-2 ring-white"
-                          : "hover:ring-2 hover:ring-white/60"
-                      } transition-all`}
-                      aria-label={`Set theme ${c.name}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {editOpen && (
-            <div className="text-left mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              {/* Basic Info Section */}
-              <div className="space-y-3">
-                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Basic Info</div>
-                <Field label="Name">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.name ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                    placeholder="Your full name"
-                  />
-                </Field>
-                <Field label="Title">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.title ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                    placeholder="Your professional title"
-                  />
-                </Field>
-              </div>
-
-              {/* Trait System Section */}
-              <div className="space-y-3 pt-2 border-t border-white/10">
-                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
-                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex items-start gap-3 mb-3">
-                    <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
-                      <div className="text-xs text-white/60 leading-relaxed">
-                        Complete a brief questionnaire to generate your leadership profile and trait scores for better
-                        portfolio matching.
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowTraitQuestionnaire(true)}
-                    className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
-                  >
-                    {draft.traitScores ? "Retake Assessment" : "Take Assessment"}
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                  {draft.traitScores && (
-                    <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
-                      <TraitScoreBar
-                        label="Enterprising"
-                        value={draft.traitScores.enterprisingPotential}
-                        min={-20}
-                        max={80}
-                      />
-                      <TraitScoreBar
-                        label="Achievement"
-                        value={draft.traitScores.achievementPotential}
-                        min={-40}
-                        max={50}
-                      />
-                      <TraitScoreBar
-                        label="Independence"
-                        value={draft.traitScores.independencePotential}
-                        min={-40}
-                        max={50}
-                      />
-                      <TraitScoreBar
-                        label="Emotional IQ"
-                        value={draft.traitScores.emotionalQuotient}
-                        min={40}
-                        max={90}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Skills Section */}
-              <div className="space-y-3 pt-2 border-t border-white/10">
-                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Skills & Expertise</div>
-                <Field label="Add Skills (for search & discovery)">
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <input
-                        className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                        placeholder="e.g. React, Design, Python"
-                        value={skillInput}
-                        onChange={(e) => setSkillInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && skillInput.trim()) {
-                            e.preventDefault()
-                            const newSkill = skillInput.trim()
-                            if (!draft.skills?.includes(newSkill)) {
-                              setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
-                            }
-                            setSkillInput("")
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          if (skillInput.trim()) {
-                            const newSkill = skillInput.trim()
-                            if (!draft.skills?.includes(newSkill)) {
-                              setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
-                            }
-                            setSkillInput("")
-                          }
-                        }}
-                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                        aria-label="Add skill"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {draft.skills && draft.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {draft.skills.map((skill, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              setDraft((d) => ({
-                                ...d,
-                                skills: d.skills?.filter((s) => s !== skill),
-                              }))
-                            }}
-                            className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
-                          >
-                            <Tag className="w-3 h-3" />
-                            {skill}
-                            <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Field>
-              </div>
-
-              {/* Social Links Section */}
-              <div className="space-y-3 pt-2 border-t border-white/10">
-                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Social Links</div>
-                <Field label="Add Social Media Links">
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <input
-                        className="w-24 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                        placeholder="Platform"
-                        value={linkPlatform}
-                        onChange={(e) => setLinkPlatform(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
-                            e.preventDefault()
-                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
-                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
-                            setLinkPlatform("")
-                            setLinkUrl("")
-                          }
-                        }}
-                      />
-                      <input
-                        className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                        placeholder="URL"
-                        value={linkUrl}
-                        onChange={(e) => setLinkUrl(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
-                            e.preventDefault()
-                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
-                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
-                            setLinkPlatform("")
-                            setLinkUrl("")
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          if (linkPlatform.trim() && linkUrl.trim()) {
-                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
-                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
-                            setLinkPlatform("")
-                            setLinkUrl("")
-                          }
-                        }}
-                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                        aria-label="Add social link"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {draft.socialLinks && draft.socialLinks.length > 0 && (
-                      <div className="space-y-1.5">
-                        {draft.socialLinks.map((link, idx) => (
-                          <div
-                            key={idx}
-                            className="group flex items-center justify-between gap-2 text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
-                          >
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <LinkIcon className="w-3 h-3 text-white/60 flex-shrink-0" />
-                              <span className="text-white/90 font-medium">{link.platform}</span>
-                              <span className="text-white/50 truncate">{link.url}</span>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setDraft((d) => ({
-                                  ...d,
-                                  socialLinks: d.socialLinks?.filter((_, i) => i !== idx),
-                                }))
-                              }}
-                              className="p-1 rounded hover:bg-red-500/20 text-white/60 hover:text-red-300 transition-colors"
-                              aria-label="Remove link"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Field>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10 sticky bottom-0 bg-[#1a1a1a] pb-2">
-                <button
-                  className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
-                  onClick={() => {
-                    setDraft(identity ?? {})
-                    setSkillInput("")
-                    setLinkPlatform("")
-                    setLinkUrl("")
-                    setEditOpen(false)
-                  }}
-                >
-                  <X className="w-4 h-4" />
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-2 font-medium"
-                  onClick={() => {
-                    onIdentityChange?.(draft)
-                    setEditOpen(false)
-                  }}
-                >
-                  <Save className="w-4 h-4" />
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Trait Questionnaire Overlay */}
+    <>
       <TraitQuestionnaireOverlay
         isOpen={showTraitQuestionnaire}
         onClose={() => setShowTraitQuestionnaire(false)}
@@ -561,59 +202,421 @@ export default function MusicAppInterface({
         }}
       />
 
-      {/* Bot card (replaces Archetype) */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.25 }}
-      >
-        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
-          <div className="flex items-center gap-2 mb-2">
-            <Bot className="w-4 h-4 text-zinc-400" />
-            <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>
-            {onTogglePreview && (
+      <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
+        {/* Profile card */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
+            {/* Node graphic with theme gradient */}
+            <div
+              className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
+            >
+              <div className="absolute inset-1 rounded-full bg-white/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-4 h-4 bg-white/90 rounded-full" />
+              </div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
+            </div>
+
+            {/* Compact profile summary */}
+            <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
+            <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
+
+            {/* Trait scores preview */}
+            {draft.traitScores && (
+              <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">
+                    Leadership Profile
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="text-left">
+                    <div className="text-white/50">Enterprising</div>
+                    <div className="text-white/90 font-medium">{draft.traitScores.enterprisingPotential}</div>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white/50">EQ</div>
+                    <div className="text-white/90 font-medium">{draft.traitScores.emotionalQuotient}</div>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white/50">Independence</div>
+                    <div className="text-white/90 font-medium">{draft.traitScores.independencePotential}</div>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white/50">People</div>
+                    <div className="text-white/90 font-medium">{draft.traitScores.peopleOrientation}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {draft.skills && draft.skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+                {draft.skills.slice(0, 4).map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10"
+                  >
+                    {skill}
+                  </span>
+                ))}
+                {draft.skills.length > 4 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                    +{draft.skills.length - 4}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Action row */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={onTogglePreview}
-                className="ml-auto text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-white/20"
+                className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
+                onClick={() => setEditOpen((s) => !s)}
               >
-                Toggle Preview
+                {editOpen ? "close" : "edit profile"}
               </button>
+              <div className="relative">
+                <button
+                  className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
+                  onClick={() => setShowPalette((s) => !s)}
+                  aria-label="Change theme color"
+                >
+                  <Palette className="w-4 h-4" />
+                </button>
+                {showPalette && (
+                  <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                    {THEME_COLOR_OPTIONS.map((c, idx) => (
+                      <button
+                        key={c.name}
+                        onClick={() => {
+                          setDraft((d) => ({ ...d, selectedColor: idx as ThemeIndex }))
+                          onIdentityChange?.({ selectedColor: idx as ThemeIndex })
+                          setShowPalette(false)
+                        }}
+                        className={`w-8 h-8 rounded-full bg-gradient-to-br ${c.gradient} ${
+                          draft.selectedColor === (idx as ThemeIndex)
+                            ? "ring-2 ring-white"
+                            : "hover:ring-2 hover:ring-white/60"
+                        } transition-all`}
+                        aria-label={`Set theme ${c.name}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {editOpen && (
+              <div className="text-left mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                {/* Basic Info Section */}
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Basic Info</div>
+                  <Field label="Name">
+                    <input
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                      value={draft.name ?? ""}
+                      onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                      placeholder="Your full name"
+                    />
+                  </Field>
+                  <Field label="Title">
+                    <input
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                      value={draft.title ?? ""}
+                      onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+                      placeholder="Your professional title"
+                    />
+                  </Field>
+                </div>
+
+                {/* Trait System Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
+                        <div className="text-xs text-white/60 leading-relaxed">
+                          Complete a brief questionnaire to generate your leadership profile and trait scores for better
+                          portfolio matching.
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowTraitQuestionnaire(true)}
+                      className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
+                    >
+                      {draft.traitScores ? "Retake Assessment" : "Take Assessment"}
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                    {draft.traitScores && (
+                      <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                        <TraitScoreBar
+                          label="Enterprising"
+                          value={draft.traitScores.enterprisingPotential}
+                          min={-20}
+                          max={80}
+                        />
+                        <TraitScoreBar
+                          label="Achievement"
+                          value={draft.traitScores.achievementPotential}
+                          min={-40}
+                          max={50}
+                        />
+                        <TraitScoreBar
+                          label="Independence"
+                          value={draft.traitScores.independencePotential}
+                          min={-40}
+                          max={50}
+                        />
+                        <TraitScoreBar
+                          label="Emotional IQ"
+                          value={draft.traitScores.emotionalQuotient}
+                          min={40}
+                          max={90}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Skills Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Skills & Expertise</div>
+                  <Field label="Add Skills (for search & discovery)">
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="e.g. React, Design, Python"
+                          value={skillInput}
+                          onChange={(e) => setSkillInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && skillInput.trim()) {
+                              e.preventDefault()
+                              const newSkill = skillInput.trim()
+                              if (!draft.skills?.includes(newSkill)) {
+                                setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                              }
+                              setSkillInput("")
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (skillInput.trim()) {
+                              const newSkill = skillInput.trim()
+                              if (!draft.skills?.includes(newSkill)) {
+                                setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                              }
+                              setSkillInput("")
+                            }
+                          }}
+                          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                          aria-label="Add skill"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {draft.skills && draft.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {draft.skills.map((skill, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setDraft((d) => ({
+                                  ...d,
+                                  skills: d.skills?.filter((s) => s !== skill),
+                                }))
+                              }}
+                              className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
+                            >
+                              <Tag className="w-3 h-3" />
+                              {skill}
+                              <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* Social Links Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Social Links</div>
+                  <Field label="Add Social Media Links">
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          className="w-24 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="Platform"
+                          value={linkPlatform}
+                          onChange={(e) => setLinkPlatform(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                              e.preventDefault()
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                        />
+                        <input
+                          className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="URL"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                              e.preventDefault()
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (linkPlatform.trim() && linkUrl.trim()) {
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                          aria-label="Add social link"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {draft.socialLinks && draft.socialLinks.length > 0 && (
+                        <div className="space-y-1.5">
+                          {draft.socialLinks.map((link, idx) => (
+                            <div
+                              key={idx}
+                              className="group flex items-center justify-between gap-2 text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <LinkIcon className="w-3 h-3 text-white/60 flex-shrink-0" />
+                                <span className="text-white/90 font-medium">{link.platform}</span>
+                                <span className="text-white/50 truncate">{link.url}</span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setDraft((d) => ({
+                                    ...d,
+                                    socialLinks: d.socialLinks?.filter((_, i) => i !== idx),
+                                  }))
+                                }}
+                                className="p-1 rounded hover:bg-red-500/20 text-white/60 hover:text-red-300 transition-colors"
+                                aria-label="Remove link"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10 sticky bottom-0 bg-[#1a1a1a] pb-2">
+                  <button
+                    className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
+                    onClick={() => {
+                      setDraft(identity ?? {})
+                      setSkillInput("")
+                      setLinkPlatform("")
+                      setLinkUrl("")
+                      setEditOpen(false)
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-2 font-medium"
+                    onClick={() => {
+                      onIdentityChange?.(draft)
+                      setEditOpen(false)
+                    }}
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                </div>
+              </div>
             )}
           </div>
+        </motion.div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {msgs.map((m, i) => (
-              <div
-                key={i}
-                className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
-              >
-                {m.text}
-              </div>
-            ))}
-            {loading && (
-              <div className="text-sm text-zinc-400 flex items-center gap-2">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Working…
-              </div>
-            )}
-            <div ref={endRef} />
-          </div>
+        {/* Bot card (replaces Archetype) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+        >
+          <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-4 h-4 text-zinc-400" />
+              <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>
+              {onTogglePreview && (
+                <button
+                  onClick={onTogglePreview}
+                  className="ml-auto text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-white/20"
+                >
+                  Toggle Preview
+                </button>
+              )}
+            </div>
 
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder='Try: add gallery right, theme purple, rename "Oliver"'
-              className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-            />
-            <button onClick={handleSend} className="p-2 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
-              <Send className="w-4 h-4" />
-            </button>
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {msgs.map((m, i) => (
+                <div
+                  key={i}
+                  className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
+                >
+                  {m.text}
+                </div>
+              ))}
+              {loading && (
+                <div className="text-sm text-zinc-400 flex items-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Working…
+                </div>
+              )}
+              <div ref={endRef} />
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder='Try: add gallery right, theme purple, rename "Oliver"'
+                className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+              />
+              <button onClick={handleSend} className="p-2 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </>
   )
 }
 
@@ -745,7 +748,7 @@ function TraitQuestionnaireOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 md:p-8 lg:p-12"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 sm:p-6 md:p-8"
           onClick={onClose}
         >
           <motion.div
@@ -753,7 +756,7 @@ function TraitQuestionnaireOverlay({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#1a1a1a] rounded-3xl p-6 md:p-8 lg:p-10 max-w-3xl w-full border border-white/10 max-h-[85vh] overflow-y-auto"
+            className="bg-[#1a1a1a] rounded-3xl p-6 md:p-8 lg:p-10 w-full max-w-2xl border border-white/10 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
@@ -793,13 +796,13 @@ function TraitQuestionnaireOverlay({
                 key={currentQuestion}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed text-center px-2"
+                className="text-base md:text-lg lg:text-xl text-white leading-relaxed text-center px-2"
               >
                 {questions[currentQuestion].text}
               </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-6 md:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 md:gap-3 mb-6 md:mb-8">
               {[
                 { value: 5, label: "Strongly Agree" },
                 { value: 4, label: "Agree" },

@@ -3,11 +3,24 @@
 import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { motion } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, Brain, ChevronRight } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 /** Types the side panel can use */
+type TraitScores = {
+  enterprisingPotential: number // -20 to 80
+  achievementPotential: number // -40 to 50
+  independencePotential: number // -40 to 50
+  comfortWithConflict: number // -40 to 50
+  emotionalQuotient: number // 40 to 90
+  peopleOrientation: number // -40 to 50
+  analyticalOrientation: number // -30 to 30
+  selfDirected: number // 0 to 60
+  lifestyleManagement: number // 0 to 60
+  commitmentReluctance: number // 0 to 60
+}
+
 type IdentityShape = {
   name?: string
   title?: string
@@ -19,6 +32,7 @@ type IdentityShape = {
   selectedColor?: ThemeIndex
   skills?: string[]
   socialLinks?: { platform: string; url: string }[]
+  traitScores?: TraitScores
 }
 
 type BotCommand =
@@ -49,6 +63,7 @@ export default function MusicAppInterface({
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
+  const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
 
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
@@ -200,6 +215,34 @@ export default function MusicAppInterface({
           <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
           <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
 
+          {/* Trait scores preview */}
+          {draft.traitScores && (
+            <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Profile</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                <div className="text-left">
+                  <div className="text-white/50">Enterprising</div>
+                  <div className="text-white/90 font-medium">{draft.traitScores.enterprisingPotential}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-white/50">EQ</div>
+                  <div className="text-white/90 font-medium">{draft.traitScores.emotionalQuotient}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-white/50">Independence</div>
+                  <div className="text-white/90 font-medium">{draft.traitScores.independencePotential}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-white/50">People</div>
+                  <div className="text-white/90 font-medium">{draft.traitScores.peopleOrientation}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {draft.skills && draft.skills.length > 0 && (
             <div className="flex flex-wrap gap-1.5 justify-center mb-3">
               {draft.skills.slice(0, 4).map((skill, idx) => (
@@ -258,7 +301,7 @@ export default function MusicAppInterface({
           </div>
 
           {editOpen && (
-            <div className="text-left mt-4 space-y-4">
+            <div className="text-left mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               {/* Basic Info Section */}
               <div className="space-y-3">
                 <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Basic Info</div>
@@ -278,6 +321,58 @@ export default function MusicAppInterface({
                     placeholder="Your professional title"
                   />
                 </Field>
+              </div>
+
+              {/* Trait System Section */}
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
+                      <div className="text-xs text-white/60 leading-relaxed">
+                        Complete a brief questionnaire to generate your leadership profile and trait scores for better
+                        portfolio matching.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowTraitQuestionnaire(true)}
+                    className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
+                  >
+                    {draft.traitScores ? "Retake Assessment" : "Take Assessment"}
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  {draft.traitScores && (
+                    <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                      <TraitScoreBar
+                        label="Enterprising"
+                        value={draft.traitScores.enterprisingPotential}
+                        min={-20}
+                        max={80}
+                      />
+                      <TraitScoreBar
+                        label="Achievement"
+                        value={draft.traitScores.achievementPotential}
+                        min={-40}
+                        max={50}
+                      />
+                      <TraitScoreBar
+                        label="Independence"
+                        value={draft.traitScores.independencePotential}
+                        min={-40}
+                        max={50}
+                      />
+                      <TraitScoreBar
+                        label="Emotional IQ"
+                        value={draft.traitScores.emotionalQuotient}
+                        min={40}
+                        max={90}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Skills Section */}
@@ -426,7 +521,7 @@ export default function MusicAppInterface({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10 sticky bottom-0 bg-[#1a1a1a] pb-2">
                 <button
                   className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
                   onClick={() => {
@@ -455,6 +550,16 @@ export default function MusicAppInterface({
           )}
         </div>
       </motion.div>
+
+      {/* Trait Questionnaire Overlay */}
+      <TraitQuestionnaireOverlay
+        isOpen={showTraitQuestionnaire}
+        onClose={() => setShowTraitQuestionnaire(false)}
+        onComplete={(scores) => {
+          setDraft((d) => ({ ...d, traitScores: scores }))
+          setShowTraitQuestionnaire(false)
+        }}
+      />
 
       {/* Bot card (replaces Archetype) */}
       <motion.div
@@ -509,6 +614,244 @@ export default function MusicAppInterface({
         </div>
       </motion.div>
     </div>
+  )
+}
+
+// TraitScoreBar component for displaying individual trait scores
+function TraitScoreBar({ label, value, min, max }: { label: string; value: number; min: number; max: number }) {
+  const percentage = ((value - min) / (max - min)) * 100
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[10px] mb-1">
+        <span className="text-white/60">{label}</span>
+        <span className="text-white/90 font-medium">{value}</span>
+      </div>
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+          style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+// TraitQuestionnaireOverlay component
+function TraitQuestionnaireOverlay({
+  isOpen,
+  onClose,
+  onComplete,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onComplete: (scores: TraitScores) => void
+}) {
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [answers, setAnswers] = useState<Record<number, number>>({})
+
+  const questions = [
+    {
+      id: 0,
+      text: "I prefer to work independently and set my own goals rather than follow detailed instructions.",
+      trait: "enterprising",
+    },
+    {
+      id: 1,
+      text: "I am motivated by challenging tasks that push me to achieve significant results.",
+      trait: "achievement",
+    },
+    {
+      id: 2,
+      text: "I feel comfortable making decisions on my own without needing team consensus.",
+      trait: "independence",
+    },
+    {
+      id: 3,
+      text: "I am comfortable addressing conflicts directly and having difficult conversations.",
+      trait: "conflict",
+    },
+    {
+      id: 4,
+      text: "I can easily recognize and understand the emotions of others in social situations.",
+      trait: "eq",
+    },
+    {
+      id: 5,
+      text: "I enjoy meeting new people and building relationships quickly.",
+      trait: "people",
+    },
+    {
+      id: 6,
+      text: "I prefer to analyze data and facts before making decisions.",
+      trait: "analytical",
+    },
+    {
+      id: 7,
+      text: "I feel in control of my life and believe my actions determine my outcomes.",
+      trait: "selfDirected",
+    },
+    {
+      id: 8,
+      text: "I manage stress effectively and maintain a healthy work-life balance.",
+      trait: "lifestyle",
+    },
+    {
+      id: 9,
+      text: "I am comfortable asking others for commitments and holding them accountable.",
+      trait: "commitment",
+    },
+  ]
+
+  const handleAnswer = (value: number) => {
+    setAnswers((prev) => ({ ...prev, [currentQuestion]: value }))
+    if (currentQuestion < questions.length - 1) {
+      setTimeout(() => setCurrentQuestion((c) => c + 1), 300)
+    }
+  }
+
+  const handleComplete = () => {
+    // Calculate scores based on answers (1-5 scale)
+    const calculateScore = (trait: string, min: number, max: number) => {
+      const relevantAnswers = questions.filter((q) => q.trait === trait).map((q) => answers[q.id] || 3)
+      const avg = relevantAnswers.reduce((a, b) => a + b, 0) / relevantAnswers.length
+      return Math.round(min + ((avg - 1) / 4) * (max - min))
+    }
+
+    const scores: TraitScores = {
+      enterprisingPotential: calculateScore("enterprising", -20, 80),
+      achievementPotential: calculateScore("achievement", -40, 50),
+      independencePotential: calculateScore("independence", -40, 50),
+      comfortWithConflict: calculateScore("conflict", -40, 50),
+      emotionalQuotient: calculateScore("eq", 40, 90),
+      peopleOrientation: calculateScore("people", -40, 50),
+      analyticalOrientation: calculateScore("analytical", -30, 30),
+      selfDirected: calculateScore("selfDirected", 0, 60),
+      lifestyleManagement: calculateScore("lifestyle", 0, 60),
+      commitmentReluctance: calculateScore("commitment", 0, 60),
+    }
+
+    onComplete(scores)
+    setCurrentQuestion(0)
+    setAnswers({})
+  }
+
+  const progress = ((currentQuestion + 1) / questions.length) * 100
+  const isComplete = Object.keys(answers).length === questions.length
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#1a1a1a] rounded-3xl p-8 max-w-2xl w-full border border-white/10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Brain className="w-6 h-6 text-purple-400" />
+                <h2 className="text-xl font-semibold text-white">Leadership Assessment</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5 text-white/60" />
+              </button>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between text-sm text-white/60 mb-2">
+                <span>
+                  Question {currentQuestion + 1} of {questions.length}
+                </span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </div>
+
+            {/* Question */}
+            <div className="mb-8">
+              <motion.p
+                key={currentQuestion}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-lg text-white leading-relaxed"
+              >
+                {questions[currentQuestion].text}
+              </motion.p>
+            </div>
+
+            {/* Answer options */}
+            <div className="space-y-3 mb-6">
+              {[
+                { value: 5, label: "Strongly Agree" },
+                { value: 4, label: "Agree" },
+                { value: 3, label: "Neutral" },
+                { value: 2, label: "Disagree" },
+                { value: 1, label: "Strongly Disagree" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleAnswer(option.value)}
+                  className={`w-full py-3 px-4 rounded-xl text-left transition-all ${
+                    answers[currentQuestion] === option.value
+                      ? "bg-purple-500/30 border-purple-500/50 text-white"
+                      : "bg-white/5 hover:bg-white/10 border-white/10 text-white/80"
+                  } border`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
+                disabled={currentQuestion === 0}
+                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+              >
+                Previous
+              </button>
+              {isComplete ? (
+                <button
+                  onClick={handleComplete}
+                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium transition-all text-sm"
+                >
+                  Complete Assessment
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
+                  disabled={currentQuestion === questions.length - 1}
+                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 

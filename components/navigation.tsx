@@ -47,7 +47,7 @@ export function Navigation({
   }, [isUserDropdownOpen, setIsUserDropdownOpen])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background">
+    <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: "oklch(0.18 0 0)" }}>
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left - Logo */}
         <div className="flex items-center gap-3">
@@ -55,7 +55,7 @@ export function Navigation({
             <AvatarImage src="/placeholder.svg" />
             <AvatarFallback className="bg-purple-600 text-white text-sm">P</AvatarFallback>
           </Avatar>
-          <span className="text-white font-medium">PathwAI</span>
+          <span className="text-white font-medium text-sm">pathwai</span>
         </div>
 
         {/* Center - Main Navigation */}

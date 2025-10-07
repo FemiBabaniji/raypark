@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Search } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 
 const FILTERS = ["Events", "Projects", "Members", "Unsaved"]
@@ -291,6 +291,8 @@ function AnnouncementItem({
 export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
   const [active, setActive] = useState("Events")
   const [showPastEvents, setShowPastEvents] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
 
   const pastEvents = [
     {
@@ -302,6 +304,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       location: "Main Auditorium",
       instructor: "Panel of VCs",
       tags: ["Pitching", "Investment", "Competition", "Startups"],
+      category: "networking",
     },
     {
       title: "Blockchain & Web3 Summit",
@@ -312,8 +315,63 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       location: "Conference Hall A",
       instructor: "Crypto Industry Leaders",
       tags: ["Blockchain", "Web3", "Crypto", "DeFi"],
+      category: "technical",
     },
   ]
+
+  const upcomingEvents = [
+    {
+      title: "AI & Machine Learning Workshop",
+      date: "1 Sept 2025",
+      description: "Deep dive into cutting-edge AI technologies and practical ML implementations for startups.",
+      time: "6:00 PM - 9:00 PM",
+      attending: 23,
+      dateLabel: "Sep 1",
+      location: "Tech Hub, 3rd Floor",
+      instructor: "Dr. Sarah Chen, AI Researcher",
+      tags: ["AI/ML", "Deep Learning", "Workshop", "Hands-on"],
+      category: "technical",
+    },
+    {
+      title: "Founder Networking Mixer",
+      date: "22 Sept 2025",
+      description: "Connect with fellow founders, share experiences, and build meaningful relationships.",
+      time: "7:00 PM - 10:00 PM",
+      attending: 45,
+      dateLabel: "Sep 22",
+      location: "Rooftop Lounge",
+      instructor: "Panel of Founders",
+      tags: ["Networking", "Founders", "Mixer", "Community"],
+      category: "networking",
+    },
+    {
+      title: "Product Design Masterclass",
+      date: "28 Sept 2025",
+      description: "Learn advanced UX/UI principles and design thinking methodologies from industry experts.",
+      time: "2:00 PM - 5:00 PM",
+      attending: 31,
+      dateLabel: "Sep 28",
+      location: "Design Studio, 2nd Floor",
+      instructor: "Maria Rodriguez, Lead UX Designer",
+      tags: ["UX/UI", "Design Thinking", "Masterclass", "Portfolio Review"],
+      category: "design",
+    },
+  ]
+
+  const filterEvents = (events: typeof upcomingEvents) => {
+    return events.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      if (selectedCategory === "all") return matchesSearch
+      return matchesSearch && event.category === selectedCategory
+    })
+  }
+
+  const filteredUpcomingEvents = filterEvents(upcomingEvents)
+  const filteredPastEvents = filterEvents(pastEvents)
 
   return (
     <div className="w-full">
@@ -323,8 +381,43 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         ))}
       </div>
 
-      {/* tabs */}
-      <div className="mt-12 flex items-center gap-8 text-sm">
+      <div className="mt-8 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Search workshops by name, description, or tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
+          />
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex gap-2">
+          {[
+            { key: "all", label: "All Workshops" },
+            { key: "technical", label: "Technical" },
+            { key: "design", label: "Design" },
+            { key: "networking", label: "Networking" },
+          ].map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => setSelectedCategory(filter.key)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                selectedCategory === filter.key
+                  ? "bg-white text-zinc-900"
+                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 flex items-center gap-8 text-sm">
         <button onClick={() => setShowPastEvents(false)} className="relative transition-colors duration-200">
           <div className={`font-semibold text-xl py-0.5 ${!showPastEvents ? "text-white" : "text-gray-400"}`}>
             Upcoming
@@ -339,51 +432,31 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         </button>
       </div>
 
-      {/* cards row */}
       <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
         {!showPastEvents ? (
-          // Upcoming events
-          <>
-            <CardSkeleton
-              title="AI & Machine Learning Workshop"
-              date="1 Sept 2025"
-              description="Deep dive into cutting-edge AI technologies and practical ML implementations for startups."
-              time="6:00 PM - 9:00 PM"
-              attending={23}
-              dateLabel="Sep 1"
-              location="Tech Hub, 3rd Floor"
-              instructor="Dr. Sarah Chen, AI Researcher"
-              tags={["AI/ML", "Deep Learning", "Workshop", "Hands-on"]}
-              onEventClick={onEventClick}
-            />
-            <CardSkeleton
-              title="Founder Networking Mixer"
-              date="22 Sept 2025"
-              description="Connect with fellow founders, share experiences, and build meaningful relationships."
-              time="7:00 PM - 10:00 PM"
-              attending={45}
-              dateLabel="Sep 22"
-              location="Rooftop Lounge"
-              instructor="Panel of Founders"
-              tags={["Networking", "Founders", "Mixer", "Community"]}
-              onEventClick={onEventClick}
-            />
-            <CardSkeleton
-              title="Product Design Masterclass"
-              date="28 Sept 2025"
-              description="Learn advanced UX/UI principles and design thinking methodologies from industry experts."
-              time="2:00 PM - 5:00 PM"
-              attending={31}
-              dateLabel="Sep 28"
-              location="Design Studio, 2nd Floor"
-              instructor="Maria Rodriguez, Lead UX Designer"
-              tags={["UX/UI", "Design Thinking", "Masterclass", "Portfolio Review"]}
-              onEventClick={onEventClick}
-            />
-          </>
-        ) : (
-          // Past events
-          pastEvents.map((event, index) => (
+          filteredUpcomingEvents.length > 0 ? (
+            filteredUpcomingEvents.map((event, index) => (
+              <CardSkeleton
+                key={index}
+                title={event.title}
+                date={event.date}
+                description={event.description}
+                time={event.time}
+                attending={event.attending}
+                dateLabel={event.dateLabel}
+                location={event.location}
+                instructor={event.instructor}
+                tags={event.tags}
+                onEventClick={onEventClick}
+              />
+            ))
+          ) : (
+            <div className="w-full text-center py-12">
+              <p className="text-zinc-500">No workshops found matching your criteria.</p>
+            </div>
+          )
+        ) : filteredPastEvents.length > 0 ? (
+          filteredPastEvents.map((event, index) => (
             <CardSkeleton
               key={index}
               title={event.title}
@@ -397,10 +470,13 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               onEventClick={onEventClick}
             />
           ))
+        ) : (
+          <div className="w-full text-center py-12">
+            <p className="text-zinc-500">No past workshops found matching your criteria.</p>
+          </div>
         )}
       </div>
 
-      {/* announcements */}
       <section className="mt-12">
         <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
           Announcements

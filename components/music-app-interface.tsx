@@ -225,31 +225,23 @@ export default function MusicAppInterface({
             <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
             <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
 
-            {/* Trait scores preview */}
             {draft.traitScores && (
-              <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">
-                    Leadership Profile
-                  </span>
+              <div className="mb-3 p-2 rounded-lg bg-white/5">
+                <div className="text-[9px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">
+                  Leadership Traits
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-[10px]">
-                  <div className="text-left">
-                    <div className="text-white/50">Enterprising</div>
-                    <div className="text-white/90 font-medium">{draft.traitScores.enterprisingPotential}</div>
+                <div className="flex items-center justify-between gap-2 text-[10px]">
+                  <div className="flex-1">
+                    <div className="text-white/50 mb-0.5">Enterprising</div>
+                    <div className="text-white/90 font-semibold">{draft.traitScores.enterprisingPotential}</div>
                   </div>
-                  <div className="text-left">
-                    <div className="text-white/50">EQ</div>
-                    <div className="text-white/90 font-medium">{draft.traitScores.emotionalQuotient}</div>
+                  <div className="flex-1">
+                    <div className="text-white/50 mb-0.5">EQ</div>
+                    <div className="text-white/90 font-semibold">{draft.traitScores.emotionalQuotient}</div>
                   </div>
-                  <div className="text-left">
-                    <div className="text-white/50">Independence</div>
-                    <div className="text-white/90 font-medium">{draft.traitScores.independencePotential}</div>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-white/50">People</div>
-                    <div className="text-white/90 font-medium">{draft.traitScores.peopleOrientation}</div>
+                  <div className="flex-1">
+                    <div className="text-white/50 mb-0.5">People</div>
+                    <div className="text-white/90 font-semibold">{draft.traitScores.peopleOrientation}</div>
                   </div>
                 </div>
               </div>

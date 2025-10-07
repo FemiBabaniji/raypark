@@ -786,13 +786,21 @@ function TraitQuestionnaireOverlay({
   ]
 
   const handleAnswer = (value: number) => {
-    setAnswers((prev) => ({ ...prev, [currentQuestion]: value }))
+    const newAnswers = { ...answers, [currentQuestion]: value }
+    setAnswers(newAnswers)
+
+    console.log("[v0] Question answered:", currentQuestion, "Value:", value)
+    console.log("[v0] Total answers:", Object.keys(newAnswers).length, "of", questions.length)
+
     if (currentQuestion < questions.length - 1) {
       setTimeout(() => setCurrentQuestion((c) => c + 1), 300)
+    } else {
+      console.log("[v0] All questions answered! Showing View Results button")
     }
   }
 
   const handleShowResults = () => {
+    console.log("[v0] Calculating results...")
     // Calculate scores based on answers (1-5 scale)
     const calculateScore = (trait: string, min: number, max: number) => {
       const relevantAnswers = questions.filter((q) => q.trait === trait).map((q) => answers[q.id] || 3)
@@ -813,11 +821,13 @@ function TraitQuestionnaireOverlay({
       commitmentReluctance: calculateScore("commitment", 0, 60),
     }
 
+    console.log("[v0] Calculated scores:", scores)
     setCalculatedScores(scores)
     setShowResults(true)
   }
 
   const handleSaveResults = () => {
+    console.log("[v0] Saving results...")
     if (calculatedScores) {
       onComplete(calculatedScores)
       setCurrentQuestion(0)
@@ -828,6 +838,7 @@ function TraitQuestionnaireOverlay({
   }
 
   const handleRetake = () => {
+    console.log("[v0] Retaking assessment...")
     setShowResults(false)
     setCurrentQuestion(0)
     setAnswers({})
@@ -836,6 +847,15 @@ function TraitQuestionnaireOverlay({
 
   const progress = ((currentQuestion + 1) / questions.length) * 100
   const isComplete = Object.keys(answers).length === questions.length
+
+  console.log(
+    "[v0] Questionnaire state - Current:",
+    currentQuestion,
+    "Answers:",
+    Object.keys(answers).length,
+    "Complete:",
+    isComplete,
+  )
 
   return (
     <AnimatePresence>
@@ -853,35 +873,29 @@ function TraitQuestionnaireOverlay({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-neutral-900/90 to-neutral-800/90 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             {showResults && calculatedScores ? (
-              // Results Summary View
               <>
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Your Leadership Profile</h2>
-                      <p className="text-sm text-neutral-400">Assessment Complete</p>
-                    </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Your Leadership Profile</h2>
+                    <p className="text-sm text-neutral-400 mt-1">Assessment Complete</p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-2 rounded-xl hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+                    className="text-2xl text-neutral-400 hover:text-white transition-colors"
                     aria-label="Close"
                   >
-                    <X className="w-5 h-5" />
+                    ×
                   </button>
                 </div>
 
                 {/* Summary of Scores */}
                 <div className="space-y-6 mb-8">
                   {/* Orientation & Coaching Factors */}
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
                     <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                       Orientation & Coaching Factors
                     </h3>
@@ -922,7 +936,7 @@ function TraitQuestionnaireOverlay({
                   </div>
 
                   {/* Communication Style */}
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
                     <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                       Communication Style
                     </h3>
@@ -947,7 +961,7 @@ function TraitQuestionnaireOverlay({
                   </div>
 
                   {/* Attitude Survey */}
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
                     <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                       Attitude Survey
                     </h3>
@@ -980,7 +994,7 @@ function TraitQuestionnaireOverlay({
                   </div>
 
                   {/* Emotional Quotient */}
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl">
                     <h3 className="text-sm font-semibold text-purple-300 uppercase tracking-wider mb-4">
                       Emotional Quotient
                     </h3>
@@ -997,42 +1011,35 @@ function TraitQuestionnaireOverlay({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between pt-6">
                   <button
                     onClick={handleRetake}
-                    className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 transition-all text-sm font-medium text-white border border-neutral-700/50"
+                    className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 transition-all text-sm font-medium text-white"
                   >
                     Retake Assessment
                   </button>
                   <button
                     onClick={handleSaveResults}
-                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 flex items-center gap-2"
+                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
                   >
-                    <Save className="w-4 h-4" />
                     Save Results
                   </button>
                 </div>
               </>
             ) : (
-              // Questionnaire View
               <>
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Leadership Assessment</h2>
-                      <p className="text-sm text-neutral-400">Discover your professional traits</p>
-                    </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Leadership Assessment</h2>
+                    <p className="text-sm text-neutral-400 mt-1">Discover your professional traits</p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-2 rounded-xl hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+                    className="text-2xl text-neutral-400 hover:text-white transition-colors"
                     aria-label="Close"
                   >
-                    <X className="w-5 h-5" />
+                    ×
                   </button>
                 </div>
 
@@ -1073,28 +1080,28 @@ function TraitQuestionnaireOverlay({
                     {
                       value: 5,
                       label: "Strongly Agree",
-                      color: "from-green-500/20 to-emerald-500/20 border-green-500/30",
+                      color: "from-green-500/20 to-emerald-500/20",
                     },
-                    { value: 4, label: "Agree", color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30" },
+                    { value: 4, label: "Agree", color: "from-blue-500/20 to-cyan-500/20" },
                     {
                       value: 3,
                       label: "Neutral",
-                      color: "from-neutral-500/20 to-neutral-600/20 border-neutral-500/30",
+                      color: "from-neutral-500/20 to-neutral-600/20",
                     },
-                    { value: 2, label: "Disagree", color: "from-orange-500/20 to-amber-500/20 border-orange-500/30" },
+                    { value: 2, label: "Disagree", color: "from-orange-500/20 to-amber-500/20" },
                     {
                       value: 1,
                       label: "Strongly Disagree",
-                      color: "from-red-500/20 to-rose-500/20 border-red-500/30",
+                      color: "from-red-500/20 to-rose-500/20",
                     },
                   ].map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handleAnswer(option.value)}
-                      className={`group relative py-4 px-3 rounded-2xl text-center transition-all duration-200 border ${
+                      className={`group relative py-4 px-3 rounded-2xl text-center transition-all duration-200 ${
                         answers[currentQuestion] === option.value
                           ? `bg-gradient-to-br ${option.color} scale-105 shadow-lg`
-                          : "bg-neutral-800/30 hover:bg-neutral-800/50 border-neutral-700/50 hover:border-neutral-600 hover:scale-105"
+                          : "bg-neutral-800/30 hover:bg-neutral-800/50 hover:scale-105"
                       }`}
                     >
                       <div className="text-2xl font-bold text-white mb-1">{option.value}</div>
@@ -1106,18 +1113,21 @@ function TraitQuestionnaireOverlay({
                 </div>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between pt-6">
                   <button
                     onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
                     disabled={currentQuestion === 0}
-                    className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white border border-neutral-700/50"
+                    className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white"
                   >
                     Previous
                   </button>
                   {isComplete ? (
                     <button
-                      onClick={handleShowResults}
-                      className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                      onClick={() => {
+                        console.log("[v0] View Results button clicked!")
+                        handleShowResults()
+                      }}
+                      className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
                     >
                       View Results
                     </button>
@@ -1125,7 +1135,7 @@ function TraitQuestionnaireOverlay({
                     <button
                       onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
                       disabled={currentQuestion === questions.length - 1}
-                      className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white border border-neutral-700/50"
+                      className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white"
                     >
                       Next
                     </button>

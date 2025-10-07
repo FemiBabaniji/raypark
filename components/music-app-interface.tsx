@@ -338,53 +338,131 @@ export default function MusicAppInterface({
                 {/* Trait System Section */}
                 <div className="space-y-3 pt-2 border-t border-white/10">
                   <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
-                  <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
-                        <div className="text-xs text-white/60 leading-relaxed">
-                          Complete a brief questionnaire to generate your leadership profile and trait scores for better
-                          portfolio matching.
+
+                  {!draft.traitScores ? (
+                    // Show assessment prompt if no scores
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
+                          <div className="text-xs text-white/60 leading-relaxed">
+                            Complete a brief questionnaire to generate your leadership profile and trait scores for
+                            better portfolio matching.
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowTraitQuestionnaire(true)}
+                        className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
+                      >
+                        Take Assessment
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    // Show comprehensive score preview after assessment
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-purple-400" />
+                          <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+                            Leadership Profile Complete
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => setShowTraitQuestionnaire(true)}
+                          className="text-[10px] px-2 py-1 rounded-md bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
+                        >
+                          Retake
+                        </button>
+                      </div>
+
+                      {/* Comprehensive Score Display */}
+                      <div className="space-y-3">
+                        {/* Orientation Factors */}
+                        <div className="space-y-2">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Orientation & Coaching
+                          </div>
+                          <TraitScoreBar
+                            label="Enterprising"
+                            value={draft.traitScores.enterprisingPotential}
+                            min={-20}
+                            max={80}
+                          />
+                          <TraitScoreBar
+                            label="Achievement"
+                            value={draft.traitScores.achievementPotential}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Independence"
+                            value={draft.traitScores.independencePotential}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Conflict Comfort"
+                            value={draft.traitScores.comfortWithConflict}
+                            min={-40}
+                            max={50}
+                          />
+                        </div>
+
+                        {/* Communication Style */}
+                        <div className="space-y-2 pt-2 border-t border-white/10">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Communication Style
+                          </div>
+                          <TraitScoreBar
+                            label="People Orientation"
+                            value={draft.traitScores.peopleOrientation}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Analytical"
+                            value={draft.traitScores.analyticalOrientation}
+                            min={-30}
+                            max={30}
+                          />
+                        </div>
+
+                        {/* Attitude & EQ */}
+                        <div className="space-y-2 pt-2 border-t border-white/10">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Attitude & Emotional Intelligence
+                          </div>
+                          <TraitScoreBar
+                            label="Emotional IQ"
+                            value={draft.traitScores.emotionalQuotient}
+                            min={40}
+                            max={90}
+                          />
+                          <TraitScoreBar
+                            label="Self Directed"
+                            value={draft.traitScores.selfDirected}
+                            min={0}
+                            max={60}
+                          />
+                          <TraitScoreBar
+                            label="Lifestyle Management"
+                            value={draft.traitScores.lifestyleManagement}
+                            min={0}
+                            max={60}
+                          />
+                          <TraitScoreBar
+                            label="Commitment"
+                            value={draft.traitScores.commitmentReluctance}
+                            min={0}
+                            max={60}
+                          />
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setShowTraitQuestionnaire(true)}
-                      className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
-                    >
-                      {draft.traitScores ? "Retake Assessment" : "Take Assessment"}
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                    {draft.traitScores && (
-                      <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
-                        <TraitScoreBar
-                          label="Enterprising"
-                          value={draft.traitScores.enterprisingPotential}
-                          min={-20}
-                          max={80}
-                        />
-                        <TraitScoreBar
-                          label="Achievement"
-                          value={draft.traitScores.achievementPotential}
-                          min={-40}
-                          max={50}
-                        />
-                        <TraitScoreBar
-                          label="Independence"
-                          value={draft.traitScores.independencePotential}
-                          min={-40}
-                          max={50}
-                        />
-                        <TraitScoreBar
-                          label="Emotional IQ"
-                          value={draft.traitScores.emotionalQuotient}
-                          min={40}
-                          max={90}
-                        />
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
 
                 {/* Skills Section */}
@@ -651,6 +729,8 @@ function TraitQuestionnaireOverlay({
 }) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
+  const [showResults, setShowResults] = useState(false)
+  const [calculatedScores, setCalculatedScores] = useState<TraitScores | null>(null)
 
   const questions = [
     {
@@ -712,7 +792,7 @@ function TraitQuestionnaireOverlay({
     }
   }
 
-  const handleComplete = () => {
+  const handleShowResults = () => {
     // Calculate scores based on answers (1-5 scale)
     const calculateScore = (trait: string, min: number, max: number) => {
       const relevantAnswers = questions.filter((q) => q.trait === trait).map((q) => answers[q.id] || 3)
@@ -733,9 +813,25 @@ function TraitQuestionnaireOverlay({
       commitmentReluctance: calculateScore("commitment", 0, 60),
     }
 
-    onComplete(scores)
+    setCalculatedScores(scores)
+    setShowResults(true)
+  }
+
+  const handleSaveResults = () => {
+    if (calculatedScores) {
+      onComplete(calculatedScores)
+      setCurrentQuestion(0)
+      setAnswers({})
+      setShowResults(false)
+      setCalculatedScores(null)
+    }
+  }
+
+  const handleRetake = () => {
+    setShowResults(false)
     setCurrentQuestion(0)
     setAnswers({})
+    setCalculatedScores(null)
   }
 
   const progress = ((currentQuestion + 1) / questions.length) * 100
@@ -748,112 +844,341 @@ function TraitQuestionnaireOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 sm:p-6 md:p-8"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-6"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#1a1a1a] rounded-3xl p-6 md:p-8 lg:p-10 w-full max-w-2xl border border-white/10 max-h-[90vh] overflow-y-auto"
+            className="bg-gradient-to-br from-neutral-900/90 to-neutral-800/90 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <div className="flex items-center gap-3">
-                <Brain className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
-                <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white">Leadership Assessment</h2>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5 text-white/60" />
-              </button>
-            </div>
+            {showResults && calculatedScores ? (
+              // Results Summary View
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center">
+                      <Brain className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Your Leadership Profile</h2>
+                      <p className="text-sm text-neutral-400">Assessment Complete</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-xl hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-            {/* Progress bar */}
-            <div className="mb-8 md:mb-10">
-              <div className="flex items-center justify-between text-xs md:text-sm text-white/60 mb-3">
-                <span>
-                  Question {currentQuestion + 1} of {questions.length}
-                </span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-            </div>
+                {/* Summary of Scores */}
+                <div className="space-y-6 mb-8">
+                  {/* Orientation & Coaching Factors */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Orientation & Coaching Factors
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="Enterprising Potential"
+                        value={calculatedScores.enterprisingPotential}
+                        min={-20}
+                        max={80}
+                        leftLabel="Responsive"
+                        rightLabel="Proactive"
+                      />
+                      <ScoreDisplay
+                        label="Achievement Potential"
+                        value={calculatedScores.achievementPotential}
+                        min={-40}
+                        max={50}
+                        leftLabel="Safety & Security"
+                        rightLabel="$ and/or Challenge"
+                      />
+                      <ScoreDisplay
+                        label="Independence Potential"
+                        value={calculatedScores.independencePotential}
+                        min={-40}
+                        max={50}
+                        leftLabel="Team-oriented"
+                        rightLabel="Very Independent"
+                      />
+                      <ScoreDisplay
+                        label="Comfort with Conflict"
+                        value={calculatedScores.comfortWithConflict}
+                        min={-40}
+                        max={50}
+                        leftLabel="Avoids Conflict"
+                        rightLabel="Comfortable"
+                      />
+                    </div>
+                  </div>
 
-            {/* Question */}
-            <div className="mb-8 md:mb-10">
-              <motion.p
-                key={currentQuestion}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="text-base md:text-lg lg:text-xl text-white leading-relaxed text-center px-2"
-              >
-                {questions[currentQuestion].text}
-              </motion.p>
-            </div>
+                  {/* Communication Style */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Communication Style
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="People Orientation"
+                        value={calculatedScores.peopleOrientation}
+                        min={-40}
+                        max={50}
+                        leftLabel="Builds Gradually"
+                        rightLabel="Outgoing"
+                      />
+                      <ScoreDisplay
+                        label="Analytical Orientation"
+                        value={calculatedScores.analyticalOrientation}
+                        min={-30}
+                        max={30}
+                        leftLabel="Learns Essentials"
+                        rightLabel="Highly Analytical"
+                      />
+                    </div>
+                  </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 md:gap-3 mb-6 md:mb-8">
-              {[
-                { value: 5, label: "Strongly Agree" },
-                { value: 4, label: "Agree" },
-                { value: 3, label: "Neutral" },
-                { value: 2, label: "Disagree" },
-                { value: 1, label: "Strongly Disagree" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleAnswer(option.value)}
-                  className={`py-3 md:py-4 px-3 md:px-4 rounded-xl text-center transition-all ${
-                    answers[currentQuestion] === option.value
-                      ? "bg-purple-500/30 border-purple-500/50 text-white scale-105"
-                      : "bg-white/5 hover:bg-white/10 border-white/10 text-white/80 hover:scale-105"
-                  } border`}
-                >
-                  <div className="text-xs md:text-sm font-medium">{option.label}</div>
-                </button>
-              ))}
-            </div>
+                  {/* Attitude Survey */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 border border-white/10">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Attitude Survey
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="Self Directed"
+                        value={calculatedScores.selfDirected}
+                        min={0}
+                        max={60}
+                        leftLabel="External Focus"
+                        rightLabel="Internal Focus"
+                      />
+                      <ScoreDisplay
+                        label="Lifestyle Management"
+                        value={calculatedScores.lifestyleManagement}
+                        min={0}
+                        max={60}
+                        leftLabel="Growth Opportunity"
+                        rightLabel="Well Managed"
+                      />
+                      <ScoreDisplay
+                        label="Commitment Orientation"
+                        value={calculatedScores.commitmentReluctance}
+                        min={0}
+                        max={60}
+                        leftLabel="Might Avoid"
+                        rightLabel="Strongly Pursues"
+                      />
+                    </div>
+                  </div>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-white/10">
-              <button
-                onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
-                disabled={currentQuestion === 0}
-                className="px-4 md:px-6 py-2 md:py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium"
-              >
-                Previous
-              </button>
-              {isComplete ? (
-                <button
-                  onClick={handleComplete}
-                  className="px-6 md:px-8 py-2 md:py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium transition-all text-xs md:text-sm shadow-lg shadow-purple-500/30"
-                >
-                  Complete Assessment
-                </button>
-              ) : (
-                <button
-                  onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
-                  disabled={currentQuestion === questions.length - 1}
-                  className="px-4 md:px-6 py-2 md:py-3 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium"
-                >
-                  Next
-                </button>
-              )}
-            </div>
+                  {/* Emotional Quotient */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                    <h3 className="text-sm font-semibold text-purple-300 uppercase tracking-wider mb-4">
+                      Emotional Quotient
+                    </h3>
+                    <ScoreDisplay
+                      label="Overall EQ"
+                      value={calculatedScores.emotionalQuotient}
+                      min={40}
+                      max={90}
+                      leftLabel="Relies on Non-Emotional Info"
+                      rightLabel="Understands & Uses Emotional Info"
+                      color="purple"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                  <button
+                    onClick={handleRetake}
+                    className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 transition-all text-sm font-medium text-white border border-neutral-700/50"
+                  >
+                    Retake Assessment
+                  </button>
+                  <button
+                    onClick={handleSaveResults}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 flex items-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Results
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Questionnaire View
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center">
+                      <Brain className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Leadership Assessment</h2>
+                      <p className="text-sm text-neutral-400">Discover your professional traits</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-xl hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Progress */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between text-sm text-neutral-400 mb-3">
+                    <span>
+                      Question {currentQuestion + 1} of {questions.length}
+                    </span>
+                    <span className="text-white font-medium">{Math.round(progress)}%</span>
+                  </div>
+                  <div className="h-2 bg-neutral-800/50 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Question */}
+                <div className="mb-10 min-h-[80px] flex items-center justify-center">
+                  <motion.p
+                    key={currentQuestion}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-lg text-white leading-relaxed text-center max-w-2xl"
+                  >
+                    {questions[currentQuestion].text}
+                  </motion.p>
+                </div>
+
+                {/* Answer Options */}
+                <div className="grid grid-cols-5 gap-3 mb-8">
+                  {[
+                    {
+                      value: 5,
+                      label: "Strongly Agree",
+                      color: "from-green-500/20 to-emerald-500/20 border-green-500/30",
+                    },
+                    { value: 4, label: "Agree", color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30" },
+                    {
+                      value: 3,
+                      label: "Neutral",
+                      color: "from-neutral-500/20 to-neutral-600/20 border-neutral-500/30",
+                    },
+                    { value: 2, label: "Disagree", color: "from-orange-500/20 to-amber-500/20 border-orange-500/30" },
+                    {
+                      value: 1,
+                      label: "Strongly Disagree",
+                      color: "from-red-500/20 to-rose-500/20 border-red-500/30",
+                    },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleAnswer(option.value)}
+                      className={`group relative py-4 px-3 rounded-2xl text-center transition-all duration-200 border ${
+                        answers[currentQuestion] === option.value
+                          ? `bg-gradient-to-br ${option.color} scale-105 shadow-lg`
+                          : "bg-neutral-800/30 hover:bg-neutral-800/50 border-neutral-700/50 hover:border-neutral-600 hover:scale-105"
+                      }`}
+                    >
+                      <div className="text-2xl font-bold text-white mb-1">{option.value}</div>
+                      <div className="text-xs text-neutral-400 group-hover:text-neutral-300 leading-tight">
+                        {option.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                  <button
+                    onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
+                    disabled={currentQuestion === 0}
+                    className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white border border-neutral-700/50"
+                  >
+                    Previous
+                  </button>
+                  {isComplete ? (
+                    <button
+                      onClick={handleShowResults}
+                      className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                    >
+                      View Results
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
+                      disabled={currentQuestion === questions.length - 1}
+                      className="px-6 py-3 rounded-xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white border border-neutral-700/50"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+function ScoreDisplay({
+  label,
+  value,
+  min,
+  max,
+  leftLabel,
+  rightLabel,
+  color = "default",
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  leftLabel: string
+  rightLabel: string
+  color?: "default" | "purple"
+}) {
+  const percentage = ((value - min) / (max - min)) * 100
+  const gradientClass = color === "purple" ? "from-purple-500 to-pink-500" : "from-blue-500 to-cyan-500"
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-white">{label}</span>
+        <span className="text-sm font-bold text-white px-2 py-0.5 rounded-md bg-white/10">{value}</span>
+      </div>
+      <div className="relative h-3 bg-neutral-800/50 rounded-full overflow-hidden mb-1">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className={`h-full bg-gradient-to-r ${gradientClass} rounded-full`}
+        />
+      </div>
+      <div className="flex items-center justify-between text-[10px] text-neutral-500">
+        <span>{leftLabel}</span>
+        <span>{rightLabel}</span>
+      </div>
+    </div>
   )
 }
 

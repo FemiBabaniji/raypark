@@ -291,6 +291,19 @@ function AnnouncementItem({
 
 const mockMembers = [
   {
+    id: "oluwafemi-babaniji",
+    name: "Oluwafemi Babaniji",
+    title: "Senior Data Scientist",
+    email: "oluwafemi@datascience.ai",
+    location: "Toronto, ON",
+    handle: "@oluwafemidata",
+    initials: "OB",
+    selectedColor: 3 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Developer",
+    isLive: true,
+  },
+  {
     id: "sarah-chen",
     name: "Sarah Chen",
     title: "AI Engineer",
@@ -301,6 +314,7 @@ const mockMembers = [
     selectedColor: 3 as const,
     avatarUrl: "/professional-headshot.png",
     role: "Developer",
+    isLive: true,
   },
   {
     id: "marcus-johnson",
@@ -313,6 +327,7 @@ const mockMembers = [
     selectedColor: 1 as const,
     avatarUrl: "/man-developer.png",
     role: "Designer",
+    isLive: true,
   },
   {
     id: "elena-rodriguez",
@@ -325,6 +340,7 @@ const mockMembers = [
     selectedColor: 2 as const,
     avatarUrl: "/woman-analyst.png",
     role: "Manager",
+    isLive: true,
   },
   {
     id: "david-kim",
@@ -337,6 +353,7 @@ const mockMembers = [
     selectedColor: 4 as const,
     avatarUrl: "/man-developer.png",
     role: "Developer",
+    isLive: true,
   },
   {
     id: "jessica-wu",
@@ -349,6 +366,7 @@ const mockMembers = [
     selectedColor: 5 as const,
     avatarUrl: "/woman-designer.png",
     role: "Designer",
+    isLive: true,
   },
   {
     id: "alex-thompson",
@@ -361,6 +379,20 @@ const mockMembers = [
     selectedColor: 0 as const,
     avatarUrl: "/man-developer.png",
     role: "Developer",
+    isLive: true,
+  },
+  {
+    id: "amara-okafor",
+    name: "Amara Okafor",
+    title: "Founder & CEO",
+    email: "amara@techventures.co",
+    location: "Lagos, Nigeria",
+    handle: "@amarafounder",
+    initials: "AO",
+    selectedColor: 2 as const,
+    avatarUrl: "/professional-woman-headshot.png",
+    role: "Manager",
+    isLive: true,
   },
 ]
 

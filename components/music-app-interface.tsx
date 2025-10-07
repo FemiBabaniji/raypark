@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2 } from "lucide-react"
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 /** Types the side panel can use */
@@ -17,6 +17,7 @@ type IdentityShape = {
   location?: string
   avatarUrl?: string
   selectedColor?: ThemeIndex
+  skills?: string[]
 }
 
 type BotCommand =
@@ -51,6 +52,8 @@ export default function MusicAppInterface({
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
   useEffect(() => setDraft(identity ?? {}), [identity])
+
+  const [skillInput, setSkillInput] = useState("")
 
   // theming for the little node graphic
   const gradient = useMemo(
@@ -199,6 +202,24 @@ export default function MusicAppInterface({
             {draft.subtitle || "short tagline"}
           </p>
 
+          {draft.skills && draft.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+              {draft.skills.slice(0, 4).map((skill, idx) => (
+                <span
+                  key={idx}
+                  className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10"
+                >
+                  {skill}
+                </span>
+              ))}
+              {draft.skills.length > 4 && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                  +{draft.skills.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Action row */}
           <div className="flex items-center gap-2">
             <button
@@ -262,6 +283,65 @@ export default function MusicAppInterface({
                   onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
                 />
               </Field>
+
+              <Field label="Skills (for search & discovery)">
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                      placeholder="e.g. React, Design, Python"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && skillInput.trim()) {
+                          e.preventDefault()
+                          const newSkill = skillInput.trim()
+                          if (!draft.skills?.includes(newSkill)) {
+                            setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                          }
+                          setSkillInput("")
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (skillInput.trim()) {
+                          const newSkill = skillInput.trim()
+                          if (!draft.skills?.includes(newSkill)) {
+                            setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                          }
+                          setSkillInput("")
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
+                      aria-label="Add skill"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {draft.skills && draft.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {draft.skills.map((skill, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setDraft((d) => ({
+                              ...d,
+                              skills: d.skills?.filter((s) => s !== skill),
+                            }))
+                          }}
+                          className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
+                        >
+                          <Tag className="w-3 h-3" />
+                          {skill}
+                          <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Field>
+
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Handle">
                   <input
@@ -300,6 +380,7 @@ export default function MusicAppInterface({
                   className="px-3 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20"
                   onClick={() => {
                     setDraft(identity ?? {})
+                    setSkillInput("")
                     setEditOpen(false)
                   }}
                 >

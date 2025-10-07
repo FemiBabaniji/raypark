@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
@@ -27,6 +28,7 @@ export default function EventsRightColumn() {
   const [isQuickActionsExpanded, setIsQuickActionsExpanded] = useState(false)
   const { user, loading } = useAuth()
   const [savedPortfolio, setSavedPortfolio] = useState<SavedPortfolioData | null>(null)
+  const router = useRouter() // Added router for navigation
 
   useEffect(() => {
     const savedData = localStorage.getItem("bea_portfolio_data")
@@ -109,10 +111,13 @@ export default function EventsRightColumn() {
             <div className="mt-2 h-3 bg-white/20 rounded w-1/2"></div>
           </div>
         ) : userPortfolio ? (
-          <div className="h-64">
+          <div
+            className="h-64 cursor-pointer transition-transform hover:scale-[1.02]"
+            onClick={() => router.push("/portfolio/builder")}
+          >
             <UnifiedPortfolioCard
               portfolio={userPortfolio}
-              onClick={(id) => console.log("View profile:", id)}
+              onClick={(id) => router.push("/portfolio/builder")}
               onShare={(id) => console.log("Share profile:", id)}
               onMore={(id) => console.log("More options:", id)}
             />
@@ -126,9 +131,13 @@ export default function EventsRightColumn() {
           </div>
         )}
 
-        <div className="mt-3 text-center text-xs" style={{ color: "#B3B3B3" }}>
+        <button
+          onClick={() => router.push("/portfolio/builder")}
+          className="mt-3 w-full text-center text-xs hover:text-white transition-colors"
+          style={{ color: "#B3B3B3" }}
+        >
           edit profile
-        </div>
+        </button>
 
         <div className="mt-4 border-t border-gray-700 pt-4">
           <button

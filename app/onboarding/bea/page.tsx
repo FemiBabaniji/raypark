@@ -349,13 +349,12 @@ export default function BEAOnboardingPage() {
         transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="flex items-center space-x-3">
-          <img src="/bea-logo.svg" alt="Black Entrepreneurship Alliance" className="h-8 w-auto" />
           <span className="text-sm font-medium" style={{ color: "#B3B3B3" }}>
             pathwai × BEA
           </span>
         </div>
 
-        <div className="flex items-center space-x-2" aria-label="Progress">
+        <div className="flex items-center space-x-2 mt-1" aria-label="Progress">
           {[1, 2, 3, 4, 5].map((step) => (
             <div
               key={step}

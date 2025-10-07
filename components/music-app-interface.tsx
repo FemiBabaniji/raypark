@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag } from "lucide-react"
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 /** Types the side panel can use */
@@ -18,6 +18,7 @@ type IdentityShape = {
   avatarUrl?: string
   selectedColor?: ThemeIndex
   skills?: string[]
+  socialLinks?: { platform: string; url: string }[]
 }
 
 type BotCommand =
@@ -54,8 +55,9 @@ export default function MusicAppInterface({
   useEffect(() => setDraft(identity ?? {}), [identity])
 
   const [skillInput, setSkillInput] = useState("")
+  const [linkPlatform, setLinkPlatform] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
 
-  // theming for the little node graphic
   const gradient = useMemo(
     () => THEME_COLOR_OPTIONS[draft.selectedColor ?? 0]?.gradient ?? "from-neutral-500/40 to-neutral-700/60",
     [draft.selectedColor],
@@ -120,7 +122,6 @@ export default function MusicAppInterface({
   }
 
   function runLocalSideEffects(cmd: BotCommand) {
-    // Apply identity-affecting commands locally too (nice immediate feedback)
     if (cmd.type === "theme") {
       const { color } = cmd.payload
       let idx: ThemeIndex | null = null
@@ -198,9 +199,6 @@ export default function MusicAppInterface({
           {/* Compact profile summary */}
           <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
           <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
-          <p className="text-neutral-300 text-xs mb-3 leading-relaxed line-clamp-2">
-            {draft.subtitle || "short tagline"}
-          </p>
 
           {draft.skills && draft.skills.length > 0 && (
             <div className="flex flex-wrap gap-1.5 justify-center mb-3">
@@ -259,142 +257,197 @@ export default function MusicAppInterface({
             </div>
           </div>
 
-          {/* Expandable editor */}
           {editOpen && (
-            <div className="text-left mt-4 space-y-3">
-              <Field label="Name">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.name ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                />
-              </Field>
-              <Field label="Title">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.title ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                />
-              </Field>
-              <Field label="Subtitle">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.subtitle ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
-                />
-              </Field>
+            <div className="text-left mt-4 space-y-4">
+              {/* Basic Info Section */}
+              <div className="space-y-3">
+                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Basic Info</div>
+                <Field label="Name">
+                  <input
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                    value={draft.name ?? ""}
+                    onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                    placeholder="Your full name"
+                  />
+                </Field>
+                <Field label="Title">
+                  <input
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                    value={draft.title ?? ""}
+                    onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+                    placeholder="Your professional title"
+                  />
+                </Field>
+              </div>
 
-              <Field label="Skills (for search & discovery)">
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                      placeholder="e.g. React, Design, Python"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && skillInput.trim()) {
-                          e.preventDefault()
-                          const newSkill = skillInput.trim()
-                          if (!draft.skills?.includes(newSkill)) {
-                            setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+              {/* Skills Section */}
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Skills & Expertise</div>
+                <Field label="Add Skills (for search & discovery)">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                        placeholder="e.g. React, Design, Python"
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && skillInput.trim()) {
+                            e.preventDefault()
+                            const newSkill = skillInput.trim()
+                            if (!draft.skills?.includes(newSkill)) {
+                              setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                            }
+                            setSkillInput("")
                           }
-                          setSkillInput("")
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (skillInput.trim()) {
-                          const newSkill = skillInput.trim()
-                          if (!draft.skills?.includes(newSkill)) {
-                            setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (skillInput.trim()) {
+                            const newSkill = skillInput.trim()
+                            if (!draft.skills?.includes(newSkill)) {
+                              setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                            }
+                            setSkillInput("")
                           }
-                          setSkillInput("")
-                        }
-                      }}
-                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-                      aria-label="Add skill"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {draft.skills && draft.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {draft.skills.map((skill, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setDraft((d) => ({
-                              ...d,
-                              skills: d.skills?.filter((s) => s !== skill),
-                            }))
-                          }}
-                          className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
-                        >
-                          <Tag className="w-3 h-3" />
-                          {skill}
-                          <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
-                      ))}
+                        }}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                        aria-label="Add skill"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
-                </div>
-              </Field>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Handle">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.handle ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, handle: e.target.value }))}
-                  />
-                </Field>
-                <Field label="Avatar URL">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.avatarUrl ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, avatarUrl: e.target.value }))}
-                  />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Email">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.email ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-                  />
-                </Field>
-                <Field label="Location">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.location ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
-                  />
+                    {draft.skills && draft.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {draft.skills.map((skill, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setDraft((d) => ({
+                                ...d,
+                                skills: d.skills?.filter((s) => s !== skill),
+                              }))
+                            }}
+                            className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
+                          >
+                            <Tag className="w-3 h-3" />
+                            {skill}
+                            <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </Field>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-1">
+              {/* Social Links Section */}
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Social Links</div>
+                <Field label="Add Social Media Links">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        className="w-24 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                        placeholder="Platform"
+                        value={linkPlatform}
+                        onChange={(e) => setLinkPlatform(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                            e.preventDefault()
+                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                            setLinkPlatform("")
+                            setLinkUrl("")
+                          }
+                        }}
+                      />
+                      <input
+                        className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                        placeholder="URL"
+                        value={linkUrl}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                            e.preventDefault()
+                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                            setLinkPlatform("")
+                            setLinkUrl("")
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (linkPlatform.trim() && linkUrl.trim()) {
+                            const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                            setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                            setLinkPlatform("")
+                            setLinkUrl("")
+                          }
+                        }}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                        aria-label="Add social link"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {draft.socialLinks && draft.socialLinks.length > 0 && (
+                      <div className="space-y-1.5">
+                        {draft.socialLinks.map((link, idx) => (
+                          <div
+                            key={idx}
+                            className="group flex items-center justify-between gap-2 text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <LinkIcon className="w-3 h-3 text-white/60 flex-shrink-0" />
+                              <span className="text-white/90 font-medium">{link.platform}</span>
+                              <span className="text-white/50 truncate">{link.url}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setDraft((d) => ({
+                                  ...d,
+                                  socialLinks: d.socialLinks?.filter((_, i) => i !== idx),
+                                }))
+                              }}
+                              className="p-1 rounded hover:bg-red-500/20 text-white/60 hover:text-red-300 transition-colors"
+                              aria-label="Remove link"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Field>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
                 <button
-                  className="px-3 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20"
+                  className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
                   onClick={() => {
                     setDraft(identity ?? {})
                     setSkillInput("")
+                    setLinkPlatform("")
+                    setLinkUrl("")
                     setEditOpen(false)
                   }}
                 >
-                  <X className="w-4 h-4 inline mr-1" />
+                  <X className="w-4 h-4" />
                   Cancel
                 </button>
                 <button
-                  className="px-3 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90"
+                  className="px-4 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-2 font-medium"
                   onClick={() => {
                     onIdentityChange?.(draft)
                     setEditOpen(false)
                   }}
                 >
-                  <Save className="w-4 h-4 inline mr-1" />
+                  <Save className="w-4 h-4" />
                   Save
                 </button>
               </div>

@@ -64,6 +64,7 @@ export default function MusicAppInterface({
   const [editOpen, setEditOpen] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
   const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
+  const [traitsExpanded, setTraitsExpanded] = useState(false)
 
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
@@ -226,24 +227,43 @@ export default function MusicAppInterface({
             <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
 
             {draft.traitScores && (
-              <div className="mb-3 p-2 rounded-lg bg-white/5">
-                <div className="text-[9px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">
-                  Leadership Traits
-                </div>
-                <div className="flex items-center justify-between gap-2 text-[10px]">
-                  <div className="flex-1">
-                    <div className="text-white/50 mb-0.5">Enterprising</div>
-                    <div className="text-white/90 font-semibold">{draft.traitScores.enterprisingPotential}</div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white/50 mb-0.5">EQ</div>
-                    <div className="text-white/90 font-semibold">{draft.traitScores.emotionalQuotient}</div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white/50 mb-0.5">People</div>
-                    <div className="text-white/90 font-semibold">{draft.traitScores.peopleOrientation}</div>
-                  </div>
-                </div>
+              <div className="mb-3">
+                <button
+                  onClick={() => setTraitsExpanded(!traitsExpanded)}
+                  className="w-full py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs text-white/70 hover:text-white/90 flex items-center justify-between"
+                >
+                  <span>Leadership Profile</span>
+                  <ChevronRight className={`w-3 h-3 transition-transform ${traitsExpanded ? "rotate-90" : ""}`} />
+                </button>
+
+                {traitsExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2 p-3 rounded-lg bg-white/5 space-y-2 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-[9px]">
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">Enterprising</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.enterprisingPotential}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">EQ</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.emotionalQuotient}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">Independence</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.independencePotential}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">People</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.peopleOrientation}</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             )}
 

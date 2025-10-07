@@ -3,6 +3,7 @@
 
 import type React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { BackButton } from "./ui/back-button"
 
 type PortfolioShellProps = {
@@ -15,19 +16,21 @@ type PortfolioShellProps = {
   className?: string // optional wrapper class
 }
 
-export function LogoPill({ src = "/logo.svg" }: { src?: string }) {
+export function LogoPill({ src = "/logo.svg", href = "/bea" }: { src?: string; href?: string }) {
   return (
-    <div className="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-50" />
-      {/* Use next/image if your project is already using it, otherwise <img> is fine */}
-      <Image
-        src={src || "/placeholder.svg"}
-        alt="Network / Org Logo"
-        width={96}
-        height={32}
-        className="h-8 w-auto relative z-10 opacity-90 hover:opacity-100 transition-opacity"
-      />
-    </div>
+    <Link href={href}>
+      <div className="relative px-6 py-3 rounded-2xl bg-gradient-to-r from-neutral-800/40 via-neutral-700/60 to-neutral-800/40 backdrop-blur-xl border border-neutral-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-50" />
+        {/* Use next/image if your project is already using it, otherwise <img> is fine */}
+        <Image
+          src={src || "/placeholder.svg"}
+          alt="Network / Org Logo"
+          width={96}
+          height={32}
+          className="h-8 w-auto relative z-10 opacity-90 hover:opacity-100 transition-opacity"
+        />
+      </div>
+    </Link>
   )
 }
 

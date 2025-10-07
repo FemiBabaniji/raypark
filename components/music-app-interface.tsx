@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, Brain, ChevronRight } from "lucide-react"
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, ChevronRight } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 /** Types the side panel can use */
@@ -352,10 +352,8 @@ export default function MusicAppInterface({
                   <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
 
                   {!draft.traitScores ? (
-                    // Show assessment prompt if no scores
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="p-3 rounded-xl bg-white/5">
                       <div className="flex items-start gap-3 mb-3">
-                        <Brain className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                         <div className="flex-1">
                           <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
                           <div className="text-xs text-white/60 leading-relaxed">
@@ -366,25 +364,21 @@ export default function MusicAppInterface({
                       </div>
                       <button
                         onClick={() => setShowTraitQuestionnaire(true)}
-                        className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 border border-purple-500/30"
+                        className="w-full py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
                         Take Assessment
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
-                    // Show comprehensive score preview after assessment
-                    <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                    <div className="p-4 rounded-xl bg-white/5">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <Brain className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
-                            Leadership Profile Complete
-                          </span>
-                        </div>
+                        <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">
+                          Leadership Profile Complete
+                        </span>
                         <button
                           onClick={() => setShowTraitQuestionnaire(true)}
-                          className="text-[10px] px-2 py-1 rounded-md bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
+                          className="text-[10px] px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white/70 transition-colors"
                         >
                           Retake
                         </button>
@@ -721,7 +715,7 @@ function TraitScoreBar({ label, value, min, max }: { label: string; value: numbe
       </div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500"
           style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
         />
       </div>
@@ -1006,8 +1000,8 @@ function TraitQuestionnaireOverlay({
                   </div>
 
                   {/* Emotional Quotient */}
-                  <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl">
-                    <h3 className="text-sm font-semibold text-purple-300 uppercase tracking-wider mb-4">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                       Emotional Quotient
                     </h3>
                     <ScoreDisplay
@@ -1017,7 +1011,7 @@ function TraitQuestionnaireOverlay({
                       max={90}
                       leftLabel="Relies on Non-Emotional Info"
                       rightLabel="Understands & Uses Emotional Info"
-                      color="purple"
+                      color="blue"
                     />
                   </div>
                 </div>
@@ -1032,7 +1026,7 @@ function TraitQuestionnaireOverlay({
                   </button>
                   <button
                     onClick={handleSaveResults}
-                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                   >
                     Save Results
                   </button>
@@ -1065,7 +1059,7 @@ function TraitQuestionnaireOverlay({
                   </div>
                   <div className="h-2 bg-neutral-800/50 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -1139,7 +1133,7 @@ function TraitQuestionnaireOverlay({
                         console.log("[v0] View Results button clicked!")
                         handleShowResults()
                       }}
-                      className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                      className="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                     >
                       View Results
                     </button>
@@ -1177,10 +1171,10 @@ function ScoreDisplay({
   max: number
   leftLabel: string
   rightLabel: string
-  color?: "default" | "purple"
+  color?: "default" | "blue"
 }) {
   const percentage = ((value - min) / (max - min)) * 100
-  const gradientClass = color === "purple" ? "from-purple-500 to-pink-500" : "from-blue-500 to-cyan-500"
+  const gradientClass = "from-blue-500 to-cyan-500"
 
   return (
     <div>

@@ -10,11 +10,11 @@ import OnboardingOverlay from "./onboarding-overlay"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
 import { safeUUID } from "@/lib/utils"
+import StartupWidget from "./portfolio/builder/widgets/StartupWidget"
 
 /**
- * StarterPortfolio — The default portfolio template featuring the StartupWidget
- * - Complete widget set (Profile, Startup, Education, Projects, Services, Description, Gallery)
- * - StartupWidget prominently displayed at top of right column
+ * StarterPortfolio — a full-fledged template matching Jenny Wilson's setup
+ * - Complete widget set (Profile, Education, Projects, Services, Description, Gallery)
  * - Same theme system and interactions
  * - 4-step onboarding overlay with widget highlighting
  */
@@ -73,6 +73,54 @@ export default function StarterPortfolio({
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
 
+  const [startupContent, setStartupContent] = useState({
+    title: "Startup Pitch",
+    slides: {
+      identity: {
+        companyName: "Your Startup",
+        tagline: "We're building X for Y",
+        stage: "Seed",
+        ask: "$50K seed funding",
+      },
+      problem: {
+        title: "Problem",
+        description: "Describe the problem you're solving...",
+      },
+      solution: {
+        title: "Solution",
+        description: "Describe your solution...",
+        links: [],
+      },
+      market: {
+        title: "Market",
+        targetCustomer: "Your target customers",
+        marketSize: "$X billion market",
+        useCase: "How customers use your product",
+      },
+      traction: {
+        title: "Traction",
+        milestones: [
+          { text: "Prototype built", completed: true },
+          { text: "First customers", completed: false },
+        ],
+        metrics: "Key metrics and growth",
+      },
+      team: {
+        title: "Team",
+        members: [{ name: "Your Name", role: "CEO" }],
+      },
+      cta: {
+        title: "Call to Action",
+        asks: [
+          { text: "Funding", active: true },
+          { text: "Mentorship", active: true },
+          { text: "Partnerships", active: false },
+        ],
+        contact: "hello@yourcompany.com",
+      },
+    },
+  })
+
   const projectColorOptions = [
     { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
     { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
@@ -82,11 +130,6 @@ export default function StarterPortfolio({
     { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
     { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
   ]
-
-  // useEffect(() => {
-  //   const seen = localStorage.getItem("starter.onboarding.seen")
-  //   if (seen === "1") setShowOnboarding(false)
-  // }, [])
 
   useEffect(() => {
     if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
@@ -130,6 +173,7 @@ export default function StarterPortfolio({
           about: aboutText,
           projectColors,
           galleryGroups,
+          startup: startupContent,
         },
         isTemplate: true,
         isLive: false,
@@ -368,7 +412,7 @@ export default function StarterPortfolio({
             >
               <X className="w-4 h-4" />
             </Button>
-            <div className={`transition-opacity ${isDragging ? "opacity-100" : "opacity-60 group-hover:opacity-100"}`}>
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               <GripVertical className="w-5 h-5 text-neutral-400" />
             </div>
           </div>
@@ -718,62 +762,6 @@ export default function StarterPortfolio({
     )
   }
 
-  const StartupWidget = ({ widgetId, column }: { widgetId: string; column: "left" | "right" }) => (
-    <div
-      className="bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-cyan-500/20 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing border border-white/10"
-      data-widget="startup"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 bg-purple-600 rounded flex items-center justify-center">
-            <div className="w-2.5 h-2.5 bg-white rounded-sm"></div>
-          </div>
-          <h2 className="text-lg font-bold text-white">Startup Pitch</h2>
-        </div>
-        {!isPreviewMode && (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2"
-              onClick={() => deleteWidget(widgetId, column)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical className="w-5 h-5 text-neutral-400" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        <div className="text-center py-6">
-          <h3 className="text-2xl font-bold text-white mb-2">Your Startup Name</h3>
-          <p className="text-white/70">We're building X for Y</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="bg-white/5 rounded-lg p-3">
-            <span className="text-white/50 text-xs">Stage</span>
-            <p className="text-white font-medium">Seed</p>
-          </div>
-          <div className="bg-white/5 rounded-lg p-3">
-            <span className="text-white/50 text-xs">Ask</span>
-            <p className="text-white font-medium">$50K</p>
-          </div>
-        </div>
-
-        <div className="border-t border-white/10 pt-4">
-          <p className="text-white/60 text-sm text-center">
-            Click to edit your startup pitch deck with problem, solution, market, traction, team, and call to action
-            slides.
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-
   const rightSlot = (
     <div className="relative">
       {showAddDropdown && (
@@ -848,7 +836,27 @@ export default function StarterPortfolio({
       case "gallery":
         return <GalleryWidget key={widget.id} widgetId={widget.id} column={column} />
       case "startup":
-        return <StartupWidget key={widget.id} widgetId={widget.id} column={column} />
+        return (
+          <StartupWidget
+            key={widget.id}
+            widgetId={widget.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={startupContent}
+            onContentChange={setStartupContent}
+            onDelete={() => deleteWidget(widget.id, column)}
+            onMove={() => {
+              deleteWidget(widget.id, column)
+              if (column === "left") {
+                setRightWidgets((p) => [...p, widget as any])
+              } else {
+                setLeftWidgets((p) => [...p, widget as any])
+              }
+            }}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
       default:
         return null
     }

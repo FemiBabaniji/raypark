@@ -7,7 +7,7 @@ import type { ThemeIndex } from "@/lib/theme"
 
 export default function PortfolioCanvas({
   isPreviewMode,
-  useStarterTemplate = false,
+  useStarterTemplate = true, // Changed default to true so StarterPortfolio (with StartupWidget) is shown by default
   activeIdentity,
   onActiveIdentityChange,
   onSavePortfolio,

@@ -153,7 +153,7 @@ export default function Home() {
   const { user, loading: authLoading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized")
-  const [useStarterTemplate, setUseStarterTemplate] = useState(false)
+  const [useStarterTemplate, setUseStarterTemplate] = useState(true)
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("jenny-wilson")
   const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([])
   const [publishedPortfolios, setPublishedPortfolios] = useState<Portfolio[]>([])

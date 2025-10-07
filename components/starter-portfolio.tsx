@@ -12,8 +12,9 @@ import type { Identity } from "./portfolio/builder/types"
 import { safeUUID } from "@/lib/utils"
 
 /**
- * StarterPortfolio — a full-fledged template matching Jenny Wilson's setup
- * - Complete widget set (Profile, Education, Projects, Services, Description, Gallery)
+ * StarterPortfolio — The default portfolio template featuring the StartupWidget
+ * - Complete widget set (Profile, Startup, Education, Projects, Services, Description, Gallery)
+ * - StartupWidget prominently displayed at top of right column
  * - Same theme system and interactions
  * - 4-step onboarding overlay with widget highlighting
  */

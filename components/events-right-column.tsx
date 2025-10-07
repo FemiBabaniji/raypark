@@ -1,29 +1,71 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 
+interface SavedPortfolioData {
+  name: string
+  title: string
+  email: string
+  location: string
+  handle: string
+  industry: string
+  skills: string[]
+  goals: string[]
+  linkedinUrl: string
+  websiteUrl: string
+  twitterUrl: string
+  avatarUrl: string
+  selectedColor: number
+  isLive: boolean
+}
+
 export default function EventsRightColumn() {
   const [isQuickActionsExpanded, setIsQuickActionsExpanded] = useState(false)
   const { user, loading } = useAuth()
+  const [savedPortfolio, setSavedPortfolio] = useState<SavedPortfolioData | null>(null)
 
-  const userPortfolio: UnifiedPortfolio | null = user
-    ? {
-        id: user.id,
-        name: user.name,
-        title: user.role || "Portfolio",
-        email: user.email,
-        location: "Location", // Default location since not in auth
-        handle: user.name.toLowerCase().replace(/\s+/g, ""),
-        avatarUrl: user.imageUrl,
-        initials: user.name.slice(0, 2).toUpperCase(),
-        selectedColor: 3, // Default orange theme
-        isLive: true,
+  useEffect(() => {
+    const savedData = localStorage.getItem("bea_portfolio_data")
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData)
+        setSavedPortfolio(parsed)
+      } catch (error) {
+        console.error("Failed to parse saved portfolio data:", error)
       }
-    : null
+    }
+  }, [])
+
+  const userPortfolio: UnifiedPortfolio | null = savedPortfolio
+    ? {
+        id: user?.id || "saved-portfolio",
+        name: savedPortfolio.name,
+        title: savedPortfolio.title,
+        email: savedPortfolio.email,
+        location: savedPortfolio.location,
+        handle: savedPortfolio.handle,
+        avatarUrl: savedPortfolio.avatarUrl || undefined,
+        selectedColor: savedPortfolio.selectedColor,
+        isLive: savedPortfolio.isLive,
+      }
+    : user
+      ? {
+          id: user.id,
+          name: user.name,
+          title: user.role || "Portfolio",
+          email: user.email,
+          location: "Location",
+          handle: user.name.toLowerCase().replace(/\s+/g, ""),
+          avatarUrl: user.imageUrl,
+          initials: user.name.slice(0, 2).toUpperCase(),
+          selectedColor: 3,
+          isLive: true,
+        }
+      : null
 
   return (
     <div className="fixed top-14 right-6 w-80 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6">

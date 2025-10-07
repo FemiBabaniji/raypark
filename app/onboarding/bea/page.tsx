@@ -205,6 +205,24 @@ export default function BEAOnboardingPage() {
   const handleCompleteOnboarding = useCallback(async () => {
     if (!user) return
     try {
+      const portfolioData = {
+        name: onboardingData.name,
+        title: onboardingData.role,
+        email: onboardingData.email,
+        location: onboardingData.location,
+        handle: onboardingData.handle,
+        industry: onboardingData.industry,
+        skills: onboardingData.skills,
+        goals: onboardingData.goals,
+        linkedinUrl: onboardingData.linkedinUrl,
+        websiteUrl: onboardingData.websiteUrl,
+        twitterUrl: onboardingData.twitterUrl,
+        avatarUrl: avatarPreview,
+        selectedColor: onboardingData.selectedColor,
+        isLive: true,
+      }
+      localStorage.setItem("bea_portfolio_data", JSON.stringify(portfolioData))
+
       const response = await fetch("/api/community-profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -220,7 +238,7 @@ export default function BEAOnboardingPage() {
       console.error(err)
       setStage("portfolio-builder")
     }
-  }, [user, onboardingData, communityCode])
+  }, [user, onboardingData, communityCode, avatarPreview])
 
   const onIdentityChange = useCallback((updatedIdentity: Partial<Identity>) => {
     setOnboardingData((prev) => ({
@@ -318,7 +336,26 @@ export default function BEAOnboardingPage() {
             </Button>
             <Button
               type="button"
-              onClick={() => router.push("/bea")}
+              onClick={() => {
+                const portfolioData = {
+                  name: onboardingData.name,
+                  title: onboardingData.role,
+                  email: onboardingData.email,
+                  location: onboardingData.location,
+                  handle: onboardingData.handle,
+                  industry: onboardingData.industry,
+                  skills: onboardingData.skills,
+                  goals: onboardingData.goals,
+                  linkedinUrl: onboardingData.linkedinUrl,
+                  websiteUrl: onboardingData.websiteUrl,
+                  twitterUrl: onboardingData.twitterUrl,
+                  avatarUrl: avatarPreview,
+                  selectedColor: onboardingData.selectedColor,
+                  isLive: true,
+                }
+                localStorage.setItem("bea_portfolio_data", JSON.stringify(portfolioData))
+                router.push("/bea")
+              }}
               className="px-4 py-2 rounded-xl font-medium"
               style={{ backgroundColor: "#0EA5E9", color: "#FFFFFF" }}
             >

@@ -26,7 +26,6 @@ const eventData = {
         initials: "JW",
         selectedColor: 1,
         avatarUrl: "/woman-designer.png",
-        role: "attendee",
       },
       {
         id: "john-doe",
@@ -37,7 +36,6 @@ const eventData = {
         handle: "@johndoe",
         initials: "JD",
         selectedColor: 2,
-        role: "speaker",
       },
       {
         id: "sarah-chen",
@@ -49,7 +47,6 @@ const eventData = {
         initials: "SC",
         selectedColor: 3,
         avatarUrl: "/professional-headshot.png",
-        role: "attendee",
       },
       {
         id: "mike-rodriguez",
@@ -60,7 +57,6 @@ const eventData = {
         handle: "@mikepm",
         initials: "MR",
         selectedColor: 4,
-        role: "organizer",
       },
       {
         id: "alex-thompson",
@@ -71,7 +67,6 @@ const eventData = {
         handle: "@alexdev",
         initials: "AT",
         selectedColor: 2,
-        role: "attendee",
       },
       {
         id: "lisa-martinez",
@@ -82,7 +77,6 @@ const eventData = {
         handle: "@lisamartinez",
         initials: "LM",
         selectedColor: 5,
-        role: "speaker",
       },
     ],
   },
@@ -93,8 +87,8 @@ export default function EventDetailPage() {
   const params = useParams()
   const { communityId, eventId } = params
 
-  const [selectedFilter, setSelectedFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedFilter, setSelectedFilter] = useState("all")
 
   const event = eventData[eventId as keyof typeof eventData]
 
@@ -103,18 +97,29 @@ export default function EventDetailPage() {
   }
 
   const filteredAttendees = event.attendees.filter((attendee) => {
-    const matchesFilter = selectedFilter === "all" || attendee.role === selectedFilter
     const matchesSearch =
       searchQuery === "" ||
       attendee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      attendee.title.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesFilter && matchesSearch
+      attendee.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.location.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesFilter =
+      selectedFilter === "all" ||
+      (selectedFilter === "design" &&
+        (attendee.title.toLowerCase().includes("design") || attendee.title.toLowerCase().includes("ux"))) ||
+      (selectedFilter === "engineering" &&
+        (attendee.title.toLowerCase().includes("engineer") || attendee.title.toLowerCase().includes("developer"))) ||
+      (selectedFilter === "product" && attendee.title.toLowerCase().includes("product")) ||
+      (selectedFilter === "data" &&
+        (attendee.title.toLowerCase().includes("data") || attendee.title.toLowerCase().includes("scientist")))
+
+    return matchesSearch && matchesFilter
   })
 
   return (
     <div className="min-h-screen bg-zinc-950">
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/80 via-blue-600/80 to-indigo-600/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/80 via-cyan-600/80 to-indigo-600/80"></div>
         <div className="absolute inset-0 bg-black/20"></div>
 
         <motion.nav
@@ -146,7 +151,7 @@ export default function EventDetailPage() {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <Button className="bg-white text-purple-600 hover:bg-white/90">RSVP Now</Button>
+            <Button className="bg-white text-blue-600 hover:bg-white/90">RSVP Now</Button>
             <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
               Add to Calendar
             </Button>
@@ -162,36 +167,38 @@ export default function EventDetailPage() {
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-blue-400" />
             <h2 className="text-2xl font-bold text-white">Event Attendees</h2>
+            <span className="text-sm text-neutral-400">({filteredAttendees.length})</span>
           </div>
 
           <div className="mb-8 space-y-4">
-            {/* Search bar */}
+            {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search attendees by name or title..."
+                placeholder="Search attendees by name, title, or location..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-2xl pl-12 pr-4 py-3 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full pl-12 pr-4 py-3 bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl text-white placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/50 transition-colors"
               />
             </div>
 
-            {/* Filter buttons */}
+            {/* Filter Buttons */}
             <div className="flex flex-wrap gap-2">
               {[
-                { label: "All Attendees", value: "all" },
-                { label: "Speakers", value: "speaker" },
-                { label: "Organizers", value: "organizer" },
-                { label: "Attendees", value: "attendee" },
+                { id: "all", label: "All Attendees" },
+                { id: "design", label: "Design" },
+                { id: "engineering", label: "Engineering" },
+                { id: "product", label: "Product" },
+                { id: "data", label: "Data & AI" },
               ].map((filter) => (
                 <button
-                  key={filter.value}
-                  onClick={() => setSelectedFilter(filter.value)}
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    selectedFilter === filter.value
+                    selectedFilter === filter.id
                       ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl text-neutral-300 hover:text-white"
+                      : "bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800/50 border border-white/10"
                   }`}
                 >
                   {filter.label}
@@ -200,6 +207,7 @@ export default function EventDetailPage() {
             </div>
           </div>
 
+          {/* Attendees Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredAttendees.map((attendee) => (
               <UnifiedPortfolioCard
@@ -220,7 +228,7 @@ export default function EventDetailPage() {
 
           {filteredAttendees.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-neutral-400 text-lg">No attendees found matching your filters.</p>
+              <p className="text-neutral-400 text-lg">No attendees found matching your search.</p>
             </div>
           )}
         </div>

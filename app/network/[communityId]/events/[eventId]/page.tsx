@@ -5,7 +5,8 @@ import { motion } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from "@/components/ui/button"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
-import { Calendar, Clock, MapPin, Users } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Search } from "lucide-react"
+import { useState, useMemo } from "react"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -86,11 +87,51 @@ export default function EventDetailPage() {
   const params = useParams()
   const { communityId, eventId } = params
 
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+
   const event = eventData[eventId as keyof typeof eventData]
 
-  if (!event) {
-    return <div>Event not found</div>
-  }
+  const filteredAttendees = useMemo(() => {
+    if (!event) {
+      return []
+    }
+    let filtered = event.attendees
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (attendee) =>
+          attendee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          attendee.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          attendee.location.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    }
+
+    // Filter by category
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((attendee) => {
+        const title = attendee.title.toLowerCase()
+        if (selectedCategory === "Designers") {
+          return title.includes("designer") || title.includes("ux") || title.includes("ui")
+        } else if (selectedCategory === "Developers") {
+          return (
+            title.includes("developer") ||
+            title.includes("engineer") ||
+            title.includes("programmer") ||
+            title.includes("software")
+          )
+        } else if (selectedCategory === "Managers") {
+          return title.includes("manager") || title.includes("director") || title.includes("lead")
+        }
+        return true
+      })
+    }
+
+    return filtered
+  }, [event, searchQuery, selectedCategory])
+
+  const categories = ["All", "Designers", "Developers", "Managers"]
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -110,31 +151,35 @@ export default function EventDetailPage() {
         </motion.nav>
 
         <div className="relative z-10 px-6 pb-12 pt-4 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">{event.title}</h1>
-          <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              <span>{event.date}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span>{event.time}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              <span>{event.location}</span>
-            </div>
-          </div>
+          {event && (
+            <>
+              <h1 className="text-4xl font-bold text-white mb-4">{event.title}</h1>
+              <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  <span>{event.date}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  <span>{event.time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  <span>{event.location}</span>
+                </div>
+              </div>
 
-          <div className="flex items-center justify-center gap-4">
-            <Button className="bg-white text-purple-600 hover:bg-white/90">RSVP Now</Button>
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-              Add to Calendar
-            </Button>
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-              Share Event
-            </Button>
-          </div>
+              <div className="flex items-center justify-center gap-4">
+                <Button className="bg-white text-purple-600 hover:bg-white/90">RSVP Now</Button>
+                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
+                  Add to Calendar
+                </Button>
+                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
+                  Share Event
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -145,23 +190,60 @@ export default function EventDetailPage() {
             <h2 className="text-2xl font-bold text-white">Event Attendees</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {event.attendees.map((attendee) => (
-              <UnifiedPortfolioCard
-                key={attendee.id}
-                portfolio={attendee}
-                onClick={(id) => {
-                  if (id === "john-doe") {
-                    router.push("/network/john-doe")
-                  } else {
-                    console.log("View attendee profile:", id)
-                  }
-                }}
-                onShare={(id) => console.log("Share attendee:", id)}
-                onMore={(id) => console.log("More options for attendee:", id)}
+          <div className="mb-6 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+              <input
+                type="text"
+                placeholder="Search attendees by name, role, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
-            ))}
+            </div>
+
+            {/* Category Filters */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? "bg-blue-500 text-white"
+                      : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {filteredAttendees.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredAttendees.map((attendee) => (
+                <UnifiedPortfolioCard
+                  key={attendee.id}
+                  portfolio={attendee}
+                  onClick={(id) => {
+                    if (id === "john-doe") {
+                      router.push("/network/john-doe")
+                    } else {
+                      console.log("View attendee profile:", id)
+                    }
+                  }}
+                  onShare={(id) => console.log("Share attendee:", id)}
+                  onMore={(id) => console.log("More options for attendee:", id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-white/60">No attendees found matching your criteria.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

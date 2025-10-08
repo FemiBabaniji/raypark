@@ -2,8 +2,10 @@
 import { Search, Home } from "lucide-react"
 import BackButton from "@/components/back-button"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function AIMLWorkshopPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
 
@@ -140,7 +142,12 @@ export default function AIMLWorkshopPage() {
               {filteredAttendees.map((attendee) => (
                 <div
                   key={attendee.id}
-                  className="bg-neutral-800 rounded-xl p-4 text-center hover:bg-neutral-700 transition-colors"
+                  onClick={() => {
+                    if (attendee.name === "Sarah Chen") {
+                      router.push("/network/sarah-chen")
+                    }
+                  }}
+                  className="bg-neutral-800 rounded-xl p-4 text-center hover:bg-neutral-700 transition-colors cursor-pointer"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-semibold">
                     {attendee.initial}

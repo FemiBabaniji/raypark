@@ -269,6 +269,8 @@ export default function EventDetailPage() {
                 onClick={(id) => {
                   if (id === "john-doe") {
                     router.push("/network/john-doe")
+                  } else if (id === "sarah-chen") {
+                    router.push("/network/sarah-chen")
                   } else {
                     console.log("View attendee profile:", id)
                   }

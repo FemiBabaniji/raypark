@@ -8,6 +8,7 @@ import PortfolioShell from "./portfolio/portfolio-shell"
 import { BackButton } from "@/components/ui/back-button"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
+import StartupWidget from "./portfolio/builder/widgets/StartupWidget"
 
 export default function JennyWilsonPortfolio({
   isPreviewMode = false,
@@ -35,6 +36,7 @@ export default function JennyWilsonPortfolio({
   ])
 
   const [rightWidgets, setRightWidgets] = useState([
+    { id: "startup", type: "startup" },
     { id: "description", type: "description" },
     { id: "projects", type: "projects" },
     { id: "services", type: "services" },
@@ -1223,6 +1225,54 @@ export default function JennyWilsonPortfolio({
     )
   }
 
+  const [startupContent, setStartupContent] = useState({
+    title: "Startup Pitch",
+    slides: {
+      identity: {
+        companyName: "Your Startup",
+        tagline: "We're building X for Y",
+        stage: "Seed",
+        ask: "$50K seed funding",
+      },
+      problem: {
+        title: "Problem",
+        description: "Describe the problem you're solving...",
+      },
+      solution: {
+        title: "Solution",
+        description: "Describe your solution...",
+        links: [],
+      },
+      market: {
+        title: "Market",
+        targetCustomer: "Your target customers",
+        marketSize: "$X billion market",
+        useCase: "How customers use your product",
+      },
+      traction: {
+        title: "Traction",
+        milestones: [
+          { text: "Prototype built", completed: true },
+          { text: "First customers", completed: false },
+        ],
+        metrics: "Key metrics and growth",
+      },
+      team: {
+        title: "Team",
+        members: [{ name: "Your Name", role: "CEO" }],
+      },
+      cta: {
+        title: "Call to Action",
+        asks: [
+          { text: "Funding", active: true },
+          { text: "Mentorship", active: true },
+          { text: "Partnerships", active: false },
+        ],
+        contact: "hello@yourcompany.com",
+      },
+    },
+  })
+
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
 
@@ -1334,6 +1384,28 @@ export default function JennyWilsonPortfolio({
         return <DescriptionWidget key={widget.id} widgetId={widget.id} column={column} />
       case "gallery":
         return <GalleryWidget key={widget.id} widgetId={widget.id} column={column} />
+      case "startup":
+        return (
+          <StartupWidget
+            key={widget.id}
+            widgetId={widget.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            content={startupContent}
+            onContentChange={setStartupContent}
+            onDelete={() => deleteWidget(widget.id, column)}
+            onMove={() => {
+              deleteWidget(widget.id, column)
+              if (column === "left") {
+                setRightWidgets([...rightWidgets, widget])
+              } else {
+                setLeftWidgets([...leftWidgets, widget])
+              }
+            }}
+            editingField={editingField}
+            setEditingField={setEditingField}
+          />
+        )
       default:
         return (
           <div key={widget.id} className="bg-neutral-800/50 backdrop-blur-xl rounded-3xl p-8">

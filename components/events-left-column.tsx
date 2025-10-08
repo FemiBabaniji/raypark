@@ -440,7 +440,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       location: "Tech Hub, 3rd Floor",
       instructor: "Dr. Sarah Chen, AI Researcher",
       tags: ["AI/ML", "Deep Learning", "Workshop", "Hands-on"],
-      category: "technical",
+      type: "workshop",
     },
     {
       title: "Founder Networking Mixer",
@@ -452,7 +452,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       location: "Rooftop Lounge",
       instructor: "Panel of Founders",
       tags: ["Networking", "Founders", "Mixer", "Community"],
-      category: "networking",
+      type: "mixer",
     },
     {
       title: "Product Design Masterclass",
@@ -464,7 +464,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       location: "Design Studio, 2nd Floor",
       instructor: "Maria Rodriguez, Lead UX Designer",
       tags: ["UX/UI", "Design Thinking", "Masterclass", "Portfolio Review"],
-      category: "design",
+      type: "masterclass",
     },
   ]
 
@@ -476,7 +476,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         event.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
 
       if (selectedCategory === "all") return matchesSearch
-      return matchesSearch && event.category === selectedCategory
+      return matchesSearch && event.type === selectedCategory
     })
   }
 
@@ -580,10 +580,10 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             {/* Category Filters */}
             <div className="flex gap-2">
               {[
-                { key: "all", label: "All Workshops" },
-                { key: "technical", label: "Technical" },
-                { key: "design", label: "Design" },
-                { key: "networking", label: "Networking" },
+                { key: "all", label: "All Events" },
+                { key: "workshop", label: "Workshops" },
+                { key: "mixer", label: "Mixers" },
+                { key: "masterclass", label: "Masterclasses" },
               ].map((filter) => (
                 <button
                   key={filter.key}

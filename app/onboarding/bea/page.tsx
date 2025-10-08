@@ -391,7 +391,7 @@ export default function BEAOnboardingPage() {
           </span>
         </div>
 
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2" aria-label="Progress">
+        <div className="flex items-center space-x-2 mt-1" aria-label="Progress">
           {[1, 2, 3, 4, 5].map((step) => (
             <div
               key={step}

@@ -3,11 +3,24 @@
 import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { motion } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, ChevronRight } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 /** Types the side panel can use */
+type TraitScores = {
+  enterprisingPotential: number // -20 to 80
+  achievementPotential: number // -40 to 50
+  independencePotential: number // -40 to 50
+  comfortWithConflict: number // -40 to 50
+  emotionalQuotient: number // 40 to 90
+  peopleOrientation: number // -40 to 50
+  analyticalOrientation: number // -30 to 30
+  selfDirected: number // 0 to 60
+  lifestyleManagement: number // 0 to 60
+  commitmentReluctance: number // 0 to 60
+}
+
 type IdentityShape = {
   name?: string
   title?: string
@@ -17,6 +30,9 @@ type IdentityShape = {
   location?: string
   avatarUrl?: string
   selectedColor?: ThemeIndex
+  skills?: string[]
+  socialLinks?: { platform: string; url: string }[]
+  traitScores?: TraitScores
 }
 
 type BotCommand =
@@ -47,12 +63,17 @@ export default function MusicAppInterface({
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
+  const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
+  const [traitsExpanded, setTraitsExpanded] = useState(false)
 
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
   useEffect(() => setDraft(identity ?? {}), [identity])
 
-  // theming for the little node graphic
+  const [skillInput, setSkillInput] = useState("")
+  const [linkPlatform, setLinkPlatform] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+
   const gradient = useMemo(
     () => THEME_COLOR_OPTIONS[draft.selectedColor ?? 0]?.gradient ?? "from-neutral-500/40 to-neutral-700/60",
     [draft.selectedColor],
@@ -117,7 +138,6 @@ export default function MusicAppInterface({
   }
 
   function runLocalSideEffects(cmd: BotCommand) {
-    // Apply identity-affecting commands locally too (nice immediate feedback)
     if (cmd.type === "theme") {
       const { color } = cmd.payload
       let idx: ThemeIndex | null = null
@@ -173,207 +193,1007 @@ export default function MusicAppInterface({
 
   /** -------------------- UI -------------------- */
   return (
-    <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
-      {/* Profile card */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-      >
-        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
-          {/* Node graphic with theme gradient */}
-          <div
-            className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
-          >
-            <div className="absolute inset-1 rounded-full bg-white/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 bg-white/90 rounded-full" />
-            </div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
-          </div>
+    <>
+      <TraitQuestionnaireOverlay
+        isOpen={showTraitQuestionnaire}
+        onClose={() => setShowTraitQuestionnaire(false)}
+        onComplete={(scores) => {
+          setDraft((d) => ({ ...d, traitScores: scores }))
+          setShowTraitQuestionnaire(false)
+        }}
+      />
 
-          {/* Compact profile summary */}
-          <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
-          <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
-          <p className="text-neutral-300 text-xs mb-3 leading-relaxed line-clamp-2">
-            {draft.subtitle || "short tagline"}
-          </p>
-
-          {/* Action row */}
-          <div className="flex items-center gap-2">
-            <button
-              className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
-              onClick={() => setEditOpen((s) => !s)}
+      <div className="fixed right-0 top-0 w-80 xl:w-96 h-screen bg-background text-white pt-20 sm:pt-24 px-4 xl:px-6 pb-4 xl:pb-6 space-y-4 xl:space-y-6 overflow-y-auto">
+        {/* Profile card */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 text-center border border-white/5">
+            {/* Node graphic with theme gradient */}
+            <div
+              className={`w-16 h-16 rounded-full bg-gradient-to-br ${gradient} border-2 border-white/30 mx-auto mb-3 relative overflow-hidden`}
             >
-              {editOpen ? "close" : "edit profile"}
-            </button>
-            <div className="relative">
+              <div className="absolute inset-1 rounded-full bg-white/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-4 h-4 bg-white/90 rounded-full" />
+              </div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
+            </div>
+
+            {/* Compact profile summary */}
+            <h2 className="text-lg font-medium text-white mb-1">{draft.name || "your name"}</h2>
+            <p className="text-neutral-400 text-sm mb-2">{draft.title || "your role"}</p>
+
+            {draft.traitScores && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setTraitsExpanded(!traitsExpanded)}
+                  className="w-full py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs text-white/70 hover:text-white/90 flex items-center justify-between"
+                >
+                  <span>Leadership Profile</span>
+                  <ChevronRight className={`w-3 h-3 transition-transform ${traitsExpanded ? "rotate-90" : ""}`} />
+                </button>
+
+                {traitsExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2 p-3 rounded-lg bg-white/5 space-y-2 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-[9px]">
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">Enterprising</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.enterprisingPotential}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">EQ</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.emotionalQuotient}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">Independence</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.independencePotential}</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded bg-white/5">
+                        <div className="text-white/40 mb-0.5">People</div>
+                        <div className="text-white/90 font-bold">{draft.traitScores.peopleOrientation}</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {draft.skills && draft.skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+                {draft.skills.slice(0, 4).map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10"
+                  >
+                    {skill}
+                  </span>
+                ))}
+                {draft.skills.length > 4 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                    +{draft.skills.length - 4}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Action row */}
+            <div className="flex items-center gap-2">
               <button
-                className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
-                onClick={() => setShowPalette((s) => !s)}
-                aria-label="Change theme color"
+                className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
+                onClick={() => setEditOpen((s) => !s)}
               >
-                <Palette className="w-4 h-4" />
+                {editOpen ? "close" : "edit profile"}
               </button>
-              {showPalette && (
-                <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
-                  {THEME_COLOR_OPTIONS.map((c, idx) => (
-                    <button
-                      key={c.name}
-                      onClick={() => {
-                        setDraft((d) => ({ ...d, selectedColor: idx as ThemeIndex }))
-                        onIdentityChange?.({ selectedColor: idx as ThemeIndex })
-                        setShowPalette(false)
-                      }}
-                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${c.gradient} ${
-                        draft.selectedColor === (idx as ThemeIndex)
-                          ? "ring-2 ring-white"
-                          : "hover:ring-2 hover:ring-white/60"
-                      } transition-all`}
-                      aria-label={`Set theme ${c.name}`}
+              <div className="relative">
+                <button
+                  className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-xl transition-colors"
+                  onClick={() => setShowPalette((s) => !s)}
+                  aria-label="Change theme color"
+                >
+                  <Palette className="w-4 h-4" />
+                </button>
+                {showPalette && (
+                  <div className="absolute right-0 mt-2 z-50 bg-[#1a1a1a]/95 border border-white/10 rounded-2xl p-3 grid grid-cols-4 gap-2">
+                    {THEME_COLOR_OPTIONS.map((c, idx) => (
+                      <button
+                        key={c.name}
+                        onClick={() => {
+                          setDraft((d) => ({ ...d, selectedColor: idx as ThemeIndex }))
+                          onIdentityChange?.({ selectedColor: idx as ThemeIndex })
+                          setShowPalette(false)
+                        }}
+                        className={`w-8 h-8 rounded-full bg-gradient-to-br ${c.gradient} ${
+                          draft.selectedColor === (idx as ThemeIndex)
+                            ? "ring-2 ring-white"
+                            : "hover:ring-2 hover:ring-white/60"
+                        } transition-all`}
+                        aria-label={`Set theme ${c.name}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {editOpen && (
+              <div className="text-left mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                {/* Basic Info Section */}
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Basic Info</div>
+                  <Field label="Name">
+                    <input
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                      value={draft.name ?? ""}
+                      onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                      placeholder="Your full name"
                     />
-                  ))}
+                  </Field>
+                  <Field label="Title">
+                    <input
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                      value={draft.title ?? ""}
+                      onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+                      placeholder="Your professional title"
+                    />
+                  </Field>
                 </div>
+
+                {/* Trait System Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Leadership Traits</div>
+
+                  {!draft.traitScores ? (
+                    <div className="p-3 rounded-xl bg-white/5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-white mb-1">Personality Assessment</div>
+                          <div className="text-xs text-white/60 leading-relaxed">
+                            Complete a brief questionnaire to generate your leadership profile and trait scores for
+                            better portfolio matching.
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowTraitQuestionnaire(true)}
+                        className="w-full py-2 px-3 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        Take Assessment
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-white/5">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">
+                          Leadership Profile Complete
+                        </span>
+                        <button
+                          onClick={() => setShowTraitQuestionnaire(true)}
+                          className="text-[10px] px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white/70 transition-colors"
+                        >
+                          Retake
+                        </button>
+                      </div>
+
+                      {/* Comprehensive Score Display */}
+                      <div className="space-y-3">
+                        {/* Orientation Factors */}
+                        <div className="space-y-2">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Orientation & Coaching
+                          </div>
+                          <TraitScoreBar
+                            label="Enterprising"
+                            value={draft.traitScores.enterprisingPotential}
+                            min={-20}
+                            max={80}
+                          />
+                          <TraitScoreBar
+                            label="Achievement"
+                            value={draft.traitScores.achievementPotential}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Independence"
+                            value={draft.traitScores.independencePotential}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Conflict Comfort"
+                            value={draft.traitScores.comfortWithConflict}
+                            min={-40}
+                            max={50}
+                          />
+                        </div>
+
+                        {/* Communication Style */}
+                        <div className="space-y-2 pt-2 border-t border-white/10">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Communication Style
+                          </div>
+                          <TraitScoreBar
+                            label="People Orientation"
+                            value={draft.traitScores.peopleOrientation}
+                            min={-40}
+                            max={50}
+                          />
+                          <TraitScoreBar
+                            label="Analytical"
+                            value={draft.traitScores.analyticalOrientation}
+                            min={-30}
+                            max={30}
+                          />
+                        </div>
+
+                        {/* Attitude & EQ */}
+                        <div className="space-y-2 pt-2 border-t border-white/10">
+                          <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                            Attitude & Emotional Intelligence
+                          </div>
+                          <TraitScoreBar
+                            label="Emotional IQ"
+                            value={draft.traitScores.emotionalQuotient}
+                            min={40}
+                            max={90}
+                          />
+                          <TraitScoreBar
+                            label="Self Directed"
+                            value={draft.traitScores.selfDirected}
+                            min={0}
+                            max={60}
+                          />
+                          <TraitScoreBar
+                            label="Lifestyle Management"
+                            value={draft.traitScores.lifestyleManagement}
+                            min={0}
+                            max={60}
+                          />
+                          <TraitScoreBar
+                            label="Commitment"
+                            value={draft.traitScores.commitmentReluctance}
+                            min={0}
+                            max={60}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Skills Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Skills & Expertise</div>
+                  <Field label="Add Skills (for search & discovery)">
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="e.g. React, Design, Python"
+                          value={skillInput}
+                          onChange={(e) => setSkillInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && skillInput.trim()) {
+                              e.preventDefault()
+                              const newSkill = skillInput.trim()
+                              if (!draft.skills?.includes(newSkill)) {
+                                setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                              }
+                              setSkillInput("")
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (skillInput.trim()) {
+                              const newSkill = skillInput.trim()
+                              if (!draft.skills?.includes(newSkill)) {
+                                setDraft((d) => ({ ...d, skills: [...(d.skills || []), newSkill] }))
+                              }
+                              setSkillInput("")
+                            }
+                          }}
+                          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                          aria-label="Add skill"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {draft.skills && draft.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {draft.skills.map((skill, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setDraft((d) => ({
+                                  ...d,
+                                  skills: d.skills?.filter((s) => s !== skill),
+                                }))
+                              }}
+                              className="group text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/20 text-white/80 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-colors flex items-center gap-1"
+                            >
+                              <Tag className="w-3 h-3" />
+                              {skill}
+                              <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* Social Links Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="text-xs font-semibold text-white/70 uppercase tracking-wider">Social Links</div>
+                  <Field label="Add Social Media Links">
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          className="w-24 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="Platform"
+                          value={linkPlatform}
+                          onChange={(e) => setLinkPlatform(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                              e.preventDefault()
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                        />
+                        <input
+                          className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+                          placeholder="URL"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && linkPlatform.trim() && linkUrl.trim()) {
+                              e.preventDefault()
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (linkPlatform.trim() && linkUrl.trim()) {
+                              const newLink = { platform: linkPlatform.trim(), url: linkUrl.trim() }
+                              setDraft((d) => ({ ...d, socialLinks: [...(d.socialLinks || []), newLink] }))
+                              setLinkPlatform("")
+                              setLinkUrl("")
+                            }
+                          }}
+                          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                          aria-label="Add social link"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {draft.socialLinks && draft.socialLinks.length > 0 && (
+                        <div className="space-y-1.5">
+                          {draft.socialLinks.map((link, idx) => (
+                            <div
+                              key={idx}
+                              className="group flex items-center justify-between gap-2 text-xs px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <LinkIcon className="w-3 h-3 text-white/60 flex-shrink-0" />
+                                <span className="text-white/90 font-medium">{link.platform}</span>
+                                <span className="text-white/50 truncate">{link.url}</span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setDraft((d) => ({
+                                    ...d,
+                                    socialLinks: d.socialLinks?.filter((_, i) => i !== idx),
+                                  }))
+                                }}
+                                className="p-1 rounded hover:bg-red-500/20 text-white/60 hover:text-red-300 transition-colors"
+                                aria-label="Remove link"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10 sticky bottom-0 bg-[#1a1a1a] pb-2">
+                  <button
+                    className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
+                    onClick={() => {
+                      setDraft(identity ?? {})
+                      setSkillInput("")
+                      setLinkPlatform("")
+                      setLinkUrl("")
+                      setEditOpen(false)
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-2 font-medium"
+                    onClick={() => {
+                      onIdentityChange?.(draft)
+                      setEditOpen(false)
+                    }}
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Bot card (replaces Archetype) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+        >
+          <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-4 h-4 text-zinc-400" />
+              <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>
+              {onTogglePreview && (
+                <button
+                  onClick={onTogglePreview}
+                  className="ml-auto text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-white/20"
+                >
+                  Toggle Preview
+                </button>
               )}
             </div>
-          </div>
 
-          {/* Expandable editor */}
-          {editOpen && (
-            <div className="text-left mt-4 space-y-3">
-              <Field label="Name">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.name ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                />
-              </Field>
-              <Field label="Title">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.title ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                />
-              </Field>
-              <Field label="Subtitle">
-                <input
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                  value={draft.subtitle ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Handle">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.handle ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, handle: e.target.value }))}
-                  />
-                </Field>
-                <Field label="Avatar URL">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.avatarUrl ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, avatarUrl: e.target.value }))}
-                  />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Email">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.email ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-                  />
-                </Field>
-                <Field label="Location">
-                  <input
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-                    value={draft.location ?? ""}
-                    onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
-                  />
-                </Field>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  className="px-3 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20"
-                  onClick={() => {
-                    setDraft(identity ?? {})
-                    setEditOpen(false)
-                  }}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {msgs.map((m, i) => (
+                <div
+                  key={i}
+                  className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
                 >
-                  <X className="w-4 h-4 inline mr-1" />
-                  Cancel
-                </button>
-                <button
-                  className="px-3 py-2 text-sm rounded-lg bg-white text-black hover:bg-white/90"
-                  onClick={() => {
-                    onIdentityChange?.(draft)
-                    setEditOpen(false)
-                  }}
-                >
-                  <Save className="w-4 h-4 inline mr-1" />
-                  Save
-                </button>
-              </div>
+                  {m.text}
+                </div>
+              ))}
+              {loading && (
+                <div className="text-sm text-zinc-400 flex items-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Working…
+                </div>
+              )}
+              <div ref={endRef} />
             </div>
-          )}
-        </div>
-      </motion.div>
 
-      {/* Bot card (replaces Archetype) */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.25 }}
-      >
-        <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 flex flex-col h-[48vh] border border-white/5">
-          <div className="flex items-center gap-2 mb-2">
-            <Bot className="w-4 h-4 text-zinc-400" />
-            <span className="text-zinc-300 text-sm">Portfolio Co-pilot</span>
-            {onTogglePreview && (
-              <button
-                onClick={onTogglePreview}
-                className="ml-auto text-xs px-2 py-1 rounded-md bg-white/10 hover:bg-white/20"
-              >
-                Toggle Preview
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder='Try: add gallery right, theme purple, rename "Oliver"'
+                className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
+              />
+              <button onClick={handleSend} className="p-2 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
+                <Send className="w-4 h-4" />
               </button>
-            )}
+            </div>
           </div>
+        </motion.div>
+      </div>
+    </>
+  )
+}
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {msgs.map((m, i) => (
-              <div
-                key={i}
-                className={`text-sm leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
-              >
-                {m.text}
-              </div>
-            ))}
-            {loading && (
-              <div className="text-sm text-zinc-400 flex items-center gap-2">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Working…
-              </div>
-            )}
-            <div ref={endRef} />
-          </div>
+// TraitScoreBar component for displaying individual trait scores
+function TraitScoreBar({ label, value, min, max }: { label: string; value: number; min: number; max: number }) {
+  const percentage = ((value - min) / (max - min)) * 100
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[10px] mb-1">
+        <span className="text-white/60">{label}</span>
+        <span className="text-white/90 font-medium">{value}</span>
+      </div>
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500"
+          style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+        />
+      </div>
+    </div>
+  )
+}
 
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder='Try: add gallery right, theme purple, rename "Oliver"'
-              className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-white/30"
-            />
-            <button onClick={handleSend} className="p-2 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </motion.div>
+// TraitQuestionnaireOverlay component
+function TraitQuestionnaireOverlay({
+  isOpen,
+  onClose,
+  onComplete,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onComplete: (scores: TraitScores) => void
+}) {
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [answers, setAnswers] = useState<Record<number, number>>({})
+  const [showResults, setShowResults] = useState(false)
+  const [calculatedScores, setCalculatedScores] = useState<TraitScores | null>(null)
+
+  const questions = [
+    {
+      id: 0,
+      text: "I prefer to work independently and set my own goals rather than follow detailed instructions.",
+      trait: "enterprising",
+    },
+    {
+      id: 1,
+      text: "I am motivated by challenging tasks that push me to achieve significant results.",
+      trait: "achievement",
+    },
+    {
+      id: 2,
+      text: "I feel comfortable making decisions on my own without needing team consensus.",
+      trait: "independence",
+    },
+    {
+      id: 3,
+      text: "I am comfortable addressing conflicts directly and having difficult conversations.",
+      trait: "conflict",
+    },
+    {
+      id: 4,
+      text: "I can easily recognize and understand the emotions of others in social situations.",
+      trait: "eq",
+    },
+    {
+      id: 5,
+      text: "I enjoy meeting new people and building relationships quickly.",
+      trait: "people",
+    },
+    {
+      id: 6,
+      text: "I prefer to analyze data and facts before making decisions.",
+      trait: "analytical",
+    },
+    {
+      id: 7,
+      text: "I feel in control of my life and believe my actions determine my outcomes.",
+      trait: "selfDirected",
+    },
+    {
+      id: 8,
+      text: "I manage stress effectively and maintain a healthy work-life balance.",
+      trait: "lifestyle",
+    },
+    {
+      id: 9,
+      text: "I am comfortable asking others for commitments and holding them accountable.",
+      trait: "commitment",
+    },
+  ]
+
+  const handleAnswer = (value: number) => {
+    const newAnswers = { ...answers, [currentQuestion]: value }
+    setAnswers(newAnswers)
+
+    console.log("[v0] Question answered:", currentQuestion, "Value:", value)
+    console.log("[v0] Total answers:", Object.keys(newAnswers).length, "of", questions.length)
+
+    if (currentQuestion < questions.length - 1) {
+      setTimeout(() => setCurrentQuestion((c) => c + 1), 300)
+    } else {
+      console.log("[v0] All questions answered! Showing View Results button")
+    }
+  }
+
+  const handleShowResults = () => {
+    console.log("[v0] Calculating results...")
+    // Calculate scores based on answers (1-5 scale)
+    const calculateScore = (trait: string, min: number, max: number) => {
+      const relevantAnswers = questions.filter((q) => q.trait === trait).map((q) => answers[q.id] || 3)
+      const avg = relevantAnswers.reduce((a, b) => a + b, 0) / relevantAnswers.length
+      return Math.round(min + ((avg - 1) / 4) * (max - min))
+    }
+
+    const scores: TraitScores = {
+      enterprisingPotential: calculateScore("enterprising", -20, 80),
+      achievementPotential: calculateScore("achievement", -40, 50),
+      independencePotential: calculateScore("independence", -40, 50),
+      comfortWithConflict: calculateScore("conflict", -40, 50),
+      emotionalQuotient: calculateScore("eq", 40, 90),
+      peopleOrientation: calculateScore("people", -40, 50),
+      analyticalOrientation: calculateScore("analytical", -30, 30),
+      selfDirected: calculateScore("selfDirected", 0, 60),
+      lifestyleManagement: calculateScore("lifestyle", 0, 60),
+      commitmentReluctance: calculateScore("commitment", 0, 60),
+    }
+
+    console.log("[v0] Calculated scores:", scores)
+    setCalculatedScores(scores)
+    setShowResults(true)
+  }
+
+  const handleSaveResults = () => {
+    console.log("[v0] Saving results...")
+    if (calculatedScores) {
+      onComplete(calculatedScores)
+      setCurrentQuestion(0)
+      setAnswers({})
+      setShowResults(false)
+      setCalculatedScores(null)
+    }
+  }
+
+  const handleRetake = () => {
+    console.log("[v0] Retaking assessment...")
+    setShowResults(false)
+    setCurrentQuestion(0)
+    setAnswers({})
+    setCalculatedScores(null)
+  }
+
+  const progress = ((currentQuestion + 1) / questions.length) * 100
+  const isComplete = Object.keys(answers).length === questions.length
+
+  console.log(
+    "[v0] Questionnaire state - Current:",
+    currentQuestion,
+    "Answers:",
+    Object.keys(answers).length,
+    "Complete:",
+    isComplete,
+  )
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-6"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto"
+          >
+            {showResults && calculatedScores ? (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Your Leadership Profile</h2>
+                    <p className="text-sm text-neutral-400 mt-1">Assessment Complete</p>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="text-2xl text-neutral-400 hover:text-white transition-colors"
+                    aria-label="Close"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Summary of Scores */}
+                <div className="space-y-6 mb-8">
+                  {/* Orientation & Coaching Factors */}
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Orientation & Coaching Factors
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="Enterprising Potential"
+                        value={calculatedScores.enterprisingPotential}
+                        min={-20}
+                        max={80}
+                        leftLabel="Responsive"
+                        rightLabel="Proactive"
+                      />
+                      <ScoreDisplay
+                        label="Achievement Potential"
+                        value={calculatedScores.achievementPotential}
+                        min={-40}
+                        max={50}
+                        leftLabel="Safety & Security"
+                        rightLabel="$ and/or Challenge"
+                      />
+                      <ScoreDisplay
+                        label="Independence Potential"
+                        value={calculatedScores.independencePotential}
+                        min={-40}
+                        max={50}
+                        leftLabel="Team-oriented"
+                        rightLabel="Very Independent"
+                      />
+                      <ScoreDisplay
+                        label="Comfort with Conflict"
+                        value={calculatedScores.comfortWithConflict}
+                        min={-40}
+                        max={50}
+                        leftLabel="Avoids Conflict"
+                        rightLabel="Comfortable"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Communication Style */}
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Communication Style
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="People Orientation"
+                        value={calculatedScores.peopleOrientation}
+                        min={-40}
+                        max={50}
+                        leftLabel="Builds Gradually"
+                        rightLabel="Outgoing"
+                      />
+                      <ScoreDisplay
+                        label="Analytical Orientation"
+                        value={calculatedScores.analyticalOrientation}
+                        min={-30}
+                        max={30}
+                        leftLabel="Learns Essentials"
+                        rightLabel="Highly Analytical"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Attitude Survey */}
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Attitude Survey
+                    </h3>
+                    <div className="space-y-4">
+                      <ScoreDisplay
+                        label="Self Directed"
+                        value={calculatedScores.selfDirected}
+                        min={0}
+                        max={60}
+                        leftLabel="External Focus"
+                        rightLabel="Internal Focus"
+                      />
+                      <ScoreDisplay
+                        label="Lifestyle Management"
+                        value={calculatedScores.lifestyleManagement}
+                        min={0}
+                        max={60}
+                        leftLabel="Growth Opportunity"
+                        rightLabel="Well Managed"
+                      />
+                      <ScoreDisplay
+                        label="Commitment Orientation"
+                        value={calculatedScores.commitmentReluctance}
+                        min={0}
+                        max={60}
+                        leftLabel="Might Avoid"
+                        rightLabel="Strongly Pursues"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Emotional Quotient */}
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl">
+                    <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
+                      Emotional Quotient
+                    </h3>
+                    <ScoreDisplay
+                      label="Overall EQ"
+                      value={calculatedScores.emotionalQuotient}
+                      min={40}
+                      max={90}
+                      leftLabel="Relies on Non-Emotional Info"
+                      rightLabel="Understands & Uses Emotional Info"
+                      color="blue"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between pt-6">
+                  <button
+                    onClick={handleRetake}
+                    className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 transition-all text-sm font-medium text-white"
+                  >
+                    Retake Assessment
+                  </button>
+                  <button
+                    onClick={handleSaveResults}
+                    className="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
+                  >
+                    Save Results
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Leadership Assessment</h2>
+                    <p className="text-sm text-neutral-400 mt-1">Discover your professional traits</p>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="text-2xl text-neutral-400 hover:text-white transition-colors"
+                    aria-label="Close"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Progress */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between text-sm text-neutral-400 mb-3">
+                    <span>
+                      Question {currentQuestion + 1} of {questions.length}
+                    </span>
+                    <span className="text-white font-medium">{Math.round(progress)}%</span>
+                  </div>
+                  <div className="h-2 bg-neutral-800/50 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Question */}
+                <div className="mb-10 min-h-[80px] flex items-center justify-center">
+                  <motion.p
+                    key={currentQuestion}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-lg text-white leading-relaxed text-center max-w-2xl"
+                  >
+                    {questions[currentQuestion].text}
+                  </motion.p>
+                </div>
+
+                {/* Answer Options */}
+                <div className="grid grid-cols-5 gap-3 mb-8">
+                  {[
+                    {
+                      value: 5,
+                      label: "Strongly Agree",
+                      color: "from-green-500/20 to-emerald-500/20",
+                    },
+                    { value: 4, label: "Agree", color: "from-blue-500/20 to-cyan-500/20" },
+                    {
+                      value: 3,
+                      label: "Neutral",
+                      color: "from-neutral-500/20 to-neutral-600/20",
+                    },
+                    { value: 2, label: "Disagree", color: "from-orange-500/20 to-amber-500/20" },
+                    {
+                      value: 1,
+                      label: "Strongly Disagree",
+                      color: "from-red-500/20 to-rose-500/20",
+                    },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleAnswer(option.value)}
+                      className={`group relative py-4 px-3 rounded-2xl text-center transition-all duration-200 ${
+                        answers[currentQuestion] === option.value
+                          ? `bg-gradient-to-br ${option.color} scale-105 shadow-lg`
+                          : "bg-neutral-800/30 hover:bg-neutral-800/50 hover:scale-105"
+                      }`}
+                    >
+                      <div className="text-2xl font-bold text-white mb-1">{option.value}</div>
+                      <div className="text-xs text-neutral-400 group-hover:text-neutral-300 leading-tight">
+                        {option.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between pt-6">
+                  <button
+                    onClick={() => setCurrentQuestion((c) => Math.max(0, c - 1))}
+                    disabled={currentQuestion === 0}
+                    className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white"
+                  >
+                    Previous
+                  </button>
+                  {isComplete ? (
+                    <button
+                      onClick={() => {
+                        console.log("[v0] View Results button clicked!")
+                        handleShowResults()
+                      }}
+                      className="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
+                    >
+                      View Results
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setCurrentQuestion((c) => Math.min(questions.length - 1, c + 1))}
+                      disabled={currentQuestion === questions.length - 1}
+                      className="px-6 py-3 rounded-2xl bg-neutral-800/50 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium text-white"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function ScoreDisplay({
+  label,
+  value,
+  min,
+  max,
+  leftLabel,
+  rightLabel,
+  color = "default",
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  leftLabel: string
+  rightLabel: string
+  color?: "default" | "blue"
+}) {
+  const percentage = ((value - min) / (max - min)) * 100
+  const gradientClass = "from-blue-500 to-cyan-500"
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-white">{label}</span>
+        <span className="text-sm font-bold text-white px-2 py-0.5 rounded-md bg-white/10">{value}</span>
+      </div>
+      <div className="relative h-3 bg-neutral-800/50 rounded-full overflow-hidden mb-1">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className={`h-full bg-gradient-to-r ${gradientClass} rounded-full`}
+        />
+      </div>
+      <div className="flex items-center justify-between text-[10px] text-neutral-500">
+        <span>{leftLabel}</span>
+        <span>{rightLabel}</span>
+      </div>
     </div>
   )
 }

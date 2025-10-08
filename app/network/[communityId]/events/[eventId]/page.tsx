@@ -6,7 +6,7 @@ import { BackButton } from "@/components/ui/back-button"
 import { Button } from "@/components/ui/button"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { Calendar, Clock, MapPin, Users, Search } from "lucide-react"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -26,6 +26,7 @@ const eventData = {
         initials: "JW",
         selectedColor: 1,
         avatarUrl: "/woman-designer.png",
+        role: "attendee",
       },
       {
         id: "john-doe",
@@ -36,6 +37,7 @@ const eventData = {
         handle: "@johndoe",
         initials: "JD",
         selectedColor: 2,
+        role: "speaker",
       },
       {
         id: "sarah-chen",
@@ -47,6 +49,7 @@ const eventData = {
         initials: "SC",
         selectedColor: 3,
         avatarUrl: "/professional-headshot.png",
+        role: "attendee",
       },
       {
         id: "mike-rodriguez",
@@ -57,6 +60,7 @@ const eventData = {
         handle: "@mikepm",
         initials: "MR",
         selectedColor: 4,
+        role: "organizer",
       },
       {
         id: "alex-thompson",
@@ -67,6 +71,7 @@ const eventData = {
         handle: "@alexdev",
         initials: "AT",
         selectedColor: 2,
+        role: "attendee",
       },
       {
         id: "lisa-martinez",
@@ -77,6 +82,7 @@ const eventData = {
         handle: "@lisamartinez",
         initials: "LM",
         selectedColor: 5,
+        role: "speaker",
       },
     ],
   },
@@ -87,51 +93,23 @@ export default function EventDetailPage() {
   const params = useParams()
   const { communityId, eventId } = params
 
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [selectedFilter, setSelectedFilter] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("")
 
   const event = eventData[eventId as keyof typeof eventData]
 
-  const filteredAttendees = useMemo(() => {
-    if (!event) {
-      return []
-    }
-    let filtered = event.attendees
+  if (!event) {
+    return <div>Event not found</div>
+  }
 
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (attendee) =>
-          attendee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          attendee.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          attendee.location.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    // Filter by category
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((attendee) => {
-        const title = attendee.title.toLowerCase()
-        if (selectedCategory === "Designers") {
-          return title.includes("designer") || title.includes("ux") || title.includes("ui")
-        } else if (selectedCategory === "Developers") {
-          return (
-            title.includes("developer") ||
-            title.includes("engineer") ||
-            title.includes("programmer") ||
-            title.includes("software")
-          )
-        } else if (selectedCategory === "Managers") {
-          return title.includes("manager") || title.includes("director") || title.includes("lead")
-        }
-        return true
-      })
-    }
-
-    return filtered
-  }, [event, searchQuery, selectedCategory])
-
-  const categories = ["All", "Designers", "Developers", "Managers"]
+  const filteredAttendees = event.attendees.filter((attendee) => {
+    const matchesFilter = selectedFilter === "all" || attendee.role === selectedFilter
+    const matchesSearch =
+      searchQuery === "" ||
+      attendee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -151,97 +129,98 @@ export default function EventDetailPage() {
         </motion.nav>
 
         <div className="relative z-10 px-6 pb-12 pt-4 text-center">
-          {event && (
-            <>
-              <h1 className="text-4xl font-bold text-white mb-4">{event.title}</h1>
-              <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>{event.date}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  <span>{event.location}</span>
-                </div>
-              </div>
+          <h1 className="text-4xl font-bold text-white mb-4">{event.title}</h1>
+          <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <span>{event.date}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              <span>{event.time}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              <span>{event.location}</span>
+            </div>
+          </div>
 
-              <div className="flex items-center justify-center gap-4">
-                <Button className="bg-white text-purple-600 hover:bg-white/90">RSVP Now</Button>
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-                  Add to Calendar
-                </Button>
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-                  Share Event
-                </Button>
-              </div>
-            </>
-          )}
+          <div className="flex items-center justify-center gap-4">
+            <Button className="bg-white text-purple-600 hover:bg-white/90">RSVP Now</Button>
+            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
+              Add to Calendar
+            </Button>
+            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
+              Share Event
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-blue-400" />
             <h2 className="text-2xl font-bold text-white">Event Attendees</h2>
           </div>
 
-          <div className="mb-6 space-y-4">
-            {/* Search Bar */}
+          <div className="mb-8 space-y-4">
+            {/* Search bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search attendees by name, role, or location..."
+                placeholder="Search attendees by name or title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-2xl pl-12 pr-4 py-3 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </div>
 
-            {/* Category Filters */}
+            {/* Filter buttons */}
             <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
+              {[
+                { label: "All Attendees", value: "all" },
+                { label: "Speakers", value: "speaker" },
+                { label: "Organizers", value: "organizer" },
+                { label: "Attendees", value: "attendee" },
+              ].map((filter) => (
                 <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedCategory === category
-                      ? "bg-blue-500 text-white"
-                      : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                  key={filter.value}
+                  onClick={() => setSelectedFilter(filter.value)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    selectedFilter === filter.value
+                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                      : "bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl text-neutral-300 hover:text-white"
                   }`}
                 >
-                  {category}
+                  {filter.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {filteredAttendees.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredAttendees.map((attendee) => (
-                <UnifiedPortfolioCard
-                  key={attendee.id}
-                  portfolio={attendee}
-                  onClick={(id) => {
-                    if (id === "john-doe") {
-                      router.push("/network/john-doe")
-                    } else {
-                      console.log("View attendee profile:", id)
-                    }
-                  }}
-                  onShare={(id) => console.log("Share attendee:", id)}
-                  onMore={(id) => console.log("More options for attendee:", id)}
-                />
-              ))}
-            </div>
-          ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredAttendees.map((attendee) => (
+              <UnifiedPortfolioCard
+                key={attendee.id}
+                portfolio={attendee}
+                onClick={(id) => {
+                  if (id === "john-doe") {
+                    router.push("/network/john-doe")
+                  } else {
+                    console.log("View attendee profile:", id)
+                  }
+                }}
+                onShare={(id) => console.log("Share attendee:", id)}
+                onMore={(id) => console.log("More options for attendee:", id)}
+              />
+            ))}
+          </div>
+
+          {filteredAttendees.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-white/60">No attendees found matching your criteria.</p>
+              <p className="text-neutral-400 text-lg">No attendees found matching your filters.</p>
             </div>
           )}
         </div>

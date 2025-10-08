@@ -10,7 +10,6 @@ import OnboardingOverlay from "./onboarding-overlay"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
 import { safeUUID } from "@/lib/utils"
-import StartupWidget from "./portfolio/builder/widgets/StartupWidget"
 
 /**
  * StarterPortfolio — a full-fledged template matching Jenny Wilson's setup
@@ -50,7 +49,6 @@ export default function StarterPortfolio({
     { id: "education", type: "education" as const },
   ])
   const [rightWidgets, setRightWidgets] = useState([
-    { id: "startup", type: "startup" as const },
     { id: "description", type: "description" as const },
     { id: "projects", type: "projects" as const },
     { id: "services", type: "services" as const },
@@ -73,54 +71,6 @@ export default function StarterPortfolio({
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
 
-  const [startupContent, setStartupContent] = useState({
-    title: "Startup Pitch",
-    slides: {
-      identity: {
-        companyName: "Your Startup",
-        tagline: "We're building X for Y",
-        stage: "Seed",
-        ask: "$50K seed funding",
-      },
-      problem: {
-        title: "Problem",
-        description: "Describe the problem you're solving...",
-      },
-      solution: {
-        title: "Solution",
-        description: "Describe your solution...",
-        links: [],
-      },
-      market: {
-        title: "Market",
-        targetCustomer: "Your target customers",
-        marketSize: "$X billion market",
-        useCase: "How customers use your product",
-      },
-      traction: {
-        title: "Traction",
-        milestones: [
-          { text: "Prototype built", completed: true },
-          { text: "First customers", completed: false },
-        ],
-        metrics: "Key metrics and growth",
-      },
-      team: {
-        title: "Team",
-        members: [{ name: "Your Name", role: "CEO" }],
-      },
-      cta: {
-        title: "Call to Action",
-        asks: [
-          { text: "Funding", active: true },
-          { text: "Mentorship", active: true },
-          { text: "Partnerships", active: false },
-        ],
-        contact: "hello@yourcompany.com",
-      },
-    },
-  })
-
   const projectColorOptions = [
     { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
     { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
@@ -130,6 +80,11 @@ export default function StarterPortfolio({
     { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
     { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
   ]
+
+  // useEffect(() => {
+  //   const seen = localStorage.getItem("starter.onboarding.seen")
+  //   if (seen === "1") setShowOnboarding(false)
+  // }, [])
 
   useEffect(() => {
     if (!showOnboarding) localStorage.setItem("starter.onboarding.seen", "1")
@@ -173,7 +128,6 @@ export default function StarterPortfolio({
           about: aboutText,
           projectColors,
           galleryGroups,
-          startup: startupContent,
         },
         isTemplate: true,
         isLive: false,
@@ -799,7 +753,7 @@ export default function StarterPortfolio({
                 <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
                   Select Widget Type
                 </div>
-                {["projects", "education", "description", "services", "gallery", "startup"].map((type) => (
+                {["projects", "education", "description", "services", "gallery"].map((type) => (
                   <button
                     key={type}
                     onClick={() => setSelectedWidgetType(type)}
@@ -835,28 +789,6 @@ export default function StarterPortfolio({
         return <DescriptionWidget key={widget.id} widgetId={widget.id} column={column} />
       case "gallery":
         return <GalleryWidget key={widget.id} widgetId={widget.id} column={column} />
-      case "startup":
-        return (
-          <StartupWidget
-            key={widget.id}
-            widgetId={widget.id}
-            column={column}
-            isPreviewMode={isPreviewMode}
-            content={startupContent}
-            onContentChange={setStartupContent}
-            onDelete={() => deleteWidget(widget.id, column)}
-            onMove={() => {
-              deleteWidget(widget.id, column)
-              if (column === "left") {
-                setRightWidgets((p) => [...p, widget as any])
-              } else {
-                setLeftWidgets((p) => [...p, widget as any])
-              }
-            }}
-            editingField={editingField}
-            setEditingField={setEditingField}
-          />
-        )
       default:
         return null
     }

@@ -113,7 +113,6 @@ export default function PortfolioBuilder({
     { id: "education", type: "education" },
   ])
   const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([
-    { id: "startup", type: "startup" },
     { id: "description", type: "description" },
     { id: "projects", type: "projects" },
     { id: "services", type: "services" },

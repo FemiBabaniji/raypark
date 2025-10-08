@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import MusicAppInterface from "@/components/music-app-interface"
-import { Button } from "@/components/ui/button"
+import BackButton from "@/components/ui/back-button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
 
@@ -106,28 +105,30 @@ export default function PortfolioBuilderPage() {
 
   return (
     <div className="min-h-screen bg-[oklch(0.18_0_0)]">
-      <div className="fixed top-4 right-4 z-50">
-        <Button
-          onClick={togglePreview}
-          variant="ghost"
-          size="sm"
-          className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
-        >
-          {isPreviewMode ? (
-            <>
-              <EyeOff className="w-4 h-4 mr-2" />
-              Exit Preview
-            </>
-          ) : (
-            <>
-              <Eye className="w-4 h-4 mr-2" />
-              Preview
-            </>
-          )}
-        </Button>
-      </div>
+      {isPreviewMode ? (
+        <div className="fixed top-8 left-8 z-50">
+          <BackButton onClick={togglePreview} />
+        </div>
+      ) : (
+        <>
+          {/* Back button in top left corner */}
+          <div className="fixed top-8 left-8 z-50">
+            <BackButton onClick={handleBack} aria-label="Back to BEA" />
+          </div>
 
-      <div className="flex" style={{ paddingTop: 80 }}>
+          {/* Preview button in top right corner */}
+          <div className="fixed top-8 right-8 z-50">
+            <button
+              onClick={togglePreview}
+              className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
+            >
+              Preview
+            </button>
+          </div>
+        </>
+      )}
+
+      <div className="flex" style={{ paddingTop: isPreviewMode ? 0 : 80 }}>
         <div className="flex-1 max-w-5xl mx-auto">
           <PortfolioCanvas
             isPreviewMode={isPreviewMode}
@@ -136,7 +137,6 @@ export default function PortfolioBuilderPage() {
             onActiveIdentityChange={handleIdentityChange}
             isLive={isLive}
             onToggleLive={handleToggleLive}
-            onBack={handleBack}
           />
         </div>
 

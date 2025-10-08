@@ -80,6 +80,57 @@ const eventData = {
       },
     ],
   },
+  "founder-networking-mixer": {
+    title: "Founder Networking Mixer",
+    description:
+      "Connect with fellow entrepreneurs and startup founders in a relaxed networking environment. Share experiences and build valuable connections.",
+    date: "Dec 18, 2024",
+    time: "6:00 PM - 9:00 PM",
+    location: "Rooftop Lounge, Downtown",
+    attendees: [
+      {
+        id: "alex-thompson",
+        name: "Alex Thompson",
+        title: "Startup Founder",
+        email: "alex@startupventure.com",
+        location: "New York, NY",
+        handle: "@alexfounder",
+        initials: "AT",
+        selectedColor: 5,
+      },
+      {
+        id: "jessica-wu",
+        name: "Jessica Wu",
+        title: "CEO",
+        email: "jessica@techcorp.io",
+        location: "San Francisco, CA",
+        handle: "@jessicaceo",
+        initials: "JW",
+        selectedColor: 3,
+        avatarUrl: "/woman-analyst.png",
+      },
+      {
+        id: "michael-brown",
+        name: "Michael Brown",
+        title: "Co-founder",
+        email: "michael@innovationstudio.com",
+        location: "Los Angeles, CA",
+        handle: "@michaelco",
+        initials: "MB",
+        selectedColor: 4,
+      },
+      {
+        id: "lisa-park",
+        name: "Lisa Park",
+        title: "Entrepreneur",
+        email: "lisa@entrepreneurhub.co",
+        location: "Portland, OR",
+        handle: "@lisaentrepreneur",
+        initials: "LP",
+        selectedColor: 2,
+      },
+    ],
+  },
 }
 
 export default function EventDetailPage() {
@@ -111,7 +162,8 @@ export default function EventDetailPage() {
         (attendee.title.toLowerCase().includes("engineer") || attendee.title.toLowerCase().includes("developer"))) ||
       (selectedFilter === "product" && attendee.title.toLowerCase().includes("product")) ||
       (selectedFilter === "data" &&
-        (attendee.title.toLowerCase().includes("data") || attendee.title.toLowerCase().includes("scientist")))
+        (attendee.title.toLowerCase().includes("data") || attendee.title.toLowerCase().includes("scientist"))) ||
+      (selectedFilter === "founder" && attendee.title.toLowerCase().includes("founder"))
 
     return matchesSearch && matchesFilter
   })
@@ -191,6 +243,7 @@ export default function EventDetailPage() {
                 { id: "engineering", label: "Engineering" },
                 { id: "product", label: "Product" },
                 { id: "data", label: "Data & AI" },
+                { id: "founder", label: "Founder" },
               ].map((filter) => (
                 <button
                   key={filter.id}

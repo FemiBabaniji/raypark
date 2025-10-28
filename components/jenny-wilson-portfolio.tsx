@@ -9,6 +9,7 @@ import { BackButton } from "@/components/ui/back-button"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import type { Identity } from "./portfolio/builder/types"
 import StartupWidget from "./portfolio/builder/widgets/StartupWidget"
+import MeetingSchedulerWidget from "./portfolio/builder/widgets/MeetingSchedulerWidget"
 
 export default function JennyWilsonPortfolio({
   isPreviewMode = false,
@@ -40,6 +41,7 @@ export default function JennyWilsonPortfolio({
     { id: "description", type: "description" },
     { id: "projects", type: "projects" },
     { id: "services", type: "services" },
+    { id: "meeting-scheduler", type: "meeting-scheduler" },
   ])
 
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -752,7 +754,7 @@ export default function JennyWilsonPortfolio({
               value={aboutText.title}
               onChange={(e) => setAboutText({ ...aboutText, title: e.target.value })}
               onBlur={() => setEditingField(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
+              onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
               className="bg-transparent border-none outline-none text-xl font-bold text-white w-full"
               autoFocus
             />
@@ -1359,6 +1361,12 @@ export default function JennyWilsonPortfolio({
                 >
                   Gallery Widget
                 </button>
+                <button
+                  onClick={() => setSelectedWidgetType("meeting-scheduler")}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
+                >
+                  Meeting Scheduler Widget
+                </button>
               </>
             )}
           </div>
@@ -1404,6 +1412,16 @@ export default function JennyWilsonPortfolio({
             }}
             editingField={editingField}
             setEditingField={setEditingField}
+          />
+        )
+      case "meeting-scheduler":
+        return (
+          <MeetingSchedulerWidget
+            key={widget.id}
+            widgetId={widget.id}
+            column={column}
+            isPreviewMode={isPreviewMode}
+            onDelete={() => deleteWidget(widget.id, column)}
           />
         )
       default:

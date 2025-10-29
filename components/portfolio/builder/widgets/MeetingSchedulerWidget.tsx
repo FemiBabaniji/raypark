@@ -1,7 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, X, GripVertical, Palette } from "lucide-react"
+import { useState, useEffect } from "react"
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Clock,
+  X,
+  GripVertical,
+  Palette,
+  ExternalLink,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
@@ -21,6 +31,10 @@ export default function MeetingSchedulerWidget({
   selectedColor?: ThemeIndex
   onColorChange?: (color: ThemeIndex) => void
 }) {
+  const [mode, setMode] = useState<"custom" | "calendly">("custom")
+  const [calendlyUrl, setCalendlyUrl] = useState("https://calendly.com/your-username/30min")
+  const [isEditingUrl, setIsEditingUrl] = useState(false)
+
   const [view, setView] = useState<"calendar" | "events" | "zones" | "slots" | "confirmation">("calendar")
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
@@ -30,6 +44,19 @@ export default function MeetingSchedulerWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
+
+  useEffect(() => {
+    if (mode === "calendly") {
+      const script = document.createElement("script")
+      script.src = "https://assets.calendly.com/assets/external/widget.js"
+      script.async = true
+      document.body.appendChild(script)
+
+      return () => {
+        document.body.removeChild(script)
+      }
+    }
+  }, [mode])
 
   const monthNames = [
     "January",
@@ -138,18 +165,19 @@ export default function MeetingSchedulerWidget({
     >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          {view !== "calendar" && (
+          {mode === "custom" && view !== "calendar" && (
             <button onClick={handleBack} className="text-white/70 hover:text-white transition">
               <ChevronLeft className="w-4 h-4" />
             </button>
           )}
           <Calendar className="w-4 h-4" />
           <h2 className="text-sm font-bold">
-            {view === "calendar" && "Schedule Meeting"}
-            {view === "events" && "Select Event"}
-            {view === "zones" && "Select Zone"}
-            {view === "slots" && "Pick Time"}
-            {view === "confirmation" && "Confirm"}
+            {mode === "calendly" && "Schedule Meeting"}
+            {mode === "custom" && view === "calendar" && "Schedule Meeting"}
+            {mode === "custom" && view === "events" && "Select Event"}
+            {mode === "custom" && view === "zones" && "Select Zone"}
+            {mode === "custom" && view === "slots" && "Pick Time"}
+            {mode === "custom" && view === "confirmation" && "Confirm"}
           </h2>
         </div>
         {!isPreviewMode && (
@@ -198,153 +226,216 @@ export default function MeetingSchedulerWidget({
         )}
       </div>
 
-      {view === "calendar" && (
-        <div>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <button
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-              className="p-1 hover:bg-white/20 rounded-lg transition"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-            <h3 className="text-xs font-semibold">
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </h3>
-            <button
-              onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              className="p-1 hover:bg-white/20 rounded-lg transition"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setMode("custom")}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium transition ${
+            mode === "custom" ? "bg-white/30 text-white" : "bg-white/10 text-white/60 hover:bg-white/20"
+          }`}
+        >
+          Custom Scheduler
+        </button>
+        <button
+          onClick={() => setMode("calendly")}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium transition ${
+            mode === "calendly" ? "bg-white/30 text-white" : "bg-white/10 text-white/60 hover:bg-white/20"
+          }`}
+        >
+          Calendly
+        </button>
+      </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-              <div key={i} className="text-center text-xs text-white/70 font-medium py-0.5">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: startingDayOfWeek }).map((_, i) => (
-              <div key={`empty-${i}`} className="aspect-square"></div>
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1
-              const isEventDay = hasEvent(day)
-              return (
+      {mode === "calendly" && (
+        <div className="space-y-3">
+          {!isPreviewMode && (
+            <div className="bg-white/20 rounded-xl p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-white/90">Calendly URL</label>
                 <button
-                  key={day}
-                  onClick={() => handleDayClick(day)}
-                  disabled={!isEventDay}
-                  className={`aspect-square rounded-lg flex flex-col items-center justify-center relative transition text-xs ${
-                    isEventDay
-                      ? "bg-white/30 hover:bg-white/40 cursor-pointer font-medium"
-                      : "bg-white/10 text-white/40 cursor-default"
+                  onClick={() => setIsEditingUrl(!isEditingUrl)}
+                  className="text-xs text-white/70 hover:text-white transition"
+                >
+                  {isEditingUrl ? "Done" : "Edit"}
+                </button>
+              </div>
+              {isEditingUrl ? (
+                <input
+                  type="text"
+                  value={calendlyUrl}
+                  onChange={(e) => setCalendlyUrl(e.target.value)}
+                  placeholder="https://calendly.com/your-username/30min"
+                  className="w-full bg-white/20 text-white placeholder:text-white/50 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-white/30"
+                />
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-white/80">
+                  <span className="truncate">{calendlyUrl}</span>
+                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="bg-white/10 rounded-xl overflow-hidden" style={{ minHeight: "500px" }}>
+            <div
+              className="calendly-inline-widget"
+              data-url={calendlyUrl}
+              style={{ minWidth: "100%", height: "500px" }}
+            />
+          </div>
+        </div>
+      )}
+
+      {mode === "custom" && (
+        <>
+          {view === "calendar" && (
+            <div>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <button
+                  onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </button>
+                <h3 className="text-xs font-semibold">
+                  {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                </h3>
+                <button
+                  onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
+                  <div key={i} className="text-center text-xs text-white/70 font-medium py-0.5">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+                  <div key={`empty-${i}`} className="aspect-square"></div>
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1
+                  const isEventDay = hasEvent(day)
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => handleDayClick(day)}
+                      disabled={!isEventDay}
+                      className={`aspect-square rounded-lg flex flex-col items-center justify-center relative transition text-xs ${
+                        isEventDay
+                          ? "bg-white/30 hover:bg-white/40 cursor-pointer font-medium"
+                          : "bg-white/10 text-white/40 cursor-default"
+                      }`}
+                    >
+                      <span>{day}</span>
+                      {isEventDay && <div className="absolute bottom-0.5 w-0.5 h-0.5 bg-white rounded-full"></div>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {view === "events" && (
+            <div className="space-y-2">
+              {getEventsForDay(selectedDay!).map((event) => (
+                <button
+                  key={event.id}
+                  onClick={() => handleEventClick(event)}
+                  className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
+                >
+                  <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
+                  <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
+                    <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">{event.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-white/80">
+                    <Clock className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-xs">{event.time}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {view === "zones" && (
+            <div className="grid grid-cols-2 gap-2">
+              {zones.map((zone) => (
+                <button
+                  key={zone.id}
+                  onClick={() => handleZoneClick(zone)}
+                  disabled={zone.available === 0}
+                  className={`rounded-xl p-3 text-center transition ${
+                    zone.available > 0
+                      ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                      : "bg-white/10 opacity-60 cursor-not-allowed"
                   }`}
                 >
-                  <span>{day}</span>
-                  {isEventDay && <div className="absolute bottom-0.5 w-0.5 h-0.5 bg-white rounded-full"></div>}
+                  <div className="text-base font-bold mb-1">{zone.name}</div>
+                  <div className="text-xs text-white/80">
+                    {zone.available > 0 ? `${zone.available} slots` : "Fully booked"}
+                  </div>
                 </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
+          )}
 
-      {view === "events" && (
-        <div className="space-y-2">
-          {getEventsForDay(selectedDay!).map((event) => (
-            <button
-              key={event.id}
-              onClick={() => handleEventClick(event)}
-              className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
-            >
-              <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
-              <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
-                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span className="text-xs">{event.location}</span>
+          {view === "slots" && (
+            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+              {timeSlots.map((slot) => (
+                <button
+                  key={slot.id}
+                  onClick={() => handleSlotClick(slot)}
+                  disabled={!slot.available}
+                  className={`rounded-xl p-2.5 text-center transition ${
+                    slot.available
+                      ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                      : "bg-white/10 opacity-60 cursor-not-allowed"
+                  }`}
+                >
+                  <div className={`font-semibold text-xs ${!slot.available ? "line-through" : ""}`}>{slot.time}</div>
+                  <div className="text-xs text-white/80 mt-0.5">25 min</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {view === "confirmation" && (
+            <div className="space-y-3">
+              <div className="bg-white/20 rounded-xl p-3 space-y-2">
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Event</div>
+                  <div className="font-semibold text-xs">{selectedEvent.name}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Location</div>
+                  <div className="font-medium text-xs">{selectedEvent.location}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
+                  <div className="font-medium text-xs">{selectedZone.name}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Time</div>
+                  <div className="font-medium text-xs">{selectedSlot.time} (25 minutes)</div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-white/80">
-                <Clock className="w-3 h-3 flex-shrink-0" />
-                <span className="text-xs">{event.time}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
 
-      {view === "zones" && (
-        <div className="grid grid-cols-2 gap-2">
-          {zones.map((zone) => (
-            <button
-              key={zone.id}
-              onClick={() => handleZoneClick(zone)}
-              disabled={zone.available === 0}
-              className={`rounded-xl p-3 text-center transition ${
-                zone.available > 0
-                  ? "bg-white/30 hover:bg-white/40 cursor-pointer"
-                  : "bg-white/10 opacity-60 cursor-not-allowed"
-              }`}
-            >
-              <div className="text-base font-bold mb-1">{zone.name}</div>
-              <div className="text-xs text-white/80">
-                {zone.available > 0 ? `${zone.available} slots` : "Fully booked"}
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {view === "slots" && (
-        <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
-          {timeSlots.map((slot) => (
-            <button
-              key={slot.id}
-              onClick={() => handleSlotClick(slot)}
-              disabled={!slot.available}
-              className={`rounded-xl p-2.5 text-center transition ${
-                slot.available
-                  ? "bg-white/30 hover:bg-white/40 cursor-pointer"
-                  : "bg-white/10 opacity-60 cursor-not-allowed"
-              }`}
-            >
-              <div className={`font-semibold text-xs ${!slot.available ? "line-through" : ""}`}>{slot.time}</div>
-              <div className="text-xs text-white/80 mt-0.5">25 min</div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {view === "confirmation" && (
-        <div className="space-y-3">
-          <div className="bg-white/20 rounded-xl p-3 space-y-2">
-            <div>
-              <div className="text-xs text-white/70 mb-0.5">Event</div>
-              <div className="font-semibold text-xs">{selectedEvent.name}</div>
+              <button
+                onClick={handleConfirm}
+                className="w-full bg-white/30 hover:bg-white/40 font-semibold py-2 rounded-xl transition text-xs"
+              >
+                Send Meeting Invitation
+              </button>
             </div>
-            <div>
-              <div className="text-xs text-white/70 mb-0.5">Location</div>
-              <div className="font-medium text-xs">{selectedEvent.location}</div>
-            </div>
-            <div>
-              <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
-              <div className="font-medium text-xs">{selectedZone.name}</div>
-            </div>
-            <div>
-              <div className="text-xs text-white/70 mb-0.5">Time</div>
-              <div className="font-medium text-xs">{selectedSlot.time} (25 minutes)</div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleConfirm}
-            className="w-full bg-white/30 hover:bg-white/40 font-semibold py-2 rounded-xl transition text-xs"
-          >
-            Send Meeting Invitation
-          </button>
-        </div>
+          )}
+        </>
       )}
     </div>
   )

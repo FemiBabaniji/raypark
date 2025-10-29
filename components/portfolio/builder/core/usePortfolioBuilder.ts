@@ -7,7 +7,15 @@ import type { PortfolioExportData } from "@/lib/portfolioExportData" // Declare 
 
 /** ---------- Types ---------- */
 export type Column = "left" | "right"
-export type WidgetType = "identity" | "education" | "projects" | "description" | "services" | "gallery" | "startup"
+export type WidgetType =
+  | "identity"
+  | "education"
+  | "projects"
+  | "description"
+  | "services"
+  | "gallery"
+  | "startup"
+  | "meeting-scheduler"
 
 export type WidgetDef = { id: string; type: WidgetType }
 

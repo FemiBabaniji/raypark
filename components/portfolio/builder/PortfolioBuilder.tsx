@@ -16,6 +16,7 @@ import {
   ServicesWidget,
   GalleryWidget,
   StartupWidget,
+  MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 
@@ -461,6 +462,23 @@ export default function PortfolioBuilder({
           </motion.div>
         )
 
+      case "meeting-scheduler":
+        return (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <MeetingSchedulerWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              onDelete={() => deleteWidget(w.id, column)}
+            />
+          </motion.div>
+        )
+
       default:
         return (
           <motion.div
@@ -542,15 +560,17 @@ export default function PortfolioBuilder({
                   <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
                     Select Widget Type
                   </div>
-                  {["projects", "education", "description", "services", "gallery", "startup"].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setSelectedWidgetType(type)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
-                    >
-                      {type} Widget
-                    </button>
-                  ))}
+                  {["projects", "education", "description", "services", "gallery", "startup", "meeting-scheduler"].map(
+                    (type) => (
+                      <button
+                        key={type}
+                        onClick={() => setSelectedWidgetType(type)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
+                      >
+                        {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
+                      </button>
+                    ),
+                  )}
                 </>
               )}
             </div>

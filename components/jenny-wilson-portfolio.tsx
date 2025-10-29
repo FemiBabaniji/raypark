@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
 import { Upload, Play, GripVertical, Palette, Plus, X } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -15,10 +17,12 @@ export default function JennyWilsonPortfolio({
   isPreviewMode = false,
   activeIdentity,
   onActiveIdentityChange,
+  rightSlot,
 }: {
   isPreviewMode?: boolean
   activeIdentity?: Identity
   onActiveIdentityChange?: (identity: Identity) => void
+  rightSlot?: React.ReactNode
 }) {
   const [profileColorIdx, setProfileColorIdx] = useState<ThemeIndex>(activeIdentity?.selectedColor ?? 0)
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -1275,106 +1279,39 @@ export default function JennyWilsonPortfolio({
     },
   })
 
-  const [showAddDropdown, setShowAddDropdown] = useState(false)
-  const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
-
-  const addWidget = (type: string, column: "left" | "right") => {
-    const newWidget = {
-      id: `${type}-${Date.now()}`,
-      type: type,
-    }
-
-    if (column === "left") {
-      setLeftWidgets([...leftWidgets, newWidget])
-    } else {
-      setRightWidgets([...rightWidgets, newWidget])
-    }
-
-    setSelectedWidgetType(null)
-    setShowAddDropdown(false)
-  }
-
-  const rightSlot = (
-    <div className="relative">
-      {showAddDropdown && (
-        <div className="absolute top-full right-0 mt-2 bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-700 p-2 z-50 min-w-[220px]">
-          <div className="space-y-1">
-            {selectedWidgetType ? (
-              <>
-                <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider flex items-center gap-2">
-                  <button onClick={() => setSelectedWidgetType(null)} className="text-neutral-300 hover:text-white">
-                    ←
-                  </button>
-                  Choose Column
-                </div>
-                <button
-                  onClick={() => addWidget(selectedWidgetType, "left")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  <div className="w-4 h-4 bg-neutral-600 rounded flex items-center justify-center">
-                    <div className="w-2 h-2 bg-neutral-400 rounded"></div>
-                  </div>
-                  Add to Left Column
-                </button>
-                <button
-                  onClick={() => addWidget(selectedWidgetType, "right")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  <div className="w-4 h-4 bg-neutral-600 rounded flex items-center justify-center">
-                    <div className="w-2 h-2 bg-neutral-400 rounded"></div>
-                  </div>
-                  Add to Right Column
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
-                  Select Widget Type
-                </div>
-                <button
-                  onClick={() => setSelectedWidgetType("projects")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Projects Widget
-                </button>
-                <button
-                  onClick={() => setSelectedWidgetType("education")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Education Widget
-                </button>
-                <button
-                  onClick={() => setSelectedWidgetType("work-experience")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Work Experience Widget
-                </button>
-                <button
-                  onClick={() => setSelectedWidgetType("description")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Description Widget
-                </button>
-                <button
-                  onClick={() => setSelectedWidgetType("gallery")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Gallery Widget
-                </button>
-                <button
-                  onClick={() => setSelectedWidgetType("meeting-scheduler")}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-neutral-700/80 rounded-lg transition-colors"
-                >
-                  Meeting Scheduler Widget
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-      <BackButton onClick={() => setShowAddDropdown(!showAddDropdown)} icon={Plus} />
-    </div>
-  )
+  const [meetingSchedulerContent, setMeetingSchedulerContent] = useState({
+    title: "Schedule Meeting",
+    events: [
+      {
+        id: 1,
+        name: "Tech Networking Mixer",
+        location: "Downtown Hub",
+        time: "6:00 PM - 9:00 PM",
+        date: 15,
+      },
+      {
+        id: 2,
+        name: "Startup Founders Meetup",
+        location: "Innovation Center",
+        time: "5:30 PM - 8:30 PM",
+        date: 22,
+      },
+    ],
+    zones: [
+      { id: 1, name: "Zone A", available: 5 },
+      { id: 2, name: "Zone B", available: 3 },
+      { id: 3, name: "Zone C", available: 0 },
+      { id: 4, name: "Zone D", available: 2 },
+    ],
+    timeSlots: [
+      { id: 1, time: "6:00 PM", available: true },
+      { id: 2, time: "6:30 PM", available: true },
+      { id: 3, time: "7:00 PM", available: false },
+      { id: 4, time: "7:30 PM", available: true },
+      { id: 5, time: "8:00 PM", available: true },
+      { id: 6, time: "8:30 PM", available: false },
+    ],
+  })
 
   const renderWidget = (widget: { id: string; type: string }, column: "left" | "right") => {
     switch (widget.type) {
@@ -1421,7 +1358,17 @@ export default function JennyWilsonPortfolio({
             widgetId={widget.id}
             column={column}
             isPreviewMode={isPreviewMode}
+            content={meetingSchedulerContent}
+            onContentChange={setMeetingSchedulerContent}
             onDelete={() => deleteWidget(widget.id, column)}
+            onMove={() => {
+              deleteWidget(widget.id, column)
+              if (column === "left") {
+                setRightWidgets([...rightWidgets, widget])
+              } else {
+                setLeftWidgets([...leftWidgets, widget])
+              }
+            }}
           />
         )
       default:

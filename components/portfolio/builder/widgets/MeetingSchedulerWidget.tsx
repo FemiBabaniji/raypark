@@ -1,19 +1,25 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, X, GripVertical } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, X, GripVertical, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { THEME_COLOR_OPTIONS } from "@/lib/theme"
+import type { ThemeIndex } from "@/lib/theme"
 
 export default function MeetingSchedulerWidget({
   widgetId,
   column,
   isPreviewMode = false,
   onDelete,
+  selectedColor = 5 as ThemeIndex,
+  onColorChange,
 }: {
   widgetId: string
   column: "left" | "right"
   isPreviewMode?: boolean
   onDelete?: () => void
+  selectedColor?: ThemeIndex
+  onColorChange?: (color: ThemeIndex) => void
 }) {
   const [view, setView] = useState<"calendar" | "events" | "zones" | "slots" | "confirmation">("calendar")
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -21,6 +27,9 @@ export default function MeetingSchedulerWidget({
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   const [selectedZone, setSelectedZone] = useState<any>(null)
   const [selectedSlot, setSelectedSlot] = useState<any>(null)
+  const [showColorPicker, setShowColorPicker] = useState(false)
+
+  const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
 
   const monthNames = [
     "January",
@@ -124,11 +133,13 @@ export default function MeetingSchedulerWidget({
   }
 
   return (
-    <div className="bg-gradient-to-br from-teal-800 to-teal-900 rounded-3xl p-6 group cursor-grab active:cursor-grabbing">
+    <div
+      className={`bg-gradient-to-br ${gradient} backdrop-blur-xl rounded-3xl p-6 group cursor-grab active:cursor-grabbing relative`}
+    >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
           {view !== "calendar" && (
-            <button onClick={handleBack} className="text-teal-200 hover:text-white transition">
+            <button onClick={handleBack} className="text-white/70 hover:text-white transition">
               <ChevronLeft className="w-4 h-4" />
             </button>
           )}
@@ -143,6 +154,35 @@ export default function MeetingSchedulerWidget({
         </div>
         {!isPreviewMode && (
           <div className="flex items-center gap-2">
+            <div className="relative">
+              {showColorPicker && (
+                <div className="absolute bottom-full right-0 mb-2 bg-neutral-900/95 backdrop-blur-xl rounded-2xl p-4 z-50 min-w-[200px]">
+                  <div className="grid grid-cols-3 gap-3">
+                    {THEME_COLOR_OPTIONS.map((color, idx) => (
+                      <button
+                        key={color.name}
+                        className={`w-10 h-10 rounded-full bg-gradient-to-br ${color.gradient} ${
+                          selectedColor === idx ? "ring-2 ring-white" : ""
+                        } hover:ring-2 hover:ring-white/50 transition-all`}
+                        onClick={() => {
+                          const i = idx as ThemeIndex
+                          onColorChange?.(i)
+                          setShowColorPicker(false)
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/30 text-white p-2"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+              >
+                <Palette className="w-4 h-4" />
+              </Button>
+            </div>
             <Button
               size="sm"
               variant="ghost"
@@ -152,7 +192,7 @@ export default function MeetingSchedulerWidget({
               <X className="w-4 h-4" />
             </Button>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical className="w-5 h-5 text-teal-200" />
+              <GripVertical className="w-5 h-5 text-white/70" />
             </div>
           </div>
         )}
@@ -163,7 +203,7 @@ export default function MeetingSchedulerWidget({
           <div className="flex items-center justify-between mb-3 px-1">
             <button
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-              className="p-1 hover:bg-teal-700 rounded-lg transition"
+              className="p-1 hover:bg-white/20 rounded-lg transition"
             >
               <ChevronLeft className="w-3 h-3" />
             </button>
@@ -172,7 +212,7 @@ export default function MeetingSchedulerWidget({
             </h3>
             <button
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              className="p-1 hover:bg-teal-700 rounded-lg transition"
+              className="p-1 hover:bg-white/20 rounded-lg transition"
             >
               <ChevronRight className="w-3 h-3" />
             </button>
@@ -180,7 +220,7 @@ export default function MeetingSchedulerWidget({
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-              <div key={i} className="text-center text-xs text-teal-200 font-medium py-0.5">
+              <div key={i} className="text-center text-xs text-white/70 font-medium py-0.5">
                 {day}
               </div>
             ))}
@@ -200,8 +240,8 @@ export default function MeetingSchedulerWidget({
                   disabled={!isEventDay}
                   className={`aspect-square rounded-lg flex flex-col items-center justify-center relative transition text-xs ${
                     isEventDay
-                      ? "bg-teal-600 hover:bg-teal-500 cursor-pointer font-medium"
-                      : "bg-teal-800/50 text-teal-400 cursor-default"
+                      ? "bg-white/30 hover:bg-white/40 cursor-pointer font-medium"
+                      : "bg-white/10 text-white/40 cursor-default"
                   }`}
                 >
                   <span>{day}</span>
@@ -219,14 +259,14 @@ export default function MeetingSchedulerWidget({
             <button
               key={event.id}
               onClick={() => handleEventClick(event)}
-              className="w-full bg-teal-700 hover:bg-teal-600 rounded-xl p-3 text-left transition"
+              className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
             >
               <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
-              <div className="flex items-start gap-1.5 text-xs text-teal-100 mb-1">
+              <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
                 <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
                 <span className="text-xs">{event.location}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-teal-100">
+              <div className="flex items-center gap-1.5 text-xs text-white/80">
                 <Clock className="w-3 h-3 flex-shrink-0" />
                 <span className="text-xs">{event.time}</span>
               </div>
@@ -244,12 +284,12 @@ export default function MeetingSchedulerWidget({
               disabled={zone.available === 0}
               className={`rounded-xl p-3 text-center transition ${
                 zone.available > 0
-                  ? "bg-teal-600 hover:bg-teal-500 cursor-pointer"
-                  : "bg-teal-800/50 opacity-60 cursor-not-allowed"
+                  ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                  : "bg-white/10 opacity-60 cursor-not-allowed"
               }`}
             >
               <div className="text-base font-bold mb-1">{zone.name}</div>
-              <div className="text-xs text-teal-100">
+              <div className="text-xs text-white/80">
                 {zone.available > 0 ? `${zone.available} slots` : "Fully booked"}
               </div>
             </button>
@@ -266,12 +306,12 @@ export default function MeetingSchedulerWidget({
               disabled={!slot.available}
               className={`rounded-xl p-2.5 text-center transition ${
                 slot.available
-                  ? "bg-teal-600 hover:bg-teal-500 cursor-pointer"
-                  : "bg-teal-800/50 opacity-60 cursor-not-allowed"
+                  ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                  : "bg-white/10 opacity-60 cursor-not-allowed"
               }`}
             >
               <div className={`font-semibold text-xs ${!slot.available ? "line-through" : ""}`}>{slot.time}</div>
-              <div className="text-xs text-teal-100 mt-0.5">25 min</div>
+              <div className="text-xs text-white/80 mt-0.5">25 min</div>
             </button>
           ))}
         </div>
@@ -279,28 +319,28 @@ export default function MeetingSchedulerWidget({
 
       {view === "confirmation" && (
         <div className="space-y-3">
-          <div className="bg-teal-700/60 rounded-xl p-3 space-y-2">
+          <div className="bg-white/20 rounded-xl p-3 space-y-2">
             <div>
-              <div className="text-xs text-teal-200 mb-0.5">Event</div>
+              <div className="text-xs text-white/70 mb-0.5">Event</div>
               <div className="font-semibold text-xs">{selectedEvent.name}</div>
             </div>
             <div>
-              <div className="text-xs text-teal-200 mb-0.5">Location</div>
+              <div className="text-xs text-white/70 mb-0.5">Location</div>
               <div className="font-medium text-xs">{selectedEvent.location}</div>
             </div>
             <div>
-              <div className="text-xs text-teal-200 mb-0.5">Networking Zone</div>
+              <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
               <div className="font-medium text-xs">{selectedZone.name}</div>
             </div>
             <div>
-              <div className="text-xs text-teal-200 mb-0.5">Time</div>
+              <div className="text-xs text-white/70 mb-0.5">Time</div>
               <div className="font-medium text-xs">{selectedSlot.time} (25 minutes)</div>
             </div>
           </div>
 
           <button
             onClick={handleConfirm}
-            className="w-full bg-teal-600 hover:bg-teal-500 font-semibold py-2 rounded-xl transition text-xs"
+            className="w-full bg-white/30 hover:bg-white/40 font-semibold py-2 rounded-xl transition text-xs"
           >
             Send Meeting Invitation
           </button>

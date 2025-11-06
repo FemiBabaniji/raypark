@@ -86,8 +86,8 @@ export default function EventDetail({
 
       <div
         className={clsx(
-          "rounded-3xl p-10 mb-2 bg-gradient-to-br relative overflow-hidden",
-          "shadow-2xl shadow-black/20",
+          "rounded-3xl p-10 mb-2 bg-gradient-to-br relative overflow-hidden backdrop-blur-xl",
+          "shadow-2xl shadow-black/20 transition-all duration-300 hover:shadow-3xl",
           e.gradient || "from-sky-400/35 to-blue-600/20",
         )}
       >
@@ -102,17 +102,17 @@ export default function EventDetail({
           <h1 className="text-5xl font-bold mb-6 text-white leading-tight">{e.title}</h1>
 
           <div className="flex flex-wrap gap-4 mb-8">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-200 hover:bg-white/20">
               <Calendar className="w-4 h-4 text-white/90" />
               <span className="text-sm font-medium text-white/90">
                 {e.date} • {e.time}
               </span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-200 hover:bg-white/20">
               <MapPin className="w-4 h-4 text-white/90" />
               <span className="text-sm font-medium text-white/90">{e.location.name}</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-200 hover:bg-white/20">
               <Users className="w-4 h-4 text-white/90" />
               <span className="text-sm font-medium text-white/90">{e.attending} attending</span>
             </div>
@@ -127,13 +127,13 @@ export default function EventDetail({
             </Button>
             <Button
               onClick={onAddToCalendar}
-              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200"
+              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200 hover:scale-105"
             >
               Add to Calendar
             </Button>
             <Button
               onClick={handleShare}
-              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200"
+              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200 hover:scale-105"
             >
               Share
             </Button>
@@ -145,10 +145,7 @@ export default function EventDetail({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left content */}
         <div className="lg:col-span-2 space-y-6">
-          <section
-            className="rounded-3xl p-10 shadow-xl shadow-black/5 backdrop-blur-sm"
-            style={{ backgroundColor: "#1F1F1F" }}
-          >
+          <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
             <h3 className="text-2xl font-bold mb-6 text-white">About This Event</h3>
             <div className="space-y-4 text-base text-neutral-300 leading-relaxed">
               <p>{e.description}</p>
@@ -156,14 +153,11 @@ export default function EventDetail({
           </section>
 
           {e.location && (
-            <section
-              className="rounded-3xl p-10 space-y-6 shadow-xl shadow-black/5"
-              style={{ backgroundColor: "#1F1F1F" }}
-            >
+            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 space-y-6 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
               <h3 className="text-2xl font-bold text-white">Location & Directions</h3>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
                     <MapPin className="w-5 h-5 text-white" />
                   </div>
                   <div className="space-y-2">
@@ -180,10 +174,7 @@ export default function EventDetail({
                 </div>
               </div>
               {mapSrc && (
-                <div
-                  className="w-full h-64 rounded-2xl overflow-hidden shadow-lg"
-                  style={{ backgroundColor: "#2A2A2A" }}
-                >
+                <div className="w-full h-64 rounded-2xl overflow-hidden shadow-lg bg-neutral-800/50 backdrop-blur-sm">
                   <iframe
                     width="100%"
                     height="100%"
@@ -214,8 +205,7 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-white hover:bg-neutral-700"
-                    style={{ backgroundColor: "#2A2A2A" }}
+                    className="px-5 py-3 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-sm font-medium transition-all duration-200 text-white"
                   >
                     Open in OSM
                   </a>
@@ -228,7 +218,7 @@ export default function EventDetail({
         <aside className="space-y-6">
           {/* Host */}
           {(e.host || e.host?.name) && (
-            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
               <h3 className="text-xl font-bold mb-6 text-white">Hosted By</h3>
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg">
@@ -242,16 +232,13 @@ export default function EventDetail({
               {e.host?.description && (
                 <p className="text-sm text-neutral-300 mb-5 leading-relaxed">{e.host.description}</p>
               )}
-              <button
-                className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 text-white hover:bg-neutral-700"
-                style={{ backgroundColor: "#2A2A2A" }}
-              >
+              <button className="w-full py-3 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-sm font-semibold transition-all duration-200 text-white">
                 Follow Organizer
               </button>
             </section>
           )}
 
-          <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+          <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
             <h3 className="text-xl font-bold mb-6 text-white">Event Stats</h3>
             <div className="space-y-5">
               <KV label="Total Attendees" value={String(e.attending)} />
@@ -263,14 +250,13 @@ export default function EventDetail({
           </section>
 
           {!!e.tags?.length && (
-            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
               <h3 className="text-xl font-bold mb-6 text-white">Topics</h3>
               <div className="flex flex-wrap gap-2.5">
                 {e.tags.map((t, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-300 transition-all duration-200 hover:bg-neutral-700 cursor-pointer"
-                    style={{ backgroundColor: "#2A2A2A" }}
+                    className="px-4 py-2 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-xs font-medium text-neutral-300 transition-all duration-200 cursor-pointer"
                   >
                     {t}
                   </span>
@@ -280,14 +266,13 @@ export default function EventDetail({
           )}
 
           {!!e.partners?.length && (
-            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
               <h3 className="text-xl font-bold mb-6 text-white">Official Partners</h3>
               <div className="flex flex-wrap gap-2.5">
                 {e.partners.map((p, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-neutral-300 hover:bg-neutral-700 cursor-pointer"
-                    style={{ backgroundColor: "#2A2A2A" }}
+                    className="px-4 py-2.5 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-xs font-medium transition-all duration-200 text-neutral-300 cursor-pointer"
                   >
                     {p}
                   </span>

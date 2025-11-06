@@ -83,27 +83,28 @@ export default function EventDetail({
       </div>
 
       {/* Header */}
-      <div className={clsx("rounded-2xl p-8 mb-2 bg-gradient-to-r", e.gradient || "from-blue-600 to-cyan-600")}>
-        <h1 className="text-4xl font-bold mb-4">{e.title}</h1>
+      <div className={clsx("rounded-2xl p-8 mb-2 bg-gradient-to-r", e.gradient || "from-sky-400/35 to-blue-600/20")}>
+        <h1 className="text-4xl font-bold mb-4 text-white">{e.title}</h1>
         <p className="text-lg mb-6 text-white/90">
           {e.date} • {e.time} • {e.location.name}
         </p>
 
         <div className="flex items-center justify-center gap-4">
-          <Button onClick={onRSVP} className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl">
+          <Button
+            onClick={onRSVP}
+            className="bg-white/20 border border-white/30 text-white hover:bg-white/30 rounded-xl px-6 py-2 font-medium transition-colors"
+          >
             RSVP Now
           </Button>
           <Button
             onClick={onAddToCalendar}
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl"
+            className="bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-xl px-6 py-2 font-medium transition-colors"
           >
             Add to Calendar
           </Button>
           <Button
             onClick={handleShare}
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl"
+            className="bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-xl px-6 py-2 font-medium transition-colors"
           >
             Share Event
           </Button>
@@ -115,8 +116,8 @@ export default function EventDetail({
         {/* Left content */}
         <div className="lg:col-span-2 space-y-6">
           {/* About */}
-          <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50">
-            <h3 className="text-xl font-bold mb-4">About This Event</h3>
+          <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+            <h3 className="text-xl font-bold mb-4 text-white">About This Event</h3>
             <div className="space-y-4 text-sm text-neutral-300">
               <p>{e.description}</p>
             </div>
@@ -124,13 +125,16 @@ export default function EventDetail({
 
           {/* Location */}
           {e.location && (
-            <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50 space-y-4">
-              <h3 className="text-xl font-bold">Location & Directions</h3>
+            <section
+              className="rounded-2xl p-6 border border-neutral-800 space-y-4"
+              style={{ backgroundColor: "#1F1F1F" }}
+            >
+              <h3 className="text-xl font-bold text-white">Location & Directions</h3>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold">{e.location.name}</p>
+                    <p className="font-semibold text-white">{e.location.name}</p>
                     {e.location.addressLine && <p className="text-sm text-neutral-400">{e.location.addressLine}</p>}
                     {e.location.venue && <p className="text-sm text-neutral-400 mt-1">{e.location.venue}</p>}
                     {e.location.venueDetails && (
@@ -145,7 +149,10 @@ export default function EventDetail({
                 </div>
               </div>
               {mapSrc && (
-                <div className="w-full h-64 bg-neutral-800/50 rounded-lg overflow-hidden border border-neutral-700/50">
+                <div
+                  className="w-full h-64 rounded-lg overflow-hidden border"
+                  style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+                >
                   <iframe
                     width="100%"
                     height="100%"
@@ -164,7 +171,7 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm font-medium transition text-center"
+                    className="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm font-medium transition text-center text-white"
                   >
                     Get Directions in Google Maps
                   </a>
@@ -176,7 +183,8 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-neutral-800/50 hover:bg-neutral-700/50 rounded-lg text-sm font-medium transition border border-neutral-700/50"
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition border text-white"
+                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
                   >
                     Open in OSM
                   </a>
@@ -190,27 +198,30 @@ export default function EventDetail({
         <aside className="space-y-6">
           {/* Host */}
           {(e.host || e.host?.name) && (
-            <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50">
-              <h3 className="text-lg font-bold mb-4">Hosted By</h3>
+            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-4 text-white">Hosted By</h3>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-lg font-bold">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-lg font-bold text-white">
                   {e.host?.avatarText || (e.host?.name ? initials(e.host.name) : "EV")}
                 </div>
                 <div>
-                  <h4 className="font-semibold">{e.host?.name || "Organizer"}</h4>
+                  <h4 className="font-semibold text-white">{e.host?.name || "Organizer"}</h4>
                   <p className="text-xs text-neutral-400">Event Organizer</p>
                 </div>
               </div>
               {e.host?.description && <p className="text-sm text-neutral-300 mb-4">{e.host.description}</p>}
-              <button className="w-full py-2 bg-neutral-800/50 hover:bg-neutral-700/50 rounded-lg text-sm font-medium transition border border-neutral-700/50">
+              <button
+                className="w-full py-2 rounded-lg text-sm font-medium transition border text-white"
+                style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+              >
                 Follow Organizer
               </button>
             </section>
           )}
 
           {/* Stats */}
-          <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50">
-            <h3 className="text-lg font-bold mb-4">Event Stats</h3>
+          <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+            <h3 className="text-lg font-bold mb-4 text-white">Event Stats</h3>
             <div className="space-y-4">
               <KV label="Total Attendees" value={String(e.attending)} />
               {typeof remaining === "number" && (
@@ -222,13 +233,14 @@ export default function EventDetail({
 
           {/* Topics */}
           {!!e.tags?.length && (
-            <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50">
-              <h3 className="text-lg font-bold mb-4">Topics</h3>
+            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-4 text-white">Topics</h3>
               <div className="flex flex-wrap gap-2">
                 {e.tags.map((t, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 bg-neutral-800/50 text-neutral-300 rounded-lg text-xs border border-neutral-700/50"
+                    className="px-3 py-1.5 rounded-lg text-xs border text-neutral-300"
+                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
                   >
                     {t}
                   </span>
@@ -239,13 +251,14 @@ export default function EventDetail({
 
           {/* Partners */}
           {!!e.partners?.length && (
-            <section className="bg-neutral-900/50 backdrop-blur-xl rounded-2xl p-6 border border-neutral-800/50">
-              <h3 className="text-lg font-bold mb-4">Official Partners</h3>
+            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-4 text-white">Official Partners</h3>
               <div className="flex flex-wrap gap-2">
                 {e.partners.map((p, i) => (
                   <span
                     key={i}
-                    className="px-3 py-2 bg-neutral-800/50 hover:bg-neutral-700/50 text-neutral-300 rounded-lg text-xs transition border border-neutral-700/50"
+                    className="px-3 py-2 rounded-lg text-xs transition border text-neutral-300"
+                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
                   >
                     {p}
                   </span>
@@ -271,7 +284,7 @@ function KV({
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-neutral-400">{label}</span>
-      <span className={clsx("font-bold", emphasis === "positive" && "text-green-400")}>{value}</span>
+      <span className={clsx("font-bold text-white", emphasis === "positive" && "text-green-400")}>{value}</span>
     </div>
   )
 }

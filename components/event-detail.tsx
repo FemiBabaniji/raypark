@@ -116,7 +116,7 @@ export default function EventDetail({
         {/* Left content */}
         <div className="lg:col-span-2 space-y-6">
           {/* About */}
-          <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+          <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
             <h3 className="text-xl font-bold mb-4 text-white">About This Event</h3>
             <div className="space-y-4 text-sm text-neutral-300">
               <p>{e.description}</p>
@@ -125,10 +125,7 @@ export default function EventDetail({
 
           {/* Location */}
           {e.location && (
-            <section
-              className="rounded-2xl p-6 border border-neutral-800 space-y-4"
-              style={{ backgroundColor: "#1F1F1F" }}
-            >
+            <section className="rounded-2xl p-6 space-y-4" style={{ backgroundColor: "#1F1F1F" }}>
               <h3 className="text-xl font-bold text-white">Location & Directions</h3>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
@@ -149,10 +146,7 @@ export default function EventDetail({
                 </div>
               </div>
               {mapSrc && (
-                <div
-                  className="w-full h-64 rounded-lg overflow-hidden border"
-                  style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
-                >
+                <div className="w-full h-64 rounded-lg overflow-hidden" style={{ backgroundColor: "#2A2A2A" }}>
                   <iframe
                     width="100%"
                     height="100%"
@@ -183,8 +177,8 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition border text-white"
-                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition text-white"
+                    style={{ backgroundColor: "#2A2A2A" }}
                   >
                     Open in OSM
                   </a>
@@ -198,7 +192,7 @@ export default function EventDetail({
         <aside className="space-y-6">
           {/* Host */}
           {(e.host || e.host?.name) && (
-            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
               <h3 className="text-lg font-bold mb-4 text-white">Hosted By</h3>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-lg font-bold text-white">
@@ -211,8 +205,8 @@ export default function EventDetail({
               </div>
               {e.host?.description && <p className="text-sm text-neutral-300 mb-4">{e.host.description}</p>}
               <button
-                className="w-full py-2 rounded-lg text-sm font-medium transition border text-white"
-                style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+                className="w-full py-2 rounded-lg text-sm font-medium transition text-white"
+                style={{ backgroundColor: "#2A2A2A" }}
               >
                 Follow Organizer
               </button>
@@ -220,7 +214,7 @@ export default function EventDetail({
           )}
 
           {/* Stats */}
-          <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+          <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
             <h3 className="text-lg font-bold mb-4 text-white">Event Stats</h3>
             <div className="space-y-4">
               <KV label="Total Attendees" value={String(e.attending)} />
@@ -233,14 +227,14 @@ export default function EventDetail({
 
           {/* Topics */}
           {!!e.tags?.length && (
-            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
               <h3 className="text-lg font-bold mb-4 text-white">Topics</h3>
               <div className="flex flex-wrap gap-2">
                 {e.tags.map((t, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 rounded-lg text-xs border text-neutral-300"
-                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+                    className="px-3 py-1.5 rounded-lg text-xs text-neutral-300"
+                    style={{ backgroundColor: "#2A2A2A" }}
                   >
                     {t}
                   </span>
@@ -251,14 +245,14 @@ export default function EventDetail({
 
           {/* Partners */}
           {!!e.partners?.length && (
-            <section className="rounded-2xl p-6 border border-neutral-800" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
               <h3 className="text-lg font-bold mb-4 text-white">Official Partners</h3>
               <div className="flex flex-wrap gap-2">
                 {e.partners.map((p, i) => (
                   <span
                     key={i}
-                    className="px-3 py-2 rounded-lg text-xs transition border text-neutral-300"
-                    style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}
+                    className="px-3 py-2 rounded-lg text-xs transition text-neutral-300"
+                    style={{ backgroundColor: "#2A2A2A" }}
                   >
                     {p}
                   </span>

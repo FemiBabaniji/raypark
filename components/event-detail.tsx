@@ -116,29 +116,27 @@ export default function EventDetail({
         {/* Left content */}
         <div className="lg:col-span-2 space-y-6">
           {/* About */}
-          <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
-            <h3 className="text-xl font-bold mb-4 text-white">About This Event</h3>
-            <div className="space-y-4 text-sm text-neutral-300">
+          <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
+            <h3 className="text-xl font-bold mb-6 text-white">About This Event</h3>
+            <div className="space-y-4 text-sm text-neutral-300 leading-relaxed">
               <p>{e.description}</p>
             </div>
           </section>
 
           {/* Location */}
           {e.location && (
-            <section className="rounded-2xl p-6 space-y-4" style={{ backgroundColor: "#1F1F1F" }}>
+            <section className="rounded-2xl p-8 space-y-6" style={{ backgroundColor: "#1F1F1F" }}>
               <h3 className="text-xl font-bold text-white">Location & Directions</h3>
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                  <div>
+                  <div className="space-y-2">
                     <p className="font-semibold text-white">{e.location.name}</p>
                     {e.location.addressLine && <p className="text-sm text-neutral-400">{e.location.addressLine}</p>}
-                    {e.location.venue && <p className="text-sm text-neutral-400 mt-1">{e.location.venue}</p>}
-                    {e.location.venueDetails && (
-                      <p className="text-xs text-neutral-500 mt-1">{e.location.venueDetails}</p>
-                    )}
+                    {e.location.venue && <p className="text-sm text-neutral-400">{e.location.venue}</p>}
+                    {e.location.venueDetails && <p className="text-xs text-neutral-500">{e.location.venueDetails}</p>}
                     {e.location.format && (
-                      <p className="text-xs text-neutral-500 mt-1 capitalize">
+                      <p className="text-xs text-neutral-500 capitalize">
                         Format: {e.location.format.replace("_", " ")}
                       </p>
                     )}
@@ -192,9 +190,9 @@ export default function EventDetail({
         <aside className="space-y-6">
           {/* Host */}
           {(e.host || e.host?.name) && (
-            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-4 text-white">Hosted By</h3>
-              <div className="flex items-center gap-3 mb-4">
+            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-6 text-white">Hosted By</h3>
+              <div className="flex items-center gap-3 mb-5">
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-lg font-bold text-white">
                   {e.host?.avatarText || (e.host?.name ? initials(e.host.name) : "EV")}
                 </div>
@@ -203,9 +201,11 @@ export default function EventDetail({
                   <p className="text-xs text-neutral-400">Event Organizer</p>
                 </div>
               </div>
-              {e.host?.description && <p className="text-sm text-neutral-300 mb-4">{e.host.description}</p>}
+              {e.host?.description && (
+                <p className="text-sm text-neutral-300 mb-5 leading-relaxed">{e.host.description}</p>
+              )}
               <button
-                className="w-full py-2 rounded-lg text-sm font-medium transition text-white"
+                className="w-full py-2.5 rounded-lg text-sm font-medium transition text-white"
                 style={{ backgroundColor: "#2A2A2A" }}
               >
                 Follow Organizer
@@ -214,9 +214,9 @@ export default function EventDetail({
           )}
 
           {/* Stats */}
-          <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
-            <h3 className="text-lg font-bold mb-4 text-white">Event Stats</h3>
-            <div className="space-y-4">
+          <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
+            <h3 className="text-lg font-bold mb-6 text-white">Event Stats</h3>
+            <div className="space-y-5">
               <KV label="Total Attendees" value={String(e.attending)} />
               {typeof remaining === "number" && (
                 <KV label="Spots Remaining" value={String(remaining)} emphasis="positive" />
@@ -227,9 +227,9 @@ export default function EventDetail({
 
           {/* Topics */}
           {!!e.tags?.length && (
-            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-4 text-white">Topics</h3>
-              <div className="flex flex-wrap gap-2">
+            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-6 text-white">Topics</h3>
+              <div className="flex flex-wrap gap-2.5">
                 {e.tags.map((t, i) => (
                   <span
                     key={i}
@@ -245,9 +245,9 @@ export default function EventDetail({
 
           {/* Partners */}
           {!!e.partners?.length && (
-            <section className="rounded-2xl p-6" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-4 text-white">Official Partners</h3>
-              <div className="flex flex-wrap gap-2">
+            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-lg font-bold mb-6 text-white">Official Partners</h3>
+              <div className="flex flex-wrap gap-2.5">
                 {e.partners.map((p, i) => (
                   <span
                     key={i}

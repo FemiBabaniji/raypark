@@ -73,7 +73,7 @@ export default function EventDetail({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-6 space-y-6">
       {/* Back */}
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="flex items-center gap-2 text-neutral-400 hover:text-white transition">

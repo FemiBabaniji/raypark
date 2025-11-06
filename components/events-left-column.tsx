@@ -196,10 +196,6 @@ function AnnouncementItem({
   timeAgo,
   avatarColor,
   isImportant = false,
-  isSaved = false,
-  isRead = false,
-  onToggleSaved,
-  onToggleRead,
 }: {
   title: string
   content: string
@@ -207,10 +203,6 @@ function AnnouncementItem({
   timeAgo: string
   avatarColor: string
   isImportant?: boolean
-  isSaved?: boolean
-  isRead?: boolean
-  onToggleSaved?: () => void
-  onToggleRead?: () => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -220,7 +212,7 @@ function AnnouncementItem({
         variant="module"
         className={`transition-all duration-300 ease-out overflow-hidden cursor-pointer hover:shadow-lg ${
           isExpanded ? "shadow-xl" : ""
-        } ${isRead ? "opacity-60" : ""}`}
+        }`}
         style={{
           backgroundColor: isImportant ? "#2A1A4A" : "#1F1F1F",
           border: "none",
@@ -246,9 +238,6 @@ function AnnouncementItem({
                       Important
                     </span>
                   )}
-                  {isSaved && (
-                    <span className="px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full font-medium">Saved</span>
-                  )}
                 </div>
                 <div className="text-sm text-gray-400 mb-2">
                   {author} • {timeAgo}
@@ -271,6 +260,7 @@ function AnnouncementItem({
             </button>
           </div>
 
+          {/* Expanded content */}
           <div
             className={`transition-all duration-300 ease-out ${
               isExpanded ? "opacity-100 mt-4" : "opacity-0 h-0 overflow-hidden"
@@ -281,31 +271,11 @@ function AnnouncementItem({
                 <p className="text-sm text-gray-200 leading-relaxed mb-3">{content}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleRead?.()
-                      }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                        isRead
-                          ? "bg-gray-500/20 text-gray-300 hover:bg-gray-500/30"
-                          : "bg-blue-500/20 text-blue-300 hover:bg-blue-500/30"
-                      }`}
-                    >
-                      {isRead ? "Mark as Unread" : "Mark as Read"}
+                    <button className="px-3 py-1.5 bg-blue-500/20 text-blue-300 text-xs rounded-lg hover:bg-blue-500/30 transition-colors">
+                      Read More
                     </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleSaved?.()
-                      }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                        isSaved
-                          ? "bg-blue-500/30 text-blue-200 hover:bg-blue-500/40"
-                          : "bg-gray-500/20 text-gray-300 hover:bg-gray-500/30"
-                      }`}
-                    >
-                      {isSaved ? "Unsave" : "Save"}
+                    <button className="px-3 py-1.5 bg-gray-500/20 text-gray-300 text-xs rounded-lg hover:bg-gray-500/30 transition-colors">
+                      Mark as Read
                     </button>
                   </div>
                   <div className="text-xs text-gray-500">12 reactions</div>
@@ -433,9 +403,6 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
   const [selectedMemberRole, setSelectedMemberRole] = useState("all")
-  const [announcementFilter, setAnnouncementFilter] = useState<"all" | "unread" | "important" | "saved">("all")
-  const [savedAnnouncements, setSavedAnnouncements] = useState<Set<string>>(new Set())
-  const [readAnnouncements, setReadAnnouncements] = useState<Set<string>>(new Set())
 
   const pastEvents = [
     {
@@ -530,70 +497,6 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const filteredPastEvents = filterEvents(pastEvents)
   const filteredMembers = filterMembers()
 
-  const announcements = [
-    {
-      id: "1",
-      title: "New Partnership with TechCorp",
-      content:
-        "We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members.",
-      author: "Admin",
-      timeAgo: "2 hours ago",
-      avatarColor: "#8B5CF6",
-      isImportant: true,
-    },
-    {
-      id: "2",
-      title: "Upcoming Hackathon Registration",
-      content:
-        "Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event.",
-      author: "Events Team",
-      timeAgo: "1 day ago",
-      avatarColor: "#10B981",
-      isImportant: false,
-    },
-    {
-      id: "3",
-      title: "New Workspace Hours",
-      content:
-        "Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions.",
-      author: "Facilities",
-      timeAgo: "3 days ago",
-      avatarColor: "#F59E0B",
-      isImportant: false,
-    },
-  ]
-
-  const filteredAnnouncements = announcements.filter((announcement) => {
-    if (announcementFilter === "unread") return !readAnnouncements.has(announcement.id)
-    if (announcementFilter === "important") return announcement.isImportant
-    if (announcementFilter === "saved") return savedAnnouncements.has(announcement.id)
-    return true
-  })
-
-  const toggleSaved = (id: string) => {
-    setSavedAnnouncements((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(id)) {
-        newSet.delete(id)
-      } else {
-        newSet.add(id)
-      }
-      return newSet
-    })
-  }
-
-  const toggleRead = (id: string) => {
-    setReadAnnouncements((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(id)) {
-        newSet.delete(id)
-      } else {
-        newSet.add(id)
-      }
-      return newSet
-    })
-  }
-
   return (
     <div className="w-full">
       <div className="flex gap-4">
@@ -604,6 +507,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Members" && (
         <div className="mt-8 space-y-6">
+          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
             <input
@@ -615,6 +519,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             />
           </div>
 
+          {/* Role Filters */}
           <div className="flex gap-2">
             {[
               { key: "all", label: "All" },
@@ -636,6 +541,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             ))}
           </div>
 
+          {/* Members Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => (
@@ -659,6 +565,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       {active === "Events" && (
         <>
           <div className="mt-8 space-y-4">
+            {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
               <input
@@ -670,6 +577,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               />
             </div>
 
+            {/* Category Filters */}
             <div className="flex gap-2">
               {[
                 { key: "all", label: "All Events" },
@@ -757,43 +665,29 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               Announcements
             </h2>
 
-            <div className="flex gap-2 mb-6">
-              {[
-                { key: "all", label: "All" },
-                { key: "unread", label: "Unread" },
-                { key: "important", label: "Important" },
-                { key: "saved", label: "Saved" },
-              ].map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => setAnnouncementFilter(filter.key as typeof announcementFilter)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    announcementFilter === filter.key
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-
             <div className="space-y-4">
-              {filteredAnnouncements.map((announcement) => (
-                <AnnouncementItem
-                  key={announcement.id}
-                  {...announcement}
-                  isSaved={savedAnnouncements.has(announcement.id)}
-                  isRead={readAnnouncements.has(announcement.id)}
-                  onToggleSaved={() => toggleSaved(announcement.id)}
-                  onToggleRead={() => toggleRead(announcement.id)}
-                />
-              ))}
-              {filteredAnnouncements.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-zinc-500">No announcements found.</p>
-                </div>
-              )}
+              <AnnouncementItem
+                title="New Partnership with TechCorp"
+                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
+                author="Admin"
+                timeAgo="2 hours ago"
+                avatarColor="#8B5CF6"
+                isImportant={true}
+              />
+              <AnnouncementItem
+                title="Upcoming Hackathon Registration"
+                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
+                author="Events Team"
+                timeAgo="1 day ago"
+                avatarColor="#10B981"
+              />
+              <AnnouncementItem
+                title="New Workspace Hours"
+                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
+                author="Facilities"
+                timeAgo="3 days ago"
+                avatarColor="#F59E0B"
+              />
             </div>
           </section>
         </>

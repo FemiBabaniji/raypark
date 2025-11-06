@@ -6,8 +6,6 @@ import { BackButton } from "@/components/ui/back-button"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
-import { CalendarView } from "@/components/calendar-view"
-import { MeetingScheduler } from "@/components/meeting-scheduler"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -173,7 +171,6 @@ const eventData = {
 
 export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
-  const [view, setView] = useState<"events" | "calendar" | "meetings">("events")
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -303,146 +300,28 @@ export default function EventsPage() {
           </div>
         </motion.div>
       ) : (
-        <main className="flex flex-row overflow-hidden">
-          {/* Left Sidebar - Community Stats & Profile */}
-          <div className="w-72 p-4 space-y-4 border-r border-neutral-800 flex-shrink-0 overflow-y-auto">
-            {/* Community Stats */}
-            <div className="bg-neutral-900 rounded-2xl p-4">
-              <div className="text-center mb-4">
-                <div className="text-lg font-bold">Black</div>
-                <div className="text-lg font-bold">Entrepreneurship</div>
-                <div className="text-lg font-bold">Alliance.</div>
-              </div>
+        <main className="px-6 py-4">
+          <div className="max-w-6xl mx-auto relative overflow-hidden">
+            <div className="flex gap-6">
+              <motion.div
+                className="flex-1"
+                animate={{
+                  width: "auto",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <EventsLeftColumn onEventClick={handleEventClick} />
+              </motion.div>
 
-              <h3 className="text-sm font-bold mb-3">Community Stats</h3>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-400">Active Members</span>
-                  <span className="font-bold">247</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-400">This Month's Events</span>
-                  <span className="font-bold">8</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-400">New Members</span>
-                  <span className="font-bold">12</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-400">Founded</span>
-                  <span className="font-bold">2021</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Profile Card */}
-            <div className="bg-neutral-900 rounded-2xl p-3">
-              <div className="bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl p-4 relative">
-                <div className="absolute top-2 left-2 w-2 h-2 bg-green-500 rounded-full"></div>
-                <button className="absolute top-2 right-2 p-1 bg-black/20 hover:bg-black/30 rounded">
-                  <span className="text-base">⋯</span>
-                </button>
-
-                <div className="flex flex-col items-start mb-3">
-                  <div className="w-12 h-12 bg-orange-900/50 rounded-full flex items-center justify-center text-lg font-bold mb-2">
-                    F
-                  </div>
-                  <h3 className="text-base font-bold">fife</h3>
-                  <p className="text-xs opacity-90">founder</p>
-                </div>
-
-                <div className="space-y-0.5 text-xs">
-                  <p>fff.test@gmail.com</p>
-                  <p>toronto</p>
-                </div>
-
-                <button className="absolute bottom-2 right-2 p-1 bg-black/20 hover:bg-black/30 rounded">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <button className="w-full mt-2 py-1.5 text-xs text-neutral-400 hover:text-white flex items-center justify-between">
-                <span>Quick Actions</span>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Main Content - Center */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="max-w-full">
-              <div className="flex gap-4 mb-6">
-                <button
-                  onClick={() => setView("events")}
-                  className={`px-6 py-3 rounded-2xl font-medium transition-all ${
-                    view === "events"
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
-                >
-                  Events
-                </button>
-                <button
-                  onClick={() => setView("calendar")}
-                  className={`px-6 py-3 rounded-2xl font-medium transition-all ${
-                    view === "calendar"
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
-                >
-                  Calendar
-                </button>
-                <button
-                  onClick={() => setView("meetings")}
-                  className={`px-6 py-3 rounded-2xl font-medium transition-all ${
-                    view === "meetings"
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
-                >
-                  Schedule Meeting
-                </button>
-              </div>
-
-              <div className="flex gap-6">
-                <motion.div
-                  className="flex-1"
-                  animate={{
-                    width: "auto",
-                  }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  {view === "events" && <EventsLeftColumn onEventClick={handleEventClick} />}
-                  {view === "calendar" && (
-                    <CalendarView
-                      onDayClick={(date, events) => {
-                        console.log("Selected date:", date, "Events:", events)
-                      }}
-                    />
-                  )}
-                  {view === "meetings" && <MeetingScheduler />}
-                </motion.div>
-
-                <motion.div
-                  className="w-80 flex-shrink-0"
-                  animate={{
-                    x: "0%",
-                  }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  <EventsRightColumn />
-                </motion.div>
-              </div>
+              <motion.div
+                className="w-80 flex-shrink-0"
+                animate={{
+                  x: "0%",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <EventsRightColumn />
+              </motion.div>
             </div>
           </div>
         </main>

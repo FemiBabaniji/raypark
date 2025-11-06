@@ -5,40 +5,16 @@ import { motion } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from "@/components/ui/button"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
-import { Calendar, Clock, MapPin, Users, Search, User, TrendingUp, Tag, Building2, Navigation } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Search } from "lucide-react"
 import { useState } from "react"
 
 const eventData = {
   "ai-ml-workshop": {
     title: "AI & Machine Learning Workshop",
     description: "Deep dive into cutting-edge AI technologies and practical ML implementations for startups.",
-    fullDescription:
-      "Join us for an intensive workshop exploring the latest developments in artificial intelligence and machine learning. This hands-on session will cover practical implementations, real-world use cases, and emerging trends in AI technology. Perfect for developers, data scientists, and tech enthusiasts looking to expand their knowledge and network with like-minded professionals.",
     date: "September 15, 2025",
     time: "6:00 PM - 9:00 PM",
     location: "Innovation Centre",
-    fullAddress: "123 Tech Street, Innovation District, San Francisco, CA 94105",
-    dressCode: "Business Casual",
-    agenda: [
-      { time: "6:00 PM", item: "Registration & Networking" },
-      { time: "6:30 PM", item: "Opening Keynote: The Future of AI" },
-      { time: "7:15 PM", item: "Hands-on Workshop: Building ML Models" },
-      { time: "8:30 PM", item: "Q&A and Closing Remarks" },
-    ],
-    host: {
-      name: "Dr. Emily Chen",
-      title: "AI Research Lead",
-      bio: "Leading AI researcher with 10+ years of experience in machine learning and neural networks. Published author and frequent speaker at tech conferences.",
-      avatar: "/professional-woman-headshot.png",
-    },
-    stats: {
-      totalAttendees: 45,
-      spotsRemaining: 15,
-      engagement: "High",
-      format: "In-Person",
-    },
-    topics: ["Artificial Intelligence", "Machine Learning", "Neural Networks", "Deep Learning", "Data Science"],
-    partners: ["TechCorp", "AI Labs", "Innovation Hub", "DataScience Institute"],
     attendees: [
       {
         id: "jenny-wilson",
@@ -108,33 +84,9 @@ const eventData = {
     title: "Founder Networking Mixer",
     description:
       "Connect with fellow entrepreneurs and startup founders in a relaxed networking environment. Share experiences and build valuable connections.",
-    fullDescription:
-      "An exclusive evening designed for startup founders and entrepreneurs to connect, share experiences, and build meaningful relationships. Enjoy drinks, appetizers, and engaging conversations with fellow innovators in a relaxed rooftop setting.",
     date: "Dec 18, 2024",
     time: "6:00 PM - 9:00 PM",
     location: "Rooftop Lounge, Downtown",
-    fullAddress: "456 Skyline Avenue, Downtown District, San Francisco, CA 94102",
-    dressCode: "Smart Casual",
-    agenda: [
-      { time: "6:00 PM", item: "Welcome Reception & Drinks" },
-      { time: "6:45 PM", item: "Speed Networking Sessions" },
-      { time: "7:30 PM", item: "Panel Discussion: Scaling Your Startup" },
-      { time: "8:30 PM", item: "Open Networking & Closing" },
-    ],
-    host: {
-      name: "Michael Torres",
-      title: "Startup Accelerator Director",
-      bio: "Serial entrepreneur and startup mentor with 15+ years of experience building and scaling companies. Passionate about fostering entrepreneurial communities.",
-      avatar: "/man-developer.png",
-    },
-    stats: {
-      totalAttendees: 60,
-      spotsRemaining: 8,
-      engagement: "Very High",
-      format: "In-Person",
-    },
-    topics: ["Entrepreneurship", "Networking", "Startup Growth", "Fundraising", "Leadership"],
-    partners: ["Startup Hub", "Venture Capital Partners", "Founder Institute"],
     attendees: [
       {
         id: "alex-thompson",
@@ -211,10 +163,7 @@ export default function EventDetailPage() {
       (selectedFilter === "product" && attendee.title.toLowerCase().includes("product")) ||
       (selectedFilter === "data" &&
         (attendee.title.toLowerCase().includes("data") || attendee.title.toLowerCase().includes("scientist"))) ||
-      (selectedFilter === "founder" &&
-        (attendee.title.toLowerCase().includes("founder") ||
-          attendee.title.toLowerCase().includes("ceo") ||
-          attendee.title.toLowerCase().includes("entrepreneur")))
+      (selectedFilter === "founder" && attendee.title.toLowerCase().includes("founder"))
 
     return matchesSearch && matchesFilter
   })
@@ -238,8 +187,7 @@ export default function EventDetailPage() {
 
         <div className="relative z-10 px-6 pb-12 pt-4 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">{event.title}</h1>
-          <p className="text-white/90 text-lg mb-6 max-w-3xl mx-auto">{event.description}</p>
-          <div className="flex items-center justify-center gap-6 text-white/90 mb-6 flex-wrap">
+          <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               <span>{event.date}</span>
@@ -254,8 +202,8 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Button className="bg-white text-blue-600 hover:bg-white/90">RSVP Now - Unlock AI Matches</Button>
+          <div className="flex items-center justify-center gap-4">
+            <Button className="bg-white text-blue-600 hover:bg-white/90">RSVP Now</Button>
             <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
               Add to Calendar
             </Button>
@@ -268,163 +216,6 @@ export default function EventDetailPage() {
 
       <div className="px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Left Column - About & Location */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* About This Event */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
-                <h2 className="text-2xl font-bold text-white mb-4">About This Event</h2>
-                <p className="text-neutral-300 leading-relaxed mb-6">{event.fullDescription}</p>
-
-                <h3 className="text-xl font-semibold text-white mb-4">Event Agenda</h3>
-                <div className="space-y-3">
-                  {event.agenda.map((item, index) => (
-                    <div key={index} className="flex gap-4 items-start">
-                      <span className="text-blue-400 font-medium min-w-[80px]">{item.time}</span>
-                      <span className="text-neutral-300">{item.item}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-white/10">
-                  <h3 className="text-lg font-semibold text-white mb-2">Dress Code</h3>
-                  <p className="text-neutral-300">{event.dressCode}</p>
-                </div>
-              </div>
-
-              {/* Location & Directions */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <MapPin className="w-6 h-6 text-blue-400" />
-                  <h2 className="text-2xl font-bold text-white">Location & Directions</h2>
-                </div>
-                <p className="text-neutral-300 mb-6">{event.fullAddress}</p>
-
-                {/* Map Embed */}
-                <div className="bg-neutral-800/50 rounded-xl overflow-hidden mb-4 h-64">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    scrolling="no"
-                    marginHeight={0}
-                    marginWidth={0}
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=-122.4194,37.7749,-122.4094,37.7849&layer=mapnik&marker=37.7799,-122.4144`}
-                    style={{ border: 0 }}
-                  ></iframe>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    <Navigation className="w-4 h-4 mr-2" />
-                    Get Directions
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-white/20 text-white hover:bg-white/5 bg-transparent"
-                  >
-                    View on Map
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Sidebar - Host, Stats, Topics, Partners */}
-            <div className="space-y-6">
-              {/* Hosted By */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <User className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">Hosted By</h3>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-xl overflow-hidden">
-                    {event.host.avatar ? (
-                      <img
-                        src={event.host.avatar || "/placeholder.svg"}
-                        alt={event.host.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      event.host.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-white font-semibold">{event.host.name}</h4>
-                    <p className="text-neutral-400 text-sm mb-2">{event.host.title}</p>
-                    <p className="text-neutral-300 text-sm leading-relaxed">{event.host.bio}</p>
-                  </div>
-                </div>
-                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">Follow</Button>
-              </div>
-
-              {/* Event Stats */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <TrendingUp className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">Event Stats</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">Total Attendees</span>
-                    <span className="text-white font-semibold">{event.stats.totalAttendees}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">Spots Remaining</span>
-                    <span className="text-green-400 font-semibold">{event.stats.spotsRemaining}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">Engagement</span>
-                    <span className="text-blue-400 font-semibold">{event.stats.engagement}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">Format</span>
-                    <span className="text-white font-semibold">{event.stats.format}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Topics */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Tag className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">Topics</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {event.topics.map((topic, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400 text-sm"
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Official Partners */}
-              <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Building2 className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">Official Partners</h3>
-                </div>
-                <div className="space-y-2">
-                  {event.partners.map((partner, index) => (
-                    <div
-                      key={index}
-                      className="px-4 py-2 bg-neutral-800/50 rounded-lg text-neutral-300 text-sm hover:bg-neutral-800 transition-colors cursor-pointer"
-                    >
-                      {partner}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-blue-400" />
             <h2 className="text-2xl font-bold text-white">Event Attendees</h2>

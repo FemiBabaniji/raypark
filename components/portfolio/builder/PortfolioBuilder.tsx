@@ -19,6 +19,7 @@ import {
   MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
+import type { ThemeIndex } from "@/lib/theme" // Declare ThemeIndex variable
 
 type Props = {
   isPreviewMode?: boolean
@@ -475,6 +476,8 @@ export default function PortfolioBuilder({
               column={column}
               isPreviewMode={isPreviewMode}
               onDelete={() => deleteWidget(w.id, column)}
+              selectedColor={widgetColors[w.id] ?? 5}
+              onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.id]: color }))}
             />
           </motion.div>
         )
@@ -588,6 +591,8 @@ export default function PortfolioBuilder({
     aiml: false,
     mobile: false,
   })
+
+  const [widgetColors, setWidgetColors] = useState<Record<string, ThemeIndex>>({})
 
   const [galleryGroups, setGalleryGroups] = useState<{
     [key: string]: Array<{

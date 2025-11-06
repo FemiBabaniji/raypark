@@ -6,6 +6,8 @@ import { BackButton } from "@/components/ui/back-button"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
+import { CalendarView } from "@/components/calendar-view"
+import { MeetingScheduler } from "@/components/meeting-scheduler"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -171,6 +173,7 @@ const eventData = {
 
 export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const [view, setView] = useState<"events" | "calendar" | "meetings">("events")
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -302,6 +305,39 @@ export default function EventsPage() {
       ) : (
         <main className="px-6 py-4">
           <div className="max-w-6xl mx-auto relative overflow-hidden">
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setView("events")}
+                className={`px-6 py-3 rounded-2xl font-medium transition-all ${
+                  view === "events"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Events
+              </button>
+              <button
+                onClick={() => setView("calendar")}
+                className={`px-6 py-3 rounded-2xl font-medium transition-all ${
+                  view === "calendar"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Calendar
+              </button>
+              <button
+                onClick={() => setView("meetings")}
+                className={`px-6 py-3 rounded-2xl font-medium transition-all ${
+                  view === "meetings"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Schedule Meeting
+              </button>
+            </div>
+
             <div className="flex gap-6">
               <motion.div
                 className="flex-1"
@@ -310,7 +346,15 @@ export default function EventsPage() {
                 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               >
-                <EventsLeftColumn onEventClick={handleEventClick} />
+                {view === "events" && <EventsLeftColumn onEventClick={handleEventClick} />}
+                {view === "calendar" && (
+                  <CalendarView
+                    onDayClick={(date, events) => {
+                      console.log("Selected date:", date, "Events:", events)
+                    }}
+                  />
+                )}
+                {view === "meetings" && <MeetingScheduler />}
               </motion.div>
 
               <motion.div

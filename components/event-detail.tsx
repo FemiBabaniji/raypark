@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, MapPin } from "lucide-react"
+import { ChevronLeft, MapPin, Calendar, Users, Sparkles } from "lucide-react"
 import clsx from "clsx"
 import { spotsRemaining, makeMapSrc, generateICS, sanitizeFilename, initials, formatLabel } from "@/utils"
 
@@ -73,41 +73,71 @@ export default function EventDetail({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 space-y-6">
-      {/* Back */}
+    <div className="max-w-6xl mx-auto px-6 space-y-8">
       <div className="flex items-center gap-2">
-        <button onClick={onBack} className="flex items-center gap-2 text-neutral-400 hover:text-white transition">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-neutral-400 hover:text-white transition-all duration-200 hover:gap-3"
+        >
           <ChevronLeft className="w-5 h-5" />
-          <span>Back to Events</span>
+          <span className="font-medium">Back to Events</span>
         </button>
       </div>
 
-      {/* Header */}
-      <div className={clsx("rounded-2xl p-8 mb-2 bg-gradient-to-r", e.gradient || "from-sky-400/35 to-blue-600/20")}>
-        <h1 className="text-4xl font-bold mb-4 text-white">{e.title}</h1>
-        <p className="text-lg mb-6 text-white/90">
-          {e.date} • {e.time} • {e.location.name}
-        </p>
+      <div
+        className={clsx(
+          "rounded-3xl p-10 mb-2 bg-gradient-to-br relative overflow-hidden",
+          "shadow-2xl shadow-black/20",
+          e.gradient || "from-sky-400/35 to-blue-600/20",
+        )}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            onClick={onRSVP}
-            className="bg-white/20 border border-white/30 text-white hover:bg-white/30 rounded-xl px-6 py-2 font-medium transition-colors"
-          >
-            RSVP Now
-          </Button>
-          <Button
-            onClick={onAddToCalendar}
-            className="bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-xl px-6 py-2 font-medium transition-colors"
-          >
-            Add to Calendar
-          </Button>
-          <Button
-            onClick={handleShare}
-            className="bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-xl px-6 py-2 font-medium transition-colors"
-          >
-            Share Event
-          </Button>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-white/80" />
+            <span className="text-sm font-medium text-white/80 uppercase tracking-wider">Featured Event</span>
+          </div>
+
+          <h1 className="text-5xl font-bold mb-6 text-white leading-tight">{e.title}</h1>
+
+          <div className="flex flex-wrap gap-4 mb-8">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+              <Calendar className="w-4 h-4 text-white/90" />
+              <span className="text-sm font-medium text-white/90">
+                {e.date} • {e.time}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+              <MapPin className="w-4 h-4 text-white/90" />
+              <span className="text-sm font-medium text-white/90">{e.location.name}</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+              <Users className="w-4 h-4 text-white/90" />
+              <span className="text-sm font-medium text-white/90">{e.attending} attending</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={onRSVP}
+              className="bg-white text-zinc-900 hover:bg-white/90 rounded-xl px-8 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+            >
+              RSVP Now
+            </Button>
+            <Button
+              onClick={onAddToCalendar}
+              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200"
+            >
+              Add to Calendar
+            </Button>
+            <Button
+              onClick={handleShare}
+              className="bg-white/15 backdrop-blur-md border border-white/30 text-white hover:bg-white/25 rounded-xl px-6 py-3 font-medium transition-all duration-200"
+            >
+              Share
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -115,23 +145,29 @@ export default function EventDetail({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* About */}
-          <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
-            <h3 className="text-xl font-bold mb-6 text-white">About This Event</h3>
-            <div className="space-y-4 text-sm text-neutral-300 leading-relaxed">
+          <section
+            className="rounded-3xl p-10 shadow-xl shadow-black/5 backdrop-blur-sm"
+            style={{ backgroundColor: "#1F1F1F" }}
+          >
+            <h3 className="text-2xl font-bold mb-6 text-white">About This Event</h3>
+            <div className="space-y-4 text-base text-neutral-300 leading-relaxed">
               <p>{e.description}</p>
             </div>
           </section>
 
-          {/* Location */}
           {e.location && (
-            <section className="rounded-2xl p-8 space-y-6" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-xl font-bold text-white">Location & Directions</h3>
+            <section
+              className="rounded-3xl p-10 space-y-6 shadow-xl shadow-black/5"
+              style={{ backgroundColor: "#1F1F1F" }}
+            >
+              <h3 className="text-2xl font-bold text-white">Location & Directions</h3>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
                   <div className="space-y-2">
-                    <p className="font-semibold text-white">{e.location.name}</p>
+                    <p className="font-semibold text-lg text-white">{e.location.name}</p>
                     {e.location.addressLine && <p className="text-sm text-neutral-400">{e.location.addressLine}</p>}
                     {e.location.venue && <p className="text-sm text-neutral-400">{e.location.venue}</p>}
                     {e.location.venueDetails && <p className="text-xs text-neutral-500">{e.location.venueDetails}</p>}
@@ -144,7 +180,10 @@ export default function EventDetail({
                 </div>
               </div>
               {mapSrc && (
-                <div className="w-full h-64 rounded-lg overflow-hidden" style={{ backgroundColor: "#2A2A2A" }}>
+                <div
+                  className="w-full h-64 rounded-2xl overflow-hidden shadow-lg"
+                  style={{ backgroundColor: "#2A2A2A" }}
+                >
                   <iframe
                     width="100%"
                     height="100%"
@@ -163,9 +202,9 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm font-medium transition text-center text-white"
+                    className="flex-1 px-5 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-sm font-semibold transition-all duration-200 text-center text-white shadow-lg hover:shadow-xl hover:scale-105"
                   >
-                    Get Directions in Google Maps
+                    Get Directions
                   </a>
                 )}
                 {(e.location.addressLine || e.location.name) && (
@@ -175,7 +214,7 @@ export default function EventDetail({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition text-white"
+                    className="px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-white hover:bg-neutral-700"
                     style={{ backgroundColor: "#2A2A2A" }}
                   >
                     Open in OSM
@@ -186,18 +225,17 @@ export default function EventDetail({
           )}
         </div>
 
-        {/* Right rail */}
         <aside className="space-y-6">
           {/* Host */}
           {(e.host || e.host?.name) && (
-            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-6 text-white">Hosted By</h3>
+            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-xl font-bold mb-6 text-white">Hosted By</h3>
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-lg font-bold text-white">
+                <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg">
                   {e.host?.avatarText || (e.host?.name ? initials(e.host.name) : "EV")}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white">{e.host?.name || "Organizer"}</h4>
+                  <h4 className="font-semibold text-lg text-white">{e.host?.name || "Organizer"}</h4>
                   <p className="text-xs text-neutral-400">Event Organizer</p>
                 </div>
               </div>
@@ -205,7 +243,7 @@ export default function EventDetail({
                 <p className="text-sm text-neutral-300 mb-5 leading-relaxed">{e.host.description}</p>
               )}
               <button
-                className="w-full py-2.5 rounded-lg text-sm font-medium transition text-white"
+                className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 text-white hover:bg-neutral-700"
                 style={{ backgroundColor: "#2A2A2A" }}
               >
                 Follow Organizer
@@ -213,9 +251,8 @@ export default function EventDetail({
             </section>
           )}
 
-          {/* Stats */}
-          <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
-            <h3 className="text-lg font-bold mb-6 text-white">Event Stats</h3>
+          <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+            <h3 className="text-xl font-bold mb-6 text-white">Event Stats</h3>
             <div className="space-y-5">
               <KV label="Total Attendees" value={String(e.attending)} />
               {typeof remaining === "number" && (
@@ -225,15 +262,14 @@ export default function EventDetail({
             </div>
           </section>
 
-          {/* Topics */}
           {!!e.tags?.length && (
-            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-6 text-white">Topics</h3>
+            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-xl font-bold mb-6 text-white">Topics</h3>
               <div className="flex flex-wrap gap-2.5">
                 {e.tags.map((t, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 rounded-lg text-xs text-neutral-300"
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-300 transition-all duration-200 hover:bg-neutral-700 cursor-pointer"
                     style={{ backgroundColor: "#2A2A2A" }}
                   >
                     {t}
@@ -243,15 +279,14 @@ export default function EventDetail({
             </section>
           )}
 
-          {/* Partners */}
           {!!e.partners?.length && (
-            <section className="rounded-2xl p-8" style={{ backgroundColor: "#1F1F1F" }}>
-              <h3 className="text-lg font-bold mb-6 text-white">Official Partners</h3>
+            <section className="rounded-3xl p-8 shadow-xl shadow-black/5" style={{ backgroundColor: "#1F1F1F" }}>
+              <h3 className="text-xl font-bold mb-6 text-white">Official Partners</h3>
               <div className="flex flex-wrap gap-2.5">
                 {e.partners.map((p, i) => (
                   <span
                     key={i}
-                    className="px-3 py-2 rounded-lg text-xs transition text-neutral-300"
+                    className="px-4 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-neutral-300 hover:bg-neutral-700 cursor-pointer"
                     style={{ backgroundColor: "#2A2A2A" }}
                   >
                     {p}

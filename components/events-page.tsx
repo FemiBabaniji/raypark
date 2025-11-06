@@ -3,9 +3,10 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Search, Home } from "lucide-react"
 import { BackButton } from "@/components/ui/back-button"
-import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
+import EventDetail, { type EventDetailData } from "@/components/event-detail"
+import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -186,6 +187,43 @@ export default function EventsPage() {
 
   const selectedEventData = selectedEvent ? eventData[selectedEvent as keyof typeof eventData] : null
 
+  const mappedEventData: EventDetailData | null = selectedEventData
+    ? {
+        id: selectedEvent!,
+        title: selectedEventData.title,
+        description: selectedEventData.description,
+        fullDescription: selectedEventData.description,
+        agenda: [
+          "Introduction and networking (30 mins)",
+          "Keynote presentation on latest AI trends (60 mins)",
+          "Hands-on workshop sessions (90 mins)",
+          "Q&A and closing remarks (30 mins)",
+        ],
+        dateLabel: selectedEventData.date,
+        timeLabel: selectedEventData.time,
+        attending: selectedEventData.attendees.length,
+        capacity: 50,
+        type: "Workshop",
+        tags: ["AI", "Machine Learning", "Technology", "Networking"],
+        gradient: selectedEventData.gradient,
+        location: {
+          name: selectedEventData.location,
+          addressLine: "123 Tech Street, Innovation District, San Francisco, CA 94105",
+          venue: "Main Conference Hall",
+          venueDetails: "Enter through the main lobby and take the elevator to the 3rd floor",
+          lat: 37.7749,
+          lng: -122.4194,
+          format: "in_person" as const,
+        },
+        host: {
+          name: "Tech Community",
+          description: "Leading community for tech professionals and innovators in the Bay Area.",
+          avatarText: "TC",
+        },
+        partners: ["Google", "Microsoft", "AWS", "Meta"],
+      }
+    : null
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {!selectedEvent && (
@@ -217,88 +255,49 @@ export default function EventsPage() {
         </header>
       )}
 
-      {selectedEvent && selectedEventData ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed inset-0 z-50"
-          style={{ backgroundColor: "oklch(0.18 0 0)" }}
-        >
-          <div className="min-h-screen">
-            <div className="relative">
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${selectedEventData.gradient}`}
-                style={{ backgroundColor: "oklch(0.145 0 0)" }}
-              ></div>
+      {selectedEvent && mappedEventData ? (
+        <div className="pt-6">
+          <EventDetail
+            event={mappedEventData}
+            onBack={handleBackClick}
+            onRSVP={(eventId) => {
+              console.log("RSVP for event:", eventId)
+            }}
+            onShare={(eventId) => {
+              console.log("Share event:", eventId)
+            }}
+          />
 
-              <motion.nav
-                className="absolute top-6 left-6 z-50"
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <BackButton onClick={handleBackClick} />
-              </motion.nav>
-
-              <div className="relative z-10 px-6 pb-12 pt-4 text-center">
-                <h1 className="text-4xl font-bold text-white mb-4">{selectedEventData.title}</h1>
-                <div className="flex items-center justify-center gap-6 text-white/90 mb-6">
-                  <div className="flex items-center gap-2">
-                    <span>{selectedEventData.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{selectedEventData.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{selectedEventData.location}</span>
-                  </div>
-                </div>
-
-                <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed">
-                  {selectedEventData.description}
-                </p>
-
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={() => {
-                      console.log("[v0] RSVP clicked - unlocking attendee list and AI matching")
-                      // This will be enhanced with AI matching functionality
-                    }}
-                    className="px-6 py-2 rounded-lg font-medium text-white transition-colors"
-                    style={{ backgroundColor: selectedEventData.accent }}
-                  >
-                    RSVP Now - Unlock AI Matches
-                  </button>
-                  <button className="border border-white/30 text-white hover:bg-white/10 bg-transparent px-6 py-2 rounded-lg transition-colors">
-                    Add to Calendar
-                  </button>
-                  <button className="border border-white/30 text-white hover:bg-white/10 bg-transparent px-6 py-2 rounded-lg transition-colors">
-                    Share Event
-                  </button>
-                </div>
+          <div className="px-6 py-12 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-7 h-7 bg-cyan-600 rounded flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-white rounded-sm"></div>
               </div>
+              <h2 className="text-3xl font-bold text-white">Event Attendees</h2>
+              <span className="text-lg text-neutral-400">({selectedEventData.attendees.length})</span>
             </div>
 
-            <div className="px-4 sm:px-6 lg:px-8 py-12">
-              <div className="max-w-7xl mx-auto">
-                <h2 className="text-2xl font-bold text-white mb-8">Event Attendees</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {selectedEventData.attendees.map((attendee) => (
-                    <UnifiedPortfolioCard
-                      key={attendee.id}
-                      portfolio={attendee}
-                      onClick={(id) => {
-                        console.log("View attendee profile:", id)
-                      }}
-                      onShare={(id) => console.log("Share attendee:", id)}
-                      onMore={(id) => console.log("More options for attendee:", id)}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {selectedEventData.attendees.map((attendee) => (
+                <UnifiedPortfolioCard
+                  key={attendee.id}
+                  portfolio={attendee}
+                  onClick={(id) => {
+                    if (id === "john-doe") {
+                      window.location.href = "/network/john-doe"
+                    } else if (id === "sarah-chen") {
+                      window.location.href = "/network/sarah-chen"
+                    } else {
+                      console.log("View attendee profile:", id)
+                    }
+                  }}
+                  onShare={(id) => console.log("Share attendee:", id)}
+                  onMore={(id) => console.log("More options for attendee:", id)}
+                />
+              ))}
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : (
         <main className="px-6 py-4">
           <div className="max-w-6xl mx-auto relative overflow-hidden">

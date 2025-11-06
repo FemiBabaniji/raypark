@@ -226,100 +226,105 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <header className="h-14 flex items-center px-6">
-        <div className="absolute top-6 left-6">
-          <BackButton onClick={handleBackClick} />
-        </div>
-        <div className="flex-1 ml-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="relative h-10 w-full max-w-md rounded-2xl" style={{ backgroundColor: "oklch(0.145 0 0)" }}>
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
-              <input
-                placeholder="Search"
-                className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
-                style={{ color: "#FFFFFF" }}
-              />
+      {!selectedEvent && (
+        <header className="h-14 flex items-center px-6">
+          <div className="absolute top-6 left-6">
+            <BackButton onClick={handleBackClick} />
+          </div>
+          <div className="flex-1 ml-20">
+            <div className="max-w-6xl mx-auto">
+              <div
+                className="relative h-10 w-full max-w-md rounded-2xl"
+                style={{ backgroundColor: "oklch(0.145 0 0)" }}
+              >
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
+                <input
+                  placeholder="Search"
+                  className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
+                  style={{ color: "#FFFFFF" }}
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
+          >
+            <Home className="w-5 h-5" fill="white" />
+          </button>
+        </header>
+      )}
+
+      {selectedEvent && mappedEventData ? (
+        <div className="pt-6">
+          <EventDetail
+            event={mappedEventData}
+            onBack={handleBackClick}
+            onRSVP={(eventId) => {
+              console.log("RSVP for event:", eventId)
+            }}
+            onShare={(eventId) => {
+              console.log("Share event:", eventId)
+            }}
+          />
+
+          <div className="px-6 py-12 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-7 h-7 bg-cyan-600 rounded flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-white rounded-sm"></div>
+              </div>
+              <h2 className="text-3xl font-bold text-white">Event Attendees</h2>
+              <span className="text-lg text-neutral-400">({selectedEventData.attendees.length})</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {selectedEventData.attendees.map((attendee) => (
+                <UnifiedPortfolioCard
+                  key={attendee.id}
+                  portfolio={attendee}
+                  onClick={(id) => {
+                    if (id === "john-doe") {
+                      window.location.href = "/network/john-doe"
+                    } else if (id === "sarah-chen") {
+                      window.location.href = "/network/sarah-chen"
+                    } else {
+                      console.log("View attendee profile:", id)
+                    }
+                  }}
+                  onShare={(id) => console.log("Share attendee:", id)}
+                  onMore={(id) => console.log("More options for attendee:", id)}
+                />
+              ))}
             </div>
           </div>
         </div>
-        <button
-          onClick={() => (window.location.href = "/")}
-          className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
-        >
-          <Home className="w-5 h-5" fill="white" />
-        </button>
-      </header>
-
-      <main className="px-6 py-4">
-        <div className="max-w-6xl mx-auto relative overflow-hidden">
-          <div className="flex gap-6">
-            <motion.div
-              className="flex-1"
-              animate={{
-                width: "auto",
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
-              {selectedEvent && mappedEventData ? (
-                <div>
-                  <EventDetail
-                    event={mappedEventData}
-                    onBack={handleBackClick}
-                    onRSVP={(eventId) => {
-                      console.log("RSVP for event:", eventId)
-                    }}
-                    onShare={(eventId) => {
-                      console.log("Share event:", eventId)
-                    }}
-                  />
-
-                  <div className="py-12">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-7 h-7 bg-cyan-600 rounded flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-white rounded-sm"></div>
-                      </div>
-                      <h2 className="text-3xl font-bold text-white">Event Attendees</h2>
-                      <span className="text-lg text-neutral-400">({selectedEventData.attendees.length})</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {selectedEventData.attendees.map((attendee) => (
-                        <UnifiedPortfolioCard
-                          key={attendee.id}
-                          portfolio={attendee}
-                          onClick={(id) => {
-                            if (id === "john-doe") {
-                              window.location.href = "/network/john-doe"
-                            } else if (id === "sarah-chen") {
-                              window.location.href = "/network/sarah-chen"
-                            } else {
-                              console.log("View attendee profile:", id)
-                            }
-                          }}
-                          onShare={(id) => console.log("Share attendee:", id)}
-                          onMore={(id) => console.log("More options for attendee:", id)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
+      ) : (
+        <main className="px-6 py-4">
+          <div className="max-w-6xl mx-auto relative overflow-hidden">
+            <div className="flex gap-6">
+              <motion.div
+                className="flex-1"
+                animate={{
+                  width: "auto",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
                 <EventsLeftColumn onEventClick={handleEventClick} />
-              )}
-            </motion.div>
+              </motion.div>
 
-            <motion.div
-              className="w-80 flex-shrink-0"
-              animate={{
-                x: "0%",
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <EventsRightColumn />
-            </motion.div>
+              <motion.div
+                className="w-80 flex-shrink-0"
+                animate={{
+                  x: "0%",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <EventsRightColumn />
+              </motion.div>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      )}
     </div>
   )
 }

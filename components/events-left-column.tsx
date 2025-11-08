@@ -221,7 +221,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const filteredMembers = filterMembers()
 
   return (
-    <div className="w-full pt-20">
+    <div className="w-full pt-16">
       <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
 
       {active === "Members" && (

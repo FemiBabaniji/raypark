@@ -1,16 +1,14 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from "lucide-react"
+import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from "lucide-react"
 
 interface NavigationProps {
   currentView: string
   isLoggedIn: boolean
-  isSearchExpanded: boolean
   isUserDropdownOpen: boolean
   setCurrentView: (view: string) => void
-  setIsSearchExpanded: (expanded: boolean) => void
   setIsUserDropdownOpen: (open: boolean) => void
   setIsLoggedIn: (loggedIn: boolean) => void
 }
@@ -18,21 +16,11 @@ interface NavigationProps {
 export function Navigation({
   currentView,
   isLoggedIn,
-  isSearchExpanded,
   isUserDropdownOpen,
   setCurrentView,
-  setIsSearchExpanded,
   setIsUserDropdownOpen,
   setIsLoggedIn,
 }: NavigationProps) {
-  const searchInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (isSearchExpanded && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [isSearchExpanded])
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isUserDropdownOpen && !(event.target as Element)?.closest(".user-dropdown")) {
@@ -65,29 +53,6 @@ export function Navigation({
 
         {/* Right - User Actions */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center">
-            <button
-              onClick={() => setIsSearchExpanded(true)}
-              className={`w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors ${isSearchExpanded ? "opacity-0" : "opacity-100"}`}
-            >
-              <Search className="w-4 h-4" />
-            </button>
-            {isSearchExpanded && (
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search"
-                    className="w-[244px] pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
-                    onBlur={() => setIsSearchExpanded(false)}
-                    autoFocus
-                  />
-                </div>
-              </div>
-            )}
-          </div>
           <button className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
             <Bell className="w-4 h-4" />
           </button>

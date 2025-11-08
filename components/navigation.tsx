@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, type ReactNode } from "react"
+import { useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from "lucide-react"
 
@@ -13,7 +13,6 @@ interface NavigationProps {
   setIsSearchExpanded: (expanded: boolean) => void
   setIsUserDropdownOpen: (open: boolean) => void
   setIsLoggedIn: (loggedIn: boolean) => void
-  centerContent?: ReactNode // Add prop for custom center content
 }
 
 export function Navigation({
@@ -25,7 +24,6 @@ export function Navigation({
   setIsSearchExpanded,
   setIsUserDropdownOpen,
   setIsLoggedIn,
-  centerContent, // Accept center content prop
 }: NavigationProps) {
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -54,10 +52,10 @@ export function Navigation({
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: "oklch(0.18 0 0)" }}>
-      <div className="flex items-center justify-between px-6 py-4 gap-6">
+    <div className="fixed top-0 left-0 right-0 z-10">
+      <div className="flex items-center justify-between px-6 py-4">
         {/* Left - Logo */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
           <Avatar className="w-8 h-8">
             <AvatarImage src="/placeholder.svg" />
             <AvatarFallback className="bg-purple-600 text-white text-sm">P</AvatarFallback>
@@ -65,38 +63,31 @@ export function Navigation({
           <span className="text-white font-medium text-sm">pathwai</span>
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
-          {centerContent ? (
-            centerContent
-          ) : (
-            <div className="relative flex items-center">
-              <button
-                onClick={() => setIsSearchExpanded(true)}
-                className={`w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors ${isSearchExpanded ? "opacity-0" : "opacity-100"}`}
-              >
-                <Search className="w-4 h-4" />
-              </button>
-              {isSearchExpanded && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      placeholder="Search"
-                      className="w-[400px] pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
-                      onBlur={() => setIsSearchExpanded(false)}
-                      autoFocus
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
         {/* Right - User Actions */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="relative flex items-center">
+            <button
+              onClick={() => setIsSearchExpanded(true)}
+              className={`w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors ${isSearchExpanded ? "opacity-0" : "opacity-100"}`}
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            {isSearchExpanded && (
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search"
+                    className="w-[244px] pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                    onBlur={() => setIsSearchExpanded(false)}
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           <button className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
             <Bell className="w-4 h-4" />
           </button>

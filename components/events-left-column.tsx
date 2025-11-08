@@ -2,15 +2,7 @@
 import { useState } from "react"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { EventCard, AnnouncementCard } from "@/components/cards"
-import {
-  FilterTabs,
-  EventSearch,
-  CategoryFilters,
-  TimeToggle,
-  FILTER_TABS,
-  EVENT_CATEGORY_FILTERS,
-  MEMBER_ROLE_FILTERS,
-} from "@/components/event-nav"
+import { CategoryFilters, TimeToggle, EVENT_CATEGORY_FILTERS, MEMBER_ROLE_FILTERS } from "@/components/event-nav"
 
 const mockMembers = [
   {
@@ -119,10 +111,18 @@ const mockMembers = [
   },
 ]
 
-export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
-  const [active, setActive] = useState("Events")
+interface EventsLeftColumnProps {
+  onEventClick?: (eventId: string) => void
+  activeTab?: string
+  searchQuery?: string
+}
+
+export default function EventsLeftColumn({
+  onEventClick,
+  activeTab = "Events",
+  searchQuery = "",
+}: EventsLeftColumnProps) {
   const [showPastEvents, setShowPastEvents] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
   const [selectedMemberRole, setSelectedMemberRole] = useState("all")
@@ -205,11 +205,12 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
   const filterMembers = () => {
     return mockMembers.filter((member) => {
+      const query = activeTab === "Members" ? searchQuery : memberSearchQuery
       const matchesSearch =
-        member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.title.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.email?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.location?.toLowerCase().includes(memberSearchQuery.toLowerCase())
+        member.name.toLowerCase().includes(query.toLowerCase()) ||
+        member.title.toLowerCase().includes(query.toLowerCase()) ||
+        member.email?.toLowerCase().includes(query.toLowerCase()) ||
+        member.location?.toLowerCase().includes(query.toLowerCase())
 
       if (selectedMemberRole === "all") return matchesSearch
       return matchesSearch && member.role === selectedMemberRole
@@ -222,16 +223,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
   return (
     <div className="w-full">
-      <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
-
-      {active === "Members" && (
-        <div className="mt-8 space-y-6">
-          <EventSearch
-            value={memberSearchQuery}
-            onChange={setMemberSearchQuery}
-            placeholder="Search members by name, role, or location..."
-          />
-
+      {activeTab === "Members" && (
+        <div className="space-y-6">
           <CategoryFilters
             filters={MEMBER_ROLE_FILTERS}
             selectedCategory={selectedMemberRole}
@@ -259,15 +252,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         </div>
       )}
 
-      {active === "Events" && (
+      {activeTab === "Events" && (
         <>
-          <div className="mt-8 space-y-4">
-            <EventSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search workshops by name, description, or tags..."
-            />
-
+          <div className="space-y-4">
             <CategoryFilters
               filters={EVENT_CATEGORY_FILTERS}
               selectedCategory={selectedCategory}

@@ -1,8 +1,9 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Search, Home } from "lucide-react"
 import { BackButton } from "@/components/ui/back-button"
+import { Navigation } from "@/components/navigation"
+import { NavbarContent, FILTER_TABS } from "@/components/event-nav"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventDetail, { type EventDetailData } from "@/components/event-detail"
@@ -172,6 +173,12 @@ const eventData = {
 
 export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const [currentView, setCurrentView] = useState("network")
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const [active, setActive] = useState("Events")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -224,39 +231,42 @@ export default function EventsPage() {
       }
     : null
 
+  const navbarContent = !selectedEvent ? (
+    <NavbarContent
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={
+        active === "Events"
+          ? "Search workshops by name, description, or tags..."
+          : active === "Members"
+            ? "Search members by name, role, or location..."
+            : "Search projects..."
+      }
+      tabs={FILTER_TABS}
+      activeTab={active}
+      onTabChange={setActive}
+    />
+  ) : undefined
+
   return (
-    <div className="min-h-screen pt-16" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {!selectedEvent && (
-        <header className="h-14 flex items-center px-6">
-          <div className="absolute top-6 left-6">
-            <BackButton onClick={handleBackClick} />
-          </div>
-          <div className="flex-1 ml-20">
-            <div className="max-w-6xl mx-auto">
-              <div
-                className="relative h-10 w-full max-w-md rounded-2xl"
-                style={{ backgroundColor: "oklch(0.145 0 0)" }}
-              >
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
-                <input
-                  placeholder="Search"
-                  className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
-                  style={{ color: "#FFFFFF" }}
-                />
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
-          >
-            <Home className="w-5 h-5" fill="white" />
-          </button>
-        </header>
-      )}
+    <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      <Navigation
+        currentView={currentView}
+        isLoggedIn={isLoggedIn}
+        isSearchExpanded={isSearchExpanded}
+        isUserDropdownOpen={isUserDropdownOpen}
+        setCurrentView={setCurrentView}
+        setIsSearchExpanded={setIsSearchExpanded}
+        setIsUserDropdownOpen={setIsUserDropdownOpen}
+        setIsLoggedIn={setIsLoggedIn}
+        centerContent={navbarContent}
+      />
 
       {selectedEvent && mappedEventData ? (
-        <div className="pt-6">
+        <div className="pt-16">
+          <div className="px-6 pt-6">
+            <BackButton onClick={handleBackClick} />
+          </div>
           <EventDetail
             event={mappedEventData}
             onBack={handleBackClick}
@@ -299,7 +309,7 @@ export default function EventsPage() {
           </div>
         </div>
       ) : (
-        <main className="px-6 py-4">
+        <main className="pt-16 px-6 py-4">
           <div className="max-w-6xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div
@@ -309,7 +319,7 @@ export default function EventsPage() {
                 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               >
-                <EventsLeftColumn onEventClick={handleEventClick} />
+                <EventsLeftColumn onEventClick={handleEventClick} activeTab={active} searchQuery={searchQuery} />
               </motion.div>
 
               <motion.div

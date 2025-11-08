@@ -221,11 +221,11 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const filteredMembers = filterMembers()
 
   return (
-    <div className="w-full pt-4">
+    <div className="w-full pt-20">
       <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
 
       {active === "Members" && (
-        <div className="mt-8 space-y-6">
+        <div className="mt-4 space-y-6">
           <EventSearch
             value={memberSearchQuery}
             onChange={setMemberSearchQuery}
@@ -261,7 +261,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-8 space-y-4">
+          <div className="mt-4 space-y-4">
             <EventSearch
               value={searchQuery}
               onChange={setSearchQuery}
@@ -275,7 +275,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             />
           </div>
 
-          <div className="mt-8">
+          <div className="mt-6">
             <TimeToggle showPast={showPastEvents} onToggle={setShowPastEvents} />
           </div>
 

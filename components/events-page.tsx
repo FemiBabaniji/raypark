@@ -299,7 +299,7 @@ export default function EventsPage() {
           </div>
         </div>
       ) : (
-        <main className="pt-20 px-6">
+        <main className="px-6">
           <div className="max-w-6xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div

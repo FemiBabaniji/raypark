@@ -225,7 +225,7 @@ export default function EventsPage() {
     : null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+    <div className="min-h-screen pt-16" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {!selectedEvent && (
         <header className="h-14 flex items-center px-6">
           <div className="absolute top-6 left-6">

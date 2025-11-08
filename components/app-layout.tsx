@@ -69,7 +69,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
         />
       )}
-      <div className={shouldShowNavigation && !isDashboard && !isNetworkWorkflow ? "pt-16" : ""}>{children}</div>
+      <div>{children}</div>
     </>
   )
 }

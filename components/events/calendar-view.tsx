@@ -94,30 +94,33 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-5xl">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-semibold text-white">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-white">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <div className="flex gap-2">
           <button
             onClick={previousMonth}
-            className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
+            className="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-zinc-400" />
+            <ChevronLeft className="h-4 w-4 text-zinc-400" />
           </button>
-          <button onClick={nextMonth} className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors">
-            <ChevronRight className="h-5 w-5 text-zinc-400" />
+          <button
+            onClick={nextMonth}
+            className="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
+          >
+            <ChevronRight className="h-4 w-4 text-zinc-400" />
           </button>
         </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1.5">
         {/* Day headers */}
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div key={day} className="text-center py-3 text-sm font-medium text-zinc-500">
+          <div key={day} className="text-center py-2 text-xs font-medium text-zinc-500">
             {day}
           </div>
         ))}
@@ -139,28 +142,30 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
             <div
               key={day}
               className={`
-                aspect-square border rounded-xl p-2 transition-all
+                aspect-square border rounded-lg p-1.5 transition-all
                 ${isToday ? "border-blue-500/50 bg-blue-500/5" : "border-zinc-800 bg-zinc-900/30"}
                 ${dayEvents.length > 0 ? "cursor-pointer hover:border-zinc-700" : ""}
               `}
             >
               <div className="h-full flex flex-col">
-                <div className={`text-sm font-medium mb-1 ${isToday ? "text-blue-400" : "text-zinc-400"}`}>{day}</div>
-                <div className="flex-1 space-y-1 overflow-y-auto scrollbar-hide">
-                  {dayEvents.map((event, idx) => (
+                <div className={`text-xs font-medium mb-0.5 ${isToday ? "text-blue-400" : "text-zinc-400"}`}>{day}</div>
+                <div className="flex-1 space-y-0.5 overflow-y-auto scrollbar-hide">
+                  {dayEvents.slice(0, 2).map((event, idx) => (
                     <div
                       key={idx}
                       onClick={() => onEventClick?.(event.title)}
                       className={`
-                        text-xs p-1.5 rounded-md border bg-gradient-to-br
+                        text-[10px] p-1 rounded border bg-gradient-to-br
                         ${getEventColor(event.type)}
                         hover:scale-105 transition-transform cursor-pointer
                       `}
                     >
-                      <div className="font-medium text-white/90 truncate">{event.title}</div>
-                      <div className="text-white/60 text-[10px] mt-0.5">{event.time.split(" - ")[0]}</div>
+                      <div className="font-medium text-white/90 truncate leading-tight">{event.title}</div>
                     </div>
                   ))}
+                  {dayEvents.length > 2 && (
+                    <div className="text-[9px] text-zinc-500 text-center">+{dayEvents.length - 2}</div>
+                  )}
                 </div>
               </div>
             </div>

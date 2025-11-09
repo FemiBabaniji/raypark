@@ -13,6 +13,7 @@ import {
 import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
+import { Users } from "lucide-react"
 
 const mockMembers = [
   {
@@ -275,6 +276,38 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[600px]">
                 <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
               </div>
+            </div>
+          </div>
+
+          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white">Members</h2>
+                  <p className="text-zinc-400 text-sm">Connect with community members</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActive("Members")}
+                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10"
+              >
+                View All
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              {mockMembers.slice(0, 4).map((member) => (
+                <UnifiedPortfolioCard
+                  key={member.id}
+                  portfolio={member}
+                  onClick={(id) => console.log("View member profile:", id)}
+                  onShare={(id) => console.log("Share member:", id)}
+                  onMore={(id) => console.log("More options for member:", id)}
+                />
+              ))}
             </div>
           </div>
 

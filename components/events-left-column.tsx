@@ -6,7 +6,6 @@ import {
   FilterTabs,
   EventSearch,
   CategoryFilters,
-  TimeToggle,
   FILTER_TABS,
   EVENT_CATEGORY_FILTERS,
   MEMBER_ROLE_FILTERS,
@@ -121,36 +120,10 @@ const mockMembers = [
 
 export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
   const [active, setActive] = useState("Events")
-  const [showPastEvents, setShowPastEvents] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
   const [selectedMemberRole, setSelectedMemberRole] = useState("all")
-
-  const pastEvents = [
-    {
-      title: "Startup Pitch Competition",
-      date: "15 Aug 2025",
-      description: "Entrepreneurs pitched their innovative ideas to a panel of investors and industry experts.",
-      time: "6:00 PM - 9:00 PM",
-      attending: 67,
-      location: "Main Auditorium",
-      instructor: "Panel of VCs",
-      tags: ["Pitching", "Investment", "Competition", "Startups"],
-      category: "networking",
-    },
-    {
-      title: "Blockchain & Web3 Summit",
-      date: "8 Aug 2025",
-      description: "Exploring the future of decentralized technologies and cryptocurrency innovations.",
-      time: "1:00 PM - 6:00 PM",
-      attending: 89,
-      location: "Conference Hall A",
-      instructor: "Crypto Industry Leaders",
-      tags: ["Blockchain", "Web3", "Crypto", "DeFi"],
-      category: "technical",
-    },
-  ]
 
   const upcomingEvents = [
     {
@@ -217,7 +190,6 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   }
 
   const filteredUpcomingEvents = filterEvents(upcomingEvents)
-  const filteredPastEvents = filterEvents(pastEvents)
   const filteredMembers = filterMembers()
 
   return (
@@ -275,35 +247,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             />
           </div>
 
-          <div className="mt-6">
-            <TimeToggle showPast={showPastEvents} onToggle={setShowPastEvents} />
-          </div>
-
           <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
-            {!showPastEvents ? (
-              filteredUpcomingEvents.length > 0 ? (
-                filteredUpcomingEvents.map((event, index) => (
-                  <EventCard
-                    key={index}
-                    title={event.title}
-                    date={event.date}
-                    description={event.description}
-                    time={event.time}
-                    attending={event.attending}
-                    dateLabel={event.dateLabel}
-                    location={event.location}
-                    instructor={event.instructor}
-                    tags={event.tags}
-                    onEventClick={onEventClick}
-                  />
-                ))
-              ) : (
-                <div className="w-full text-center py-12">
-                  <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                </div>
-              )
-            ) : filteredPastEvents.length > 0 ? (
-              filteredPastEvents.map((event, index) => (
+            {filteredUpcomingEvents.length > 0 ? (
+              filteredUpcomingEvents.map((event, index) => (
                 <EventCard
                   key={index}
                   title={event.title}
@@ -311,6 +257,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   description={event.description}
                   time={event.time}
                   attending={event.attending}
+                  dateLabel={event.dateLabel}
                   location={event.location}
                   instructor={event.instructor}
                   tags={event.tags}
@@ -319,7 +266,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               ))
             ) : (
               <div className="w-full text-center py-12">
-                <p className="text-zinc-500">No past workshops found matching your criteria.</p>
+                <p className="text-zinc-500">No workshops found matching your criteria.</p>
               </div>
             )}
           </div>

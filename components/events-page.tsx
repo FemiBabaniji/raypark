@@ -285,7 +285,7 @@ export default function EventsPage() {
         </div>
       ) : (
         <main>
-          <div className="w-full px-6 relative overflow-hidden">
+          <div className="w-full pl-12 px-6 relative overflow-hidden">
             <div className="flex gap-8">
               <motion.div
                 className="w-[calc(100%-22rem)]"

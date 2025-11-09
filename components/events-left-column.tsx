@@ -125,9 +125,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const [active, setActive] = useState("Home")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [memberSearchQuery, setMemberSearchQuery] = useState("")
-  const [selectedMemberRole, setSelectedMemberRole] = useState("all")
-  const [homeSelectedMemberRole, setHomeSelectedMemberRole] = useState("all")
+  const [networkSearchQuery, setNetworkSearchQuery] = useState("")
+  const [selectedNetworkRole, setSelectedNetworkRole] = useState("all")
+  const [homeSelectedNetworkRole, setHomeSelectedNetworkRole] = useState("all")
   const [view, setView] = useState<"grid" | "calendar">("grid")
 
   const upcomingEvents = [
@@ -181,37 +181,37 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
     })
   }
 
-  const filterMembers = () => {
+  const filterNetworks = () => {
     return mockMembers.filter((member) => {
       const matchesSearch =
-        member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.title.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.email?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-        member.location?.toLowerCase().includes(memberSearchQuery.toLowerCase())
+        member.name.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
+        member.title.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
+        member.email?.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
+        member.location?.toLowerCase().includes(networkSearchQuery.toLowerCase())
 
-      if (selectedMemberRole === "all") return matchesSearch
-      return matchesSearch && member.role === selectedMemberRole
+      if (selectedNetworkRole === "all") return matchesSearch
+      return matchesSearch && member.role === selectedNetworkRole
     })
   }
 
-  const filterHomeMembersbyRole = () => {
-    if (homeSelectedMemberRole === "all") return mockMembers
-    return mockMembers.filter((member) => member.role === homeSelectedMemberRole)
+  const filterHomeNetworksByRole = () => {
+    if (homeSelectedNetworkRole === "all") return mockMembers
+    return mockMembers.filter((member) => member.role === homeSelectedNetworkRole)
   }
 
   const filteredUpcomingEvents = filterEvents(upcomingEvents)
-  const filteredMembers = filterMembers()
-  const filteredHomeMembers = filterHomeMembersbyRole()
+  const filteredNetworks = filterNetworks()
+  const filteredHomeNetworks = filterHomeNetworksByRole()
 
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center space-y-4">
+      <div className="flex flex-col items-center space-y-3">
         <EventSearch
-          value={active === "Members" ? memberSearchQuery : active === "Meetings" ? "" : searchQuery}
-          onChange={active === "Members" ? setMemberSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
+          value={active === "Networks" ? networkSearchQuery : active === "Meetings" ? "" : searchQuery}
+          onChange={active === "Networks" ? setNetworkSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
           placeholder={
-            active === "Members"
-              ? "Search members by name, role, or location..."
+            active === "Networks"
+              ? "Search networks by name, role, or location..."
               : active === "Meetings"
                 ? "Search meetings..."
                 : "Search workshops by name, description, or tags..."
@@ -223,19 +223,18 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Home" && (
         <>
-          <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-            {/* Events Section - 70% on xl screens, full width on smaller */}
+          <div className="mt-4 flex flex-col xl:flex-row gap-4 w-full">
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col overflow-hidden">
-                <div className="mb-6 flex items-start justify-between flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-lg shadow-black/20 min-h-[450px] max-h-[450px] flex flex-col overflow-hidden">
+                <div className="mb-3 flex items-start justify-between flex-shrink-0">
                   <div>
-                    <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
-                    <p className="text-zinc-400 text-lg">Discover and join community events</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Events</h1>
+                    <p className="text-zinc-400 text-sm">Discover and join community events</p>
                   </div>
                   <ViewToggle view={view} onViewChange={setView} />
                 </div>
 
-                <div className="mt-6 flex-shrink-0">
+                <div className="mt-3 flex-shrink-0">
                   <CategoryFilters
                     filters={EVENT_CATEGORY_FILTERS}
                     selectedCategory={selectedCategory}
@@ -243,9 +242,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex-1 overflow-hidden mt-6 flex flex-col">
+                <div className="flex-1 overflow-hidden mt-3 flex flex-col">
                   {view === "grid" ? (
-                    <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin">
+                    <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredUpcomingEvents.length > 0 ? (
                         filteredUpcomingEvents.map((event, index) => (
                           <EventCard
@@ -277,23 +276,19 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
             </div>
 
-            {/* Meetings Section - 30% on xl screens, full width on smaller */}
             <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[600px]">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-lg shadow-black/20 min-h-[450px] max-h-[450px] overflow-hidden">
                 <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
               </div>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-            {/* Announcements Section - 30% on lg screens, full width on smaller */}
+          <div className="mt-4 flex flex-col lg:flex-row gap-4 w-full">
             <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg shadow-black/20">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 text-white">
-                  Announcements
-                </h2>
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-5 shadow-lg shadow-black/20 max-h-[350px] overflow-y-auto">
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">Announcements</h2>
 
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-2">
                   <AnnouncementCard
                     title="New Partnership with TechCorp"
                     content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
@@ -320,38 +315,37 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
             </div>
 
-            {/* Members Section - 70% on lg screens, full width on smaller */}
             <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg shadow-black/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-5 shadow-lg shadow-black/20 max-h-[350px] overflow-y-auto">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
                   <div>
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Members</h2>
-                    <p className="text-zinc-400 text-xs sm:text-sm">Connect with community members</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-white">Networks</h2>
+                    <p className="text-zinc-400 text-xs">Connect with community networks</p>
                   </div>
                   <button
-                    onClick={() => setActive("Members")}
-                    className="px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs sm:text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
+                    onClick={() => setActive("Networks")}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
                   >
                     View All
                   </button>
                 </div>
 
-                <div className="mb-4 sm:mb-6">
+                <div className="mb-3">
                   <CategoryFilters
                     filters={MEMBER_ROLE_FILTERS}
-                    selectedCategory={homeSelectedMemberRole}
-                    onCategoryChange={setHomeSelectedMemberRole}
+                    selectedCategory={homeSelectedNetworkRole}
+                    onCategoryChange={setHomeSelectedNetworkRole}
                   />
                 </div>
 
-                <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                  {filteredHomeMembers.slice(0, 8).map((member) => (
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                  {filteredHomeNetworks.slice(0, 8).map((member) => (
                     <div key={member.id} className="flex-shrink-0 w-48 sm:w-56">
                       <UnifiedPortfolioCard
                         portfolio={member}
-                        onClick={(id) => console.log("View member profile:", id)}
-                        onShare={(id) => console.log("Share member:", id)}
-                        onMore={(id) => console.log("More options for member:", id)}
+                        onClick={(id) => console.log("View network profile:", id)}
+                        onShare={(id) => console.log("Share network:", id)}
+                        onMore={(id) => console.log("More options for network:", id)}
                       />
                     </div>
                   ))}
@@ -362,28 +356,28 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         </>
       )}
 
-      {active === "Members" && (
+      {active === "Networks" && (
         <div className="mt-6 space-y-6">
           <CategoryFilters
             filters={MEMBER_ROLE_FILTERS}
-            selectedCategory={selectedMemberRole}
-            onCategoryChange={setSelectedMemberRole}
+            selectedCategory={selectedNetworkRole}
+            onCategoryChange={setSelectedNetworkRole}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
-            {filteredMembers.length > 0 ? (
-              filteredMembers.map((member) => (
+            {filteredNetworks.length > 0 ? (
+              filteredNetworks.map((member) => (
                 <UnifiedPortfolioCard
                   key={member.id}
                   portfolio={member}
-                  onClick={(id) => console.log("View member profile:", id)}
-                  onShare={(id) => console.log("Share member:", id)}
-                  onMore={(id) => console.log("More options for member:", id)}
+                  onClick={(id) => console.log("View network profile:", id)}
+                  onShare={(id) => console.log("Share network:", id)}
+                  onMore={(id) => console.log("More options for network:", id)}
                 />
               ))
             ) : (
               <div className="col-span-full text-center py-12">
-                <p className="text-zinc-500">No members found matching your criteria.</p>
+                <p className="text-zinc-500">No networks found matching your criteria.</p>
               </div>
             )}
           </div>

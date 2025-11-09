@@ -217,8 +217,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       {active === "Home" && (
         <>
           <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-            {/* Events Section - 75% on xl screens, full width on smaller */}
-            <div className="w-full xl:w-3/4 xl:flex-shrink-0">
+            {/* Events Section - 70% on xl screens, full width on smaller */}
+            <div className="w-full xl:w-[70%] xl:flex-shrink-0">
               <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
                 <div className="mb-6">
                   <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
@@ -266,8 +266,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
             </div>
 
-            {/* Meetings Section - 25% on xl screens, full width on smaller */}
-            <div className="w-full xl:w-1/4 xl:flex-shrink-0">
+            {/* Meetings Section - 30% on xl screens, full width on smaller */}
+            <div className="w-full xl:w-[30%] xl:flex-shrink-0">
               <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
                 <div className="mb-4">
                   <h2 className="text-2xl font-bold text-white mb-1">Meetings</h2>

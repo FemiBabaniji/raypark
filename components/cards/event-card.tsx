@@ -63,62 +63,55 @@ export function EventCard({ title, date, description, time, attending, location,
         bg-gradient-to-br ${gradient}
         backdrop-blur-xl
         rounded-3xl 
-        p-5 sm:p-6 lg:p-7
+        p-5 sm:p-6
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
         text-left text-white
-        w-56 sm:w-64 lg:w-72 xl:w-80
+        w-56 sm:w-64 lg:w-72
         flex-shrink-0
       `}
       style={{
         minHeight: "380px",
-        aspectRatio: "3/4",
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
       <div className="relative flex flex-col h-full">
-        <div className="mb-3 sm:mb-4 lg:mb-5">
-          <p className="text-white/60 text-[10px] sm:text-xs font-medium tracking-wide uppercase mb-1.5 sm:mb-2">
-            {type}
-          </p>
-          <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-1.5 sm:mb-2 leading-tight text-balance">
-            {title}
-          </h3>
+        <div className="mb-3 sm:mb-4">
+          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
+          <h3 className="text-lg sm:text-xl font-bold mb-2 leading-tight text-balance">{title}</h3>
         </div>
 
-        <p className="text-white/75 mb-4 sm:mb-5 lg:mb-6 leading-relaxed text-xs sm:text-sm text-pretty flex-grow line-clamp-3">
-          {description}
-        </p>
+        <p className="text-white/75 mb-4 sm:mb-5 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
 
-        <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-5 lg:mb-6">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-white/85">
-            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 opacity-70" />
-            <span className="font-medium truncate">{date}</span>
+        <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-5">
+          <div className="flex items-center gap-2.5 text-sm text-white/85">
+            <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
+            <span className="font-medium">{date}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-white/85">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 opacity-70" />
-            <span className="font-medium truncate">{time}</span>
+          <div className="flex items-center gap-2.5 text-sm text-white/85">
+            <Clock className="w-4 h-4 flex-shrink-0 opacity-70" />
+            <span className="font-medium">{time}</span>
           </div>
           {location && (
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-white/85">
-              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 opacity-70" />
-              <span className="font-medium truncate">{location}</span>
+            <div className="flex items-center gap-2.5 text-sm text-white/85">
+              <MapPin className="w-4 h-4 flex-shrink-0 opacity-70" />
+              <span className="font-medium">{location}</span>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
-          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="font-semibold text-xs sm:text-sm">{attending}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
+            <Users className="w-4 h-4" />
+            <span className="font-semibold text-sm">{attending}</span>
           </div>
           <div
             className={`
-              px-3 sm:px-4 py-1.5 sm:py-2 
+              px-4 py-2 
               bg-white/95 text-black 
-              font-semibold rounded-full text-xs sm:text-sm
+              font-semibold rounded-full text-sm
               transition-all
               ${isHovered ? "bg-white" : ""}
             `}

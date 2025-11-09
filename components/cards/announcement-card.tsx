@@ -29,8 +29,8 @@ export function AnnouncementCard({
   return (
     <li className="group">
       <div
-        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientClass} backdrop-blur-xl border border-white/5 transition-all duration-500 ease-out cursor-pointer hover:scale-[1.01] hover:border-white/10 hover:shadow-2xl ${
-          isExpanded ? "shadow-2xl scale-[1.01]" : ""
+        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientClass} backdrop-blur-xl border border-white/5 transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] hover:border-white/10 hover:shadow-2xl ${
+          isExpanded ? "shadow-2xl scale-[1.02]" : ""
         }`}
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
@@ -38,11 +38,11 @@ export function AnnouncementCard({
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E\")",
         }}
       >
-        <div className="p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
               <div
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-full flex-shrink-0 flex items-center justify-center font-semibold text-white text-xs sm:text-sm shadow-lg"
+                className="h-9 w-9 rounded-full flex-shrink-0 flex items-center justify-center font-semibold text-white text-xs shadow-lg"
                 style={{
                   backgroundColor: avatarColor,
                   boxShadow: `0 4px 14px ${avatarColor}40`,
@@ -53,20 +53,20 @@ export function AnnouncementCard({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm sm:text-base font-semibold text-white/95 truncate">{title}</h3>
+                  <h3 className="text-sm font-semibold text-white/95 truncate">{title}</h3>
                   {isImportant && (
-                    <span className="px-2 py-0.5 bg-gradient-to-r from-violet-500/80 to-fuchsia-500/80 text-white text-[9px] sm:text-[10px] font-semibold rounded-full tracking-wide uppercase backdrop-blur-sm flex-shrink-0">
+                    <span className="px-2.5 py-0.5 bg-gradient-to-r from-violet-500/80 to-fuchsia-500/80 text-white text-[10px] font-semibold rounded-full tracking-wide uppercase backdrop-blur-sm">
                       Important
                     </span>
                   )}
                 </div>
 
-                <div className="text-[10px] sm:text-xs text-white/40 font-medium mb-2 tracking-wide">
+                <div className="text-xs text-white/40 font-medium mb-2 tracking-wide">
                   {author} · {timeAgo}
                 </div>
 
                 <div
-                  className={`text-xs sm:text-sm text-white/70 leading-relaxed transition-all duration-500 ${
+                  className={`text-sm text-white/70 leading-relaxed transition-all duration-500 ${
                     isExpanded ? "line-clamp-none" : "line-clamp-2"
                   }`}
                 >
@@ -76,22 +76,22 @@ export function AnnouncementCard({
             </div>
 
             <button
-              className={`h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-full transition-all duration-500 hover:bg-white/10 flex-shrink-0 ${
+              className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-500 hover:bg-white/10 flex-shrink-0 ${
                 isExpanded ? "rotate-180 bg-white/5" : ""
               }`}
             >
-              <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
+              <ChevronDown className="h-4 w-4 text-white/40" />
             </button>
           </div>
 
           <div
             className={`transition-all duration-500 ease-out ${
-              isExpanded ? "opacity-100 max-h-96 mt-5" : "opacity-0 max-h-0 overflow-hidden"
+              isExpanded ? "opacity-100 max-h-96 mt-4" : "opacity-0 max-h-0 overflow-hidden"
             }`}
           >
-            <div className="border-t border-white/5 pt-5">
-              <div className="bg-white/5 rounded-xl p-5 backdrop-blur-sm">
-                <p className="text-sm text-white/80 leading-relaxed mb-4">{content}</p>
+            <div className="border-t border-white/5 pt-4">
+              <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm">
+                <p className="text-sm text-white/80 leading-relaxed mb-3">{content}</p>
 
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">

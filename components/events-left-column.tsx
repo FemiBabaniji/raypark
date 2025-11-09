@@ -225,16 +225,16 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         <>
           <div className="mt-4 flex flex-col xl:flex-row gap-4 w-full">
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-lg shadow-black/20 min-h-[450px] max-h-[450px] flex flex-col overflow-hidden">
-                <div className="mb-3 flex items-start justify-between flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-5 shadow-lg shadow-black/20 min-h-[480px] flex flex-col overflow-hidden">
+                <div className="mb-4 flex items-start justify-between flex-shrink-0">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Events</h1>
-                    <p className="text-zinc-400 text-sm">Discover and join community events</p>
+                    <h1 className="text-3xl font-bold text-white mb-1">Events</h1>
+                    <p className="text-zinc-400 text-base">Discover and join community events</p>
                   </div>
                   <ViewToggle view={view} onViewChange={setView} />
                 </div>
 
-                <div className="mt-3 flex-shrink-0">
+                <div className="mt-4 flex-shrink-0">
                   <CategoryFilters
                     filters={EVENT_CATEGORY_FILTERS}
                     selectedCategory={selectedCategory}
@@ -242,7 +242,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex-1 overflow-hidden mt-3 flex flex-col">
+                <div className="flex-1 overflow-hidden mt-4 flex flex-col">
                   {view === "grid" ? (
                     <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredUpcomingEvents.length > 0 ? (
@@ -277,7 +277,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-lg shadow-black/20 min-h-[450px] max-h-[450px] overflow-hidden">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 shadow-lg shadow-black/20 min-h-[480px]">
                 <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
               </div>
             </div>
@@ -285,10 +285,12 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
           <div className="mt-4 flex flex-col lg:flex-row gap-4 w-full">
             <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-5 shadow-lg shadow-black/20 max-h-[350px] overflow-y-auto">
-                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-white">Announcements</h2>
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-3 sm:p-4 lg:p-5 shadow-lg shadow-black/20">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4 lg:mb-5 text-white">
+                  Announcements
+                </h2>
 
-                <div className="space-y-2">
+                <div className="space-y-2 sm:space-y-3">
                   <AnnouncementCard
                     title="New Partnership with TechCorp"
                     content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
@@ -316,21 +318,21 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-5 shadow-lg shadow-black/20 max-h-[350px] overflow-y-auto">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-3 sm:p-4 lg:p-5 shadow-lg shadow-black/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-3">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">Networks</h2>
-                    <p className="text-zinc-400 text-xs">Connect with community networks</p>
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">Networks</h2>
+                    <p className="text-zinc-400 text-xs sm:text-sm">Connect with community networks</p>
                   </div>
                   <button
                     onClick={() => setActive("Networks")}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
+                    className="px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs sm:text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
                   >
                     View All
                   </button>
                 </div>
 
-                <div className="mb-3">
+                <div className="mb-3 sm:mb-4">
                   <CategoryFilters
                     filters={MEMBER_ROLE_FILTERS}
                     selectedCategory={homeSelectedNetworkRole}
@@ -338,9 +340,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-thin">
                   {filteredHomeNetworks.slice(0, 8).map((member) => (
-                    <div key={member.id} className="flex-shrink-0 w-44 sm:w-48 lg:w-52">
+                    <div key={member.id} className="flex-shrink-0 w-40 sm:w-48">
                       <UnifiedPortfolioCard
                         portfolio={member}
                         onClick={(id) => console.log("View network profile:", id)}

@@ -335,7 +335,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 auto-rows-fr">
                   {mockMembers.slice(0, 4).map((member) => (
                     <UnifiedPortfolioCard
                       key={member.id}

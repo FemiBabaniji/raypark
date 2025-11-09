@@ -1,6 +1,8 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { Home } from "lucide-react"
+import { BackButton } from "@/components/ui/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventDetail, { type EventDetailData } from "@/components/event-detail"
@@ -224,6 +226,20 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      {!selectedEvent && (
+        <>
+          <div className="fixed top-6 left-6 z-20">
+            <BackButton onClick={handleBackClick} />
+          </div>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="fixed top-6 right-6 z-20 w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
+          >
+            <Home className="w-5 h-5" fill="white" />
+          </button>
+        </>
+      )}
+
       {selectedEvent && mappedEventData ? (
         <div className="pt-6">
           <EventDetail
@@ -269,7 +285,7 @@ export default function EventsPage() {
         </div>
       ) : (
         <main>
-          <div className="relative overflow-hidden">
+          <div className="max-w-6xl mx-auto relative overflow-hidden">
             <div className="flex gap-6">
               <motion.div
                 className="flex-1"

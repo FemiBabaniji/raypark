@@ -285,12 +285,12 @@ export default function EventsPage() {
         </div>
       ) : (
         <main>
-          <div className="max-w-6xl mx-auto relative overflow-hidden">
-            <div className="flex gap-6">
+          <div className="w-full px-6 relative overflow-hidden">
+            <div className="flex gap-8">
               <motion.div
-                className="flex-1"
+                className="w-[calc(100%-22rem)]"
                 animate={{
-                  width: "auto",
+                  width: "calc(100% - 22rem)",
                 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               >

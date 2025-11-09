@@ -1,4 +1,4 @@
-export const FILTER_TABS = ["Events", "Projects", "Members"]
+export const FILTER_TABS = ["Events", "Projects", "Members", "Meetings"]
 
 export const EVENT_CATEGORY_FILTERS = [
   { key: "all", label: "All Events" },

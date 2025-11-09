@@ -12,6 +12,7 @@ import {
 } from "@/components/event-nav"
 import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
+import { MeetingsSection } from "@/components/events/meetings-section"
 
 const mockMembers = [
   {
@@ -121,7 +122,7 @@ const mockMembers = [
 ]
 
 export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
-  const [active, setActive] = useState("Events")
+  const [active, setActive] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
@@ -199,17 +200,83 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
     <div className="w-full">
       <div className="flex flex-col items-center space-y-4">
         <EventSearch
-          value={active === "Members" ? memberSearchQuery : searchQuery}
-          onChange={active === "Members" ? setMemberSearchQuery : setSearchQuery}
+          value={active === "Members" ? memberSearchQuery : active === "Meetings" ? "" : searchQuery}
+          onChange={active === "Members" ? setMemberSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
           placeholder={
             active === "Members"
               ? "Search members by name, role, or location..."
-              : "Search workshops by name, description, or tags..."
+              : active === "Meetings"
+                ? "Search meetings..."
+                : "Search workshops by name, description, or tags..."
           }
         />
 
         <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
       </div>
+
+      {active === "" && (
+        <div className="mt-6 flex gap-6">
+          {/* Events Section - 75% */}
+          <div className="flex-[3]">
+            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+              <div className="mb-6">
+                <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
+                <p className="text-zinc-400 text-lg">Discover and join community events</p>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <CategoryFilters
+                  filters={EVENT_CATEGORY_FILTERS}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                />
+                <ViewToggle view={view} onViewChange={setView} />
+              </div>
+
+              {view === "grid" ? (
+                <div className="mt-6 flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
+                  {filteredUpcomingEvents.length > 0 ? (
+                    filteredUpcomingEvents.map((event, index) => (
+                      <EventCard
+                        key={index}
+                        title={event.title}
+                        date={event.date}
+                        description={event.description}
+                        time={event.time}
+                        attending={event.attending}
+                        dateLabel={event.dateLabel}
+                        location={event.location}
+                        instructor={event.instructor}
+                        tags={event.tags}
+                        onEventClick={onEventClick}
+                      />
+                    ))
+                  ) : (
+                    <div className="w-full text-center py-12">
+                      <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Meetings Section - 25% */}
+          <div className="flex-[1]">
+            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-white mb-1">Meetings</h2>
+                <p className="text-zinc-400 text-sm">Your upcoming schedule</p>
+              </div>
+              <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {active === "Members" && (
         <div className="mt-6 space-y-6">
@@ -318,6 +385,22 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
           </section>
         </>
+      )}
+
+      {active === "Meetings" && (
+        <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-white mb-2">Meetings</h1>
+            <p className="text-zinc-400 text-lg">Manage your upcoming meetings and schedule</p>
+          </div>
+          <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+        </div>
+      )}
+
+      {active === "Projects" && (
+        <div className="mt-8 text-center py-12">
+          <p className="text-zinc-500">Projects section coming soon...</p>
+        </div>
       )}
     </div>
   )

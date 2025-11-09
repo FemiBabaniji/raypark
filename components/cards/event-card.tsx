@@ -63,29 +63,29 @@ export function EventCard({ title, date, description, time, attending, location,
         bg-gradient-to-br ${gradient}
         backdrop-blur-xl
         rounded-3xl 
-        p-8
+        p-6 sm:p-8
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
         text-left text-white
-        w-80
+        w-64 sm:w-72 lg:w-80
         flex-shrink-0
       `}
       style={{
-        minHeight: "500px",
+        minHeight: "450px",
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
       <div className="relative flex flex-col h-full">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3 className="text-2xl font-bold mb-2 leading-tight text-balance">{title}</h3>
+          <h3 className="text-xl sm:text-2xl font-bold mb-2 leading-tight text-balance">{title}</h3>
         </div>
 
-        <p className="text-white/75 mb-8 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
+        <p className="text-white/75 mb-6 sm:mb-8 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
 
-        <div className="space-y-2.5 mb-8">
+        <div className="space-y-2 sm:space-y-2.5 mb-6 sm:mb-8">
           <div className="flex items-center gap-2.5 text-sm text-white/85">
             <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
             <span className="font-medium">{date}</span>
@@ -102,7 +102,7 @@ export function EventCard({ title, date, description, time, attending, location,
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-5 mt-auto">
+        <div className="flex items-center justify-between pt-4 sm:pt-5 mt-auto">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
             <Users className="w-4 h-4" />
             <span className="font-semibold text-sm">{attending}</span>

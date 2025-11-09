@@ -13,7 +13,6 @@ import {
 import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
-import { Users } from "lucide-react"
 
 const mockMembers = [
   {
@@ -128,6 +127,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
   const [selectedMemberRole, setSelectedMemberRole] = useState("all")
+  const [homeSelectedMemberRole, setHomeSelectedMemberRole] = useState("all")
   const [view, setView] = useState<"grid" | "calendar">("grid")
 
   const upcomingEvents = [
@@ -194,8 +194,14 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
     })
   }
 
+  const filterHomeMembersbyRole = () => {
+    if (homeSelectedMemberRole === "all") return mockMembers
+    return mockMembers.filter((member) => member.role === homeSelectedMemberRole)
+  }
+
   const filteredUpcomingEvents = filterEvents(upcomingEvents)
   const filteredMembers = filterMembers()
+  const filteredHomeMembers = filterHomeMembersbyRole()
 
   return (
     <div className="w-full">
@@ -317,15 +323,10 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             {/* Members Section - 70% on lg screens, full width on smaller */}
             <div className="w-full lg:w-[70%] lg:flex-shrink-0">
               <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg shadow-black/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 lg:mb-8 gap-3">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Members</h2>
-                      <p className="text-zinc-400 text-xs sm:text-sm">Connect with community members</p>
-                    </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Members</h2>
+                    <p className="text-zinc-400 text-xs sm:text-sm">Connect with community members</p>
                   </div>
                   <button
                     onClick={() => setActive("Members")}
@@ -335,15 +336,24 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 auto-rows-fr">
-                  {mockMembers.slice(0, 4).map((member) => (
-                    <UnifiedPortfolioCard
-                      key={member.id}
-                      portfolio={member}
-                      onClick={(id) => console.log("View member profile:", id)}
-                      onShare={(id) => console.log("Share member:", id)}
-                      onMore={(id) => console.log("More options for member:", id)}
-                    />
+                <div className="mb-4 sm:mb-6">
+                  <CategoryFilters
+                    filters={MEMBER_ROLE_FILTERS}
+                    selectedCategory={homeSelectedMemberRole}
+                    onCategoryChange={setHomeSelectedMemberRole}
+                  />
+                </div>
+
+                <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                  {filteredHomeMembers.slice(0, 8).map((member) => (
+                    <div key={member.id} className="flex-shrink-0 w-48 sm:w-56">
+                      <UnifiedPortfolioCard
+                        portfolio={member}
+                        onClick={(id) => console.log("View member profile:", id)}
+                        onShare={(id) => console.log("Share member:", id)}
+                        onMore={(id) => console.log("More options for member:", id)}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

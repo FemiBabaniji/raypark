@@ -94,7 +94,7 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-h-[600px] overflow-y-auto">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-white">

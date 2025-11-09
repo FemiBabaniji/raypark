@@ -279,13 +279,15 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-            {/* Announcements Section - 30% on xl screens */}
-            <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">Announcements</h2>
+          <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+            {/* Announcements Section - 30% on lg screens, full width on smaller */}
+            <div className="w-full lg:w-[30%] lg:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg shadow-black/20">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 text-white">
+                  Announcements
+                </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <AnnouncementCard
                     title="New Partnership with TechCorp"
                     content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
@@ -312,28 +314,28 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
             </div>
 
-            {/* Members Section - 70% on xl screens */}
-            <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
-                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+            {/* Members Section - 70% on lg screens, full width on smaller */}
+            <div className="w-full lg:w-[70%] lg:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg shadow-black/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 lg:mb-8 gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                      <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-white">Members</h2>
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Members</h2>
                       <p className="text-zinc-400 text-xs sm:text-sm">Connect with community members</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setActive("Members")}
-                    className="px-4 sm:px-6 py-2 sm:py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs sm:text-sm font-medium transition-colors backdrop-blur-sm border border-white/10"
+                    className="px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs sm:text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
                   >
                     View All
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                   {mockMembers.slice(0, 4).map((member) => (
                     <UnifiedPortfolioCard
                       key={member.id}

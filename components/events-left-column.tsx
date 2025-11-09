@@ -279,64 +279,72 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
           </div>
 
-          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-white">Members</h2>
-                  <p className="text-zinc-400 text-sm">Connect with community members</p>
+          <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
+            {/* Announcements Section - 30% on xl screens */}
+            <div className="w-full xl:w-[30%] xl:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">Announcements</h2>
+
+                <div className="space-y-4">
+                  <AnnouncementCard
+                    title="New Partnership with TechCorp"
+                    content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
+                    author="Admin"
+                    timeAgo="2 hours ago"
+                    avatarColor="#8B5CF6"
+                    isImportant={true}
+                  />
+                  <AnnouncementCard
+                    title="Upcoming Hackathon Registration"
+                    content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
+                    author="Events Team"
+                    timeAgo="1 day ago"
+                    avatarColor="#10B981"
+                  />
+                  <AnnouncementCard
+                    title="New Workspace Hours"
+                    content="Starting next week, our co-working space will be open 24/7 for all premium members."
+                    author="Facilities"
+                    timeAgo="3 days ago"
+                    avatarColor="#F59E0B"
+                  />
                 </div>
               </div>
-              <button
-                onClick={() => setActive("Members")}
-                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10"
-              >
-                View All
-              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {mockMembers.slice(0, 4).map((member) => (
-                <UnifiedPortfolioCard
-                  key={member.id}
-                  portfolio={member}
-                  onClick={(id) => console.log("View member profile:", id)}
-                  onShare={(id) => console.log("Share member:", id)}
-                  onMore={(id) => console.log("More options for member:", id)}
-                />
-              ))}
-            </div>
-          </div>
+            {/* Members Section - 70% on xl screens */}
+            <div className="w-full xl:w-[70%] xl:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
+                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-bold text-white">Members</h2>
+                      <p className="text-zinc-400 text-xs sm:text-sm">Connect with community members</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActive("Members")}
+                    className="px-4 sm:px-6 py-2 sm:py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs sm:text-sm font-medium transition-colors backdrop-blur-sm border border-white/10"
+                  >
+                    View All
+                  </button>
+                </div>
 
-          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
-            <h2 className="text-3xl font-bold mb-8 text-white">Announcements</h2>
-
-            <div className="space-y-4">
-              <AnnouncementCard
-                title="New Partnership with TechCorp"
-                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
-                author="Admin"
-                timeAgo="2 hours ago"
-                avatarColor="#8B5CF6"
-                isImportant={true}
-              />
-              <AnnouncementCard
-                title="Upcoming Hackathon Registration"
-                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
-                author="Events Team"
-                timeAgo="1 day ago"
-                avatarColor="#10B981"
-              />
-              <AnnouncementCard
-                title="New Workspace Hours"
-                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
-                author="Facilities"
-                timeAgo="3 days ago"
-                avatarColor="#F59E0B"
-              />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {mockMembers.slice(0, 4).map((member) => (
+                    <UnifiedPortfolioCard
+                      key={member.id}
+                      portfolio={member}
+                      onClick={(id) => console.log("View member profile:", id)}
+                      onShare={(id) => console.log("Share member:", id)}
+                      onMore={(id) => console.log("More options for member:", id)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </>

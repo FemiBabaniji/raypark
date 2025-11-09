@@ -234,7 +234,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
 
               {view === "grid" ? (
-                <div className="mt-6 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
                   {filteredUpcomingEvents.length > 0 ? (
                     filteredUpcomingEvents.map((event, index) => (
                       <EventCard
@@ -252,7 +252,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                       />
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-12">
+                    <div className="w-full text-center py-12">
                       <p className="text-zinc-500">No workshops found matching your criteria.</p>
                     </div>
                   )}
@@ -324,7 +324,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             {view === "grid" ? (
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
                 {filteredUpcomingEvents.length > 0 ? (
                   filteredUpcomingEvents.map((event, index) => (
                     <EventCard
@@ -342,7 +342,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12">
+                  <div className="w-full text-center py-12">
                     <p className="text-zinc-500">No workshops found matching your criteria.</p>
                   </div>
                 )}

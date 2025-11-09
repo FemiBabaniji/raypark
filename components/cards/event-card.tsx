@@ -67,12 +67,11 @@ export function EventCard({ title, date, description, time, attending, location,
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
         text-left text-white
-        w-full
-        aspect-[3/4]
+        w-80
+        flex-shrink-0
       `}
       style={{
-        minHeight: "400px",
-        maxWidth: "420px",
+        minHeight: "500px",
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >

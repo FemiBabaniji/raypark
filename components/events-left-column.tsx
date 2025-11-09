@@ -194,19 +194,23 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
   return (
     <div className="w-full">
-      <div className="max-w-7xl mx-auto">
+      <div className="flex flex-col items-center space-y-4">
+        <EventSearch
+          value={active === "Members" ? memberSearchQuery : searchQuery}
+          onChange={active === "Members" ? setMemberSearchQuery : setSearchQuery}
+          placeholder={
+            active === "Members"
+              ? "Search members by name, role, or location..."
+              : "Search workshops by name, description, or tags..."
+          }
+        />
+
         <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
       </div>
 
       {active === "Members" && (
-        <div className="mt-4 space-y-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <EventSearch
-              value={memberSearchQuery}
-              onChange={setMemberSearchQuery}
-              placeholder="Search members by name, role, or location..."
-            />
-
+        <div className="mt-6 space-y-6">
+          <div className="flex justify-center">
             <CategoryFilters
               filters={MEMBER_ROLE_FILTERS}
               selectedCategory={selectedMemberRole}
@@ -236,13 +240,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-4 max-w-7xl mx-auto space-y-4">
-            <EventSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search workshops by name, description, or tags..."
-            />
-
+          <div className="mt-6 flex justify-center">
             <CategoryFilters
               filters={EVENT_CATEGORY_FILTERS}
               selectedCategory={selectedCategory}

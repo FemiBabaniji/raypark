@@ -240,8 +240,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       )}
 
       {active === "Events" && (
-        <>
-          <div className="mt-8 mb-6">
+        <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+          <div className="mb-6">
             <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
             <p className="text-zinc-400 text-lg">Discover and join community events</p>
           </div>
@@ -315,7 +315,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               />
             </div>
           </section>
-        </>
+        </div>
       )}
     </div>
   )

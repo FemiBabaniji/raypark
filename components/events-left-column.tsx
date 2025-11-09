@@ -238,6 +238,11 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
+          <div className="mt-8 mb-6">
+            <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
+            <p className="text-zinc-400 text-lg">Discover and join community events</p>
+          </div>
+
           <div className="mt-6">
             <CategoryFilters
               filters={EVENT_CATEGORY_FILTERS}

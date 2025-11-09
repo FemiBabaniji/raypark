@@ -122,7 +122,7 @@ const mockMembers = [
 ]
 
 export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
-  const [active, setActive] = useState("")
+  const [active, setActive] = useState("Home")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [memberSearchQuery, setMemberSearchQuery] = useState("")
@@ -214,68 +214,99 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
       </div>
 
-      {active === "" && (
-        <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-          {/* Events Section - 75% on large screens, full width on smaller */}
-          <div className="w-full lg:w-3/4 lg:flex-shrink-0">
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
-              <div className="mb-6">
-                <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
-                <p className="text-zinc-400 text-lg">Discover and join community events</p>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <CategoryFilters
-                  filters={EVENT_CATEGORY_FILTERS}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-                <ViewToggle view={view} onViewChange={setView} />
-              </div>
-
-              {view === "grid" ? (
-                <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
-                  {filteredUpcomingEvents.length > 0 ? (
-                    filteredUpcomingEvents.map((event, index) => (
-                      <EventCard
-                        key={index}
-                        title={event.title}
-                        date={event.date}
-                        description={event.description}
-                        time={event.time}
-                        attending={event.attending}
-                        dateLabel={event.dateLabel}
-                        location={event.location}
-                        instructor={event.instructor}
-                        tags={event.tags}
-                        onEventClick={onEventClick}
-                      />
-                    ))
-                  ) : (
-                    <div className="w-full text-center py-12">
-                      <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                    </div>
-                  )}
+      {active === "Home" && (
+        <>
+          <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+            {/* Events Section - 75% on large screens, full width on smaller */}
+            <div className="w-full lg:w-3/4 lg:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+                <div className="mb-6">
+                  <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
+                  <p className="text-zinc-400 text-lg">Discover and join community events</p>
                 </div>
-              ) : (
-                <div className="mt-6">
-                  <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+
+                <div className="mt-6 flex items-center justify-between">
+                  <CategoryFilters
+                    filters={EVENT_CATEGORY_FILTERS}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                  />
+                  <ViewToggle view={view} onViewChange={setView} />
                 </div>
-              )}
+
+                {view === "grid" ? (
+                  <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
+                    {filteredUpcomingEvents.length > 0 ? (
+                      filteredUpcomingEvents.map((event, index) => (
+                        <EventCard
+                          key={index}
+                          title={event.title}
+                          date={event.date}
+                          description={event.description}
+                          time={event.time}
+                          attending={event.attending}
+                          dateLabel={event.dateLabel}
+                          location={event.location}
+                          instructor={event.instructor}
+                          tags={event.tags}
+                          onEventClick={onEventClick}
+                        />
+                      ))
+                    ) : (
+                      <div className="w-full text-center py-12">
+                        <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-6">
+                    <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Meetings Section - 25% on large screens, full width on smaller */}
+            <div className="w-full lg:w-1/4 lg:flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold text-white mb-1">Meetings</h2>
+                  <p className="text-zinc-400 text-sm">Your upcoming schedule</p>
+                </div>
+                <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+              </div>
             </div>
           </div>
 
-          {/* Meetings Section - 25% on large screens, full width on smaller */}
-          <div className="w-full lg:w-1/4 lg:flex-shrink-0">
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
-              <div className="mb-4">
-                <h2 className="text-2xl font-bold text-white mb-1">Meetings</h2>
-                <p className="text-zinc-400 text-sm">Your upcoming schedule</p>
-              </div>
-              <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
+            <h2 className="text-3xl font-bold mb-8 text-white">Announcements</h2>
+
+            <div className="space-y-4">
+              <AnnouncementCard
+                title="New Partnership with TechCorp"
+                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
+                author="Admin"
+                timeAgo="2 hours ago"
+                avatarColor="#8B5CF6"
+                isImportant={true}
+              />
+              <AnnouncementCard
+                title="Upcoming Hackathon Registration"
+                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
+                author="Events Team"
+                timeAgo="1 day ago"
+                avatarColor="#10B981"
+              />
+              <AnnouncementCard
+                title="New Workspace Hours"
+                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
+                author="Facilities"
+                timeAgo="3 days ago"
+                avatarColor="#F59E0B"
+              />
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {active === "Members" && (

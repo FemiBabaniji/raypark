@@ -210,13 +210,11 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Members" && (
         <div className="mt-6 space-y-6">
-          <div className="flex justify-center">
-            <CategoryFilters
-              filters={MEMBER_ROLE_FILTERS}
-              selectedCategory={selectedMemberRole}
-              onCategoryChange={setSelectedMemberRole}
-            />
-          </div>
+          <CategoryFilters
+            filters={MEMBER_ROLE_FILTERS}
+            selectedCategory={selectedMemberRole}
+            onCategoryChange={setSelectedMemberRole}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
             {filteredMembers.length > 0 ? (
@@ -240,7 +238,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6">
             <CategoryFilters
               filters={EVENT_CATEGORY_FILTERS}
               selectedCategory={selectedCategory}

@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { Panel } from "@/components/ui/panel"
 
 interface AnnouncementCardProps {
   title: string
@@ -23,85 +22,93 @@ export function AnnouncementCard({
 }: AnnouncementCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const gradientClass = isImportant
+    ? "from-purple-900/20 via-violet-900/20 to-fuchsia-900/20"
+    : "from-zinc-900/40 via-zinc-800/40 to-zinc-900/40"
+
   return (
     <li className="group">
-      <Panel
-        variant="module"
-        className={`transition-all duration-300 ease-out overflow-hidden cursor-pointer hover:shadow-lg ${
-          isExpanded ? "shadow-xl" : ""
+      <div
+        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientClass} backdrop-blur-xl border border-white/5 transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] hover:border-white/10 hover:shadow-2xl ${
+          isExpanded ? "shadow-2xl scale-[1.02]" : ""
         }`}
-        style={{
-          backgroundColor: isImportant ? "#2A1A4A" : "#1F1F1F",
-          border: "none",
-          boxShadow: "none",
-          height: isExpanded ? "auto" : "80px",
-        }}
         onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E\")",
+        }}
       >
         <div className="p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4 flex-1">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
               <div
-                className="h-12 w-12 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white text-sm"
-                style={{ backgroundColor: avatarColor }}
+                className="h-11 w-11 rounded-full flex-shrink-0 flex items-center justify-center font-semibold text-white text-sm shadow-lg"
+                style={{
+                  backgroundColor: avatarColor,
+                  boxShadow: `0 4px 14px ${avatarColor}40`,
+                }}
               >
                 {author.charAt(0)}
               </div>
+
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-base font-semibold text-white truncate">{title}</h3>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <h3 className="text-base font-semibold text-white/95 truncate">{title}</h3>
                   {isImportant && (
-                    <span className="px-2 py-0.5 bg-violet-500 text-white text-xs rounded-full font-medium">
+                    <span className="px-2.5 py-0.5 bg-gradient-to-r from-violet-500/80 to-fuchsia-500/80 text-white text-[10px] font-semibold rounded-full tracking-wide uppercase backdrop-blur-sm">
                       Important
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-gray-400 mb-2">
-                  {author} • {timeAgo}
+
+                <div className="text-xs text-white/40 font-medium mb-3 tracking-wide">
+                  {author} · {timeAgo}
                 </div>
+
                 <div
-                  className={`text-sm text-gray-300 leading-relaxed transition-all duration-300 ${
-                    isExpanded ? "line-clamp-none" : "line-clamp-1"
+                  className={`text-sm text-white/70 leading-relaxed transition-all duration-500 ${
+                    isExpanded ? "line-clamp-none" : "line-clamp-2"
                   }`}
                 >
                   {content}
                 </div>
               </div>
             </div>
+
             <button
-              className={`h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 hover:bg-white/10 ${
-                isExpanded ? "rotate-180" : ""
+              className={`h-9 w-9 flex items-center justify-center rounded-full transition-all duration-500 hover:bg-white/10 flex-shrink-0 ${
+                isExpanded ? "rotate-180 bg-white/5" : ""
               }`}
             >
-              <ChevronDown className="h-5 w-5 text-gray-400" />
+              <ChevronDown className="h-4 w-4 text-white/40" />
             </button>
           </div>
 
-          {/* Expanded content */}
           <div
-            className={`transition-all duration-300 ease-out ${
-              isExpanded ? "opacity-100 mt-4" : "opacity-0 h-0 overflow-hidden"
+            className={`transition-all duration-500 ease-out ${
+              isExpanded ? "opacity-100 max-h-96 mt-5" : "opacity-0 max-h-0 overflow-hidden"
             }`}
           >
-            <div className="border-t border-gray-700 pt-4">
-              <div className="bg-gradient-to-r from-white/5 to-white/10 rounded-xl p-4 backdrop-blur-sm">
-                <p className="text-sm text-gray-200 leading-relaxed mb-3">{content}</p>
+            <div className="border-t border-white/5 pt-5">
+              <div className="bg-white/5 rounded-xl p-5 backdrop-blur-sm">
+                <p className="text-sm text-white/80 leading-relaxed mb-4">{content}</p>
+
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
-                    <button className="px-3 py-1.5 bg-blue-500/20 text-blue-300 text-xs rounded-lg hover:bg-blue-500/30 transition-colors">
+                    <button className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white/90 text-xs font-medium rounded-full transition-all duration-300 backdrop-blur-sm">
                       Read More
                     </button>
-                    <button className="px-3 py-1.5 bg-gray-500/20 text-gray-300 text-xs rounded-lg hover:bg-gray-500/30 transition-colors">
+                    <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 text-xs font-medium rounded-full transition-all duration-300 backdrop-blur-sm">
                       Mark as Read
                     </button>
                   </div>
-                  <div className="text-xs text-gray-500">12 reactions</div>
+                  <div className="text-xs text-white/30 font-medium">12 reactions</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Panel>
+      </div>
     </li>
   )
 }

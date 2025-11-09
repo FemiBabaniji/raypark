@@ -70,7 +70,7 @@ export default function EventsRightColumn() {
       : null
 
   return (
-    <div className="fixed top-14 right-6 w-80 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6">
+    <div className="fixed top-12 right-6 w-80 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6">
       {/* org card */}
       <Panel variant="widget" className="p-6" style={{ backgroundColor: "#1F1F1F", boxShadow: "none" }}>
         <div className="flex items-center justify-center mb-4">

@@ -220,18 +220,20 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             {/* Events Section - 70% on xl screens, full width on smaller */}
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
               <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
-                <div className="mb-6">
-                  <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
-                  <p className="text-zinc-400 text-lg">Discover and join community events</p>
+                <div className="mb-6 flex items-start justify-between">
+                  <div>
+                    <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
+                    <p className="text-zinc-400 text-lg">Discover and join community events</p>
+                  </div>
+                  <ViewToggle view={view} onViewChange={setView} />
                 </div>
 
-                <div className="mt-6 flex items-center justify-between">
+                <div className="mt-6">
                   <CategoryFilters
                     filters={EVENT_CATEGORY_FILTERS}
                     selectedCategory={selectedCategory}
                     onCategoryChange={setSelectedCategory}
                   />
-                  <ViewToggle view={view} onViewChange={setView} />
                 </div>
 
                 {view === "grid" ? (
@@ -340,18 +342,20 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       {active === "Events" && (
         <>
           <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20">
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
-              <p className="text-zinc-400 text-lg">Discover and join community events</p>
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
+                <p className="text-zinc-400 text-lg">Discover and join community events</p>
+              </div>
+              <ViewToggle view={view} onViewChange={setView} />
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6">
               <CategoryFilters
                 filters={EVENT_CATEGORY_FILTERS}
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
               />
-              <ViewToggle view={view} onViewChange={setView} />
             </div>
 
             {view === "grid" ? (

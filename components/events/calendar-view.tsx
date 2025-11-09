@@ -94,7 +94,7 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
   }
 
   return (
-    <div className="w-full max-w-5xl">
+    <div className="w-full">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-white">

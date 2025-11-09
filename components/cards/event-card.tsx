@@ -21,13 +21,13 @@ export function EventCard({ title, date, description, time, attending, location,
 
   const getGradient = (title: string) => {
     if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-cyan-600 to-blue-600"
+      return "from-blue-400/90 via-cyan-400/80 to-blue-500/90"
     } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-emerald-600 to-teal-600"
+      return "from-emerald-400/90 via-teal-400/80 to-emerald-500/90"
     } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-purple-600 to-pink-600"
+      return "from-purple-400/90 via-pink-400/80 to-purple-500/90"
     }
-    return "from-cyan-600 to-blue-600"
+    return "from-blue-400/90 via-cyan-400/80 to-blue-500/90"
   }
 
   const getEventType = (title: string) => {
@@ -56,44 +56,67 @@ export function EventCard({ title, date, description, time, attending, location,
     <button
       type="button"
       onClick={handleEventClick}
-      className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 hover:scale-105 transition cursor-pointer text-left`}
-      style={{ width: "320px", minHeight: "500px" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`
+        relative overflow-hidden
+        bg-gradient-to-br ${gradient}
+        backdrop-blur-xl
+        rounded-3xl 
+        p-8
+        transition-all duration-300 ease-out
+        ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
+        text-left text-white
+      `}
+      style={{
+        width: "320px",
+        minHeight: "420px",
+        boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
+      }}
     >
-      <div className="flex flex-col h-full">
-        {/* Top: type pill + title */}
-        <div className="mb-4">
-          <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium mb-3">{type}</span>
-          <h3 className="text-xl font-bold mb-3">{title}</h3>
+      <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
+
+      <div className="relative flex flex-col h-full">
+        <div className="mb-6">
+          <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
+          <h3 className="text-2xl font-bold mb-2 leading-tight text-balance">{title}</h3>
         </div>
 
-        {/* Description */}
-        <p className="text-white/90 mb-6 leading-relaxed text-sm flex-grow">{description}</p>
+        <p className="text-white/80 mb-8 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
 
-        {/* Time / Date / Location */}
-        <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="w-4 h-4 flex-shrink-0" />
-            <span>{time}</span>
+        <div className="space-y-2.5 mb-8">
+          <div className="flex items-center gap-2.5 text-sm text-white/90">
+            <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
+            <span className="font-medium">{date}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 flex-shrink-0" />
-            <span>{date}</span>
+          <div className="flex items-center gap-2.5 text-sm text-white/90">
+            <Clock className="w-4 h-4 flex-shrink-0 opacity-70" />
+            <span className="font-medium">{time}</span>
           </div>
           {location && (
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4 flex-shrink-0" />
-              <span>{location}</span>
+            <div className="flex items-center gap-2.5 text-sm text-white/90">
+              <MapPin className="w-4 h-4 flex-shrink-0 opacity-70" />
+              <span className="font-medium">{location}</span>
             </div>
           )}
         </div>
 
-        {/* Footer: attendees + CTA */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/20 mt-auto">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            <span className="font-semibold text-sm">{attending} attending</span>
+        <div className="flex items-center justify-between pt-5 mt-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full">
+            <Users className="w-4 h-4" />
+            <span className="font-semibold text-sm">{attending}</span>
           </div>
-          <div className="px-5 py-2 bg-white text-black font-semibold rounded-lg text-sm">View Event</div>
+          <div
+            className={`
+              px-4 py-2 
+              bg-white/95 text-black 
+              font-semibold rounded-full text-sm
+              transition-all
+              ${isHovered ? "bg-white" : ""}
+            `}
+          >
+            View Event
+          </div>
         </div>
       </div>
     </button>

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Search, Home } from "lucide-react"
+import { Home } from "lucide-react"
 import { BackButton } from "@/components/ui/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
@@ -231,21 +231,7 @@ export default function EventsPage() {
           <div className="absolute top-6 left-6">
             <BackButton onClick={handleBackClick} />
           </div>
-          <div className="flex-1 ml-20">
-            <div className="max-w-6xl mx-auto">
-              <div
-                className="relative h-10 w-full max-w-md rounded-2xl"
-                style={{ backgroundColor: "oklch(0.145 0 0)" }}
-              >
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
-                <input
-                  placeholder="Search"
-                  className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
-                  style={{ color: "#FFFFFF" }}
-                />
-              </div>
-            </div>
-          </div>
+          <div className="flex-1"></div>
           <button
             onClick={() => (window.location.href = "/")}
             className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"

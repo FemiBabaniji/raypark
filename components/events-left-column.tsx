@@ -194,21 +194,25 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
   return (
     <div className="w-full">
-      <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
+      <div className="max-w-7xl mx-auto">
+        <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
+      </div>
 
       {active === "Members" && (
         <div className="mt-4 space-y-6">
-          <EventSearch
-            value={memberSearchQuery}
-            onChange={setMemberSearchQuery}
-            placeholder="Search members by name, role, or location..."
-          />
+          <div className="max-w-7xl mx-auto space-y-6">
+            <EventSearch
+              value={memberSearchQuery}
+              onChange={setMemberSearchQuery}
+              placeholder="Search members by name, role, or location..."
+            />
 
-          <CategoryFilters
-            filters={MEMBER_ROLE_FILTERS}
-            selectedCategory={selectedMemberRole}
-            onCategoryChange={setSelectedMemberRole}
-          />
+            <CategoryFilters
+              filters={MEMBER_ROLE_FILTERS}
+              selectedCategory={selectedMemberRole}
+              onCategoryChange={setSelectedMemberRole}
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
             {filteredMembers.length > 0 ? (
@@ -232,7 +236,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 max-w-7xl mx-auto space-y-4">
             <EventSearch
               value={searchQuery}
               onChange={setSearchQuery}

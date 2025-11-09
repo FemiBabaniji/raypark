@@ -219,7 +219,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
           <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
             {/* Events Section - 70% on xl screens, full width on smaller */}
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col overflow-hidden">
                 <div className="mb-6 flex items-start justify-between flex-shrink-0">
                   <div>
                     <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
@@ -236,9 +236,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex-1 overflow-hidden mt-6">
+                <div className="flex-1 overflow-hidden mt-6 flex flex-col">
                   {view === "grid" ? (
-                    <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin h-full">
+                    <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredUpcomingEvents.length > 0 ? (
                         filteredUpcomingEvents.map((event, index) => (
                           <EventCard
@@ -262,7 +262,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                       )}
                     </div>
                   ) : (
-                    <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                    <div className="flex-1 overflow-hidden">
+                      <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                    </div>
                   )}
                 </div>
               </div>
@@ -337,7 +339,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col">
+          <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col overflow-hidden">
             <div className="mb-6 flex items-start justify-between flex-shrink-0">
               <div>
                 <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
@@ -354,9 +356,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               />
             </div>
 
-            <div className="flex-1 overflow-hidden mt-6">
+            <div className="flex-1 overflow-hidden mt-6 flex flex-col">
               {view === "grid" ? (
-                <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin h-full">
+                <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin">
                   {filteredUpcomingEvents.length > 0 ? (
                     filteredUpcomingEvents.map((event, index) => (
                       <EventCard
@@ -380,7 +382,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   )}
                 </div>
               ) : (
-                <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                <div className="flex-1 overflow-hidden">
+                  <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                </div>
               )}
             </div>
           </div>

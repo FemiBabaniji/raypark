@@ -94,9 +94,9 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
   }
 
   return (
-    <div className="w-full max-h-[600px] overflow-y-auto">
+    <div className="w-full h-full flex flex-col">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <h2 className="text-xl font-semibold text-white">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
@@ -117,7 +117,7 @@ export function CalendarView({ events, onEventClick }: CalendarViewProps) {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1.5 flex-1 overflow-y-auto">
         {/* Day headers */}
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="text-center py-2 text-xs font-medium text-zinc-500">

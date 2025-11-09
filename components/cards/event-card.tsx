@@ -21,13 +21,13 @@ export function EventCard({ title, date, description, time, attending, location,
 
   const getGradient = (title: string) => {
     if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-blue-400/90 via-cyan-400/80 to-blue-500/90"
+      return "from-blue-900/70 via-cyan-900/60 to-blue-950/70"
     } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-emerald-400/90 via-teal-400/80 to-emerald-500/90"
+      return "from-emerald-900/70 via-teal-900/60 to-emerald-950/70"
     } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-purple-400/90 via-pink-400/80 to-purple-500/90"
+      return "from-purple-900/70 via-pink-900/60 to-purple-950/70"
     }
-    return "from-blue-400/90 via-cyan-400/80 to-blue-500/90"
+    return "from-blue-900/70 via-cyan-900/60 to-blue-950/70"
   }
 
   const getEventType = (title: string) => {
@@ -74,27 +74,27 @@ export function EventCard({ title, date, description, time, attending, location,
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >
-      <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
+      <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
       <div className="relative flex flex-col h-full">
         <div className="mb-6">
-          <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
+          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
           <h3 className="text-2xl font-bold mb-2 leading-tight text-balance">{title}</h3>
         </div>
 
-        <p className="text-white/80 mb-8 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
+        <p className="text-white/75 mb-8 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
 
         <div className="space-y-2.5 mb-8">
-          <div className="flex items-center gap-2.5 text-sm text-white/90">
+          <div className="flex items-center gap-2.5 text-sm text-white/85">
             <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
             <span className="font-medium">{date}</span>
           </div>
-          <div className="flex items-center gap-2.5 text-sm text-white/90">
+          <div className="flex items-center gap-2.5 text-sm text-white/85">
             <Clock className="w-4 h-4 flex-shrink-0 opacity-70" />
             <span className="font-medium">{time}</span>
           </div>
           {location && (
-            <div className="flex items-center gap-2.5 text-sm text-white/90">
+            <div className="flex items-center gap-2.5 text-sm text-white/85">
               <MapPin className="w-4 h-4 flex-shrink-0 opacity-70" />
               <span className="font-medium">{location}</span>
             </div>
@@ -102,7 +102,7 @@ export function EventCard({ title, date, description, time, attending, location,
         </div>
 
         <div className="flex items-center justify-between pt-5 mt-auto">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
             <Users className="w-4 h-4" />
             <span className="font-semibold text-sm">{attending}</span>
           </div>

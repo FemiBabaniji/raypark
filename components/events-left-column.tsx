@@ -215,9 +215,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       </div>
 
       {active === "" && (
-        <div className="mt-6 flex gap-6 w-full">
-          {/* Events Section - 75% */}
-          <div className="w-3/4 flex-shrink-0">
+        <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+          {/* Events Section - 75% on large screens, full width on smaller */}
+          <div className="w-full lg:w-3/4 lg:flex-shrink-0">
             <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20">
               <div className="mb-6">
                 <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
@@ -234,7 +234,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
 
               {view === "grid" ? (
-                <div className="mt-6 flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="mt-6 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
                   {filteredUpcomingEvents.length > 0 ? (
                     filteredUpcomingEvents.map((event, index) => (
                       <EventCard
@@ -252,7 +252,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                       />
                     ))
                   ) : (
-                    <div className="w-full text-center py-12">
+                    <div className="col-span-full text-center py-12">
                       <p className="text-zinc-500">No workshops found matching your criteria.</p>
                     </div>
                   )}
@@ -265,8 +265,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
           </div>
 
-          {/* Meetings Section - 25% */}
-          <div className="w-1/4 flex-shrink-0">
+          {/* Meetings Section - 25% on large screens, full width on smaller */}
+          <div className="w-full lg:w-1/4 lg:flex-shrink-0">
             <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
               <div className="mb-4">
                 <h2 className="text-2xl font-bold text-white mb-1">Meetings</h2>
@@ -324,7 +324,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             {view === "grid" ? (
-              <div className="mt-6 flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 {filteredUpcomingEvents.length > 0 ? (
                   filteredUpcomingEvents.map((event, index) => (
                     <EventCard
@@ -342,7 +342,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                     />
                   ))
                 ) : (
-                  <div className="w-full text-center py-12">
+                  <div className="col-span-full text-center py-12">
                     <p className="text-zinc-500">No workshops found matching your criteria.</p>
                   </div>
                 )}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LayoutGrid, Calendar } from "lucide-react"
+import { LayoutGrid, Calendar, ChevronRight } from "lucide-react"
 import { MeetingsCalendarView } from "./meetings-calendar-view"
 
 interface Meeting {
@@ -63,13 +63,13 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
   const getTypeStyles = (type: Meeting["type"]) => {
     switch (type) {
       case "1-on-1":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-purple-500/70"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-r-4 border-r-purple-500/70"
       case "team":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-blue-500/70"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-r-4 border-r-blue-500/70"
       case "all-hands":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-cyan-500/70"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-r-4 border-r-cyan-500/70"
       default:
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-zinc-500/70"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-r-4 border-r-zinc-500/70"
     }
   }
 
@@ -97,30 +97,35 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {viewMode === "list" ? (
-          <div className="space-y-3 h-full overflow-y-auto">
-            {upcomingMeetings.map((meeting) => (
-              <button
-                key={meeting.id}
-                onClick={() => onMeetingClick?.(meeting.id)}
-                className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-sm rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-800/50 shadow-lg shadow-black/10`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1">{meeting.title}</h3>
-                    <p className="text-xs text-zinc-400">{meeting.host}</p>
+          <>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+              <ChevronRight className="h-5 w-5 text-zinc-600 animate-pulse" />
+            </div>
+            <div className="space-y-3 h-full overflow-y-auto overflow-x-auto pr-2">
+              {upcomingMeetings.map((meeting) => (
+                <button
+                  key={meeting.id}
+                  onClick={() => onMeetingClick?.(meeting.id)}
+                  className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-sm rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-800/50 shadow-lg shadow-black/10`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1">{meeting.title}</h3>
+                      <p className="text-xs text-zinc-400">{meeting.host}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">
-                    {meeting.date} • {meeting.time}
-                  </span>
-                  <span className="text-zinc-500">{meeting.attendees} attending</span>
-                </div>
-              </button>
-            ))}
-          </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-400">
+                      {meeting.date} • {meeting.time}
+                    </span>
+                    <span className="text-zinc-500">{meeting.attendees} attending</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
         ) : (
           <MeetingsCalendarView meetings={upcomingMeetings} onMeetingClick={onMeetingClick} />
         )}

@@ -74,12 +74,8 @@ export default function EventsRightColumn() {
         {/* Profile editing card */}
         <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold mb-1" style={{ color: "#FFFFFF" }}>
-              Your Profile
-            </h3>
-            <p className="text-xs" style={{ color: "#B3B3B3" }}>
-              Customize who you are and what you represent
-            </p>
+            <h3 className="text-sm font-semibold mb-1 text-white">Your Profile</h3>
+            <p className="text-xs text-zinc-400">Customize who you are and what you represent</p>
           </div>
 
           {loading ? (
@@ -108,8 +104,7 @@ export default function EventsRightColumn() {
 
           <button
             onClick={() => router.push("/portfolio/builder")}
-            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80"
-            style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
+            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 bg-zinc-800/60 text-white"
           >
             Edit Profile
           </button>
@@ -118,29 +113,26 @@ export default function EventsRightColumn() {
         {/* AI Assistant */}
         <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
-              AI Assistant
-            </h3>
+            <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
           </div>
 
-          <p className="text-xs mb-4" style={{ color: "#B3B3B3" }}>
+          <p className="text-xs mb-4 text-zinc-400">
             Get instant help with events, networking, and profile optimization
           </p>
 
           <button
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 flex items-center justify-center gap-2"
-            style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
+            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 flex items-center justify-center gap-2 bg-zinc-800/60 text-white"
           >
             {isChatOpen ? "Close Chat" : "Start Chat"}
           </button>
 
           {isChatOpen && (
-            <div className="mt-4 rounded-lg p-4" style={{ backgroundColor: "#2A2A2A" }}>
+            <div className="mt-4 rounded-lg p-4 bg-zinc-800/40">
               <div className="space-y-3 max-h-60 overflow-y-auto">
-                <div className="text-xs" style={{ color: "#E5E5E5" }}>
+                <div className="text-xs text-white">
                   <p className="mb-2">Hi! I'm your AI assistant. I can help you with:</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: "#B3B3B3" }}>
+                  <ul className="list-disc list-inside space-y-1 text-xs text-zinc-400">
                     <li>Finding relevant events</li>
                     <li>Networking suggestions</li>
                     <li>Profile improvements</li>
@@ -153,13 +145,9 @@ export default function EventsRightColumn() {
                 <input
                   type="text"
                   placeholder="Ask me anything..."
-                  className="flex-1 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-1"
-                  style={{ backgroundColor: "#1F1F1F", color: "#FFFFFF", border: "1px solid #444" }}
+                  className="flex-1 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-zinc-600 bg-zinc-900/60 text-white border border-zinc-700 placeholder:text-zinc-500"
                 />
-                <button
-                  className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                  style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
-                >
+                <button className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80 bg-zinc-800/60 text-white">
                   Send
                 </button>
               </div>

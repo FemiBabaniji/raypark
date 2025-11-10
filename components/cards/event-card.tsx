@@ -21,13 +21,13 @@ export function EventCard({ title, date, description, time, attending, location,
 
   const getGradient = (title: string) => {
     if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-blue-400 via-blue-500 to-blue-600"
+      return "from-[#3B82F6] to-[#06B6D4]" // Friends Mix - Blue
     } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-teal-400 via-cyan-400 to-teal-500"
+      return "from-[#34D399] to-[#6EE7B7]" // Chill Mix - Green
     } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-purple-400 via-purple-500 to-pink-500"
+      return "from-[#A855F7] to-[#7C3AED]" // Favourites Mix - Purple
     }
-    return "from-coral-400 via-pink-400 to-rose-500"
+    return "from-[#F87171] to-[#FB7185]" // New Music Mix - Red/Pink (default)
   }
 
   const getEventType = (title: string) => {

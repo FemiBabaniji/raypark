@@ -223,18 +223,18 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Home" && (
         <>
-          <div className="mt-8 flex flex-col xl:flex-row gap-8 w-full">
+          <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[400px] flex flex-col overflow-hidden">
-                <div className="mb-5 flex items-start justify-between flex-shrink-0">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px] flex flex-col overflow-hidden">
+                <div className="mb-4 flex items-start justify-between flex-shrink-0">
                   <div>
-                    <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
-                    <p className="text-zinc-400 text-base">Discover and join community events</p>
+                    <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                    <p className="text-zinc-400 text-sm">Discover and join community events</p>
                   </div>
                   <ViewToggle view={view} onViewChange={setView} />
                 </div>
 
-                <div className="mt-5 flex-shrink-0">
+                <div className="mt-3 flex-shrink-0">
                   <CategoryFilters
                     filters={EVENT_CATEGORY_FILTERS}
                     selectedCategory={selectedCategory}
@@ -242,9 +242,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex-1 overflow-hidden mt-6 flex flex-col">
+                <div className="flex-1 overflow-hidden mt-4 flex flex-col">
                   {view === "grid" ? (
-                    <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-thin">
+                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredUpcomingEvents.length > 0 ? (
                         filteredUpcomingEvents.map((event, index) => (
                           <EventCard
@@ -277,18 +277,18 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[400px]">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px]">
                 <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
               </div>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col lg:flex-row gap-8 w-full">
+          <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
             <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
-                <h2 className="text-2xl font-bold mb-5 text-white">Announcements</h2>
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <AnnouncementCard
                     title="New Partnership with TechCorp"
                     content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
@@ -316,11 +316,11 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-3">
+              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Networks</h2>
-                    <p className="text-zinc-400 text-sm">Connect with community networks</p>
+                    <h2 className="text-xl font-bold text-white">Networks</h2>
+                    <p className="text-zinc-400 text-xs">Connect with community networks</p>
                   </div>
                   <button
                     onClick={() => setActive("Networks")}
@@ -330,7 +330,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   </button>
                 </div>
 
-                <div className="mb-5">
+                <div className="mb-4">
                   <CategoryFilters
                     filters={MEMBER_ROLE_FILTERS}
                     selectedCategory={homeSelectedNetworkRole}
@@ -338,9 +338,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
                   />
                 </div>
 
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                   {filteredHomeNetworks.slice(0, 8).map((member) => (
-                    <div key={member.id} className="flex-shrink-0 w-40 sm:w-48">
+                    <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
                       <UnifiedPortfolioCard
                         portfolio={member}
                         onClick={(id) => console.log("View network profile:", id)}
@@ -386,16 +386,16 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
       {active === "Events" && (
         <>
-          <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/20 min-h-[600px] flex flex-col overflow-hidden">
-            <div className="mb-6 flex items-start justify-between flex-shrink-0">
+          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px] flex flex-col overflow-hidden">
+            <div className="mb-5 flex items-start justify-between flex-shrink-0">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">Events</h1>
-                <p className="text-zinc-400 text-lg">Discover and join community events</p>
+                <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
+                <p className="text-zinc-400 text-base">Discover and join community events</p>
               </div>
               <ViewToggle view={view} onViewChange={setView} />
             </div>
 
-            <div className="mt-6 flex-shrink-0">
+            <div className="mt-4 flex-shrink-0">
               <CategoryFilters
                 filters={EVENT_CATEGORY_FILTERS}
                 selectedCategory={selectedCategory}
@@ -403,9 +403,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               />
             </div>
 
-            <div className="flex-1 overflow-hidden mt-6 flex flex-col">
+            <div className="flex-1 overflow-hidden mt-5 flex flex-col">
               {view === "grid" ? (
-                <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin">
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
                   {filteredUpcomingEvents.length > 0 ? (
                     filteredUpcomingEvents.map((event, index) => (
                       <EventCard
@@ -470,10 +470,10 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
       )}
 
       {active === "Meetings" && (
-        <div className="mt-8 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-black/20 min-h-[600px]">
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold text-white mb-2">Meetings</h1>
-            <p className="text-zinc-400 text-lg">Manage your upcoming meetings and schedule</p>
+        <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px]">
+          <div className="mb-5">
+            <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
+            <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>
           </div>
           <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
         </div>

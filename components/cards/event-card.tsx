@@ -63,60 +63,61 @@ export function EventCard({ title, date, description, time, attending, location,
         bg-gradient-to-br ${gradient}
         backdrop-blur-xl
         rounded-3xl 
-        p-6 sm:p-7
+        p-5
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
         text-left text-white
-        w-72 sm:w-80
+        w-56 sm:w-64
         flex-shrink-0
       `}
       style={{
-        minHeight: "420px",
+        minHeight: "340px",
+        maxWidth: "256px",
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
       <div className="relative flex flex-col h-full">
-        <div className="mb-4">
-          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2.5">{type}</p>
-          <h3 className="text-xl font-bold mb-2.5 leading-tight text-balance">{title}</h3>
+        <div className="mb-3">
+          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
+          <h3 className="text-lg font-bold mb-2 leading-tight text-balance">{title}</h3>
         </div>
 
-        <p className="text-white/75 mb-5 leading-relaxed text-sm text-pretty flex-grow">{description}</p>
+        <p className="text-white/75 mb-4 leading-relaxed text-xs text-pretty flex-grow">{description}</p>
 
-        <div className="space-y-2.5 mb-5">
-          <div className="flex items-center gap-3 text-sm text-white/85">
-            <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-xs text-white/85">
+            <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
             <span className="font-medium">{date}</span>
           </div>
-          <div className="flex items-center gap-3 text-sm text-white/85">
-            <Clock className="w-4 h-4 flex-shrink-0 opacity-70" />
+          <div className="flex items-center gap-2 text-xs text-white/85">
+            <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
             <span className="font-medium">{time}</span>
           </div>
           {location && (
-            <div className="flex items-center gap-3 text-sm text-white/85">
-              <MapPin className="w-4 h-4 flex-shrink-0 opacity-70" />
+            <div className="flex items-center gap-2 text-xs text-white/85">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
               <span className="font-medium">{location}</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-4 mt-auto">
-          <div className="flex items-center gap-2 px-3.5 py-2 bg-white/20 backdrop-blur-sm rounded-full">
-            <Users className="w-4 h-4" />
-            <span className="font-semibold text-sm">{attending}</span>
+        <div className="flex items-center justify-between pt-3 mt-auto">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
+            <Users className="w-3.5 h-3.5" />
+            <span className="font-semibold text-xs">{attending}</span>
           </div>
           <div
             className={`
-              px-5 py-2.5 
+              px-4 py-2 
               bg-white/95 text-black 
-              font-semibold rounded-full text-sm
+              font-semibold rounded-full text-xs
               transition-all
               ${isHovered ? "bg-white" : ""}
             `}
           >
-            View Event
+            View
           </div>
         </div>
       </div>

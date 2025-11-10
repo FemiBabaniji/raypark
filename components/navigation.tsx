@@ -43,12 +43,8 @@ export function Navigation({
     <div className="absolute top-12 left-0 right-0 z-10">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left - Logo */}
-        <div className="flex items-center gap-3">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback className="bg-purple-600 text-white text-sm">P</AvatarFallback>
-          </Avatar>
-          <img src="/bea-logo.svg" alt="BEA" className="h-8 w-auto" />
+        <div className="flex items-center">
+          <img src="/bea-logo.svg" alt="BEA" className="h-16 w-auto" />
         </div>
 
         {/* Right - User Actions */}

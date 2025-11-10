@@ -30,6 +30,17 @@ export function EventCard({ title, date, description, time, attending, location,
     return "from-[#F87171]/70 to-[#FB7185]/70" // New Music Mix - Red/Pink (softer)
   }
 
+  const getTitleGradient = (title: string) => {
+    if (title.includes("AI") || title.includes("Machine Learning")) {
+      return "from-white via-white to-[#3B82F6]" // Blue tint
+    } else if (title.includes("Networking") || title.includes("Founder")) {
+      return "from-white via-white to-[#34D399]" // Green tint
+    } else if (title.includes("Design") || title.includes("Product")) {
+      return "from-white via-white to-[#A855F7]" // Purple tint
+    }
+    return "from-white via-white to-[#F87171]" // Red/Pink tint
+  }
+
   const getEventType = (title: string) => {
     if (title.includes("Workshop")) return "Workshop"
     if (title.includes("Mixer") || title.includes("Networking")) return "Networking"
@@ -38,6 +49,7 @@ export function EventCard({ title, date, description, time, attending, location,
   }
 
   const gradient = getGradient(title)
+  const titleGradient = getTitleGradient(title)
   const type = getEventType(title)
 
   const handleEventClick = () => {
@@ -81,7 +93,11 @@ export function EventCard({ title, date, description, time, attending, location,
       <div className="relative flex flex-col h-full">
         <div className="mb-3">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3 className="text-2xl font-bold mb-2 leading-tight text-balance text-white">{title}</h3>
+          <h3
+            className={`text-2xl font-bold mb-2 leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
+          >
+            {title}
+          </h3>
         </div>
 
         <p className="text-white/75 mb-4 leading-relaxed text-xs text-pretty flex-grow">{description}</p>

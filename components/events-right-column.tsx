@@ -72,24 +72,24 @@ export default function EventsRightColumn() {
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
       <div className="space-y-6">
         {/* Profile editing card */}
-        <Panel variant="widget" className="p-6 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+        <Panel variant="widget" className="p-5 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold mb-1" style={{ color: "#FFFFFF" }}>
               Your Profile
             </h3>
+            <p className="text-xs" style={{ color: "#B3B3B3" }}>
+              Customize who you are and what you represent
+            </p>
           </div>
 
           {loading ? (
-            <div className="rounded-3xl p-5 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg animate-pulse">
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg animate-pulse">
               <div className="h-10 w-10 rounded-full bg-white/20"></div>
               <div className="mt-3 h-4 bg-white/20 rounded w-3/4"></div>
               <div className="mt-2 h-3 bg-white/20 rounded w-1/2"></div>
             </div>
           ) : userPortfolio ? (
-            <div
-              className="h-56 cursor-pointer transition-transform hover:scale-[1.02]"
-              onClick={() => router.push("/portfolio/builder")}
-            >
+            <div className="mb-4">
               <UnifiedPortfolioCard
                 portfolio={userPortfolio}
                 onClick={(id) => router.push("/portfolio/builder")}
@@ -98,7 +98,7 @@ export default function EventsRightColumn() {
               />
             </div>
           ) : (
-            <div className="rounded-3xl p-5 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg">
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg mb-4">
               <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white">?</div>
               <div className="mt-3 text-base font-semibold text-white">Guest User</div>
               <div className="text-sm text-white/90">Portfolio</div>
@@ -108,17 +108,14 @@ export default function EventsRightColumn() {
 
           <button
             onClick={() => router.push("/portfolio/builder")}
-            className="mt-4 w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80"
             style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
           >
             Edit Profile
           </button>
-
-          <p className="mt-3 text-xs text-center" style={{ color: "#B3B3B3" }}>
-            Customize who you are and what you represent
-          </p>
         </Panel>
 
+        {/* AI Assistant */}
         <Panel variant="widget" className="p-5 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>

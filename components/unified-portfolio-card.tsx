@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Share } from "lucide-react"
+import { MoreHorizontal, Share, Upload } from "lucide-react"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 export interface UnifiedPortfolio {
@@ -16,7 +16,7 @@ export interface UnifiedPortfolio {
   initials?: string
   selectedColor: ThemeIndex
   isLive?: boolean
-  isTemplate?: boolean // Added isTemplate property to track template-based portfolios
+  isTemplate?: boolean
 }
 
 type Props = {
@@ -25,9 +25,10 @@ type Props = {
   onShare?: (id: string) => void
   onMore?: (id: string) => void
   onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
+  onUpload?: (id: string) => void
 }
 
-export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onChangeColor }: Props) {
+export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onUpload }: Props) {
   const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
 
   const initials = useMemo(() => {
@@ -43,16 +44,30 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
       tabIndex={0}
       onClick={() => onClick?.(portfolio.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick?.(portfolio.id)}
-      className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer focus:outline-none
-                 focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
+      className="relative w-full aspect-[4/5] rounded-[30px] overflow-hidden cursor-pointer focus:outline-none
+                 focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]
+                 shadow-[0_22px_55px_rgba(0,0,0,0.4)]"
     >
+      {onUpload && (
+        <button
+          type="button"
+          aria-label="Upload photo"
+          className="absolute top-3 left-3 p-1.5 rounded-md bg-white/10 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70 z-10"
+          onClick={(e) => {
+            e.stopPropagation()
+            onUpload(portfolio.id)
+          }}
+        >
+          <Upload className="w-4 h-4 text-white" />
+        </button>
+      )}
+
       {portfolio.isLive && (
-        <div className="absolute top-3 left-3 w-3 h-3 bg-green-500 rounded-full z-10 shadow-lg">
+        <div className="absolute top-3 left-12 w-3 h-3 bg-green-500 rounded-full z-10 shadow-lg">
           <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
         </div>
       )}
 
-      {/* Card background */}
       <div className={`h-full w-full bg-neutral-900 bg-gradient-to-br ${gradient} backdrop-blur-xl p-6 flex flex-col`}>
         {/* Top-right 'More' */}
         <button
@@ -67,8 +82,11 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
           <MoreHorizontal className="w-4 h-4 text-white" />
         </button>
 
-        {/* Avatar */}
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mb-4">
+        <div className="flex flex-col mb-6">
+          <div className="text-white font-bold text-2xl leading-tight truncate">{portfolio.name}</div>
+        </div>
+
+        <div className="relative mx-auto my-auto w-[180px] h-[180px] rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
           {portfolio.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -77,44 +95,30 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-base font-semibold text-white">{initials}</span>
+            <span className="text-7xl font-bold text-white">{initials}</span>
           )}
         </div>
 
-        {/* Identity */}
-        <div className="flex flex-col mb-4">
-          <div className="text-white font-bold text-xl leading-tight truncate">{portfolio.name}</div>
-          <div className="text-white/90 text-sm leading-snug truncate">{portfolio.title}</div>
-        </div>
-
-        {/* Contact */}
-        <div className="mt-auto space-y-1">
-          {portfolio.email ? <div className="text-white font-semibold text-sm truncate">{portfolio.email}</div> : null}
-          {portfolio.location ? <div className="text-white/90 text-sm truncate">{portfolio.location}</div> : null}
-        </div>
-
-        {/* Footer: handle + share */}
-        <div className="mt-4 flex items-center justify-between">
-          {portfolio.handle ? (
+        <div className="mt-auto space-y-2">
+          {portfolio.handle && (
             <Badge className="bg-white/15 text-white border-white/25 px-3 py-1 rounded-full text-xs font-medium">
               @{portfolio.handle.replace(/^@/, "")}
             </Badge>
-          ) : (
-            <span />
           )}
-
-          <button
-            type="button"
-            aria-label="Share portfolio"
-            className="p-2 rounded-md bg-white/10 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
-            onClick={(e) => {
-              e.stopPropagation()
-              onShare?.(portfolio.id)
-            }}
-          >
-            <Share className="w-4 h-4 text-white" />
-          </button>
+          <div className="text-white/90 text-base font-medium leading-snug">{portfolio.title}</div>
         </div>
+
+        <button
+          type="button"
+          aria-label="Share portfolio"
+          className="absolute bottom-3 right-3 p-2 rounded-md bg-white/10 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
+          onClick={(e) => {
+            e.stopPropagation()
+            onShare?.(portfolio.id)
+          }}
+        >
+          <Share className="w-4 h-4 text-white" />
+        </button>
       </div>
     </div>
   )

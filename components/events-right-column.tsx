@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronDown } from "lucide-react"
+import { Bot, User, Edit3, Sparkles } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
@@ -25,10 +25,10 @@ interface SavedPortfolioData {
 }
 
 export default function EventsRightColumn() {
-  const [isQuickActionsExpanded, setIsQuickActionsExpanded] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
   const { user, loading } = useAuth()
   const [savedPortfolio, setSavedPortfolio] = useState<SavedPortfolioData | null>(null)
-  const router = useRouter() // Added router for navigation
+  const router = useRouter()
 
   useEffect(() => {
     const savedData = localStorage.getItem("bea_portfolio_data")
@@ -71,40 +71,23 @@ export default function EventsRightColumn() {
 
   return (
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
-      <div className="space-y-4">
-        {/* org card */}
-        <Panel variant="widget" className="p-5 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
-          <div className="flex items-center justify-center mb-3">
-            <img src="/bea-logo.svg" alt="Black Entrepreneurship Alliance" className="h-14 w-auto" />
+      <div className="space-y-6">
+        {/* Profile editing card */}
+        <Panel variant="widget" className="p-6 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5" style={{ color: "#B3B3B3" }} />
+              <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+                Your Profile
+              </h3>
+            </div>
+            <Edit3
+              className="h-4 w-4 cursor-pointer hover:scale-110 transition-transform"
+              style={{ color: "#B3B3B3" }}
+              onClick={() => router.push("/portfolio/builder")}
+            />
           </div>
 
-          {/* nested community stats */}
-          <Panel variant="module" className="mt-4 p-4 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
-            <div className="text-sm font-medium mb-2" style={{ color: "#FFFFFF" }}>
-              Community Stats
-            </div>
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between">
-                <span style={{ color: "#B3B3B3" }}>Active Members</span>
-                <span style={{ color: "#FFFFFF" }}>247</span>
-              </div>
-              <div className="flex justify-between">
-                <span style={{ color: "#B3B3B3" }}>This Month's Events</span>
-                <span style={{ color: "#FFFFFF" }}>8</span>
-              </div>
-              <div className="flex justify-between">
-                <span style={{ color: "#B3B3B3" }}>New Members</span>
-                <span style={{ color: "#FFFFFF" }}>12</span>
-              </div>
-              <div className="flex justify-between">
-                <span style={{ color: "#B3B3B3" }}>Founded</span>
-                <span style={{ color: "#FFFFFF" }}>2021</span>
-              </div>
-            </div>
-          </Panel>
-        </Panel>
-
-        <Panel variant="widget" className="p-5 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
           {loading ? (
             <div className="rounded-3xl p-5 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg animate-pulse">
               <div className="h-10 w-10 rounded-full bg-white/20"></div>
@@ -134,64 +117,75 @@ export default function EventsRightColumn() {
 
           <button
             onClick={() => router.push("/portfolio/builder")}
-            className="mt-2 w-full text-center text-xs hover:text-white transition-colors"
-            style={{ color: "#B3B3B3" }}
+            className="mt-4 w-full py-2.5 rounded-lg font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#2A2A2A" }}
           >
-            edit profile
+            <Edit3 className="h-4 w-4" />
+            Edit Profile
           </button>
 
-          <div className="mt-3 border-t border-gray-700 pt-3">
-            <button
-              onClick={() => setIsQuickActionsExpanded(!isQuickActionsExpanded)}
-              className="w-full flex items-center justify-between text-xs font-medium mb-2 hover:text-white transition-colors"
-              style={{ color: "#B3B3B3" }}
-            >
-              Quick Actions
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-300 ${isQuickActionsExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
+          <p className="mt-3 text-xs text-center" style={{ color: "#7A7A7A" }}>
+            Customize who you are and what you represent
+          </p>
+        </Panel>
 
-            <div
-              className={`transition-all duration-300 ease-out overflow-hidden ${
-                isQuickActionsExpanded ? "opacity-100" : "opacity-0"
-              }`}
-              style={{
-                maxHeight: isQuickActionsExpanded ? "200px" : "0px",
-              }}
-            >
-              <div className="grid grid-cols-2 gap-1.5">
+        <Panel variant="widget" className="p-6 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5" style={{ color: "#B3B3B3" }} />
+              <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+                AI Assistant
+              </h3>
+            </div>
+            <Sparkles className="h-4 w-4" style={{ color: "#A855F7" }} />
+          </div>
+
+          <p className="text-xs mb-4" style={{ color: "#B3B3B3" }}>
+            Get instant help with events, networking, and profile optimization
+          </p>
+
+          <button
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className="w-full py-2.5 rounded-lg font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)" }}
+          >
+            <Bot className="h-4 w-4" />
+            {isChatOpen ? "Close Chat" : "Start Chat"}
+          </button>
+
+          {isChatOpen && (
+            <div className="mt-4 rounded-lg p-4 border" style={{ backgroundColor: "#2A2A2A", borderColor: "#444" }}>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                <div className="flex gap-2">
+                  <Bot className="h-4 w-4 flex-shrink-0 mt-1" style={{ color: "#A855F7" }} />
+                  <div className="text-xs" style={{ color: "#E5E5E5" }}>
+                    <p className="mb-2">Hi! I'm your AI assistant. I can help you with:</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: "#B3B3B3" }}>
+                      <li>Finding relevant events</li>
+                      <li>Networking suggestions</li>
+                      <li>Profile improvements</li>
+                      <li>Community insights</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Ask me anything..."
+                  className="flex-1 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-1"
+                  style={{ backgroundColor: "#1F1F1F", color: "#FFFFFF", borderColor: "#444" }}
+                />
                 <button
-                  className="h-14 rounded-lg font-medium text-xs text-white transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center gap-1"
-                  style={{ backgroundColor: "#2A2A2A" }}
+                  className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:scale-105"
+                  style={{ background: "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)", color: "#FFFFFF" }}
                 >
-                  <span className="font-semibold">View</span>
-                  <span className="text-xs opacity-90">Members</span>
-                </button>
-                <button
-                  className="h-14 rounded-lg text-xs transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center gap-1"
-                  style={{ backgroundColor: "#2A2A2A", color: "#FFFFFF" }}
-                >
-                  <span className="font-semibold">Create</span>
-                  <span className="text-xs opacity-90">Event</span>
-                </button>
-                <button
-                  className="h-14 rounded-lg text-xs transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center gap-1"
-                  style={{ backgroundColor: "#2A2A2A", color: "#FFFFFF" }}
-                >
-                  <span className="font-semibold">Post</span>
-                  <span className="text-xs opacity-90">Announcement</span>
-                </button>
-                <button
-                  className="h-14 rounded-lg text-xs transition-all duration-200 hover:scale-105 flex flex-col items-center justify-center gap-1"
-                  style={{ backgroundColor: "#2A2A2A", color: "#FFFFFF" }}
-                >
-                  <span className="font-semibold">Invite</span>
-                  <span className="text-xs opacity-90">Members</span>
+                  Send
                 </button>
               </div>
             </div>
-          </div>
+          )}
         </Panel>
       </div>
     </div>

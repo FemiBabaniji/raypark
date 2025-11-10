@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
@@ -72,7 +71,7 @@ export default function EventsRightColumn() {
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
       <div className="space-y-6">
         {/* Profile editing card */}
-        <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
+        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-1 text-white">Your Profile</h3>
             <p className="text-xs text-zinc-400">Customize who you are and what you represent</p>
@@ -108,10 +107,10 @@ export default function EventsRightColumn() {
           >
             Edit Profile
           </button>
-        </Panel>
+        </div>
 
         {/* AI Assistant */}
-        <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
+        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
           </div>
@@ -153,7 +152,7 @@ export default function EventsRightColumn() {
               </div>
             </div>
           )}
-        </Panel>
+        </div>
       </div>
     </div>
   )

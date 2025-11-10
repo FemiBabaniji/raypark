@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Bot, User, Edit3, Sparkles } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
@@ -75,17 +74,9 @@ export default function EventsRightColumn() {
         {/* Profile editing card */}
         <Panel variant="widget" className="p-6 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <User className="h-5 w-5" style={{ color: "#B3B3B3" }} />
-              <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
-                Your Profile
-              </h3>
-            </div>
-            <Edit3
-              className="h-4 w-4 cursor-pointer hover:scale-110 transition-transform"
-              style={{ color: "#B3B3B3" }}
-              onClick={() => router.push("/portfolio/builder")}
-            />
+            <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+              Your Profile
+            </h3>
           </div>
 
           {loading ? (
@@ -117,27 +108,22 @@ export default function EventsRightColumn() {
 
           <button
             onClick={() => router.push("/portfolio/builder")}
-            className="mt-4 w-full py-2.5 rounded-lg font-medium text-sm text-white transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
-            style={{ backgroundColor: "#2A2A2A" }}
+            className="mt-4 w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
           >
-            <Edit3 className="h-4 w-4" />
             Edit Profile
           </button>
 
-          <p className="mt-3 text-xs text-center" style={{ color: "#7A7A7A" }}>
+          <p className="mt-3 text-xs text-center" style={{ color: "#B3B3B3" }}>
             Customize who you are and what you represent
           </p>
         </Panel>
 
         <Panel variant="widget" className="p-5 shadow-lg shadow-black/20" style={{ backgroundColor: "#1F1F1F" }}>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5" style={{ color: "#B3B3B3" }} />
-              <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
-                AI Assistant
-              </h3>
-            </div>
-            <Sparkles className="h-4 w-4" style={{ color: "#A855F7" }} />
+            <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+              AI Assistant
+            </h3>
           </div>
 
           <p className="text-xs mb-4" style={{ color: "#B3B3B3" }}>
@@ -146,27 +132,23 @@ export default function EventsRightColumn() {
 
           <button
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className="w-full py-2.5 rounded-lg font-medium text-sm text-white transition-all duration-200 hover:opacity-80 flex items-center justify-center gap-2"
-            style={{ backgroundColor: "#393939" }}
+            className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
           >
-            <Bot className="h-4 w-4" />
             {isChatOpen ? "Close Chat" : "Start Chat"}
           </button>
 
           {isChatOpen && (
-            <div className="mt-4 rounded-lg p-4" style={{ backgroundColor: "#393939" }}>
+            <div className="mt-4 rounded-lg p-4" style={{ backgroundColor: "#2A2A2A" }}>
               <div className="space-y-3 max-h-60 overflow-y-auto">
-                <div className="flex gap-2">
-                  <Bot className="h-4 w-4 flex-shrink-0 mt-1" style={{ color: "#A855F7" }} />
-                  <div className="text-xs" style={{ color: "#E5E5E5" }}>
-                    <p className="mb-2">Hi! I'm your AI assistant. I can help you with:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: "#B3B3B3" }}>
-                      <li>Finding relevant events</li>
-                      <li>Networking suggestions</li>
-                      <li>Profile improvements</li>
-                      <li>Community insights</li>
-                    </ul>
-                  </div>
+                <div className="text-xs" style={{ color: "#E5E5E5" }}>
+                  <p className="mb-2">Hi! I'm your AI assistant. I can help you with:</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: "#B3B3B3" }}>
+                    <li>Finding relevant events</li>
+                    <li>Networking suggestions</li>
+                    <li>Profile improvements</li>
+                    <li>Community insights</li>
+                  </ul>
                 </div>
               </div>
 
@@ -175,11 +157,11 @@ export default function EventsRightColumn() {
                   type="text"
                   placeholder="Ask me anything..."
                   className="flex-1 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-1"
-                  style={{ backgroundColor: "#2A2A2A", color: "#FFFFFF", border: "none" }}
+                  style={{ backgroundColor: "#1F1F1F", color: "#FFFFFF", border: "1px solid #444" }}
                 />
                 <button
                   className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                  style={{ backgroundColor: "#A855F7", color: "#FFFFFF" }}
+                  style={{ backgroundColor: "#393939", color: "#FFFFFF" }}
                 >
                   Send
                 </button>

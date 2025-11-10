@@ -48,7 +48,7 @@ export function Navigation({
             <AvatarImage src="/placeholder.svg" />
             <AvatarFallback className="bg-purple-600 text-white text-sm">P</AvatarFallback>
           </Avatar>
-          <span className="text-white font-medium text-sm">pathwai</span>
+          <img src="/bea-logo.svg" alt="BEA" className="h-8 w-auto" />
         </div>
 
         {/* Right - User Actions */}

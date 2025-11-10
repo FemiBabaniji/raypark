@@ -81,7 +81,7 @@ export function EventCard({ title, date, description, time, attending, location,
       <div className="relative flex flex-col h-full">
         <div className="mb-3">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3 className="text-lg font-bold mb-2 leading-tight text-balance text-white/85">{title}</h3>
+          <h3 className="text-2xl font-bold mb-2 leading-tight text-balance text-white">{title}</h3>
         </div>
 
         <p className="text-white/75 mb-4 leading-relaxed text-xs text-pretty flex-grow">{description}</p>

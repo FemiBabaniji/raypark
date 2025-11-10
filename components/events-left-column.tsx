@@ -204,286 +204,288 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
   const filteredHomeNetworks = filterHomeNetworksByRole()
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col items-center space-y-4">
-        <EventSearch
-          value={active === "Networks" ? networkSearchQuery : active === "Meetings" ? "" : searchQuery}
-          onChange={active === "Networks" ? setNetworkSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
-          placeholder={
-            active === "Networks"
-              ? "Search networks by name, role, or location..."
-              : active === "Meetings"
-                ? "Search meetings..."
-                : "Search workshops by name, description, or tags..."
-          }
-        />
-
-        <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
-      </div>
-
-      {active === "Home" && (
-        <>
-          <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-            <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px] flex flex-col overflow-hidden">
-                <div className="mb-4 flex items-start justify-between flex-shrink-0">
-                  <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
-                    <p className="text-zinc-400 text-sm">Discover and join community events</p>
-                  </div>
-                  <ViewToggle view={view} onViewChange={setView} />
-                </div>
-
-                <div className="mt-3 flex-shrink-0">
-                  <CategoryFilters
-                    filters={EVENT_CATEGORY_FILTERS}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
-                  />
-                </div>
-
-                <div className="flex-1 overflow-hidden mt-4 flex flex-col">
-                  {view === "grid" ? (
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                      {filteredUpcomingEvents.length > 0 ? (
-                        filteredUpcomingEvents.map((event, index) => (
-                          <EventCard
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            description={event.description}
-                            time={event.time}
-                            attending={event.attending}
-                            dateLabel={event.dateLabel}
-                            location={event.location}
-                            instructor={event.instructor}
-                            tags={event.tags}
-                            onEventClick={onEventClick}
-                          />
-                        ))
-                      ) : (
-                        <div className="w-full text-center py-12">
-                          <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex-1 overflow-hidden">
-                      <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px]">
-                <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-            <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-                <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
-
-                <div className="space-y-3">
-                  <AnnouncementCard
-                    title="New Partnership with TechCorp"
-                    content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
-                    author="Admin"
-                    timeAgo="2 hours ago"
-                    avatarColor="#8B5CF6"
-                    isImportant={true}
-                  />
-                  <AnnouncementCard
-                    title="Upcoming Hackathon Registration"
-                    content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
-                    author="Events Team"
-                    timeAgo="1 day ago"
-                    avatarColor="#10B981"
-                  />
-                  <AnnouncementCard
-                    title="New Workspace Hours"
-                    content="Starting next week, our co-working space will be open 24/7 for all premium members."
-                    author="Facilities"
-                    timeAgo="3 days ago"
-                    avatarColor="#F59E0B"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-              <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Networks</h2>
-                    <p className="text-zinc-400 text-xs">Connect with community networks</p>
-                  </div>
-                  <button
-                    onClick={() => setActive("Networks")}
-                    className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
-                  >
-                    View All
-                  </button>
-                </div>
-
-                <div className="mb-4">
-                  <CategoryFilters
-                    filters={MEMBER_ROLE_FILTERS}
-                    selectedCategory={homeSelectedNetworkRole}
-                    onCategoryChange={setHomeSelectedNetworkRole}
-                  />
-                </div>
-
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                  {filteredHomeNetworks.slice(0, 8).map((member) => (
-                    <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
-                      <UnifiedPortfolioCard
-                        portfolio={member}
-                        onClick={(id) => console.log("View network profile:", id)}
-                        onShare={(id) => console.log("Share network:", id)}
-                        onMore={(id) => console.log("More options for network:", id)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {active === "Networks" && (
-        <div className="mt-6 space-y-6">
-          <CategoryFilters
-            filters={MEMBER_ROLE_FILTERS}
-            selectedCategory={selectedNetworkRole}
-            onCategoryChange={setSelectedNetworkRole}
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-[1400px]">
+        <div className="flex flex-col items-center space-y-4">
+          <EventSearch
+            value={active === "Networks" ? networkSearchQuery : active === "Meetings" ? "" : searchQuery}
+            onChange={active === "Networks" ? setNetworkSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
+            placeholder={
+              active === "Networks"
+                ? "Search networks by name, role, or location..."
+                : active === "Meetings"
+                  ? "Search meetings..."
+                  : "Search workshops by name, description, or tags..."
+            }
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
-            {filteredNetworks.length > 0 ? (
-              filteredNetworks.map((member) => (
-                <UnifiedPortfolioCard
-                  key={member.id}
-                  portfolio={member}
-                  onClick={(id) => console.log("View network profile:", id)}
-                  onShare={(id) => console.log("Share network:", id)}
-                  onMore={(id) => console.log("More options for network:", id)}
-                />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-zinc-500">No networks found matching your criteria.</p>
-              </div>
-            )}
-          </div>
+          <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
         </div>
-      )}
 
-      {active === "Events" && (
-        <>
-          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px] flex flex-col overflow-hidden">
-            <div className="mb-5 flex items-start justify-between flex-shrink-0">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
-                <p className="text-zinc-400 text-base">Discover and join community events</p>
-              </div>
-              <ViewToggle view={view} onViewChange={setView} />
-            </div>
-
-            <div className="mt-4 flex-shrink-0">
-              <CategoryFilters
-                filters={EVENT_CATEGORY_FILTERS}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-              />
-            </div>
-
-            <div className="flex-1 overflow-hidden mt-5 flex flex-col">
-              {view === "grid" ? (
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                  {filteredUpcomingEvents.length > 0 ? (
-                    filteredUpcomingEvents.map((event, index) => (
-                      <EventCard
-                        key={index}
-                        title={event.title}
-                        date={event.date}
-                        description={event.description}
-                        time={event.time}
-                        attending={event.attending}
-                        dateLabel={event.dateLabel}
-                        location={event.location}
-                        instructor={event.instructor}
-                        tags={event.tags}
-                        onEventClick={onEventClick}
-                      />
-                    ))
-                  ) : (
-                    <div className="w-full text-center py-12">
-                      <p className="text-zinc-500">No workshops found matching your criteria.</p>
+        {active === "Home" && (
+          <>
+            <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
+              <div className="w-full xl:w-[70%] xl:flex-shrink-0">
+                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px] flex flex-col overflow-hidden">
+                  <div className="mb-4 flex items-start justify-between flex-shrink-0">
+                    <div>
+                      <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                      <p className="text-zinc-400 text-sm">Discover and join community events</p>
                     </div>
-                  )}
+                    <ViewToggle view={view} onViewChange={setView} />
+                  </div>
+
+                  <div className="mt-3 flex-shrink-0">
+                    <CategoryFilters
+                      filters={EVENT_CATEGORY_FILTERS}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                    />
+                  </div>
+
+                  <div className="flex-1 overflow-hidden mt-4 flex flex-col">
+                    {view === "grid" ? (
+                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                        {filteredUpcomingEvents.length > 0 ? (
+                          filteredUpcomingEvents.map((event, index) => (
+                            <EventCard
+                              key={index}
+                              title={event.title}
+                              date={event.date}
+                              description={event.description}
+                              time={event.time}
+                              attending={event.attending}
+                              dateLabel={event.dateLabel}
+                              location={event.location}
+                              instructor={event.instructor}
+                              tags={event.tags}
+                              onEventClick={onEventClick}
+                            />
+                          ))
+                        ) : (
+                          <div className="w-full text-center py-12">
+                            <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex-1 overflow-hidden">
+                        <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
+
+              <div className="w-full xl:w-[30%] xl:flex-shrink-0">
+                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px]">
+                  <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+              <div className="w-full lg:w-[30%] lg:flex-shrink-0">
+                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                  <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
+
+                  <div className="space-y-3">
+                    <AnnouncementCard
+                      title="New Partnership with TechCorp"
+                      content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
+                      author="Admin"
+                      timeAgo="2 hours ago"
+                      avatarColor="#8B5CF6"
+                      isImportant={true}
+                    />
+                    <AnnouncementCard
+                      title="Upcoming Hackathon Registration"
+                      content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
+                      author="Events Team"
+                      timeAgo="1 day ago"
+                      avatarColor="#10B981"
+                    />
+                    <AnnouncementCard
+                      title="New Workspace Hours"
+                      content="Starting next week, our co-working space will be open 24/7 for all premium members."
+                      author="Facilities"
+                      timeAgo="3 days ago"
+                      avatarColor="#F59E0B"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full lg:w-[70%] lg:flex-shrink-0">
+                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Networks</h2>
+                      <p className="text-zinc-400 text-xs">Connect with community networks</p>
+                    </div>
+                    <button
+                      onClick={() => setActive("Networks")}
+                      className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  <div className="mb-4">
+                    <CategoryFilters
+                      filters={MEMBER_ROLE_FILTERS}
+                      selectedCategory={homeSelectedNetworkRole}
+                      onCategoryChange={setHomeSelectedNetworkRole}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                    {filteredHomeNetworks.slice(0, 8).map((member) => (
+                      <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
+                        <UnifiedPortfolioCard
+                          portfolio={member}
+                          onClick={(id) => console.log("View network profile:", id)}
+                          onShare={(id) => console.log("Share network:", id)}
+                          onMore={(id) => console.log("More options for network:", id)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {active === "Networks" && (
+          <div className="mt-6 space-y-6">
+            <CategoryFilters
+              filters={MEMBER_ROLE_FILTERS}
+              selectedCategory={selectedNetworkRole}
+              onCategoryChange={setSelectedNetworkRole}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
+              {filteredNetworks.length > 0 ? (
+                filteredNetworks.map((member) => (
+                  <UnifiedPortfolioCard
+                    key={member.id}
+                    portfolio={member}
+                    onClick={(id) => console.log("View network profile:", id)}
+                    onShare={(id) => console.log("Share network:", id)}
+                    onMore={(id) => console.log("More options for network:", id)}
+                  />
+                ))
               ) : (
-                <div className="flex-1 overflow-hidden">
-                  <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                <div className="col-span-full text-center py-12">
+                  <p className="text-zinc-500">No networks found matching your criteria.</p>
                 </div>
               )}
             </div>
           </div>
+        )}
 
-          <section className="mt-12">
-            <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
-              Announcements
-            </h2>
+        {active === "Events" && (
+          <>
+            <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px] flex flex-col overflow-hidden">
+              <div className="mb-5 flex items-start justify-between flex-shrink-0">
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
+                  <p className="text-zinc-400 text-base">Discover and join community events</p>
+                </div>
+                <ViewToggle view={view} onViewChange={setView} />
+              </div>
 
-            <div className="space-y-4">
-              <AnnouncementCard
-                title="New Partnership with TechCorp"
-                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
-                author="Admin"
-                timeAgo="2 hours ago"
-                avatarColor="#8B5CF6"
-                isImportant={true}
-              />
-              <AnnouncementCard
-                title="Upcoming Hackathon Registration"
-                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
-                author="Events Team"
-                timeAgo="1 day ago"
-                avatarColor="#10B981"
-              />
-              <AnnouncementCard
-                title="New Workspace Hours"
-                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
-                author="Facilities"
-                timeAgo="3 days ago"
-                avatarColor="#F59E0B"
-              />
+              <div className="mt-4 flex-shrink-0">
+                <CategoryFilters
+                  filters={EVENT_CATEGORY_FILTERS}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                />
+              </div>
+
+              <div className="flex-1 overflow-hidden mt-5 flex flex-col">
+                {view === "grid" ? (
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                    {filteredUpcomingEvents.length > 0 ? (
+                      filteredUpcomingEvents.map((event, index) => (
+                        <EventCard
+                          key={index}
+                          title={event.title}
+                          date={event.date}
+                          description={event.description}
+                          time={event.time}
+                          attending={event.attending}
+                          dateLabel={event.dateLabel}
+                          location={event.location}
+                          instructor={event.instructor}
+                          tags={event.tags}
+                          onEventClick={onEventClick}
+                        />
+                      ))
+                    ) : (
+                      <div className="w-full text-center py-12">
+                        <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-hidden">
+                    <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                  </div>
+                )}
+              </div>
             </div>
-          </section>
-        </>
-      )}
 
-      {active === "Meetings" && (
-        <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px]">
-          <div className="mb-5">
-            <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
-            <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>
+            <section className="mt-12">
+              <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
+                Announcements
+              </h2>
+
+              <div className="space-y-4">
+                <AnnouncementCard
+                  title="New Partnership with TechCorp"
+                  content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
+                  author="Admin"
+                  timeAgo="2 hours ago"
+                  avatarColor="#8B5CF6"
+                  isImportant={true}
+                />
+                <AnnouncementCard
+                  title="Upcoming Hackathon Registration"
+                  content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
+                  author="Events Team"
+                  timeAgo="1 day ago"
+                  avatarColor="#10B981"
+                />
+                <AnnouncementCard
+                  title="New Workspace Hours"
+                  content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
+                  author="Facilities"
+                  timeAgo="3 days ago"
+                  avatarColor="#F59E0B"
+                />
+              </div>
+            </section>
+          </>
+        )}
+
+        {active === "Meetings" && (
+          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px]">
+            <div className="mb-5">
+              <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
+              <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>
+            </div>
+            <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
           </div>
-          <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
-        </div>
-      )}
+        )}
 
-      {active === "Projects" && (
-        <div className="mt-8 text-center py-12">
-          <p className="text-zinc-500">Projects section coming soon...</p>
-        </div>
-      )}
+        {active === "Projects" && (
+          <div className="mt-8 text-center py-12">
+            <p className="text-zinc-500">Projects section coming soon...</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

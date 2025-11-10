@@ -86,18 +86,33 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onUp
           <div className="text-white font-bold text-2xl leading-tight truncate">{portfolio.name}</div>
         </div>
 
-        <div className="relative mx-auto my-auto w-[180px] h-[180px] rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
-          {portfolio.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={portfolio.avatarUrl || "/placeholder.svg"}
-              alt={`${portfolio.name || "User"} avatar`}
-              className="w-full h-full object-cover"
+        <div className="relative mx-auto my-auto">
+          {/* Circular blur gradient that fades into background */}
+          <div className="absolute inset-0 -m-12">
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                background: `radial-gradient(circle, transparent 40%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.6) 100%)`,
+                filter: "blur(20px)",
+              }}
             />
-          ) : (
-            <span className="text-7xl font-bold text-white">{initials}</span>
-          )}
+          </div>
+
+          {/* Avatar container with subtle glow */}
+          <div className="relative w-[180px] h-[180px] rounded-full overflow-hidden bg-white/20 flex items-center justify-center ring-2 ring-white/10">
+            {portfolio.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={portfolio.avatarUrl || "/placeholder.svg"}
+                alt={`${portfolio.name || "User"} avatar`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-7xl font-bold text-white">{initials}</span>
+            )}
+          </div>
         </div>
+        {/* </CHANGE> */}
 
         <div className="mt-auto space-y-2">
           {portfolio.handle && (

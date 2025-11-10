@@ -60,16 +60,16 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
     },
   ]
 
-  const getTypeColor = (type: Meeting["type"]) => {
+  const getTypeStyles = (type: Meeting["type"]) => {
     switch (type) {
       case "1-on-1":
-        return "from-blue-900/30 to-cyan-900/30"
+        return "bg-zinc-800/40 border-zinc-700/50"
       case "team":
-        return "from-purple-900/30 to-pink-900/30"
+        return "bg-zinc-800/40 border-zinc-700/50"
       case "all-hands":
-        return "from-emerald-900/30 to-teal-900/30"
+        return "bg-zinc-800/40 border-zinc-700/50"
       default:
-        return "from-zinc-900/30 to-zinc-800/30"
+        return "bg-zinc-800/40 border-zinc-700/50"
     }
   }
 
@@ -104,7 +104,7 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
               <button
                 key={meeting.id}
                 onClick={() => onMeetingClick?.(meeting.id)}
-                className={`w-full text-left bg-gradient-to-br ${getTypeColor(meeting.type)} backdrop-blur-sm rounded-2xl p-4 transition-all hover:scale-[1.02] border border-white/5 shadow-lg shadow-black/10`}
+                className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-sm rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-800/60 border shadow-lg shadow-black/10`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">

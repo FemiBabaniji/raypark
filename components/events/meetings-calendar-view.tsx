@@ -77,17 +77,8 @@ export function MeetingsCalendarView({ meetings, onMeetingClick }: MeetingsCalen
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
   const emptyDays = Array.from({ length: firstDay }, (_, i) => i)
 
-  const getMeetingColor = (type: Meeting["type"]) => {
-    switch (type) {
-      case "1-on-1":
-        return "from-blue-500/20 to-cyan-500/20 border-blue-400/30"
-      case "team":
-        return "from-purple-500/20 to-pink-500/20 border-purple-400/30"
-      case "all-hands":
-        return "from-emerald-500/20 to-teal-500/20 border-emerald-400/30"
-      default:
-        return "from-zinc-500/20 to-zinc-600/20 border-zinc-400/30"
-    }
+  const getMeetingStyles = (type: Meeting["type"]) => {
+    return "bg-zinc-800/60 border-zinc-700/50"
   }
 
   return (
@@ -137,12 +128,12 @@ export function MeetingsCalendarView({ meetings, onMeetingClick }: MeetingsCalen
               key={day}
               className={`
                 aspect-square border rounded p-1 transition-all
-                ${isToday ? "border-blue-500/50 bg-blue-500/5" : "border-zinc-800 bg-zinc-900/30"}
+                ${isToday ? "border-zinc-600/50 bg-zinc-800/20" : "border-zinc-800 bg-zinc-900/30"}
                 ${dayMeetings.length > 0 ? "cursor-pointer hover:border-zinc-700" : ""}
               `}
             >
               <div className="h-full flex flex-col">
-                <div className={`text-[10px] font-medium mb-0.5 ${isToday ? "text-blue-400" : "text-zinc-400"}`}>
+                <div className={`text-[10px] font-medium mb-0.5 ${isToday ? "text-zinc-300" : "text-zinc-400"}`}>
                   {day}
                 </div>
                 <div className="flex-1 space-y-0.5 overflow-hidden">
@@ -151,8 +142,8 @@ export function MeetingsCalendarView({ meetings, onMeetingClick }: MeetingsCalen
                       key={meeting.id}
                       onClick={() => onMeetingClick?.(meeting.id)}
                       className={`
-                        text-[8px] p-0.5 rounded border bg-gradient-to-br
-                        ${getMeetingColor(meeting.type)}
+                        text-[8px] p-0.5 rounded border
+                        ${getMeetingStyles(meeting.type)}
                         hover:scale-105 transition-transform cursor-pointer
                       `}
                     >

@@ -63,13 +63,13 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
   const getTypeStyles = (type: Meeting["type"]) => {
     switch (type) {
       case "1-on-1":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-purple-500/70"
       case "team":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-blue-500/70"
       case "all-hands":
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-cyan-500/70"
       default:
-        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50"
+        return "bg-zinc-800/30 ring-1 ring-zinc-700/30 hover:ring-zinc-600/50 border-l-4 border-l-zinc-500/70"
     }
   }
 

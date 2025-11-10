@@ -205,9 +205,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
   return (
     <div className="w-full flex justify-center px-8 md:px-12 lg:px-16">
-      <div className="w-full max-w-[1400px]">
+      <div className="w-full max-w-[1200px]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="max-w-fit">
+          <div className="inline-block">
             <EventSearch
               value={active === "Networks" ? networkSearchQuery : active === "Meetings" ? "" : searchQuery}
               onChange={
@@ -223,7 +223,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             />
           </div>
 
-          <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
+          <div className="inline-block">
+            <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
+          </div>
         </div>
 
         {active === "Home" && (

@@ -14,6 +14,8 @@ import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
 
+const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20"
+
 const mockMembers = [
   {
     id: "oluwafemi-babaniji",
@@ -226,7 +228,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
           <>
             <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
               <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px] flex flex-col overflow-hidden">
+                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <div className="mb-4 flex items-start justify-between flex-shrink-0">
                     <div>
                       <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
@@ -278,7 +280,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
 
               <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20 min-h-[320px]">
+                <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
                   <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
               </div>
@@ -286,7 +288,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
             <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
               <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                <div className={CONTAINER_STYLES}>
                   <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
 
                   <div className="space-y-3">
@@ -317,7 +319,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
               </div>
 
               <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-                <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+                <div className={CONTAINER_STYLES}>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
                     <div>
                       <h2 className="text-xl font-bold text-white">Networks</h2>
@@ -387,7 +389,9 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
 
         {active === "Events" && (
           <>
-            <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px] flex flex-col overflow-hidden">
+            <div
+              className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px] flex flex-col overflow-hidden`}
+            >
               <div className="mb-5 flex items-start justify-between flex-shrink-0">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
@@ -438,9 +442,7 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <section className="mt-12">
-              <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
-                Announcements
-              </h2>
+              <h2 className="text-3xl font-bold mb-8 text-white">Announcements</h2>
 
               <div className="space-y-4">
                 <AnnouncementCard
@@ -471,7 +473,8 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         )}
 
         {active === "Meetings" && (
-          <div className="mt-6 bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20 min-h-[480px]">
+          /* Using consistent container styles constant with adjusted padding */
+          <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
               <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>

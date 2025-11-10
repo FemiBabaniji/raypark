@@ -72,11 +72,7 @@ export default function EventsRightColumn() {
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
       <div className="space-y-6">
         {/* Profile editing card */}
-        <Panel
-          variant="widget"
-          className="p-5 rounded-3xl shadow-lg shadow-black/20"
-          style={{ backgroundColor: "#1F1F1F" }}
-        >
+        <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-1" style={{ color: "#FFFFFF" }}>
               Your Profile
@@ -120,11 +116,7 @@ export default function EventsRightColumn() {
         </Panel>
 
         {/* AI Assistant */}
-        <Panel
-          variant="widget"
-          className="p-5 rounded-3xl shadow-lg shadow-black/20"
-          style={{ backgroundColor: "#1F1F1F" }}
-        >
+        <Panel variant="widget" className="bg-zinc-900/40 backdrop-blur-sm p-5 rounded-3xl shadow-lg shadow-black/20">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
               AI Assistant

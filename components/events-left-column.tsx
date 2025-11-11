@@ -265,218 +265,214 @@ export default function EventsLeftColumn({
 
         {active === "Home" && (
           <>
-            {selectedEvent && selectedEventData ? (
-              <div className="mt-6">
-                <div className={CONTAINER_STYLES}>
-                  <button
-                    onClick={onBackClick}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 group"
-                  >
-                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium">Back to Events</span>
-                  </button>
+            <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
+              <div className="w-full xl:w-[70%] xl:flex-shrink-0">
+                {selectedEvent && selectedEventData ? (
+                  <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
+                    <button
+                      onClick={onBackClick}
+                      className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 group"
+                    >
+                      <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                      <span className="text-sm font-medium">Back to Events</span>
+                    </button>
 
-                  <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-white mb-3">{selectedEventData.title}</h1>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400 mb-4">
-                      <span>{selectedEventData.dateLabel}</span>
-                      <span>•</span>
-                      <span>{selectedEventData.timeLabel}</span>
-                      <span>•</span>
-                      <span>{selectedEventData.location.name}</span>
-                    </div>
-                    <p className="text-zinc-300 leading-relaxed">{selectedEventData.fullDescription}</p>
-                  </div>
-
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">Attendees ({filteredAttendees.length})</h3>
-                        <p className="text-xs text-zinc-400 mt-0.5">Connect with other attendees</p>
+                    <div className="mb-6">
+                      <h1 className="text-3xl font-bold text-white mb-3">{selectedEventData.title}</h1>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400 mb-4">
+                        <span>{selectedEventData.dateLabel}</span>
+                        <span>•</span>
+                        <span>{selectedEventData.timeLabel}</span>
+                        <span>•</span>
+                        <span>{selectedEventData.location.name}</span>
                       </div>
+                      <p className="text-zinc-300 leading-relaxed">{selectedEventData.fullDescription}</p>
                     </div>
 
-                    <div className="mb-4 space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Search attendees..."
-                        value={attendeeSearchQuery}
-                        onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-                        className="w-full bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-                      />
-
-                      <div className="flex gap-2 flex-wrap">
-                        {[
-                          { id: "all", label: "All" },
-                          { id: "design", label: "Design" },
-                          { id: "engineering", label: "Engineering" },
-                          { id: "product", label: "Product" },
-                          { id: "data", label: "Data & AI" },
-                        ].map((filter) => (
-                          <button
-                            key={filter.id}
-                            onClick={() => setAttendeeFilter(filter.id)}
-                            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                              attendeeFilter === filter.id
-                                ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
-                                : "bg-zinc-800/40 text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-700/30"
-                            }`}
-                          >
-                            {filter.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                      {filteredAttendees.map((attendee) => (
-                        <div key={attendee.id} className="flex-shrink-0 w-36 sm:w-44">
-                          <UnifiedPortfolioCard
-                            portfolio={attendee}
-                            onClick={(id) => console.log("View attendee profile:", id)}
-                            onShare={(id) => console.log("Share attendee:", id)}
-                            onMore={(id) => console.log("More options for attendee:", id)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-                  <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-                    <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
-                      <div className="mb-4 flex items-start justify-between flex-shrink-0">
+                    <div className="mt-8">
+                      <div className="flex items-center justify-between mb-4">
                         <div>
-                          <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
-                          <p className="text-zinc-400 text-sm">Discover and join community events</p>
+                          <h3 className="text-lg font-semibold text-white">Attendees ({filteredAttendees.length})</h3>
+                          <p className="text-xs text-zinc-400 mt-0.5">Connect with other attendees</p>
                         </div>
-                        <ViewToggle view={view} onViewChange={setView} />
                       </div>
 
-                      <div className="mt-3 flex-shrink-0">
-                        <CategoryFilters
-                          filters={EVENT_CATEGORY_FILTERS}
-                          selectedCategory={selectedCategory}
-                          onCategoryChange={setSelectedCategory}
+                      <div className="mb-4 space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Search attendees..."
+                          value={attendeeSearchQuery}
+                          onChange={(e) => setAttendeeSearchQuery(e.target.value)}
+                          className="w-full bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600"
                         />
-                      </div>
 
-                      <div className="flex-1 overflow-hidden mt-4 flex flex-col">
-                        {view === "grid" ? (
-                          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                            {filteredUpcomingEvents.length > 0 ? (
-                              filteredUpcomingEvents.map((event, index) => (
-                                <EventCard
-                                  key={index}
-                                  title={event.title}
-                                  date={event.date}
-                                  description={event.description}
-                                  time={event.time}
-                                  attending={event.attending}
-                                  dateLabel={event.dateLabel}
-                                  location={event.location}
-                                  instructor={event.instructor}
-                                  tags={event.tags}
-                                  onEventClick={onEventClick}
-                                />
-                              ))
-                            ) : (
-                              <div className="w-full text-center py-12">
-                                <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex-1 overflow-hidden">
-                            <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                    <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
-                      <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-                  <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-                    <div className={CONTAINER_STYLES}>
-                      <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
-
-                      <div className="space-y-3">
-                        <AnnouncementCard
-                          title="New Partnership with TechCorp"
-                          content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
-                          author="Admin"
-                          timeAgo="2 hours ago"
-                          avatarColor="#8B5CF6"
-                          isImportant={true}
-                        />
-                        <AnnouncementCard
-                          title="Upcoming Hackathon Registration"
-                          content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
-                          author="Events Team"
-                          timeAgo="1 day ago"
-                          avatarColor="#10B981"
-                        />
-                        <AnnouncementCard
-                          title="New Workspace Hours"
-                          content="Starting next week, our co-working space will be open 24/7 for all premium members."
-                          author="Facilities"
-                          timeAgo="3 days ago"
-                          avatarColor="#F59E0B"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-                    <div className={CONTAINER_STYLES}>
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                        <div>
-                          <h2 className="text-xl font-bold text-white">Networks</h2>
-                          <p className="text-zinc-400 text-xs">Connect with community networks</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {[
+                            { id: "all", label: "All" },
+                            { id: "design", label: "Design" },
+                            { id: "engineering", label: "Engineering" },
+                            { id: "product", label: "Product" },
+                            { id: "data", label: "Data & AI" },
+                          ].map((filter) => (
+                            <button
+                              key={filter.id}
+                              onClick={() => setAttendeeFilter(filter.id)}
+                              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                attendeeFilter === filter.id
+                                  ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
+                                  : "bg-zinc-800/40 text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-700/30"
+                              }`}
+                            >
+                              {filter.label}
+                            </button>
+                          ))}
                         </div>
-                        <button
-                          onClick={() => setActive("Networks")}
-                          className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
-                        >
-                          View All
-                        </button>
-                      </div>
-
-                      <div className="mb-4">
-                        <CategoryFilters
-                          filters={MEMBER_ROLE_FILTERS}
-                          selectedCategory={homeSelectedNetworkRole}
-                          onCategoryChange={setHomeSelectedNetworkRole}
-                        />
                       </div>
 
                       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                        {filteredHomeNetworks.slice(0, 8).map((member) => (
-                          <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
+                        {filteredAttendees.map((attendee) => (
+                          <div key={attendee.id} className="flex-shrink-0 w-36 sm:w-44">
                             <UnifiedPortfolioCard
-                              portfolio={member}
-                              onClick={(id) => console.log("View network profile:", id)}
-                              onShare={(id) => console.log("Share network:", id)}
-                              onMore={(id) => console.log("More options for network:", id)}
+                              portfolio={attendee}
+                              onClick={(id) => console.log("View attendee profile:", id)}
+                              onShare={(id) => console.log("Share attendee:", id)}
+                              onMore={(id) => console.log("More options for attendee:", id)}
                             />
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
+                    <div className="mb-4 flex items-start justify-between flex-shrink-0">
+                      <div>
+                        <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                        <p className="text-zinc-400 text-sm">Discover and join community events</p>
+                      </div>
+                      <ViewToggle view={view} onViewChange={setView} />
+                    </div>
+
+                    <div className="mt-3 flex-shrink-0">
+                      <CategoryFilters
+                        filters={EVENT_CATEGORY_FILTERS}
+                        selectedCategory={selectedCategory}
+                        onCategoryChange={setSelectedCategory}
+                      />
+                    </div>
+
+                    <div className="flex-1 overflow-hidden mt-4 flex flex-col">
+                      {view === "grid" ? (
+                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                          {filteredUpcomingEvents.length > 0 ? (
+                            filteredUpcomingEvents.map((event, index) => (
+                              <EventCard
+                                key={index}
+                                title={event.title}
+                                date={event.date}
+                                description={event.description}
+                                time={event.time}
+                                attending={event.attending}
+                                dateLabel={event.dateLabel}
+                                location={event.location}
+                                instructor={event.instructor}
+                                tags={event.tags}
+                                onEventClick={onEventClick}
+                              />
+                            ))
+                          ) : (
+                            <div className="w-full text-center py-12">
+                              <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex-1 overflow-hidden">
+                          <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="w-full xl:w-[30%] xl:flex-shrink-0">
+                <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
+                  <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
-              </>
-            )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+              <div className="w-full lg:w-[30%] lg:flex-shrink-0">
+                <div className={CONTAINER_STYLES}>
+                  <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
+
+                  <div className="space-y-3">
+                    <AnnouncementCard
+                      title="New Partnership with TechCorp"
+                      content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
+                      author="Admin"
+                      timeAgo="2 hours ago"
+                      avatarColor="#8B5CF6"
+                      isImportant={true}
+                    />
+                    <AnnouncementCard
+                      title="Upcoming Hackathon Registration"
+                      content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
+                      author="Events Team"
+                      timeAgo="1 day ago"
+                      avatarColor="#10B981"
+                    />
+                    <AnnouncementCard
+                      title="New Workspace Hours"
+                      content="Starting next week, our co-working space will be open 24/7 for all premium members."
+                      author="Facilities"
+                      timeAgo="3 days ago"
+                      avatarColor="#F59E0B"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full lg:w-[70%] lg:flex-shrink-0">
+                <div className={CONTAINER_STYLES}>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Networks</h2>
+                      <p className="text-zinc-400 text-xs">Connect with community networks</p>
+                    </div>
+                    <button
+                      onClick={() => setActive("Networks")}
+                      className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  <div className="mb-4">
+                    <CategoryFilters
+                      filters={MEMBER_ROLE_FILTERS}
+                      selectedCategory={homeSelectedNetworkRole}
+                      onCategoryChange={setHomeSelectedNetworkRole}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                    {filteredHomeNetworks.slice(0, 8).map((member) => (
+                      <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
+                        <UnifiedPortfolioCard
+                          portfolio={member}
+                          onClick={(id) => console.log("View network profile:", id)}
+                          onShare={(id) => console.log("Share network:", id)}
+                          onMore={(id) => console.log("More options for network:", id)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </>
         )}
 

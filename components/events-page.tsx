@@ -3,7 +3,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
-import type { EventDetailData } from "@/components/event-detail"
+import EventDetail, { type EventDetailData } from "@/components/event-detail"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -214,7 +214,6 @@ export default function EventsPage() {
           avatarText: "TC",
         },
         partners: ["Google", "Microsoft", "AWS", "Meta"],
-        attendees: selectedEventData.attendees,
       }
     : null
 
@@ -229,12 +228,25 @@ export default function EventsPage() {
             }}
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
-            <EventsLeftColumn
-              onEventClick={handleEventClick}
-              selectedEvent={selectedEvent}
-              selectedEventData={mappedEventData}
-              onBackClick={handleBackClick}
-            />
+            {selectedEvent && mappedEventData ? (
+              <EventDetail
+                event={mappedEventData}
+                onBack={handleBackClick}
+                onRSVP={(eventId) => {
+                  console.log("RSVP for event:", eventId)
+                }}
+                onShare={(eventId) => {
+                  console.log("Share event:", eventId)
+                }}
+              />
+            ) : (
+              <EventsLeftColumn
+                onEventClick={handleEventClick}
+                selectedEvent={selectedEvent}
+                selectedEventData={mappedEventData}
+                onBackClick={handleBackClick}
+              />
+            )}
           </motion.div>
 
           <motion.div

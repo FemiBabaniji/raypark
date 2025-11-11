@@ -24,7 +24,7 @@ import type { ThemeIndex } from "@/lib/theme" // Declare ThemeIndex variable
 type Props = {
   isPreviewMode?: boolean
   identity: Identity
-  onIdentityChange: (identity: Identity) => void
+  onIdentityChange: (updates: Partial<Identity>) => void
   onExportData?: (data: PortfolioExportData) => void
   onSavePortfolio?: (data: any) => void
   isLive?: boolean

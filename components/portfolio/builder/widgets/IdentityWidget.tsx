@@ -26,6 +26,9 @@ export default function IdentityWidget({
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
   const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
 
+  const defaultBio = `${identity.name || "jenny wilson"} ${identity.title || "is a digital product designer"} ${identity.subtitle || "currently designing at acme."}`
+  const displayBio = identity.bio || defaultBio
+
   return (
     <div
       className={`${backgroundStyle} backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}
@@ -83,64 +86,29 @@ export default function IdentityWidget({
 
       <div className="space-y-4">
         <h1 className="text-3xl font-bold leading-tight text-white">
-          {editingField === "identity-name" ? (
-            <input
-              type="text"
-              value={identity.name || ""}
-              onChange={(e) => onChange({ name: e.target.value })}
+          {editingField === "identity-bio" ? (
+            <textarea
+              value={displayBio}
+              onChange={(e) => onChange({ bio: e.target.value })}
               onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-              className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  setEditingField?.(null)
+                }
+              }}
+              className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full resize-none leading-tight"
               autoFocus
+              rows={3}
             />
           ) : (
             <span
-              onClick={() => !isPreviewMode && setEditingField?.("identity-name")}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+              onClick={() => !isPreviewMode && setEditingField?.("identity-bio")}
+              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1 block" : ""}
             >
-              {identity.name || "jenny wilson"}
+              {displayBio}
             </span>
           )}
-          <br />
-          {editingField === "identity-title" ? (
-            <input
-              type="text"
-              value={identity.title || ""}
-              onChange={(e) => onChange({ title: e.target.value })}
-              onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-              className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
-              autoFocus
-            />
-          ) : (
-            <span
-              onClick={() => !isPreviewMode && setEditingField?.("identity-title")}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-            >
-              {identity.title || "is a digital product designer"}
-            </span>
-          )}
-          <br />
-          <span className="text-white/70">
-            {editingField === "identity-subtitle" ? (
-              <input
-                type="text"
-                value={identity.subtitle || ""}
-                onChange={(e) => onChange({ subtitle: e.target.value })}
-                onBlur={() => setEditingField?.(null)}
-                onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-                className="bg-transparent border-none outline-none text-3xl font-bold text-white/70 w-full"
-                autoFocus
-              />
-            ) : (
-              <span
-                onClick={() => !isPreviewMode && setEditingField?.("identity-subtitle")}
-                className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-              >
-                {identity.subtitle || "currently designing at acme."}
-              </span>
-            )}
-          </span>
         </h1>
 
         <div className="flex flex-wrap gap-3 pt-4">

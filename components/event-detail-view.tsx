@@ -44,7 +44,7 @@ interface EventDetailProps {
   onAttendeeClick?: (id: string) => void
 }
 
-export function EventDetailView({ event, onBack, onAttendeeClick }: EventDetailProps) {
+function EventDetailView({ event, onBack, onAttendeeClick }: EventDetailProps) {
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
   const [attendeeFilter, setAttendeeFilter] = useState("all")
 
@@ -429,3 +429,5 @@ export function EventDetailView({ event, onBack, onAttendeeClick }: EventDetailP
     </motion.div>
   )
 }
+
+export default EventDetailView

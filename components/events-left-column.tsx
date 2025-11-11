@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { EventCard, AnnouncementCard } from "@/components/cards"
+import EventDetailView from "@/components/event-detail-view"
 import {
   FilterTabs,
   EventSearch,
@@ -265,81 +265,7 @@ export default function EventsLeftColumn({
 
         {active === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
-            <div className={`${CONTAINER_STYLES} min-h-[600px]`}>
-              <button
-                onClick={onBackClick}
-                className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 group"
-              >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                <span className="text-sm font-medium">Back to Home</span>
-              </button>
-
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold text-white mb-3">{selectedEventData.title}</h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400 mb-4">
-                  <span>{selectedEventData.dateLabel}</span>
-                  <span>•</span>
-                  <span>{selectedEventData.timeLabel}</span>
-                  <span>•</span>
-                  <span>{selectedEventData.location.name}</span>
-                </div>
-                <p className="text-zinc-300 leading-relaxed">{selectedEventData.fullDescription}</p>
-              </div>
-
-              <div className="mt-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Attendees ({filteredAttendees.length})</h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">Connect with other attendees</p>
-                  </div>
-                </div>
-
-                <div className="mb-4 space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Search attendees..."
-                    value={attendeeSearchQuery}
-                    onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-                    className="w-full bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-                  />
-
-                  <div className="flex gap-2 flex-wrap">
-                    {[
-                      { id: "all", label: "All" },
-                      { id: "design", label: "Design" },
-                      { id: "engineering", label: "Engineering" },
-                      { id: "product", label: "Product" },
-                      { id: "data", label: "Data & AI" },
-                    ].map((filter) => (
-                      <button
-                        key={filter.id}
-                        onClick={() => setAttendeeFilter(filter.id)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          attendeeFilter === filter.id
-                            ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
-                            : "bg-zinc-800/40 text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-700/30"
-                        }`}
-                      >
-                        {filter.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                  {filteredAttendees.map((attendee) => (
-                    <div key={attendee.id} className="flex-shrink-0 w-36 sm:w-44">
-                      <UnifiedPortfolioCard
-                        portfolio={attendee}
-                        onClick={(id) => console.log("View attendee profile:", id)}
-                        onShare={(id) => console.log("Share attendee:", id)}
-                        onMore={(id) => console.log("More options for attendee:", id)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <EventDetailView event={selectedEventData} onBack={onBackClick || (() => {})} />
           </div>
         ) : active === "Home" ? (
           <>

@@ -4,7 +4,6 @@ import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventDetail, { type EventDetailData } from "@/components/event-detail"
-import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -176,11 +175,7 @@ export default function EventsPage() {
   }
 
   const handleBackClick = () => {
-    if (selectedEvent) {
-      setSelectedEvent(null)
-    } else {
-      window.history.back()
-    }
+    setSelectedEvent(null)
   }
 
   const selectedEventData = selectedEvent ? eventData[selectedEvent as keyof typeof eventData] : null
@@ -224,76 +219,42 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {selectedEvent && mappedEventData ? (
-        <div className="pt-6">
-          <EventDetail
-            event={mappedEventData}
-            onBack={handleBackClick}
-            onRSVP={(eventId) => {
-              console.log("RSVP for event:", eventId)
+      <main className="w-full pl-12 px-6 relative overflow-hidden">
+        <div className="flex gap-8">
+          <motion.div
+            className="w-[calc(100%-22rem)]"
+            animate={{
+              width: "calc(100% - 22rem)",
             }}
-            onShare={(eventId) => {
-              console.log("Share event:", eventId)
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            {selectedEvent && mappedEventData ? (
+              <EventDetail
+                event={mappedEventData}
+                onBack={handleBackClick}
+                onRSVP={(eventId) => {
+                  console.log("RSVP for event:", eventId)
+                }}
+                onShare={(eventId) => {
+                  console.log("Share event:", eventId)
+                }}
+              />
+            ) : (
+              <EventsLeftColumn onEventClick={handleEventClick} />
+            )}
+          </motion.div>
+
+          <motion.div
+            className="w-80 flex-shrink-0"
+            animate={{
+              x: "0%",
             }}
-          />
-
-          <div className="px-6 py-12 max-w-7xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-7 h-7 bg-cyan-600 rounded flex items-center justify-center">
-                <div className="w-4 h-4 border-2 border-white rounded-sm"></div>
-              </div>
-              <h2 className="text-3xl font-bold text-white">Event Attendees</h2>
-              <span className="text-lg text-neutral-400">({selectedEventData.attendees.length})</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {selectedEventData.attendees.map((attendee) => (
-                <UnifiedPortfolioCard
-                  key={attendee.id}
-                  portfolio={attendee}
-                  onClick={(id) => {
-                    if (id === "john-doe") {
-                      window.location.href = "/network/john-doe"
-                    } else if (id === "sarah-chen") {
-                      window.location.href = "/network/sarah-chen"
-                    } else {
-                      console.log("View attendee profile:", id)
-                    }
-                  }}
-                  onShare={(id) => console.log("Share attendee:", id)}
-                  onMore={(id) => console.log("More options for attendee:", id)}
-                />
-              ))}
-            </div>
-          </div>
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <EventsRightColumn />
+          </motion.div>
         </div>
-      ) : (
-        <main>
-          <div className="w-full pl-12 px-6 relative overflow-hidden">
-            <div className="flex gap-8">
-              <motion.div
-                className="w-[calc(100%-22rem)]"
-                animate={{
-                  width: "calc(100% - 22rem)",
-                }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <EventsLeftColumn onEventClick={handleEventClick} />
-              </motion.div>
-
-              <motion.div
-                className="w-80 flex-shrink-0"
-                animate={{
-                  x: "0%",
-                }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <EventsRightColumn />
-              </motion.div>
-            </div>
-          </div>
-        </main>
-      )}
+      </main>
     </div>
   )
 }

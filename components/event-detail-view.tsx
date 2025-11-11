@@ -76,87 +76,86 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="w-full"
     >
-      <div className="relative rounded-3xl overflow-hidden mb-4">
+      <div className="relative rounded-3xl overflow-hidden mb-6 shadow-lg shadow-black/20">
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${event.gradient} opacity-80`}
+          className={`absolute inset-0 bg-gradient-to-br ${event.gradient} backdrop-blur-xl`}
           style={{ backgroundColor: "oklch(0.145 0 0)" }}
         />
 
-        <div className="relative z-10 px-4 py-5">
+        <div className="relative z-10 px-6 py-6">
           <button
             onClick={onBack}
-            className="mb-3 flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
+            className="mb-4 flex items-center gap-2 text-white/90 hover:text-white transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </button>
 
-          <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 bg-white/20 backdrop-blur-xl rounded-full text-xs font-medium text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="px-3 py-1 bg-white/20 backdrop-blur-xl rounded-full text-sm font-medium text-white">
                   {event.type}
                 </span>
-                <span className="px-2.5 py-0.5 bg-white/20 backdrop-blur-xl rounded-full text-xs font-medium text-white flex items-center gap-1">
-                  <Users className="w-3 h-3" />
+                <span className="px-3 py-1 bg-white/20 backdrop-blur-xl rounded-full text-sm font-medium text-white flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" />
                   {event.attending} attending
                 </span>
               </div>
-              <h1 className="text-xl font-bold text-white mb-1.5">{event.title}</h1>
+              <h1 className="text-2xl font-bold text-white mb-2 leading-tight">{event.title}</h1>
               <p className="text-sm text-white/90 leading-relaxed">{event.description}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-white/10 backdrop-blur-xl rounded-lg p-2.5">
-              <div className="flex items-center gap-1 text-white/70 mb-0.5">
-                <Calendar className="w-3.5 h-3.5" />
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="bg-white/15 backdrop-blur-xl rounded-xl p-3">
+              <div className="flex items-center gap-1.5 text-white/80 mb-1">
+                <Calendar className="w-4 h-4" />
                 <span className="text-xs font-medium">Date</span>
               </div>
-              <p className="font-semibold text-white text-xs">{event.date}</p>
-              <p className="text-xs text-white/80">{event.time}</p>
+              <p className="font-semibold text-white text-sm">{event.date}</p>
+              <p className="text-xs text-white/85">{event.time}</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl rounded-lg p-2.5">
-              <div className="flex items-center gap-1 text-white/70 mb-0.5">
-                <MapPin className="w-3.5 h-3.5" />
+            <div className="bg-white/15 backdrop-blur-xl rounded-xl p-3">
+              <div className="flex items-center gap-1.5 text-white/80 mb-1">
+                <MapPin className="w-4 h-4" />
                 <span className="text-xs font-medium">Location</span>
               </div>
-              <p className="font-semibold text-white text-xs">{event.location}</p>
-              <p className="text-xs text-white/80">{event.venue || "In-Person"}</p>
+              <p className="font-semibold text-white text-sm">{event.location}</p>
+              <p className="text-xs text-white/85">{event.venue || "In-Person"}</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl rounded-lg p-2.5">
-              <div className="flex items-center gap-1 text-white/70 mb-0.5">
-                <Users className="w-3.5 h-3.5" />
+            <div className="bg-white/15 backdrop-blur-xl rounded-xl p-3">
+              <div className="flex items-center gap-1.5 text-white/80 mb-1">
+                <Users className="w-4 h-4" />
                 <span className="text-xs font-medium">Dress Code</span>
               </div>
-              <p className="font-semibold text-white text-xs">{event.dressCode || "Casual"}</p>
+              <p className="font-semibold text-white text-sm">{event.dressCode || "Casual"}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
-              className="px-4 py-1.5 rounded-lg font-semibold text-white text-sm transition-all hover:scale-105"
+              className="px-5 py-2 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105"
               style={{ backgroundColor: event.accent }}
             >
               RSVP
             </button>
-            <button className="px-3 py-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-xl text-white rounded-lg font-semibold text-sm transition-all hover:scale-105 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
+            <button className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl text-white rounded-xl font-semibold text-sm transition-all hover:scale-105 flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
               Add
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-5">
         {/* Left Column - About & Attendees */}
-        <div className="col-span-2 space-y-4">
-          {/* About This Event */}
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-            <h3 className="text-base font-bold text-white mb-2">About This Event</h3>
-            <div className="space-y-2 text-zinc-300 text-sm">
+        <div className="col-span-2 space-y-5">
+          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+            <h3 className="text-lg font-bold text-white mb-3">About This Event</h3>
+            <div className="space-y-3 text-zinc-300 text-sm">
               {event.fullDescription ? (
                 event.fullDescription.split("\n\n").map((para, i) => (
                   <p key={i} className="whitespace-pre-line leading-relaxed">
@@ -168,11 +167,11 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
               )}
 
               {event.agenda && event.agenda.length > 0 && (
-                <div className="mt-3">
-                  <h4 className="font-semibold text-white text-sm mb-1.5">Agenda:</h4>
-                  <ul className="space-y-1">
+                <div className="mt-4">
+                  <h4 className="font-semibold text-white text-sm mb-2">Agenda:</h4>
+                  <ul className="space-y-1.5">
                     {event.agenda.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs">
+                      <li key={i} className="flex items-start gap-2 text-sm">
                         <span className="text-cyan-400 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
@@ -183,27 +182,26 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
             </div>
           </div>
 
-          {/* Attendees Section */}
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-base font-bold text-white">Attendees</h2>
+          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-lg font-bold text-white">Attendees</h2>
               <span className="text-sm text-zinc-400">({filteredAttendees.length})</span>
             </div>
 
-            <div className="space-y-2 mb-3">
+            <div className="space-y-3 mb-4">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <input
                   type="text"
                   placeholder="Search attendees..."
                   value={attendeeSearchQuery}
                   onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-2.5 py-1.5 bg-zinc-800/50 rounded-lg text-white text-xs placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-colors"
+                  className="w-full pl-10 pr-3 py-2 bg-zinc-800/50 rounded-xl text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-colors"
                 />
               </div>
 
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { id: "all", label: "All" },
                   { id: "design", label: "Design" },
@@ -214,7 +212,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
                   <button
                     key={filter.id}
                     onClick={() => setAttendeeFilter(filter.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${
                       attendeeFilter === filter.id
                         ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                         : "bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/50"
@@ -226,9 +224,9 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
               </div>
             </div>
 
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
               {filteredAttendees.map((attendee) => (
-                <div key={attendee.id} className="flex-shrink-0 w-32">
+                <div key={attendee.id} className="flex-shrink-0 w-36">
                   <UnifiedPortfolioCard
                     portfolio={attendee}
                     onClick={(id) => {
@@ -244,21 +242,20 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
             </div>
 
             {filteredAttendees.length === 0 && (
-              <div className="text-center py-6">
-                <p className="text-zinc-400 text-xs">No attendees found.</p>
+              <div className="text-center py-8">
+                <p className="text-zinc-400 text-sm">No attendees found.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Right Sidebar - Host, Stats, Topics */}
-        <div className="space-y-4">
-          {/* Host Card */}
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-            <h3 className="text-sm font-bold text-white mb-3">Hosted By</h3>
+        <div className="space-y-5">
+          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+            <h3 className="text-sm font-bold text-white mb-4">Hosted By</h3>
             <div className="flex items-center gap-2 mb-3">
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${event.accent}, ${event.accent}dd)` }}
               >
                 {(event.host || "TC").substring(0, 2).toUpperCase()}
@@ -268,40 +265,38 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
                 <p className="text-xs text-zinc-400">Organizer</p>
               </div>
             </div>
-            <p className="text-xs text-zinc-300 mb-3 leading-relaxed">
+            <p className="text-xs text-zinc-300 mb-4 leading-relaxed">
               {event.hostDescription || "Leading community for tech professionals."}
             </p>
-            <button className="w-full py-1.5 bg-zinc-800/50 hover:bg-zinc-700/50 rounded-lg text-white text-xs font-medium transition-all">
+            <button className="w-full py-2 bg-zinc-800/50 hover:bg-zinc-700/50 rounded-xl text-white text-sm font-medium transition-colors">
               Follow
             </button>
           </div>
 
-          {/* Event Stats */}
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-            <h3 className="text-sm font-bold text-white mb-3">Stats</h3>
-            <div className="space-y-2.5">
+          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+            <h3 className="text-sm font-bold text-white mb-4">Stats</h3>
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Attendees</span>
-                <span className="font-bold text-white text-sm">{event.attending}</span>
+                <span className="text-sm text-zinc-400">Attendees</span>
+                <span className="font-bold text-white text-base">{event.attending}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Spots Left</span>
-                <span className="font-bold text-green-400 text-sm">27</span>
+                <span className="text-sm text-zinc-400">Spots Left</span>
+                <span className="font-bold text-green-400 text-base">27</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Format</span>
-                <span className="font-bold text-white text-sm">In-Person</span>
+                <span className="text-sm text-zinc-400">Format</span>
+                <span className="font-bold text-white text-base">In-Person</span>
               </div>
             </div>
           </div>
 
-          {/* Topics */}
           {event.tags && event.tags.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-              <h3 className="text-sm font-bold text-white mb-2">Topics</h3>
-              <div className="flex flex-wrap gap-1.5">
+            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+              <h3 className="text-sm font-bold text-white mb-3">Topics</h3>
+              <div className="flex flex-wrap gap-2">
                 {event.tags.slice(0, 6).map((tag, i) => (
-                  <span key={i} className="px-2 py-1 bg-zinc-800/50 text-zinc-300 rounded text-xs">
+                  <span key={i} className="px-3 py-1.5 bg-zinc-800/50 text-zinc-300 rounded-xl text-xs">
                     {tag}
                   </span>
                 ))}
@@ -309,13 +304,12 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
             </div>
           )}
 
-          {/* Partners */}
           {event.partners && event.partners.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-4">
-              <h3 className="text-sm font-bold text-white mb-2">Partners</h3>
-              <div className="space-y-1.5">
+            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+              <h3 className="text-sm font-bold text-white mb-3">Partners</h3>
+              <div className="space-y-2">
                 {event.partners.slice(0, 3).map((partner, i) => (
-                  <div key={i} className="px-2 py-1.5 bg-zinc-800/50 text-zinc-300 rounded text-xs">
+                  <div key={i} className="px-3 py-2 bg-zinc-800/50 text-zinc-300 rounded-xl text-xs">
                     {partner}
                   </div>
                 ))}

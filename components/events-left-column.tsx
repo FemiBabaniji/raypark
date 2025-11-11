@@ -265,7 +265,37 @@ export default function EventsLeftColumn({
 
         {active === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
-            <EventDetailView event={selectedEventData} onBack={onBackClick || (() => {})} />
+            <EventDetailView
+              event={{
+                id: selectedEventData.id,
+                title: selectedEventData.title,
+                description: selectedEventData.description,
+                fullDescription: selectedEventData.fullDescription,
+                date: selectedEventData.date,
+                time: selectedEventData.time,
+                location: selectedEventData.location?.name || "Location TBD",
+                fullAddress: selectedEventData.location?.addressLine,
+                venue: selectedEventData.location?.venue,
+                venueDetails: selectedEventData.location?.venueDetails,
+                dressCode: selectedEventData.dressCode,
+                host: selectedEventData.host?.name,
+                hostDescription: selectedEventData.host?.description,
+                agenda: selectedEventData.agenda,
+                partners: selectedEventData.partners,
+                tags: selectedEventData.tags,
+                attending: selectedEventData.attending,
+                gradient: selectedEventData.gradient || "from-sky-400/35 to-blue-600/20",
+                accent: selectedEventData.accent || "#06b6d4",
+                type: selectedEventData.type || "workshop",
+                attendees:
+                  selectedEventData.attendees ||
+                  mockMembers.slice(0, 8).map((m) => ({
+                    ...m,
+                    selectedColor: m.selectedColor as number,
+                  })),
+              }}
+              onBack={onBackClick || (() => {})}
+            />
           </div>
         ) : active === "Home" ? (
           <>

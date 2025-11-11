@@ -56,6 +56,81 @@ export default function EventDetail({
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
   const [attendeeFilter, setAttendeeFilter] = useState("all")
 
+  const mockAttendees = [
+    {
+      id: "1",
+      name: "Sarah Johnson",
+      title: "Product Designer",
+      department: "design",
+      avatar: "SJ",
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      id: "2",
+      name: "Michael Chen",
+      title: "Senior Engineer",
+      department: "engineering",
+      avatar: "MC",
+      color: "from-cyan-500 to-blue-500",
+    },
+    {
+      id: "3",
+      name: "Emily Rodriguez",
+      title: "UX Researcher",
+      department: "design",
+      avatar: "ER",
+      color: "from-violet-500 to-purple-500",
+    },
+    {
+      id: "4",
+      name: "David Kim",
+      title: "Product Manager",
+      department: "product",
+      avatar: "DK",
+      color: "from-emerald-500 to-teal-500",
+    },
+    {
+      id: "5",
+      name: "Lisa Wang",
+      title: "Data Scientist",
+      department: "data",
+      avatar: "LW",
+      color: "from-orange-500 to-red-500",
+    },
+    {
+      id: "6",
+      name: "James Wilson",
+      title: "Frontend Developer",
+      department: "engineering",
+      avatar: "JW",
+      color: "from-blue-500 to-indigo-500",
+    },
+    {
+      id: "7",
+      name: "Ana Martinez",
+      title: "AI Engineer",
+      department: "data",
+      avatar: "AM",
+      color: "from-pink-500 to-rose-500",
+    },
+    {
+      id: "8",
+      name: "Robert Taylor",
+      title: "Design Lead",
+      department: "design",
+      avatar: "RT",
+      color: "from-teal-500 to-cyan-500",
+    },
+  ]
+
+  const filteredAttendees = mockAttendees.filter((attendee) => {
+    const matchesSearch =
+      attendee.name.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+      attendee.title.toLowerCase().includes(attendeeSearchQuery.toLowerCase())
+    const matchesFilter = attendeeFilter === "all" || attendee.department === attendeeFilter
+    return matchesSearch && matchesFilter
+  })
+
   const handleShare = () => {
     if (onShare) return onShare(e.id)
     const shareData = {
@@ -160,7 +235,7 @@ export default function EventDetail({
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-6 h-6 text-cyan-400" />
               <h3 className="text-2xl font-bold text-white">Event Attendees</h3>
-              <span className="text-sm text-neutral-400">({e.attending})</span>
+              <span className="text-sm text-neutral-400">({filteredAttendees.length})</span>
             </div>
 
             <div className="space-y-4 mb-6">
@@ -200,9 +275,30 @@ export default function EventDetail({
               </div>
             </div>
 
-            <p className="text-sm text-neutral-400">
-              Browse and connect with {e.attending} attendees joining this event.
-            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {filteredAttendees.map((attendee) => (
+                <div
+                  key={attendee.id}
+                  className="bg-neutral-800/40 backdrop-blur-xl rounded-xl p-4 border border-neutral-700/50 hover:border-neutral-600/50 transition-all duration-200 hover:bg-neutral-800/60 cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${attendee.color} flex items-center justify-center text-white font-semibold shadow-lg`}
+                    >
+                      {attendee.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white truncate">{attendee.name}</h4>
+                      <p className="text-sm text-neutral-400 truncate">{attendee.title}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredAttendees.length === 0 && (
+              <p className="text-center text-neutral-500 py-8">No attendees found matching your search.</p>
+            )}
           </section>
         </div>
 

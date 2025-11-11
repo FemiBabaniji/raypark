@@ -442,9 +442,12 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
 
             <section className="mt-12">
-              <h2 className="text-3xl font-bold mb-8 text-white">Announcements</h2>
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-white mb-2">Announcements</h2>
+                <p className="text-zinc-400">Stay updated with the latest community news</p>
+              </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <AnnouncementCard
                   title="New Partnership with TechCorp"
                   content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
@@ -473,7 +476,6 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
         )}
 
         {active === "Meetings" && (
-          /* Using consistent container styles constant with adjusted padding */
           <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>

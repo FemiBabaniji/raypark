@@ -1,8 +1,9 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, MapPin, Calendar, Users, Sparkles } from "lucide-react"
+import { ChevronLeft, MapPin, Calendar, Users, Sparkles, Search } from "lucide-react"
 import clsx from "clsx"
-import { spotsRemaining, makeMapSrc, generateICS, sanitizeFilename, initials, formatLabel } from "@/utils"
+import { spotsRemaining, makeMapSrc, generateICS, sanitizeFilename, initials } from "@/utils"
+import { useState } from "react"
 
 interface Event {
   title: string
@@ -51,6 +52,9 @@ export default function EventDetail({
 }: EventDetailProps) {
   const remaining = spotsRemaining(e.attending, e.capacity)
   const mapSrc = makeMapSrc(e.location)
+
+  const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
+  const [attendeeFilter, setAttendeeFilter] = useState("all")
 
   const handleShare = () => {
     if (onShare) return onShare(e.id)
@@ -152,67 +156,54 @@ export default function EventDetail({
             </div>
           </section>
 
-          {e.location && (
-            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 space-y-6 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
-              <h3 className="text-2xl font-bold text-white">Location & Directions</h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="font-semibold text-lg text-white">{e.location.name}</p>
-                    {e.location.addressLine && <p className="text-sm text-neutral-400">{e.location.addressLine}</p>}
-                    {e.location.venue && <p className="text-sm text-neutral-400">{e.location.venue}</p>}
-                    {e.location.venueDetails && <p className="text-xs text-neutral-500">{e.location.venueDetails}</p>}
-                    {e.location.format && (
-                      <p className="text-xs text-neutral-500 capitalize">
-                        Format: {e.location.format.replace("_", " ")}
-                      </p>
-                    )}
-                  </div>
-                </div>
+          <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="w-6 h-6 text-cyan-400" />
+              <h3 className="text-2xl font-bold text-white">Event Attendees</h3>
+              <span className="text-sm text-neutral-400">({e.attending})</span>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search attendees by name, title..."
+                  value={attendeeSearchQuery}
+                  onChange={(e) => setAttendeeSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 backdrop-blur-xl border border-neutral-700/50 rounded-xl text-white placeholder:text-neutral-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                />
               </div>
-              {mapSrc && (
-                <div className="w-full h-64 rounded-2xl overflow-hidden shadow-lg bg-neutral-800/50 backdrop-blur-sm">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    frameBorder={0}
-                    scrolling="no"
-                    src={mapSrc}
-                    style={{ border: 0 }}
-                  />
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                {e.location.addressLine && (
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                      e.location.addressLine,
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 px-5 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-sm font-semibold transition-all duration-200 text-center text-white shadow-lg hover:shadow-xl hover:scale-105"
+
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "design", label: "Design" },
+                  { id: "engineering", label: "Engineering" },
+                  { id: "product", label: "Product" },
+                  { id: "data", label: "Data & AI" },
+                ].map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => setAttendeeFilter(filter.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      attendeeFilter === filter.id
+                        ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg"
+                        : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800/70 border border-neutral-700/50"
+                    }`}
                   >
-                    Get Directions
-                  </a>
-                )}
-                {(e.location.addressLine || e.location.name) && (
-                  <a
-                    href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
-                      e.location.addressLine || e.location.name,
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-sm font-medium transition-all duration-200 text-white"
-                  >
-                    Open in OSM
-                  </a>
-                )}
+                    {filter.label}
+                  </button>
+                ))}
               </div>
-            </section>
-          )}
+            </div>
+
+            <p className="text-sm text-neutral-400">
+              Browse and connect with {e.attending} attendees joining this event.
+            </p>
+          </section>
         </div>
 
         <aside className="space-y-6">
@@ -238,16 +229,67 @@ export default function EventDetail({
             </section>
           )}
 
-          <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
-            <h3 className="text-xl font-bold mb-6 text-white">Event Stats</h3>
-            <div className="space-y-5">
-              <KV label="Total Attendees" value={String(e.attending)} />
-              {typeof remaining === "number" && (
-                <KV label="Spots Remaining" value={String(remaining)} emphasis="positive" />
+          {e.location && (
+            <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 space-y-6 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">
+              <h3 className="text-xl font-bold text-white">Location</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-semibold text-base text-white">{e.location.name}</p>
+                    {e.location.addressLine && <p className="text-sm text-neutral-400">{e.location.addressLine}</p>}
+                    {e.location.venue && <p className="text-sm text-neutral-400">{e.location.venue}</p>}
+                    {e.location.venueDetails && <p className="text-xs text-neutral-500">{e.location.venueDetails}</p>}
+                    {e.location.format && (
+                      <p className="text-xs text-neutral-500 capitalize">
+                        Format: {e.location.format.replace("_", " ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {mapSrc && (
+                <div className="w-full h-48 rounded-2xl overflow-hidden shadow-lg bg-neutral-800/50 backdrop-blur-sm">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder={0}
+                    scrolling="no"
+                    src={mapSrc}
+                    style={{ border: 0 }}
+                  />
+                </div>
               )}
-              <KV label="Event Format" value={formatLabel(e.location?.format)} />
-            </div>
-          </section>
+              <div className="flex items-center gap-2">
+                {e.location.addressLine && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                      e.location.addressLine,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-xs font-semibold transition-all duration-200 text-center text-white shadow-lg hover:shadow-xl hover:scale-105"
+                  >
+                    Get Directions
+                  </a>
+                )}
+                {(e.location.addressLine || e.location.name) && (
+                  <a
+                    href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                      e.location.addressLine || e.location.name,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 bg-neutral-800/50 hover:bg-neutral-800/70 rounded-xl text-xs font-medium transition-all duration-200 text-white"
+                  >
+                    OSM
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
 
           {!!e.tags?.length && (
             <section className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 shadow-xl shadow-black/5 transition-all duration-300 hover:shadow-2xl">

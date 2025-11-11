@@ -240,7 +240,12 @@ export default function EventsPage() {
                 }}
               />
             ) : (
-              <EventsLeftColumn onEventClick={handleEventClick} />
+              <EventsLeftColumn
+                onEventClick={handleEventClick}
+                selectedEvent={selectedEvent}
+                selectedEventData={mappedEventData}
+                onBackClick={handleBackClick}
+              />
             )}
           </motion.div>
 

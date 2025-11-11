@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { EventCard } from "@/components/cards"
+import EventDetail from "@/components/event-detail"
 import {
   FilterTabs,
   EventSearch,
@@ -266,101 +266,36 @@ export default function EventsLeftColumn({
         {active === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
             <div className={CONTAINER_STYLES}>
-              <button
-                onClick={onBackClick}
-                className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 group"
-              >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                <span className="text-sm font-medium">Back to Events</span>
-              </button>
-
-              <div className="space-y-6">
-                {/* Event Hero */}
-                <div>
-                  <h1 className="text-3xl font-bold text-white mb-3">{selectedEventData.title}</h1>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400 mb-4">
-                    <span>{selectedEventData.dateLabel}</span>
-                    <span>•</span>
-                    <span>{selectedEventData.timeLabel}</span>
-                    <span>•</span>
-                    <span>{selectedEventData.location.name}</span>
-                  </div>
-                  <p className="text-zinc-300 leading-relaxed">{selectedEventData.fullDescription}</p>
-                </div>
-
-                {/* Location */}
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">Location</h3>
-                  <div className="bg-zinc-800/30 rounded-xl p-4 space-y-2">
-                    <p className="text-white font-medium">{selectedEventData.location.name}</p>
-                    {selectedEventData.location.addressLine && (
-                      <p className="text-sm text-zinc-400">{selectedEventData.location.addressLine}</p>
-                    )}
-                    {selectedEventData.location.venueDetails && (
-                      <p className="text-sm text-zinc-400">{selectedEventData.location.venueDetails}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Attendees */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">Attendees ({filteredAttendees.length})</h3>
-                      <p className="text-xs text-zinc-400 mt-0.5">Connect with other attendees</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-4 space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Search attendees..."
-                      value={attendeeSearchQuery}
-                      onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-                      className="w-full bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600"
-                    />
-
-                    <div className="flex gap-2 flex-wrap">
-                      {[
-                        { id: "all", label: "All" },
-                        { id: "design", label: "Design" },
-                        { id: "engineering", label: "Engineering" },
-                        { id: "product", label: "Product" },
-                        { id: "data", label: "Data & AI" },
-                      ].map((filter) => (
-                        <button
-                          key={filter.id}
-                          onClick={() => setAttendeeFilter(filter.id)}
-                          className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                            attendeeFilter === filter.id
-                              ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
-                              : "bg-zinc-800/40 text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-700/30"
-                          }`}
-                        >
-                          {filter.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                    {filteredAttendees.map((attendee) => (
-                      <div key={attendee.id} className="flex-shrink-0 w-36 sm:w-44">
-                        <UnifiedPortfolioCard
-                          portfolio={attendee}
-                          onClick={(id) => console.log("View attendee profile:", id)}
-                          onShare={(id) => console.log("Share attendee:", id)}
-                          onMore={(id) => console.log("More options for attendee:", id)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Use imported EventDetail component with its existing beautiful design */}
+              <EventDetail
+                event={{
+                  id: selectedEventData.id,
+                  title: selectedEventData.title,
+                  date: selectedEventData.dateLabel,
+                  time: selectedEventData.timeLabel,
+                  location: selectedEventData.location,
+                  description: selectedEventData.fullDescription,
+                  attending: selectedEventData.attending,
+                  capacity: selectedEventData.capacity,
+                  gradient: selectedEventData.gradient,
+                  host: selectedEventData.host,
+                  tags: selectedEventData.tags,
+                  partners: selectedEventData.partners,
+                }}
+                onBack={onBackClick}
+                onRSVP={() => console.log("RSVP clicked")}
+                onAddToCalendar={() => console.log("Add to calendar clicked")}
+                onShare={(id) => console.log("Share event:", id)}
+                calendarTimes={{
+                  start: selectedEventData.timeLabel.split(" - ")[0],
+                  end: selectedEventData.timeLabel.split(" - ")[1] || selectedEventData.timeLabel,
+                }}
+              />
             </div>
           </div>
         ) : active === "Home" ? (
           <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
+            {/* Events widget - left 70% */}
             <div className="w-full xl:w-[70%] xl:flex-shrink-0">
               <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                 <div className="mb-4 flex items-start justify-between flex-shrink-0">
@@ -413,6 +348,7 @@ export default function EventsLeftColumn({
               </div>
             </div>
 
+            {/* Meetings widget - right 30% */}
             <div className="w-full xl:w-[30%] xl:flex-shrink-0">
               <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
                 <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
@@ -420,6 +356,47 @@ export default function EventsLeftColumn({
             </div>
           </div>
         ) : null}
+
+        {active === "Home" && !selectedEvent && (
+          <div className="mt-6 space-y-6">
+            {/* Announcements widget */}
+            <div className={CONTAINER_STYLES}>
+              <h2 className="text-xl font-bold text-white mb-4">Announcements</h2>
+              <div className="space-y-3">
+                <div className="bg-zinc-800/30 rounded-xl p-4">
+                  <p className="text-sm text-zinc-400">New AI workshop series starting next month</p>
+                </div>
+                <div className="bg-zinc-800/30 rounded-xl p-4">
+                  <p className="text-sm text-zinc-400">Community meetup this Friday at 6 PM</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Networks widget */}
+            <div className={CONTAINER_STYLES}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">Network</h2>
+                <CategoryFilters
+                  filters={MEMBER_ROLE_FILTERS}
+                  selectedCategory={homeSelectedNetworkRole}
+                  onCategoryChange={setHomeSelectedNetworkRole}
+                />
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                {filteredHomeNetworks.map((member) => (
+                  <div key={member.id} className="flex-shrink-0 w-40">
+                    <UnifiedPortfolioCard
+                      portfolio={member}
+                      onClick={(id) => console.log("View profile:", id)}
+                      onShare={(id) => console.log("Share:", id)}
+                      onMore={(id) => console.log("More:", id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {active === "Networks" && (
           <div className="mt-6 space-y-6">

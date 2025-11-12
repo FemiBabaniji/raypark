@@ -72,6 +72,11 @@ export default function PortfolioBuilderPage() {
           ...next,
         }
         localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
+
+        // Dispatch event to notify other components
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("portfolio-updated"))
+        }
       } catch (error) {
         console.error("Failed to save portfolio data:", error)
       }
@@ -90,6 +95,11 @@ export default function PortfolioBuilderPage() {
           isLive: newIsLive,
         }
         localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
+
+        // Dispatch event to notify other components
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("portfolio-updated"))
+        }
       } catch (error) {
         console.error("Failed to save live status:", error)
       }

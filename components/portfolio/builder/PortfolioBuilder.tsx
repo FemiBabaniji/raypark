@@ -182,7 +182,7 @@ export default function PortfolioBuilder({
         console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
 
-        // Save portfolio metadata and identity
+        // Save portfolio metadata and identity to database
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -192,15 +192,44 @@ export default function PortfolioBuilder({
 
         await saveWidgetLayout(id, leftWidgets, rightWidgets, widgetContent)
 
-        console.log("[v0] Portfolio auto-saved successfully")
-
         if (typeof window !== "undefined") {
+          const savedData = localStorage.getItem("bea_portfolio_data")
+          if (savedData) {
+            try {
+              const parsed = JSON.parse(savedData)
+              const updated = {
+                ...parsed,
+                name: identity.name,
+                title: identity.title,
+                email: identity.email,
+                location: identity.location,
+                handle: identity.handle,
+                avatarUrl: identity.avatar,
+                bio: identity.bio,
+                linkedin: identity.linkedin,
+                dribbble: identity.dribbble,
+                behance: identity.behance,
+                twitter: identity.twitter,
+                unsplash: identity.unsplash,
+                instagram: identity.instagram,
+                isLive: state.is_public,
+              }
+              localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
+              console.log("[v0] Synced to localStorage")
+            } catch (error) {
+              console.error("[v0] Failed to sync localStorage:", error)
+            }
+          }
+
+          // Dispatch event to notify BEA events page
           window.dispatchEvent(new Event("portfolio-updated"))
         }
+
+        console.log("[v0] Portfolio auto-saved successfully")
       } catch (error) {
         console.error("[v0] Auto-save failed:", error)
       }
-    }, 800) // 800ms debounce
+    }, 800)
 
     setSaveTimeout(timeout)
   }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent]) // Added widget dependencies

@@ -73,8 +73,8 @@ export async function createPortfolioOnce(params: {
   const { error: layoutErr } = await supabase.from("page_layouts").insert({
     page_id: page?.id,
     layout: {
-      left: [],
-      right: [],
+      left: { type: "vertical", widgets: [] },
+      right: { type: "vertical", widgets: [] },
     },
   })
   if (layoutErr) console.warn("[seed] layout create failed:", layoutErr?.message)
@@ -546,7 +546,7 @@ export async function saveWidgetLayout(
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
-    .maybeSingle() // Use maybeSingle() instead of single() to handle 0 rows gracefully
+    .maybeSingle()
 
   if (pageError) {
     console.error("[v0] Error fetching page:", pageError)
@@ -554,7 +554,6 @@ export async function saveWidgetLayout(
   }
 
   if (!existingPage) {
-    // Page doesn't exist, create it
     console.log("[v0] Page doesn't exist, creating new page...")
     const { data: newPage, error: createError } = await supabase
       .from("pages")
@@ -581,8 +580,8 @@ export async function saveWidgetLayout(
   }
 
   const layout = {
-    left: leftWidgets.map((w) => w.id),
-    right: rightWidgets.map((w) => w.id),
+    left: { type: "vertical", widgets: leftWidgets.map((w) => w.type) },
+    right: { type: "vertical", widgets: rightWidgets.map((w) => w.type) },
   }
 
   console.log("[v0] Saving layout:", layout)

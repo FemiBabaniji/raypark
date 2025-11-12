@@ -40,6 +40,16 @@ export default function EducationWidget({
   setEditingField,
 }: Props) {
   const [isHovering, setIsHovering] = useState<number | null>(null)
+  const [widgetColor, setWidgetColor] = useState("bg-zinc-900/40")
+  const [showColorPicker, setShowColorPicker] = useState(false)
+
+  const colorOptions = [
+    { name: "Default", value: "bg-zinc-900/40" },
+    { name: "Blue", value: "bg-gradient-to-br from-blue-900/40 to-cyan-900/40" },
+    { name: "Purple", value: "bg-gradient-to-br from-purple-900/40 to-pink-900/40" },
+    { name: "Green", value: "bg-gradient-to-br from-green-900/40 to-emerald-900/40" },
+    { name: "Orange", value: "bg-gradient-to-br from-orange-900/40 to-red-900/40" },
+  ]
 
   const addEducationItem = () => {
     const newItem: EducationItem = {
@@ -64,7 +74,9 @@ export default function EducationWidget({
   }
 
   return (
-    <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
+    <div
+      className={`${widgetColor} backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing relative`}
+    >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white">
           {editingField === `${widgetId}-title` ? (
@@ -80,7 +92,7 @@ export default function EducationWidget({
                 }
                 if (e.key === "Escape") setEditingField(null)
               }}
-              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-xl font-bold text-white px-2 py-1 transition-all duration-200"
+              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-xl font-bold text-white px-2 py-1 h-9 transition-all duration-200"
               autoFocus
             />
           ) : (
@@ -98,6 +110,33 @@ export default function EducationWidget({
         </h2>
         {!isPreviewMode && (
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 hover:bg-white/20 text-white p-2"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+              >
+                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500" />
+              </Button>
+              {showColorPicker && (
+                <div className="absolute top-full right-0 mt-2 bg-zinc-900 border border-white/20 rounded-lg p-2 z-50 min-w-[150px]">
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => {
+                        setWidgetColor(color.value)
+                        setShowColorPicker(false)
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-white/10 rounded text-white text-sm flex items-center gap-2"
+                    >
+                      <div className={`w-4 h-4 rounded ${color.value}`} />
+                      {color.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button
               size="sm"
               variant="ghost"
@@ -136,13 +175,13 @@ export default function EducationWidget({
                       }
                       if (e.key === "Escape") setEditingField(null)
                     }}
-                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white font-semibold px-2 py-1 w-full transition-all duration-200"
+                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white font-semibold px-2 py-1 w-full h-8 transition-all duration-200"
                     autoFocus
                   />
                 ) : (
                   <h3
                     onClick={() => !isPreviewMode && setEditingField(`${widgetId}-degree-${idx}`)}
-                    className={`font-semibold text-white ${
+                    className={`font-semibold text-white min-h-[24px] ${
                       !isPreviewMode && isHovering === idx
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
@@ -165,13 +204,13 @@ export default function EducationWidget({
                       }
                       if (e.key === "Escape") setEditingField(null)
                     }}
-                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-sm px-2 py-1 w-full transition-all duration-200"
+                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-sm px-2 py-1 w-full h-7 transition-all duration-200"
                     autoFocus
                   />
                 ) : (
                   <p
                     onClick={() => !isPreviewMode && setEditingField(`${widgetId}-school-${idx}`)}
-                    className={`text-neutral-300 text-sm ${
+                    className={`text-neutral-300 text-sm min-h-[20px] ${
                       !isPreviewMode && isHovering === idx
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
@@ -194,13 +233,13 @@ export default function EducationWidget({
                       }
                       if (e.key === "Escape") setEditingField(null)
                     }}
-                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-xs px-2 py-1 w-full transition-all duration-200"
+                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-xs px-2 py-1 w-full h-6 transition-all duration-200"
                     autoFocus
                   />
                 ) : (
                   <p
                     onClick={() => !isPreviewMode && setEditingField(`${widgetId}-year-${idx}`)}
-                    className={`text-neutral-400 text-xs ${
+                    className={`text-neutral-400 text-xs min-h-[18px] ${
                       !isPreviewMode && isHovering === idx
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""

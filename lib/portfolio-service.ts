@@ -9,6 +9,7 @@ export interface PortfolioData {
   is_public: boolean
   is_demo: boolean
   theme_id?: string
+  community_id?: string // Optional community association
   created_at?: string
   updated_at?: string
 }
@@ -28,9 +29,9 @@ export async function createPortfolioOnce(params: {
   name: string
   theme_id: string
   description?: string
+  community_id?: string // Optional community association
 }) {
   const supabase = createClient()
-  // slug is decided ONCE at creation; do not recompute on edits
   const slug = toSlug(params.name)
 
   const { data, error } = await supabase
@@ -43,16 +44,15 @@ export async function createPortfolioOnce(params: {
       theme_id: params.theme_id,
       is_public: false,
       is_demo: false,
+      community_id: params.community_id, // Store community association
     })
-    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .select("id, name, slug, description, theme_id, is_public, is_demo, community_id, created_at, updated_at")
     .single()
 
   if (error) {
-    // if slug is globally unique and already taken, you may see 23505; handle if needed
     throw new Error(`Failed to create portfolio: ${error.message}`)
   }
 
-  // Optional: seed a main page + layout for the editor to bind to
   const { data: page, error: pageErr } = await supabase
     .from("pages")
     .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
@@ -75,6 +75,7 @@ export async function updatePortfolioById(
     description?: string
     theme_id?: string
     is_public?: boolean
+    community_id?: string // Optional community association update
     // intentionally no slug here — slug changes should be explicit via a separate function/flow
   },
 ) {
@@ -85,7 +86,7 @@ export async function updatePortfolioById(
     .from("portfolios")
     .update(patch)
     .eq("id", portfolioId)
-    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .select("id, name, slug, description, theme_id, is_public, is_demo, community_id, created_at, updated_at")
     .single()
 
   if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
@@ -98,7 +99,7 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
 
   const { data, error } = await supabase
     .from("portfolios")
-    .select("id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at")
+    .select("id, user_id, name, slug, is_public, is_demo, theme_id, community_id, created_at, updated_at")
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
 
@@ -139,6 +140,7 @@ async function insertPortfolioWithRetry(
     is_public?: boolean
     is_demo?: boolean
     id?: string
+    community_id?: string // Optional community association in payload
   },
 ) {
   // try base, then slug-<n>, then slug-<random>
@@ -224,6 +226,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     slug: baseSlug,
     is_public: portfolio.isLive || false,
     is_demo: false,
+    community_id: portfolio.community_id, // Store community association
   }
 
   let savedPortfolio
@@ -447,6 +450,54 @@ export async function removeWidgetFromPage(instanceId: string): Promise<void> {
     console.error("Error removing widget:", error)
     throw new Error(`Failed to remove widget: ${error.message}`)
   }
+}
+
+export async function getCommunityByCode(code: string) {
+  const supabase = createClient()
+
+  const { data, error } = await supabase.from("communities").select("*").eq("code", code).single()
+
+  if (error) {
+    console.error("Error fetching community:", error)
+    return null
+  }
+
+  return data
+}
+
+export async function joinCommunity(communityCode: string, userId: string, metadata?: Record<string, any>) {
+  const supabase = createClient()
+
+  const { data, error } = await supabase.rpc("join_community", {
+    p_community_code: communityCode,
+    p_user_id: userId,
+    p_metadata: metadata || {},
+  })
+
+  if (error) {
+    console.error("Error joining community:", error)
+    throw new Error(`Failed to join community: ${error.message}`)
+  }
+
+  return data
+}
+
+export async function getCommunityPortfolios(communityId: string) {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from("community_portfolios")
+    .select("*")
+    .eq("community_id", communityId)
+    .eq("is_public", true)
+    .order("updated_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching community portfolios:", error)
+    throw new Error(`Failed to fetch community portfolios: ${error.message}`)
+  }
+
+  return data
 }
 
 const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

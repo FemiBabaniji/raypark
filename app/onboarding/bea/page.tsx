@@ -12,6 +12,7 @@ import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
 import type { Identity } from "@/components/portfolio/builder/types"
+import { getCommunityByCode, joinCommunity, createPortfolioOnce } from "@/lib/portfolio-service"
 
 interface OnboardingData {
   name: string
@@ -103,11 +104,27 @@ export default function BEAOnboardingPage() {
     selectedColor: 1,
   })
   const [avatarPreview, setAvatarPreview] = useState<string>("")
+  const [communityId, setCommunityId] = useState<string | null>(null)
+  const [portfolioId, setPortfolioId] = useState<string | null>(null)
 
   const { user, loading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const communityCode = searchParams.get("code") || "bea-founders-connect"
+
+  useEffect(() => {
+    async function fetchCommunity() {
+      try {
+        const community = await getCommunityByCode(communityCode)
+        if (community) {
+          setCommunityId(community.id)
+        }
+      } catch (error) {
+        console.error("Error fetching community:", error)
+      }
+    }
+    fetchCommunity()
+  }, [communityCode])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -205,7 +222,26 @@ export default function BEAOnboardingPage() {
   const handleCompleteOnboarding = useCallback(async () => {
     if (!user) return
     try {
+      const portfolio = await createPortfolioOnce({
+        userId: user.id,
+        name: `${onboardingData.name}'s Portfolio`,
+        theme_id: "default-theme-id", // Use actual theme ID from your system
+        description: `Portfolio for ${onboardingData.name} - ${onboardingData.role}`,
+        community_id: communityId || undefined,
+      })
+
+      setPortfolioId(portfolio.id)
+
+      if (communityId) {
+        await joinCommunity(communityCode, user.id, {
+          industry: onboardingData.industry,
+          skills: onboardingData.skills,
+          goals: onboardingData.goals,
+        })
+      }
+
       const portfolioData = {
+        id: portfolio.id,
         name: onboardingData.name,
         title: onboardingData.role,
         email: onboardingData.email,
@@ -220,25 +256,17 @@ export default function BEAOnboardingPage() {
         avatarUrl: avatarPreview,
         selectedColor: onboardingData.selectedColor,
         isLive: true,
+        community_id: communityId,
       }
       localStorage.setItem("bea_portfolio_data", JSON.stringify(portfolioData))
 
-      const response = await fetch("/api/community-profiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...onboardingData,
-          communityCode,
-          userId: user.id,
-        }),
-      })
-      if (!response.ok) throw new Error("Failed to create profile")
       setStage("portfolio-builder")
     } catch (err) {
-      console.error(err)
+      console.error("Error completing onboarding:", err)
+      // Still proceed to builder on error
       setStage("portfolio-builder")
     }
-  }, [user, onboardingData, communityCode, avatarPreview])
+  }, [user, onboardingData, communityCode, avatarPreview, communityId])
 
   const onIdentityChange = useCallback((updatedIdentity: Partial<Identity>) => {
     setOnboardingData((prev) => ({
@@ -338,6 +366,7 @@ export default function BEAOnboardingPage() {
               type="button"
               onClick={() => {
                 const portfolioData = {
+                  id: portfolioId,
                   name: onboardingData.name,
                   title: onboardingData.role,
                   email: onboardingData.email,
@@ -352,6 +381,7 @@ export default function BEAOnboardingPage() {
                   avatarUrl: avatarPreview,
                   selectedColor: onboardingData.selectedColor,
                   isLive: true,
+                  community_id: communityId,
                 }
                 localStorage.setItem("bea_portfolio_data", JSON.stringify(portfolioData))
                 router.push("/bea")

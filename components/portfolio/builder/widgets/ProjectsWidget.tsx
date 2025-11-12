@@ -52,7 +52,17 @@ export default function ProjectsWidget({
   const [open, setOpen] = useState(false)
   const [isHovering, setIsHovering] = useState<number | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
+  const [widgetColor, setWidgetColor] = useState("bg-zinc-900/40")
+  const [showColorPicker, setShowColorPicker] = useState(false)
   const layoutId = `widget-${widgetId}`
+
+  const colorOptions = [
+    { name: "Default", value: "bg-zinc-900/40" },
+    { name: "Blue", value: "bg-gradient-to-br from-blue-900/40 to-cyan-900/40" },
+    { name: "Purple", value: "bg-gradient-to-br from-purple-900/40 to-pink-900/40" },
+    { name: "Green", value: "bg-gradient-to-br from-green-900/40 to-emerald-900/40" },
+    { name: "Orange", value: "bg-gradient-to-br from-orange-900/40 to-red-900/40" },
+  ]
 
   const addProject = () => {
     const newProject: ProjectItem = {
@@ -93,9 +103,8 @@ export default function ProjectsWidget({
     <>
       <motion.div
         layoutId={layoutId}
-        className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-8 group relative"
+        className={`${widgetColor} backdrop-blur-xl rounded-3xl p-8 group relative`}
         onClick={(e) => {
-          // Only open if not clicking on input or button
           if (!(e.target as HTMLElement).closest("input, button, textarea")) {
             setOpen(true)
           }
@@ -120,7 +129,7 @@ export default function ProjectsWidget({
                   if (e.key === "Escape") setEditingField(null)
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg outline-none focus:ring-2 focus:ring-white/30 text-xl font-bold text-white px-2 py-1 transition-all duration-200"
+                className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg outline-none focus:ring-2 focus:ring-white/30 text-xl font-bold text-white px-2 py-1 h-9 transition-all duration-200"
                 autoFocus
               />
             ) : (
@@ -141,6 +150,37 @@ export default function ProjectsWidget({
           </div>
           {!isPreviewMode && (
             <div className="flex items-center gap-2">
+              <div className="relative">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 hover:bg-white/20 text-white p-2"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowColorPicker(!showColorPicker)
+                  }}
+                >
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500" />
+                </Button>
+                {showColorPicker && (
+                  <div className="absolute top-full right-0 mt-2 bg-zinc-900 border border-white/20 rounded-lg p-2 z-50 min-w-[150px]">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color.name}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setWidgetColor(color.value)
+                          setShowColorPicker(false)
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-white/10 rounded text-white text-sm flex items-center gap-2"
+                      >
+                        <div className={`w-4 h-4 rounded ${color.value}`} />
+                        {color.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Button
                 size="sm"
                 variant="ghost"
@@ -163,13 +203,12 @@ export default function ProjectsWidget({
           {content.items.map((project, idx) => (
             <div
               key={idx}
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 space-y-3 transition-all duration-200 hover:bg-white/10 relative group/project"
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 space-y-3 transition-all duration-200 hover:bg-white/10 relative group/project min-h-[180px]"
               onMouseEnter={() => setIsHovering(idx)}
               onMouseLeave={() => setIsHovering(null)}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
-                {/* Project name */}
                 {editingField === `name-${idx}` ? (
                   <input
                     type="text"
@@ -183,13 +222,13 @@ export default function ProjectsWidget({
                       }
                       if (e.key === "Escape") setEditingField(null)
                     }}
-                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-sm font-medium px-2 py-1 flex-1 transition-all duration-200"
+                    className="bg-white/10 border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 text-white text-sm font-medium px-2 py-1 flex-1 h-8 transition-all duration-200"
                     autoFocus
                   />
                 ) : (
                   <span
                     onClick={() => !isPreviewMode && setEditingField(`name-${idx}`)}
-                    className={`text-sm font-medium text-white ${
+                    className={`text-sm font-medium text-white min-h-[24px] block ${
                       !isPreviewMode && isHovering === idx
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
@@ -214,7 +253,6 @@ export default function ProjectsWidget({
                 </div>
               </div>
 
-              {/* Project description */}
               {editingField === `description-${idx}` ? (
                 <textarea
                   value={project.description}
@@ -244,7 +282,6 @@ export default function ProjectsWidget({
                 </p>
               )}
 
-              {/* Tags */}
               <div className="flex flex-wrap gap-1">
                 {project.tags.map((tag, tagIdx) => (
                   <span key={tagIdx} className="text-xs bg-white/10 px-2 py-1 rounded text-white group/tag relative">
@@ -269,7 +306,6 @@ export default function ProjectsWidget({
                 )}
               </div>
 
-              {/* Year */}
               {editingField === `year-${idx}` ? (
                 <input
                   type="text"

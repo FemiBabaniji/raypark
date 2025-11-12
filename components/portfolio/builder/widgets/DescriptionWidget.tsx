@@ -39,13 +39,13 @@ export default function DescriptionWidget({
   const textareaRefDesc = useRef<HTMLTextAreaElement>(null)
   const textareaRefSubdesc = useRef<HTMLTextAreaElement>(null)
 
-  const demoContent = {
-    title: "About me",
-    description:
-      "I'm a passionate digital designer with over 8 years of experience creating user-centered designs that solve real problems. I specialize in UI/UX design, product strategy, and design systems.",
-    subdescription:
-      "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools and techniques.",
-  }
+  const title = content.title || "About me"
+  const description =
+    content.description ||
+    "I'm a passionate digital designer with over 8 years of experience creating user-centered designs that solve real problems."
+  const subdescription =
+    content.subdescription ||
+    "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools."
 
   useEffect(() => {
     if (textareaRefDesc.current && editingField === `${widgetId}-description`) {
@@ -56,7 +56,7 @@ export default function DescriptionWidget({
       textareaRefSubdesc.current.style.height = "auto"
       textareaRefSubdesc.current.style.height = `${textareaRefSubdesc.current.scrollHeight}px`
     }
-  }, [demoContent.description, demoContent.subdescription, editingField, widgetId])
+  }, [description, subdescription, editingField, widgetId])
 
   return (
     <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
@@ -88,7 +88,7 @@ export default function DescriptionWidget({
           {editingField === `${widgetId}-title` ? (
             <input
               type="text"
-              value={demoContent.title}
+              value={title}
               onChange={(e) => onContentChange({ ...content, title: e.target.value })}
               onBlur={() => setEditingField(null)}
               onKeyDown={(e) => {
@@ -112,7 +112,7 @@ export default function DescriptionWidget({
                   : ""
               }`}
             >
-              {demoContent.title}
+              {title}
             </h3>
           )}
         </div>
@@ -126,7 +126,7 @@ export default function DescriptionWidget({
             {editingField === `${widgetId}-description` ? (
               <textarea
                 ref={textareaRefDesc}
-                value={demoContent.description}
+                value={description}
                 onChange={(e) => {
                   onContentChange({ ...content, description: e.target.value })
                   e.target.style.height = "auto"
@@ -159,7 +159,7 @@ export default function DescriptionWidget({
                     : ""
                 }`}
               >
-                {demoContent.description}
+                {description}
               </span>
             )}
           </div>{" "}
@@ -171,7 +171,7 @@ export default function DescriptionWidget({
             {editingField === `${widgetId}-subdescription` ? (
               <textarea
                 ref={textareaRefSubdesc}
-                value={demoContent.subdescription}
+                value={subdescription}
                 onChange={(e) => {
                   onContentChange({ ...content, subdescription: e.target.value })
                   e.target.style.height = "auto"
@@ -204,7 +204,7 @@ export default function DescriptionWidget({
                     : ""
                 }`}
               >
-                {demoContent.subdescription}
+                {subdescription}
               </span>
             )}
           </div>

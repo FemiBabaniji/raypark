@@ -536,20 +536,45 @@ export async function saveWidgetLayout(
   console.log("[v0] Right widgets:", rightWidgets)
   console.log("[v0] Widget content:", widgetContent)
 
-  // Get the main page for this portfolio
-  const { data: page, error: pageError } = await supabase
+  let page
+  const { data: existingPage, error: pageError } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
-    .single()
+    .maybeSingle() // Use maybeSingle() instead of single() to handle 0 rows gracefully
 
-  if (pageError || !page) {
+  if (pageError) {
     console.error("[v0] Error fetching page:", pageError)
-    throw new Error(`Failed to fetch page: ${pageError?.message}`)
+    throw new Error(`Failed to fetch page: ${pageError.message}`)
   }
 
-  console.log("[v0] Found page:", page.id)
+  if (!existingPage) {
+    // Page doesn't exist, create it
+    console.log("[v0] Page doesn't exist, creating new page...")
+    const { data: newPage, error: createError } = await supabase
+      .from("pages")
+      .insert({
+        portfolio_id: portfolioId,
+        key: "main",
+        title: "Main",
+        route: "/",
+        is_demo: false,
+      })
+      .select("id")
+      .single()
+
+    if (createError || !newPage) {
+      console.error("[v0] Error creating page:", createError)
+      throw new Error(`Failed to create page: ${createError?.message}`)
+    }
+
+    page = newPage
+    console.log("[v0] Created new page:", page.id)
+  } else {
+    page = existingPage
+    console.log("[v0] Found existing page:", page.id)
+  }
 
   // Save page layout (widget positions)
   const layout = {

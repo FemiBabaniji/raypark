@@ -119,17 +119,19 @@ export default function IdentityWidget({
                   setEditingField?.(null)
                 }
               }}
-              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-3xl font-bold text-white w-full resize-none leading-tight p-3 transition-all duration-200"
+              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-3xl font-bold text-white w-full resize-none leading-tight p-3 transition-all duration-200 break-words"
               autoFocus
               style={{
                 overflow: "hidden",
                 minHeight: "3.75rem",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
             />
           ) : (
             <h1
               onClick={() => !isPreviewMode && setEditingField?.("identity-bio")}
-              className={`text-3xl font-bold leading-tight text-white transition-all duration-200 ${
+              className={`text-3xl font-bold leading-tight text-white transition-all duration-200 break-words ${
                 !isPreviewMode
                   ? `cursor-text rounded-xl p-3 -m-3 ${isHovering ? "bg-white/5 backdrop-blur-sm" : ""}`
                   : ""

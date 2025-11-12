@@ -29,14 +29,46 @@ export default function EventsRightColumn() {
   const router = useRouter()
 
   useEffect(() => {
-    const savedData = localStorage.getItem("bea_portfolio_data")
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData)
-        setSavedPortfolio(parsed)
-      } catch (error) {
-        console.error("Failed to parse saved portfolio data:", error)
+    const loadPortfolioData = () => {
+      const savedData = localStorage.getItem("bea_portfolio_data")
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData)
+          setSavedPortfolio(parsed)
+        } catch (error) {
+          console.error("Failed to parse saved portfolio data:", error)
+        }
       }
+    }
+
+    // Load on mount
+    loadPortfolioData()
+
+    // Listen for storage events (when localStorage changes in another tab/window)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "bea_portfolio_data") {
+        loadPortfolioData()
+      }
+    }
+
+    // Listen for focus events (when user returns to this page)
+    const handleFocus = () => {
+      loadPortfolioData()
+    }
+
+    // Listen for custom event when portfolio is updated
+    const handlePortfolioUpdate = () => {
+      loadPortfolioData()
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener("focus", handleFocus)
+    window.addEventListener("portfolio-updated", handlePortfolioUpdate)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("focus", handleFocus)
+      window.removeEventListener("portfolio-updated", handlePortfolioUpdate)
     }
   }, [])
 

@@ -193,6 +193,10 @@ export default function PortfolioBuilder({
         await saveWidgetLayout(id, leftWidgets, rightWidgets, widgetContent)
 
         console.log("[v0] Portfolio auto-saved successfully")
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("portfolio-updated"))
+        }
       } catch (error) {
         console.error("[v0] Auto-save failed:", error)
       }

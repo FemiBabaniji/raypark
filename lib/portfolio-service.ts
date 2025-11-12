@@ -39,9 +39,13 @@ export async function createPortfolioOnce(params: {
     name: params.name.trim(),
     slug,
     description: params.description?.trim() || `${params.name}'s portfolio`,
-    theme_id: params.theme_id,
     is_public: false,
     is_demo: false,
+  }
+
+  // Only add theme_id if it's a valid UUID
+  if (params.theme_id && isUUID(params.theme_id)) {
+    insertData.theme_id = params.theme_id
   }
 
   // Only add community_id if provided (column may not exist yet)
@@ -158,6 +162,11 @@ async function insertPortfolioWithRetry(
 
   for (const slug of candidates) {
     const insertData = { ...basePayload, slug }
+
+    // Only add theme_id if it's a valid UUID
+    if (payload.theme_id && isUUID(payload.theme_id)) {
+      insertData.theme_id = payload.theme_id
+    }
 
     // Only add community_id if it exists
     if (community_id) {

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
-import { createPortfolioOnce, updatePortfolioById } from "@/lib/portfolio-service"
+import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout } from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -181,22 +181,17 @@ export default function PortfolioBuilder({
       try {
         console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
+
+        // Save portfolio metadata and identity
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
           theme_id: state.theme_id,
           is_public: !!state.is_public,
-          identity: {
-            name: identity.name,
-            title: identity.title,
-            subtitle: identity.subtitle,
-            selectedColor: identity.selectedColor,
-            initials: identity.initials,
-            email: identity.email,
-            location: identity.location,
-            handle: identity.handle,
-          },
         })
+
+        await saveWidgetLayout(id, leftWidgets, rightWidgets, widgetContent)
+
         console.log("[v0] Portfolio auto-saved successfully")
       } catch (error) {
         console.error("[v0] Auto-save failed:", error)
@@ -204,7 +199,7 @@ export default function PortfolioBuilder({
     }, 800) // 800ms debounce
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state, identity]) // Added identity to dependencies
+  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent]) // Added widget dependencies
 
   useEffect(() => {
     if (hasInitialized) {

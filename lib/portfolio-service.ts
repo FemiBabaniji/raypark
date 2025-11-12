@@ -500,4 +500,74 @@ export async function getCommunityPortfolios(communityId: string) {
   return data
 }
 
+export async function saveWidgetLayout(
+  portfolioId: string,
+  leftWidgets: Array<{ id: string; type: string }>,
+  rightWidgets: Array<{ id: string; type: string }>,
+  widgetContent: Record<string, any>,
+) {
+  const supabase = createClient()
+
+  // Get the main page for this portfolio
+  const { data: page, error: pageError } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .single()
+
+  if (pageError || !page) {
+    console.error("[v0] Error fetching page:", pageError)
+    return
+  }
+
+  // Save page layout (widget positions)
+  const layout = {
+    columns: {
+      left: leftWidgets.map((w) => w.id),
+      right: rightWidgets.map((w) => w.id),
+    },
+  }
+
+  const { error: layoutError } = await supabase.from("page_layouts").upsert(
+    {
+      page_id: page.id,
+      layout,
+    },
+    { onConflict: "page_id" },
+  )
+
+  if (layoutError) {
+    console.error("[v0] Error saving layout:", layoutError)
+  }
+
+  // Save widget instances (content)
+  const allWidgets = [...leftWidgets, ...rightWidgets]
+
+  for (const widget of allWidgets) {
+    if (widget.type === "identity") continue // Identity is saved separately
+
+    // Get widget type ID
+    const { data: widgetType } = await supabase.from("widget_types").select("id").eq("key", widget.type).single()
+
+    if (!widgetType) continue
+
+    const props = widgetContent[widget.type] || {}
+
+    // Upsert widget instance
+    await supabase.from("widget_instances").upsert(
+      {
+        id: widget.id,
+        page_id: page.id,
+        widget_type_id: widgetType.id,
+        props,
+        enabled: true,
+      },
+      { onConflict: "id" },
+    )
+  }
+
+  console.log("[v0] Widget layout and content saved")
+}
+
 const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

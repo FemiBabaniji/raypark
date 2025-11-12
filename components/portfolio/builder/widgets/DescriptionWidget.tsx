@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { GripVertical, X } from "lucide-react"
 
@@ -32,6 +33,12 @@ export default function DescriptionWidget({
   editingField,
   setEditingField,
 }: Props) {
+  const [isHoveringTitle, setIsHoveringTitle] = useState(false)
+  const [isHoveringDesc, setIsHoveringDesc] = useState(false)
+  const [isHoveringSubdesc, setIsHoveringSubdesc] = useState(false)
+  const textareaRefDesc = useRef<HTMLTextAreaElement>(null)
+  const textareaRefSubdesc = useRef<HTMLTextAreaElement>(null)
+
   const demoContent = {
     title: "About me",
     description:
@@ -39,6 +46,17 @@ export default function DescriptionWidget({
     subdescription:
       "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools and techniques.",
   }
+
+  useEffect(() => {
+    if (textareaRefDesc.current && editingField === `${widgetId}-description`) {
+      textareaRefDesc.current.style.height = "auto"
+      textareaRefDesc.current.style.height = `${textareaRefDesc.current.scrollHeight}px`
+    }
+    if (textareaRefSubdesc.current && editingField === `${widgetId}-subdescription`) {
+      textareaRefSubdesc.current.style.height = "auto"
+      textareaRefSubdesc.current.style.height = `${textareaRefSubdesc.current.scrollHeight}px`
+    }
+  }, [demoContent.description, demoContent.subdescription, editingField, widgetId])
 
   return (
     <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-8 group cursor-grab active:cursor-grabbing">
@@ -62,66 +80,135 @@ export default function DescriptionWidget({
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xl font-bold">
+        <div
+          className="relative"
+          onMouseEnter={() => !isPreviewMode && setIsHoveringTitle(true)}
+          onMouseLeave={() => !isPreviewMode && setIsHoveringTitle(false)}
+        >
           {editingField === `${widgetId}-title` ? (
             <input
               type="text"
               value={demoContent.title}
               onChange={(e) => onContentChange({ ...content, title: e.target.value })}
               onBlur={() => setEditingField(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
-              className="bg-transparent border-none outline-none text-xl font-bold text-white w-full"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  setEditingField(null)
+                }
+                if (e.key === "Escape") {
+                  setEditingField(null)
+                }
+              }}
+              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-xl font-bold text-white w-full px-3 py-2 transition-all duration-200"
               autoFocus
             />
           ) : (
-            <span
+            <h3
               onClick={() => !isPreviewMode && setEditingField(`${widgetId}-title`)}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1 text-white" : "text-white"}
+              className={`text-xl font-bold transition-all duration-200 ${
+                !isPreviewMode
+                  ? `cursor-text rounded-xl px-3 py-2 -mx-3 -my-2 ${isHoveringTitle ? "bg-white/5 backdrop-blur-sm" : ""}`
+                  : ""
+              }`}
             >
               {demoContent.title}
-            </span>
+            </h3>
           )}
-        </h3>
-        <p className="text-white leading-relaxed">
-          {editingField === `${widgetId}-description` ? (
-            <textarea
-              value={demoContent.description}
-              onChange={(e) => onContentChange({ ...content, description: e.target.value })}
-              onBlur={() => setEditingField(null)}
-              onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
-              className="bg-transparent border-none outline-none text-white leading-relaxed w-full resize-none"
-              rows={2}
-              autoFocus
-            />
-          ) : (
-            <span
-              onClick={() => !isPreviewMode && setEditingField(`${widgetId}-description`)}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-            >
-              {demoContent.description}
-            </span>
-          )}{" "}
-          <span className="text-neutral-400">
+        </div>
+
+        <div className="text-white leading-relaxed">
+          <div
+            className="relative inline"
+            onMouseEnter={() => !isPreviewMode && setIsHoveringDesc(true)}
+            onMouseLeave={() => !isPreviewMode && setIsHoveringDesc(false)}
+          >
+            {editingField === `${widgetId}-description` ? (
+              <textarea
+                ref={textareaRefDesc}
+                value={demoContent.description}
+                onChange={(e) => {
+                  onContentChange({ ...content, description: e.target.value })
+                  e.target.style.height = "auto"
+                  e.target.style.height = `${e.target.scrollHeight}px`
+                }}
+                onBlur={() => setEditingField(null)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    setEditingField(null)
+                  }
+                  if (e.key === "Escape") {
+                    setEditingField(null)
+                  }
+                }}
+                className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white leading-relaxed w-full resize-none px-3 py-2 transition-all duration-200 break-words"
+                autoFocus
+                style={{
+                  overflow: "hidden",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              />
+            ) : (
+              <span
+                onClick={() => !isPreviewMode && setEditingField(`${widgetId}-description`)}
+                className={`transition-all duration-200 break-words ${
+                  !isPreviewMode
+                    ? `cursor-text rounded-xl px-1 -mx-1 ${isHoveringDesc ? "bg-white/5 backdrop-blur-sm" : ""}`
+                    : ""
+                }`}
+              >
+                {demoContent.description}
+              </span>
+            )}
+          </div>{" "}
+          <div
+            className="relative inline"
+            onMouseEnter={() => !isPreviewMode && setIsHoveringSubdesc(true)}
+            onMouseLeave={() => !isPreviewMode && setIsHoveringSubdesc(false)}
+          >
             {editingField === `${widgetId}-subdescription` ? (
               <textarea
+                ref={textareaRefSubdesc}
                 value={demoContent.subdescription}
-                onChange={(e) => onContentChange({ ...content, subdescription: e.target.value })}
+                onChange={(e) => {
+                  onContentChange({ ...content, subdescription: e.target.value })
+                  e.target.style.height = "auto"
+                  e.target.style.height = `${e.target.scrollHeight}px`
+                }}
                 onBlur={() => setEditingField(null)}
-                onKeyDown={(e) => e.key === "Enter" && e.shiftKey === false && setEditingField(null)}
-                className="bg-transparent border-none outline-none text-neutral-400 leading-relaxed w-full resize-none"
-                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    setEditingField(null)
+                  }
+                  if (e.key === "Escape") {
+                    setEditingField(null)
+                  }
+                }}
+                className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-neutral-400 leading-relaxed w-full resize-none px-3 py-2 transition-all duration-200 break-words"
                 autoFocus
+                style={{
+                  overflow: "hidden",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
               />
             ) : (
               <span
                 onClick={() => !isPreviewMode && setEditingField(`${widgetId}-subdescription`)}
-                className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+                className={`text-neutral-400 transition-all duration-200 break-words ${
+                  !isPreviewMode
+                    ? `cursor-text rounded-xl px-1 -mx-1 ${isHoveringSubdesc ? "bg-white/5 backdrop-blur-sm" : ""}`
+                    : ""
+                }`}
               >
                 {demoContent.subdescription}
               </span>
             )}
-          </span>
-        </p>
+          </div>
+        </div>
       </div>
     </div>
   )

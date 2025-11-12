@@ -5,13 +5,19 @@ export type Identity = {
   name: string
   title: string
   subtitle?: string
-  bio?: string // Added single editable bio field for full sentence editing
+  bio?: string
   handle: string
   avatarUrl?: string
   selectedColor: ThemeIndex
   initials?: string
   email?: string
   location?: string
+  linkedin?: string
+  dribbble?: string
+  behance?: string
+  twitter?: string
+  unsplash?: string
+  instagram?: string
 }
 
 export type WidgetDef = { id: string; type: string }

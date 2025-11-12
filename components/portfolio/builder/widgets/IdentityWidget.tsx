@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { GripVertical, Palette } from "lucide-react"
+import { GripVertical, Palette, LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { Identity, ThemeIndex } from "../types"
@@ -23,6 +23,15 @@ export default function IdentityWidget({
 }: Props) {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+  const [editingSocial, setEditingSocial] = useState<string | null>(null)
+  const [socialLinks, setSocialLinks] = useState({
+    linkedin: identity.linkedin || "",
+    dribbble: identity.dribbble || "",
+    behance: identity.behance || "",
+    twitter: identity.twitter || "",
+    unsplash: identity.unsplash || "",
+    instagram: identity.instagram || "",
+  })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
@@ -143,15 +152,52 @@ export default function IdentityWidget({
         </div>
 
         <div className="flex flex-wrap gap-3 pt-4">
-          {["linkedin.", "dribbble.", "behance.", "twitter.", "unsplash.", "instagram."].map((social) => (
-            <Button
-              key={social}
-              variant="outline"
-              size="sm"
-              className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-200"
-            >
-              {social}
-            </Button>
+          {(["linkedin", "dribbble", "behance", "twitter", "unsplash", "instagram"] as const).map((social) => (
+            <div key={social} className="relative group/social">
+              {editingSocial === social && !isPreviewMode ? (
+                <input
+                  type="url"
+                  value={socialLinks[social]}
+                  onChange={(e) => {
+                    setSocialLinks({ ...socialLinks, [social]: e.target.value })
+                    onChange({ [social]: e.target.value })
+                  }}
+                  onBlur={() => setEditingSocial(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      setEditingSocial(null)
+                    }
+                    if (e.key === "Escape") {
+                      setEditingSocial(null)
+                    }
+                  }}
+                  placeholder={`${social}.com/username`}
+                  className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent text-white text-sm px-3 py-2 w-48 transition-all duration-200"
+                  autoFocus
+                />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-200 relative"
+                  onClick={() => socialLinks[social] && window.open(socialLinks[social], "_blank")}
+                >
+                  {social}.
+                  {!isPreviewMode && (
+                    <div
+                      className="absolute -right-2 -top-2 opacity-0 group-hover/social:opacity-100 transition-opacity duration-200 bg-white/90 rounded-full p-1 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingSocial(social)
+                      }}
+                    >
+                      <LinkIcon className="w-3 h-3 text-neutral-900" />
+                    </div>
+                  )}
+                </Button>
+              )}
+            </div>
           ))}
         </div>
       </div>

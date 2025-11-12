@@ -73,8 +73,8 @@ export async function createPortfolioOnce(params: {
   const { error: layoutErr } = await supabase.from("page_layouts").insert({
     page_id: page?.id,
     layout: {
-      left: { type: "vertical", widgets: [] },
-      right: { type: "vertical", widgets: [] },
+      left: [],
+      right: [],
     },
   })
   if (layoutErr) console.warn("[seed] layout create failed:", layoutErr?.message)
@@ -581,14 +581,8 @@ export async function saveWidgetLayout(
   }
 
   const layout = {
-    left: {
-      type: "vertical",
-      widgets: leftWidgets.map((w) => w.id),
-    },
-    right: {
-      type: "vertical",
-      widgets: rightWidgets.map((w) => w.id),
-    },
+    left: leftWidgets.map((w) => w.id),
+    right: rightWidgets.map((w) => w.id),
   }
 
   console.log("[v0] Saving layout:", layout)

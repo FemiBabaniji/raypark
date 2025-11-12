@@ -510,6 +510,9 @@ export async function saveWidgetLayout(
   const supabase = createClient()
 
   console.log("[v0] Saving widget layout for portfolio:", portfolioId)
+  console.log("[v0] Left widgets:", leftWidgets)
+  console.log("[v0] Right widgets:", rightWidgets)
+  console.log("[v0] Widget content:", widgetContent)
 
   // Get the main page for this portfolio
   const { data: page, error: pageError } = await supabase
@@ -521,8 +524,10 @@ export async function saveWidgetLayout(
 
   if (pageError || !page) {
     console.error("[v0] Error fetching page:", pageError)
-    return
+    throw new Error(`Failed to fetch page: ${pageError?.message}`)
   }
+
+  console.log("[v0] Found page:", page.id)
 
   // Save page layout (widget positions)
   const layout = {
@@ -544,47 +549,75 @@ export async function saveWidgetLayout(
 
   if (layoutError) {
     console.error("[v0] Error saving layout:", layoutError)
-    return
+    throw new Error(`Failed to save layout: ${layoutError.message}`)
   }
 
-  const { error: deleteError } = await supabase
-    .from("widget_instances")
-    .delete()
-    .eq("page_id", page.id)
-    .neq("widget_type_id", "00000000-0000-0000-0000-000000000000") // Dummy condition to delete all
+  console.log("[v0] Layout saved successfully")
+
+  // Delete all existing widget instances for this page
+  const { error: deleteError } = await supabase.from("widget_instances").delete().eq("page_id", page.id)
 
   if (deleteError) {
     console.error("[v0] Error deleting old widgets:", deleteError)
+    throw new Error(`Failed to delete old widgets: ${deleteError.message}`)
   }
 
-  // Save widget instances (content)
+  console.log("[v0] Deleted old widget instances")
+
+  // Get all widget types from database
+  const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
+
+  if (widgetTypesError || !widgetTypes) {
+    console.error("[v0] Error fetching widget types:", widgetTypesError)
+    throw new Error(`Failed to fetch widget types: ${widgetTypesError?.message}`)
+  }
+
+  console.log("[v0] Available widget types:", widgetTypes)
+
+  // Create a map of widget type key to ID
+  const widgetTypeMap = new Map(widgetTypes.map((wt) => [wt.key, wt.id]))
+
+  // Save widget instances with content
   const allWidgets = [...leftWidgets, ...rightWidgets]
 
   for (const widget of allWidgets) {
-    if (widget.type === "identity") continue // Identity is saved separately
+    // Map widget.type to database widget_type key
+    let dbWidgetKey = widget.type
 
-    // Get widget type ID
-    const { data: widgetType } = await supabase.from("widget_types").select("id").eq("key", widget.type).single()
+    // Handle type mappings if needed
+    if (widget.type === "description") dbWidgetKey = "description"
+    if (widget.type === "education") dbWidgetKey = "education"
+    if (widget.type === "projects") dbWidgetKey = "projects"
+    if (widget.type === "services") dbWidgetKey = "services"
+    if (widget.type === "identity") dbWidgetKey = "identity"
+    if (widget.type === "gallery") dbWidgetKey = "gallery"
+    if (widget.type === "startup") dbWidgetKey = "startup"
+    if (widget.type === "meeting-scheduler") dbWidgetKey = "meeting-scheduler"
 
-    if (!widgetType) {
-      console.warn("[v0] Widget type not found:", widget.type)
+    const widgetTypeId = widgetTypeMap.get(dbWidgetKey)
+
+    if (!widgetTypeId) {
+      console.warn("[v0] Widget type not found in database:", dbWidgetKey)
       continue
     }
 
+    // Get content for this widget type (not by ID, by type)
     const props = widgetContent[widget.type] || {}
 
-    console.log("[v0] Inserting widget:", widget.type, props)
+    console.log("[v0] Inserting widget:", { type: widget.type, dbKey: dbWidgetKey, props })
 
     // Insert new widget instance
     const { error: insertError } = await supabase.from("widget_instances").insert({
       page_id: page.id,
-      widget_type_id: widgetType.id,
+      widget_type_id: widgetTypeId,
       props,
       enabled: true,
     })
 
     if (insertError) {
       console.error("[v0] Error inserting widget:", widget.type, insertError)
+    } else {
+      console.log("[v0] Widget inserted successfully:", widget.type)
     }
   }
 

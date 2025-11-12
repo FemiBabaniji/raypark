@@ -238,7 +238,17 @@ export default function PortfolioBuilder({
     if (hasInitialized) {
       debouncedSave()
     }
-  }, [state, identity, leftWidgets, rightWidgets, widgetContent, hasInitialized, debouncedSave]) // Added all widget dependencies
+  }, [
+    state.name,
+    state.description,
+    state.theme_id,
+    state.is_public,
+    identity,
+    leftWidgets,
+    rightWidgets,
+    widgetContent,
+    hasInitialized,
+  ]) // Removed debouncedSave from dependencies
 
   useEffect(() => {
     const timer = setTimeout(() => {

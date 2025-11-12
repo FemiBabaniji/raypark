@@ -75,22 +75,23 @@ export async function updatePortfolioById(
     description?: string
     theme_id?: string
     is_public?: boolean
-    community_id?: string // Optional community association update
-    // intentionally no slug here — slug changes should be explicit via a separate function/flow
+    community_id?: string
   },
 ) {
   if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
 
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from("portfolios")
-    .update(patch)
-    .eq("id", portfolioId)
-    .select("id, name, slug, description, theme_id, is_public, is_demo, community_id, created_at, updated_at")
-    .single()
+  const response = await fetch(`/api/portfolios/${portfolioId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  })
 
-  if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
-  return data
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(`Failed to update portfolio: ${error.error}`)
+  }
+
+  return await response.json()
 }
 
 export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
@@ -508,6 +509,8 @@ export async function saveWidgetLayout(
 ) {
   const supabase = createClient()
 
+  console.log("[v0] Saving widget layout for portfolio:", portfolioId)
+
   // Get the main page for this portfolio
   const { data: page, error: pageError } = await supabase
     .from("pages")
@@ -529,6 +532,8 @@ export async function saveWidgetLayout(
     },
   }
 
+  console.log("[v0] Saving layout:", layout)
+
   const { error: layoutError } = await supabase.from("page_layouts").upsert(
     {
       page_id: page.id,
@@ -539,6 +544,17 @@ export async function saveWidgetLayout(
 
   if (layoutError) {
     console.error("[v0] Error saving layout:", layoutError)
+    return
+  }
+
+  const { error: deleteError } = await supabase
+    .from("widget_instances")
+    .delete()
+    .eq("page_id", page.id)
+    .neq("widget_type_id", "00000000-0000-0000-0000-000000000000") // Dummy condition to delete all
+
+  if (deleteError) {
+    console.error("[v0] Error deleting old widgets:", deleteError)
   }
 
   // Save widget instances (content)
@@ -550,24 +566,29 @@ export async function saveWidgetLayout(
     // Get widget type ID
     const { data: widgetType } = await supabase.from("widget_types").select("id").eq("key", widget.type).single()
 
-    if (!widgetType) continue
+    if (!widgetType) {
+      console.warn("[v0] Widget type not found:", widget.type)
+      continue
+    }
 
     const props = widgetContent[widget.type] || {}
 
-    // Upsert widget instance
-    await supabase.from("widget_instances").upsert(
-      {
-        id: widget.id,
-        page_id: page.id,
-        widget_type_id: widgetType.id,
-        props,
-        enabled: true,
-      },
-      { onConflict: "id" },
-    )
+    console.log("[v0] Inserting widget:", widget.type, props)
+
+    // Insert new widget instance
+    const { error: insertError } = await supabase.from("widget_instances").insert({
+      page_id: page.id,
+      widget_type_id: widgetType.id,
+      props,
+      enabled: true,
+    })
+
+    if (insertError) {
+      console.error("[v0] Error inserting widget:", widget.type, insertError)
+    }
   }
 
-  console.log("[v0] Widget layout and content saved")
+  console.log("[v0] Widget layout and content saved successfully")
 }
 
 const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

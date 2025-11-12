@@ -34,19 +34,25 @@ export async function createPortfolioOnce(params: {
   const supabase = createClient()
   const slug = toSlug(params.name)
 
+  const insertData: any = {
+    user_id: params.userId,
+    name: params.name.trim(),
+    slug,
+    description: params.description?.trim() || `${params.name}'s portfolio`,
+    theme_id: params.theme_id,
+    is_public: false,
+    is_demo: false,
+  }
+
+  // Only add community_id if provided (column may not exist yet)
+  if (params.community_id) {
+    insertData.community_id = params.community_id
+  }
+
   const { data, error } = await supabase
     .from("portfolios")
-    .insert({
-      user_id: params.userId,
-      name: params.name.trim(),
-      slug,
-      description: params.description?.trim() || `${params.name}'s portfolio`,
-      theme_id: params.theme_id,
-      is_public: false,
-      is_demo: false,
-      community_id: params.community_id, // Store community association
-    })
-    .select("id, name, slug, description, theme_id, is_public, is_demo, community_id, created_at, updated_at")
+    .insert(insertData)
+    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
     .single()
 
   if (error) {
@@ -141,20 +147,24 @@ async function insertPortfolioWithRetry(
     is_public?: boolean
     is_demo?: boolean
     id?: string
-    community_id?: string // Optional community association in payload
+    community_id?: string
   },
 ) {
-  // try base, then slug-<n>, then slug-<random>
+  const { community_id, ...basePayload } = payload
+
   const candidates = [payload.slug]
   for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
   candidates.push(`${payload.slug}-${makeSuffix()}`)
 
   for (const slug of candidates) {
-    const { data, error } = await supabase
-      .from("portfolios")
-      .insert({ ...payload, slug })
-      .select()
-      .single()
+    const insertData = { ...basePayload, slug }
+
+    // Only add community_id if it exists
+    if (community_id) {
+      insertData.community_id = community_id
+    }
+
+    const { data, error } = await supabase.from("portfolios").insert(insertData).select().single()
 
     if (!error) return data
 
@@ -221,13 +231,16 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   }
 
   const baseData = {
-    ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
+    ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}),
     user_id: user.id,
     name: portfolio.name,
     slug: baseSlug,
     is_public: portfolio.isLive || false,
     is_demo: false,
-    community_id: portfolio.community_id, // Store community association
+  }
+
+  if ((portfolio as any).community_id) {
+    baseData.community_id = (portfolio as any).community_id
   }
 
   let savedPortfolio

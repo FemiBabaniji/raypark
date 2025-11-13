@@ -29,7 +29,7 @@ export async function createPortfolioOnce(params: {
   name: string
   theme_id: string
   description?: string
-  community_id?: string // Optional community association
+  community_id?: string
 }) {
   const supabase = createClient()
   const slug = toSlug(params.name)
@@ -41,6 +41,88 @@ export async function createPortfolioOnce(params: {
     theme_id: params.theme_id,
   })
 
+  console.log("[v0] Checking for existing portfolio...")
+  const { data: existingPortfolio, error: checkError } = await supabase
+    .from("portfolios")
+    .select("id, name, slug")
+    .eq("user_id", params.userId)
+    .maybeSingle()
+
+  if (checkError) {
+    console.error("[v0] ❌ Error checking for existing portfolio:", checkError)
+    throw new Error(`Failed to check existing portfolio: ${checkError.message}`)
+  }
+
+  if (existingPortfolio) {
+    console.log("[v0] ✅ Portfolio already exists:", existingPortfolio.id)
+
+    // Check if the existing portfolio has a page
+    const { data: existingPage, error: pageCheckError } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("portfolio_id", existingPortfolio.id)
+      .eq("key", "main")
+      .maybeSingle()
+
+    if (pageCheckError) {
+      console.error("[v0] ❌ Error checking for existing page:", pageCheckError)
+      throw new Error(`Failed to check existing page: ${pageCheckError.message}`)
+    }
+
+    if (existingPage) {
+      console.log("[v0] ✅ Portfolio has a page, returning existing portfolio")
+      return existingPortfolio
+    }
+
+    // Portfolio exists but no page - create the page
+    console.log("[v0] Portfolio exists but missing page, creating page...")
+    const { data: page, error: pageErr } = await supabase
+      .from("pages")
+      .insert({
+        portfolio_id: existingPortfolio.id,
+        key: "main",
+        title: "Main",
+        route: "/",
+        is_demo: false,
+      })
+      .select("id")
+      .maybeSingle()
+
+    if (pageErr || !page) {
+      console.error("[v0] ❌ Failed to create page:", pageErr)
+      throw new Error(`Failed to create page: ${pageErr?.message || "No data returned"}`)
+    }
+
+    console.log("[v0] ✅ Page created successfully:", page.id)
+
+    // Create page layout
+    const layoutStructure = {
+      left: {
+        type: "vertical" as const,
+        widgets: [] as string[],
+      },
+      right: {
+        type: "vertical" as const,
+        widgets: [] as string[],
+      },
+    }
+
+    const { error: layoutErr } = await supabase.from("page_layouts").insert({
+      page_id: page.id,
+      layout: layoutStructure,
+    })
+
+    if (layoutErr) {
+      console.error("[v0] ❌ Failed to create layout:", layoutErr)
+      throw new Error(`Failed to create page layout: ${layoutErr.message}`)
+    }
+
+    console.log("[v0] ✅ Layout created successfully")
+    return existingPortfolio
+  }
+
+  console.log("[v0] No existing portfolio found, creating new one...")
+
   const insertData: any = {
     user_id: params.userId,
     name: params.name.trim(),
@@ -50,12 +132,10 @@ export async function createPortfolioOnce(params: {
     is_demo: false,
   }
 
-  // Only add theme_id if it's a valid UUID
   if (params.theme_id && isUUID(params.theme_id)) {
     insertData.theme_id = params.theme_id
   }
 
-  // Only add community_id if provided (column may not exist yet)
   if (params.community_id) {
     insertData.community_id = params.community_id
   }
@@ -89,7 +169,6 @@ export async function createPortfolioOnce(params: {
 
   console.log("[v0] ✅ Page created successfully:", page.id)
 
-  // Create the layout structure that matches the constraint exactly
   const layoutStructure = {
     left: {
       type: "vertical" as const,
@@ -100,14 +179,6 @@ export async function createPortfolioOnce(params: {
       widgets: [] as string[],
     },
   }
-
-  // Validate the structure before sending
-  console.log("[v0] Validating layout structure before insert...")
-  console.log("[v0] - typeof layoutStructure:", typeof layoutStructure)
-  console.log("[v0] - typeof layoutStructure.left:", typeof layoutStructure.left)
-  console.log("[v0] - Array.isArray(layoutStructure.left.widgets):", Array.isArray(layoutStructure.left.widgets))
-  console.log("[v0] - typeof layoutStructure.right:", typeof layoutStructure.right)
-  console.log("[v0] - Array.isArray(layoutStructure.right.widgets):", Array.isArray(layoutStructure.right.widgets))
 
   const layoutData = {
     page_id: page.id,
@@ -124,15 +195,6 @@ export async function createPortfolioOnce(params: {
     console.error("[v0] Error code:", layoutErr.code)
     console.error("[v0] Error details:", layoutErr.details)
     console.error("[v0] Error hint:", layoutErr.hint)
-    console.error("[v0] Full error:", JSON.stringify(layoutErr, null, 2))
-
-    // Try to provide more context about what went wrong
-    if (layoutErr.message?.includes("page_layouts_left_widgets_valid")) {
-      console.error("[v0] ❌ Constraint violation: left.widgets must be an array")
-      console.error("[v0] Actual type sent:", typeof layoutStructure.left.widgets)
-      console.error("[v0] Is array?:", Array.isArray(layoutStructure.left.widgets))
-    }
-
     throw new Error(`Failed to create page layout: ${layoutErr.message}`)
   }
 

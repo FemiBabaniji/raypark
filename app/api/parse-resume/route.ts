@@ -1,40 +1,91 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
+import { spawn } from "child_process"
+
+async function extractPdfText(pdfBase64: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    console.log("[v0] 🐍 Calling Python script for PDF extraction...")
+
+    const python = spawn("python3", ["scripts/extract_pdf_text.py"])
+
+    let output = ""
+    let errorOutput = ""
+
+    python.stdout.on("data", (data) => {
+      output += data.toString()
+    })
+
+    python.stderr.on("data", (data) => {
+      errorOutput += data.toString()
+      console.error("[v0] Python stderr:", data.toString())
+    })
+
+    python.on("close", (code) => {
+      if (code !== 0) {
+        console.error("[v0] ❌ Python script failed with code:", code)
+        console.error("[v0] Error output:", errorOutput)
+        reject(new Error("PDF extraction failed"))
+        return
+      }
+
+      try {
+        const result = JSON.parse(output)
+        if (result.success) {
+          console.log("[v0] ✅ PDF extracted successfully, length:", result.length)
+          resolve(result.text)
+        } else {
+          console.error("[v0] ❌ PDF extraction failed:", result.error)
+          reject(new Error(result.error))
+        }
+      } catch (e) {
+        console.error("[v0] ❌ Failed to parse Python output:", e)
+        reject(new Error("Failed to parse PDF extraction result"))
+      }
+    })
+
+    // Send PDF data to Python script
+    python.stdin.write(JSON.stringify({ pdf_base64: pdfBase64 }))
+    python.stdin.end()
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
     console.log("[v0] ========== RESUME PARSING STARTED ==========")
 
-    const formData = await request.formData()
-    const file = formData.get("file") as File
+    const body = await request.json()
+    const { text, pdfBase64, filename } = body
 
-    if (!file) {
-      console.log("[v0] ❌ No file provided")
-      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    let resumeText = ""
+
+    if (pdfBase64) {
+      console.log("[v0] 📄 PDF file received:", filename)
+      console.log("[v0] 📄 Base64 length:", pdfBase64.length)
+
+      try {
+        resumeText = await extractPdfText(pdfBase64)
+        console.log("[v0] ✅ PDF extracted, text length:", resumeText.length)
+      } catch (error: any) {
+        console.error("[v0] ❌ PDF extraction failed:", error)
+        return NextResponse.json(
+          { error: "Could not extract text from PDF. Please ensure it is a text-based PDF, not a scanned image." },
+          { status: 400 },
+        )
+      }
+    } else if (text) {
+      resumeText = text
+      console.log("[v0] 📝 Text received, length:", resumeText.length)
+    } else {
+      console.log("[v0] ❌ No text or PDF provided")
+      return NextResponse.json({ error: "No resume text or PDF provided" }, { status: 400 })
     }
 
-    console.log("[v0] 📄 File received:", {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    })
+    console.log("[v0] 📝 First 500 characters:")
+    console.log(resumeText.substring(0, 500))
 
-    // Extract text from PDF
-    const buffer = await file.arrayBuffer()
-    console.log("[v0] 📦 Buffer size:", buffer.byteLength)
-
-    const text = await extractTextFromPDF(buffer)
-
-    console.log("[v0] 📝 Extracted text length:", text.length)
-    console.log("[v0] 📝 First 500 characters of extracted text:")
-    console.log(text.substring(0, 500))
-
-    if (!text || text.trim().length < 50) {
-      console.log("[v0] ❌ Text too short or empty")
-      return NextResponse.json(
-        { error: "Could not extract text from PDF. Please ensure it is a text-based PDF, not a scanned image." },
-        { status: 400 },
-      )
+    if (resumeText.trim().length < 50) {
+      console.log("[v0] ❌ Text too short")
+      return NextResponse.json({ error: "Resume text is too short. Please provide more information." }, { status: 400 })
     }
 
     console.log("[v0] 🤖 Sending to OpenAI for parsing...")
@@ -92,7 +143,7 @@ export async function POST(request: NextRequest) {
 }
 
 Resume text:
-${text}
+${resumeText}
 
 Return only the JSON object, no markdown formatting or additional text.`,
     })
@@ -135,39 +186,4 @@ Return only the JSON object, no markdown formatting or additional text.`,
     console.error("[v0] Error stack:", error.stack)
     return NextResponse.json({ error: error.message || "Failed to parse resume" }, { status: 500 })
   }
-}
-
-async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
-  const uint8Array = new Uint8Array(buffer)
-  let text = ""
-
-  // Try UTF-8 decoding first
-  try {
-    const decoder = new TextDecoder("utf-8")
-    text = decoder.decode(uint8Array)
-  } catch {
-    // Fallback to latin1 if UTF-8 fails
-    const decoder = new TextDecoder("latin1")
-    text = decoder.decode(uint8Array)
-  }
-
-  // Extract text between PDF stream objects
-  // PDF format stores text in content streams
-  const textMatches = text.match(/$$([^)]+)$$/g) || []
-  const extractedText = textMatches.map((match) => match.replace(/[()]/g, "")).join(" ")
-
-  // Also extract text after "Tj" operators (text showing commands)
-  const tjMatches = text.match(/\[([^\]]+)\]\s*TJ/g) || []
-  const tjText = tjMatches.map((match) => match.replace(/[[\]]/g, "").replace(/TJ/g, "")).join(" ")
-
-  // Combine both extraction methods
-  const combinedText = (extractedText + " " + tjText)
-    .replace(/[\x00-\x1F\x7F-\x9F]/g, " ") // Remove control characters
-    .replace(/\\[nrt]/g, " ") // Remove escape sequences
-    .replace(/\s+/g, " ") // Normalize whitespace
-    .trim()
-
-  console.log("[v0] 📝 Extracted text preview:", combinedText.substring(0, 200))
-
-  return combinedText
 }

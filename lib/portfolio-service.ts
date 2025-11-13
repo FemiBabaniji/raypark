@@ -89,19 +89,54 @@ export async function createPortfolioOnce(params: {
 
   console.log("[v0] ✅ Page created successfully:", page.id)
 
-  const { error: layoutErr } = await supabase.from("page_layouts").insert({
-    page_id: page.id,
-    layout: {
-      left: { type: "vertical", widgets: [] },
-      right: { type: "vertical", widgets: [] },
+  // Create the layout structure that matches the constraint exactly
+  const layoutStructure = {
+    left: {
+      type: "vertical" as const,
+      widgets: [] as string[],
     },
-  })
+    right: {
+      type: "vertical" as const,
+      widgets: [] as string[],
+    },
+  }
+
+  // Validate the structure before sending
+  console.log("[v0] Validating layout structure before insert...")
+  console.log("[v0] - typeof layoutStructure:", typeof layoutStructure)
+  console.log("[v0] - typeof layoutStructure.left:", typeof layoutStructure.left)
+  console.log("[v0] - Array.isArray(layoutStructure.left.widgets):", Array.isArray(layoutStructure.left.widgets))
+  console.log("[v0] - typeof layoutStructure.right:", typeof layoutStructure.right)
+  console.log("[v0] - Array.isArray(layoutStructure.right.widgets):", Array.isArray(layoutStructure.right.widgets))
+
+  const layoutData = {
+    page_id: page.id,
+    layout: layoutStructure,
+  }
+
+  console.log("[v0] Inserting page_layout:")
+  console.log(JSON.stringify(layoutData, null, 2))
+
+  const { data: insertedLayout, error: layoutErr } = await supabase.from("page_layouts").insert(layoutData).select()
 
   if (layoutErr) {
-    console.warn("[v0] ⚠️ Warning creating layout:", layoutErr.message)
-  } else {
-    console.log("[v0] ✅ Layout created successfully")
+    console.error("[v0] ❌ Failed to create layout:", layoutErr)
+    console.error("[v0] Error code:", layoutErr.code)
+    console.error("[v0] Error details:", layoutErr.details)
+    console.error("[v0] Error hint:", layoutErr.hint)
+    console.error("[v0] Full error:", JSON.stringify(layoutErr, null, 2))
+
+    // Try to provide more context about what went wrong
+    if (layoutErr.message?.includes("page_layouts_left_widgets_valid")) {
+      console.error("[v0] ❌ Constraint violation: left.widgets must be an array")
+      console.error("[v0] Actual type sent:", typeof layoutStructure.left.widgets)
+      console.error("[v0] Is array?:", Array.isArray(layoutStructure.left.widgets))
+    }
+
+    throw new Error(`Failed to create page layout: ${layoutErr.message}`)
   }
+
+  console.log("[v0] ✅ Layout created successfully:", insertedLayout)
 
   return data
 }

@@ -635,9 +635,6 @@ export async function saveWidgetLayout(
   leftWidgets: Array<{ id: string; type: string }>,
   rightWidgets: Array<{ id: string; type: string }>,
   widgetContent: Record<string, any>,
-  projectColors?: Record<string, string>,
-  widgetColors?: Record<string, ThemeIndex>,
-  galleryGroups?: Record<string, any[]>,
 ) {
   const supabase = createClient()
 
@@ -684,18 +681,6 @@ export async function saveWidgetLayout(
       .maybeSingle()
 
     const mergedProps = { ...(existing?.props ?? {}), ...incomingProps }
-
-    if (key === "projects" && projectColors) {
-      mergedProps.projectColors = projectColors
-    }
-
-    if (widgetColors && widgetColors[key] !== undefined) {
-      mergedProps.selectedColor = widgetColors[key]
-    }
-
-    if (key === "gallery" && galleryGroups && galleryGroups[key]) {
-      mergedProps.galleryGroups = galleryGroups[key]
-    }
 
     const { error: upsertErr } = await supabase
       .from("widget_instances")

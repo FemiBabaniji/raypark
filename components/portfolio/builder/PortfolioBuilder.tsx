@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Reorder, motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -77,49 +77,6 @@ export default function PortfolioBuilder({
 
   const [isLoadingData, setIsLoadingData] = useState(false)
   const hasLoadedDataRef = useRef(false)
-
-  const [projectColors, setProjectColors] = useState<Record<string, string>>({
-    aiml: "purple",
-    mobile: "purple",
-  })
-  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
-    aiml: false,
-    mobile: false,
-  })
-
-  const [widgetColors, setWidgetColors] = useState<Record<string, ThemeIndex>>({})
-
-  const [galleryGroups, setGalleryGroups] = useState<{
-    [key: string]: Array<{
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }>
-  }>({})
-
-  const [selectedGroup, setSelectedGroup] = useState<{
-    widgetId: string
-    groupId: string
-    group: {
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }
-  } | null>(null)
-
-  const projectColorOptions = [
-    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
-    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
-    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
-    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
-    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
-    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
-    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
-  ]
 
   useEffect(() => {
     portfolioIdRef.current = portfolioId
@@ -252,10 +209,6 @@ export default function PortfolioBuilder({
         console.error("[v0] ❌ Failed to load portfolio data:", error)
       } finally {
         setIsLoadingData(false)
-        setTimeout(() => {
-          setHasInitialized(true)
-          console.log("[v0] ✅ Auto-save enabled")
-        }, 100)
       }
     }
 
@@ -273,8 +226,8 @@ export default function PortfolioBuilder({
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
 
-  useEffect(() => {
-    if (!hasInitialized || isLoadingData || !user?.id) {
+  const debouncedSave = useCallback(async () => {
+    if (!user?.id || !hasInitialized || isLoadingData) {
       return
     }
 
@@ -316,7 +269,7 @@ export default function PortfolioBuilder({
           startup: widgetContent.startup || {},
         }
 
-        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave, projectColors, widgetColors, galleryGroups)
+        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
@@ -325,27 +278,74 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData])
 
-    // Cleanup
-    return () => {
-      if (timeout) clearTimeout(timeout)
+  useEffect(() => {
+    if (hasInitialized) {
+      debouncedSave()
     }
   }, [
-    hasInitialized,
-    isLoadingData,
-    user,
     state.name,
     state.description,
     state.theme_id,
     state.is_public,
-    identity,
+    identity.name,
+    identity.handle,
+    identity.avatar,
+    identity.selectedColor,
+    identity.bio,
+    identity.email,
+    identity.location,
     leftWidgets,
     rightWidgets,
     widgetContent,
-    projectColors,
-    widgetColors,
-    galleryGroups,
+    hasInitialized,
   ])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isLoadingData) {
+        setHasInitialized(true)
+      }
+    }, 1500) // Wait 1.5 seconds after loading completes
+
+    return () => clearTimeout(timer)
+  }, [isLoadingData])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout)
+      }
+    }
+  }, [saveTimeout])
+
+  // Ensure identity stays first if lists are reordered externally
+  useEffect(() => {
+    setLeftWidgets((prev) => {
+      const rest = prev.filter((w) => w.id !== "identity")
+      return [{ id: "identity", type: "identity" }, ...rest]
+    })
+  }, [])
+
+  useEffect(() => {
+    if (user?.id && !portfolioIdRef.current && !createInFlight.current) {
+      ensurePortfolioId().catch((err) => {
+        console.error("[v0] Failed to initialize portfolio:", err)
+      })
+    }
+  }, [user])
+
+  useEffect(() => {
+    const wasUnauthenticated = !prevUserRef.current?.id
+    const isNowAuthenticated = !!user?.id
+
+    if (wasUnauthenticated && isNowAuthenticated && hasInitialized) {
+      debouncedSave()
+    }
+
+    prevUserRef.current = user
+  }, [user, hasInitialized, debouncedSave])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -693,6 +693,49 @@ export default function PortfolioBuilder({
       </div>
     </div>
   ) : null
+
+  const [projectColors, setProjectColors] = useState<Record<string, string>>({
+    aiml: "purple",
+    mobile: "purple",
+  })
+  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
+    aiml: false,
+    mobile: false,
+  })
+
+  const [widgetColors, setWidgetColors] = useState<Record<string, ThemeIndex>>({})
+
+  const [galleryGroups, setGalleryGroups] = useState<{
+    [key: string]: Array<{
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }>
+  }>({})
+
+  const [selectedGroup, setSelectedGroup] = useState<{
+    widgetId: string
+    groupId: string
+    group: {
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }
+  } | null>(null)
+
+  const projectColorOptions = [
+    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
+    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
+    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
+    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
+    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
+    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
+    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
+  ]
 
   const GroupDetailView = () => {
     if (!selectedGroup) return null

@@ -7,7 +7,7 @@ export async function updateSession(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase environment variables")
+    console.error("[v0] Middleware - Missing Supabase environment variables")
     // If on auth pages, allow through
     if (request.nextUrl.pathname.startsWith("/auth")) {
       return NextResponse.next()
@@ -47,14 +47,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  console.log("[v0] Middleware - path:", request.nextUrl.pathname, "authenticated:", !!user, "userId:", user?.id)
+
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth")
   ) {
+    console.log("[v0] Middleware - Redirecting unauthenticated user to /auth")
     const url = request.nextUrl.clone()
-    url.pathname = "/auth"
+    if (request.nextUrl.pathname.startsWith("/bea")) {
+      url.pathname = "/auth"
+      url.searchParams.set("redirect", request.nextUrl.pathname)
+    } else {
+      url.pathname = "/auth"
+    }
     return NextResponse.redirect(url)
   }
 

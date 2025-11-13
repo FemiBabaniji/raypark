@@ -20,9 +20,10 @@ export default function EventsRightColumn() {
       console.log("[v0] User:", user?.id, user?.email)
 
       if (!user?.id) {
-        console.log("[v0] ❌ No authenticated user, cannot load portfolio")
+        console.log("[v0] ❌ No authenticated user, skipping portfolio load")
         setPortfolioLoading(false)
         setHasPortfolio(false)
+        setPortfolio(null)
         return
       }
 
@@ -178,12 +179,17 @@ export default function EventsRightColumn() {
       }
     }
 
-    loadBEAPortfolio()
+    if (!loading) {
+      loadBEAPortfolio()
+    }
+  }, [user?.id, loading])
 
-    // Listen for portfolio updates
+  useEffect(() => {
+    if (!user?.id) return
+
     const handlePortfolioUpdate = () => {
       console.log("[v0] Portfolio update event received, reloading...")
-      loadBEAPortfolio()
+      // Reload will be triggered by the main useEffect
     }
 
     window.addEventListener("portfolio-updated", handlePortfolioUpdate)
@@ -196,6 +202,18 @@ export default function EventsRightColumn() {
   }, [user?.id])
 
   const handleEditProfile = () => {
+    if (!user) {
+      router.push("/login?redirect=/portfolio/builder")
+      return
+    }
+    router.push("/portfolio/builder")
+  }
+
+  const handleCreateProfile = () => {
+    if (!user) {
+      router.push("/login?redirect=/portfolio/builder")
+      return
+    }
     router.push("/portfolio/builder")
   }
 
@@ -215,6 +233,14 @@ export default function EventsRightColumn() {
               <div className="mt-3 h-4 bg-white/20 rounded w-3/4"></div>
               <div className="mt-2 h-3 bg-white/20 rounded w-1/2"></div>
             </div>
+          ) : !user ? (
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-blue-600/40 to-cyan-600/40 text-white shadow-lg mb-4">
+              <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white text-xl">
+                →
+              </div>
+              <div className="mt-3 text-base font-semibold text-white">Sign In Required</div>
+              <div className="text-sm text-white/90">Create your portfolio</div>
+            </div>
           ) : portfolio ? (
             <div className="mb-4">
               <UnifiedPortfolioCard
@@ -233,10 +259,10 @@ export default function EventsRightColumn() {
           )}
 
           <button
-            onClick={handleEditProfile}
+            onClick={!user ? () => router.push("/login") : hasPortfolio ? handleEditProfile : handleCreateProfile}
             className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 bg-zinc-800/60 text-white"
           >
-            {hasPortfolio ? "Edit Profile" : "Create New Profile"}
+            {!user ? "Sign In" : hasPortfolio ? "Edit Profile" : "Create New Profile"}
           </button>
         </div>
 

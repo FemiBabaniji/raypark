@@ -182,7 +182,7 @@ export default function PortfolioBuilder({
         console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
 
-        // Save portfolio metadata and identity to database
+        // Save portfolio metadata
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -190,7 +190,28 @@ export default function PortfolioBuilder({
           is_public: !!state.is_public,
         })
 
-        await saveWidgetLayout(id, leftWidgets, rightWidgets, widgetContent)
+        const contentToSave = {
+          ...widgetContent,
+          identity: {
+            name: identity.name,
+            handle: identity.handle,
+            avatarUrl: identity.avatar,
+            selectedColor: identity.selectedColor,
+            title: identity.title,
+            email: identity.email,
+            location: identity.location,
+            bio: identity.bio,
+            linkedin: identity.linkedin,
+            dribbble: identity.dribbble,
+            behance: identity.behance,
+            twitter: identity.twitter,
+            unsplash: identity.unsplash,
+            instagram: identity.instagram,
+          },
+        }
+
+        console.log("[v0] Saving with content:", contentToSave)
+        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
         if (typeof window !== "undefined") {
           const savedData = localStorage.getItem("bea_portfolio_data")
@@ -199,19 +220,8 @@ export default function PortfolioBuilder({
               const parsed = JSON.parse(savedData)
               const updated = {
                 ...parsed,
-                name: identity.name,
-                title: identity.title,
-                email: identity.email,
-                location: identity.location,
-                handle: identity.handle,
+                ...identity,
                 avatarUrl: identity.avatar,
-                bio: identity.bio,
-                linkedin: identity.linkedin,
-                dribbble: identity.dribbble,
-                behance: identity.behance,
-                twitter: identity.twitter,
-                unsplash: identity.unsplash,
-                instagram: identity.instagram,
                 isLive: state.is_public,
               }
               localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
@@ -221,7 +231,6 @@ export default function PortfolioBuilder({
             }
           }
 
-          // Dispatch event to notify BEA events page
           window.dispatchEvent(new Event("portfolio-updated"))
         }
 
@@ -232,7 +241,7 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent]) // Added widget dependencies
+  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent])
 
   useEffect(() => {
     if (hasInitialized) {
@@ -248,7 +257,7 @@ export default function PortfolioBuilder({
     rightWidgets,
     widgetContent,
     hasInitialized,
-  ]) // Removed debouncedSave from dependencies
+  ])
 
   useEffect(() => {
     const timer = setTimeout(() => {

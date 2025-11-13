@@ -546,9 +546,6 @@ export async function saveWidgetLayout(
   const supabase = createClient()
 
   console.log("[v0] Saving widget layout for portfolio:", portfolioId)
-  console.log("[v0] Left widgets:", leftWidgets)
-  console.log("[v0] Right widgets:", rightWidgets)
-  console.log("[v0] Widget content:", widgetContent)
 
   let page
   const { data: existingPage, error: pageError } = await supabase
@@ -564,7 +561,7 @@ export async function saveWidgetLayout(
   }
 
   if (!existingPage) {
-    console.log("[v0] Page doesn't exist, creating new page...")
+    console.log("[v0] Creating new page...")
     const { data: newPage, error: createError } = await supabase
       .from("pages")
       .insert({
@@ -578,15 +575,11 @@ export async function saveWidgetLayout(
       .single()
 
     if (createError || !newPage) {
-      console.error("[v0] Error creating page:", createError)
       throw new Error(`Failed to create page: ${createError?.message}`)
     }
-
     page = newPage
-    console.log("[v0] Created new page:", page.id)
   } else {
     page = existingPage
-    console.log("[v0] Found existing page:", page.id)
   }
 
   const layout = {
@@ -605,80 +598,154 @@ export async function saveWidgetLayout(
   )
 
   if (layoutError) {
-    console.error("[v0] Error saving layout:", layoutError)
     throw new Error(`Failed to save layout: ${layoutError.message}`)
   }
 
   console.log("[v0] Layout saved successfully")
 
-  // Delete all existing widget instances for this page
-  const { error: deleteError } = await supabase.from("widget_instances").delete().eq("page_id", page.id)
-
-  if (deleteError) {
-    console.error("[v0] Error deleting old widgets:", deleteError)
-    throw new Error(`Failed to delete old widgets: ${deleteError.message}`)
-  }
-
-  console.log("[v0] Deleted old widget instances")
-
-  // Get all widget types from database
   const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
 
   if (widgetTypesError || !widgetTypes) {
-    console.error("[v0] Error fetching widget types:", widgetTypesError)
     throw new Error(`Failed to fetch widget types: ${widgetTypesError?.message}`)
   }
 
-  console.log("[v0] Available widget types:", widgetTypes)
+  const typeIdMap = new Map(widgetTypes.map((wt) => [wt.key, wt.id]))
 
-  // Create a map of widget type key to ID
-  const widgetTypeMap = new Map(widgetTypes.map((wt) => [wt.key, wt.id]))
+  const { data: existing, error: existingError } = await supabase
+    .from("widget_instances")
+    .select("id, widget_type_id, props")
+    .eq("page_id", page.id)
 
-  // Save widget instances with content
-  const allWidgets = [...leftWidgets, ...rightWidgets]
+  if (existingError) {
+    console.error("[v0] Error loading existing widgets:", existingError)
+  }
 
-  for (const widget of allWidgets) {
-    // Map widget.type to database widget_type key
-    let dbWidgetKey = widget.type
-
-    // Handle type mappings if needed
-    if (widget.type === "description") dbWidgetKey = "description"
-    if (widget.type === "education") dbWidgetKey = "education"
-    if (widget.type === "projects") dbWidgetKey = "projects"
-    if (widget.type === "services") dbWidgetKey = "services"
-    if (widget.type === "identity") dbWidgetKey = "identity"
-    if (widget.type === "gallery") dbWidgetKey = "gallery"
-    if (widget.type === "startup") dbWidgetKey = "startup"
-    if (widget.type === "meeting-scheduler") dbWidgetKey = "meeting-scheduler"
-
-    const widgetTypeId = widgetTypeMap.get(dbWidgetKey)
-
-    if (!widgetTypeId) {
-      console.warn("[v0] Widget type not found in database:", dbWidgetKey)
-      continue
-    }
-
-    // Get content for this widget type (not by ID, by type)
-    const props = widgetContent[widget.type] || {}
-
-    console.log("[v0] Inserting widget:", { type: widget.type, dbKey: dbWidgetKey, props })
-
-    // Insert new widget instance
-    const { error: insertError } = await supabase.from("widget_instances").insert({
-      page_id: page.id,
-      widget_type_id: widgetTypeId,
-      props,
-      enabled: true,
-    })
-
-    if (insertError) {
-      console.error("[v0] Error inserting widget:", widget.type, insertError)
-    } else {
-      console.log("[v0] Widget inserted successfully:", widget.type)
+  // Map: widget key -> { id, props }
+  const existingByKey = new Map<string, { id: string; props: any }>()
+  for (const row of existing ?? []) {
+    const key = [...typeIdMap.entries()].find(([, id]) => id === row.widget_type_id)?.[0]
+    if (key) {
+      existingByKey.set(key, { id: row.id, props: row.props || {} })
+      console.log(`[v0] Existing widget found: ${key}, props:`, row.props)
     }
   }
 
+  const desiredKeys = new Set([...layout.left.widgets, ...layout.right.widgets])
+
+  const keysToDelete = [...existingByKey.keys()].filter((k) => !desiredKeys.has(k))
+  if (keysToDelete.length) {
+    const idsToDelete = keysToDelete.map((k) => existingByKey.get(k)?.id).filter(Boolean) as string[]
+    if (idsToDelete.length) {
+      console.log("[v0] Deleting removed widgets:", keysToDelete)
+      await supabase.from("widget_instances").delete().in("id", idsToDelete)
+    }
+  }
+
+  const upserts: any[] = []
+  let order = 0
+
+  for (const col of ["left", "right"] as const) {
+    for (const key of layout[col].widgets) {
+      const widget_type_id = typeIdMap.get(key)
+      if (!widget_type_id) {
+        console.warn("[v0] Widget type not found:", key)
+        continue
+      }
+
+      // Get incoming content from UI
+      const incoming = widgetContent[key]
+      // Get existing props from database
+      const existingProps = existingByKey.get(key)?.props || {}
+
+      // MERGE: For critical widgets like identity/startup, preserve existing if incoming is empty
+      let merged: any
+      if ((key === "identity" || key === "startup") && (!incoming || Object.keys(incoming).length === 0)) {
+        // Preserve existing props if no new data provided
+        merged = existingProps
+        console.log(`[v0] Preserving existing ${key} props:`, merged)
+      } else {
+        // Merge incoming with existing (incoming takes precedence)
+        merged = { ...existingProps, ...(incoming || {}) }
+        console.log(`[v0] Merging ${key} props:`, merged)
+      }
+
+      // Add metadata for rendering order
+      merged.__column = col
+      merged.__position = order++
+
+      upserts.push({
+        page_id: page.id,
+        widget_type_id,
+        props: merged,
+        enabled: true,
+      })
+    }
+  }
+
+  if (upserts.length) {
+    console.log("[v0] Upserting widgets with conflict resolution...")
+    const { error: upsertError } = await supabase
+      .from("widget_instances")
+      .upsert(upserts, { onConflict: "page_id,widget_type_id" })
+
+    if (upsertError) {
+      console.error("[v0] Error upserting widgets:", upsertError)
+      throw new Error(`Failed to upsert widgets: ${upsertError.message}`)
+    }
+    console.log("[v0] Widgets upserted successfully")
+  }
+
   console.log("[v0] Widget layout and content saved successfully")
+}
+
+export async function getPageLayout(portfolioId: string): Promise<{
+  left: { type: string; widgets: string[] }
+  right: { type: string; widgets: string[] }
+} | null> {
+  const supabase = createClient()
+
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  if (!page?.id) return null
+
+  const { data: layout } = await supabase.from("page_layouts").select("layout").eq("page_id", page.id).maybeSingle()
+
+  return layout?.layout as any
+}
+
+export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: string; props: any }>> {
+  const supabase = createClient()
+
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  if (!page?.id) return []
+
+  const { data: instances } = await supabase
+    .from("widget_instances")
+    .select(
+      `
+      props,
+      widget_types!inner(key)
+    `,
+    )
+    .eq("page_id", page.id)
+
+  return (
+    instances?.map((i: any) => ({
+      key: i.widget_types.key,
+      props: i.props || {},
+    })) || []
+  )
 }
 
 const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

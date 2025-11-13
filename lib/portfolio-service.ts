@@ -82,6 +82,42 @@ export async function createPortfolioOnce(params: {
   return data
 }
 
+/**
+ * Ensures the current user has a portfolio and page.
+ * Uses the database function ensure_user_portfolio() for atomic, RLS-compliant creation.
+ *
+ * @returns Object with portfolio_id, page_id, and is_new flag
+ */
+export async function ensureUserPortfolio(): Promise<{
+  portfolio_id: string
+  page_id: string
+  is_new: boolean
+}> {
+  console.log("[v0] ensureUserPortfolio: calling database function")
+
+  const supabase = createClient()
+
+  // Call the database function that handles everything atomically
+  const { data, error } = await supabase.rpc("ensure_user_portfolio").single()
+
+  if (error) {
+    console.error("[v0] Error calling ensure_user_portfolio:", error)
+    throw new Error(`Failed to ensure portfolio: ${error.message}`)
+  }
+
+  if (!data) {
+    throw new Error("No data returned from ensure_user_portfolio")
+  }
+
+  console.log("[v0] ensureUserPortfolio result:", data)
+
+  return {
+    portfolio_id: data.portfolio_id,
+    page_id: data.page_id,
+    is_new: data.is_new,
+  }
+}
+
 export async function updatePortfolioById(
   portfolioId: string,
   patch: {
@@ -609,13 +645,12 @@ export async function saveWidgetLayout(
   }
 
   console.log("[v0] Fetching page for portfolio...")
-  let page
   const { data: existingPage, error: pageError } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
-    .maybeSingle()
+    .single()
 
   if (pageError) {
     console.error("[v0] ❌ Error fetching page:", pageError)
@@ -623,29 +658,14 @@ export async function saveWidgetLayout(
   }
 
   if (!existingPage) {
-    console.log("[v0] Page not found, creating new page...")
-    const { data: newPage, error: createError } = await supabase
-      .from("pages")
-      .insert({
-        portfolio_id: portfolioId,
-        key: "main",
-        title: "Main",
-        route: "/",
-        is_demo: false,
-      })
-      .select("id")
-      .single()
-
-    if (createError || !newPage) {
-      console.error("[v0] ❌ Error creating page:", createError)
-      throw new Error(`Failed to create page: ${createError?.message}`)
-    }
-    page = newPage
-    console.log("[v0] ✅ New page created:", page.id)
-  } else {
-    page = existingPage
-    console.log("[v0] ✅ Using existing page:", page.id)
+    console.error("[v0] ❌ No page found for portfolio. Portfolio may not be properly initialized.")
+    throw new Error(
+      `No page found for portfolio ${portfolioId}. Please ensure the portfolio is created with createPortfolioOnce() which creates both the portfolio and its main page.`,
+    )
   }
+
+  const page = existingPage
+  console.log("[v0] ✅ Using existing page:", page.id)
 
   const layout = {
     left: { type: "vertical", widgets: leftWidgets.map((w) => w.type) },

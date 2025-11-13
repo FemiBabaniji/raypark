@@ -109,8 +109,15 @@ export async function updatePortfolioById(
 }
 
 export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
+  console.log("[v0] loadUserPortfolios called with user:", { id: user?.id, email: user?.email })
+
   const supabase = createClient()
-  if (!user?.id) return []
+  if (!user?.id) {
+    console.warn("[v0] No user ID provided to loadUserPortfolios")
+    return []
+  }
+
+  console.log("[v0] Querying portfolios table for user_id:", user.id)
 
   const { data, error } = await supabase
     .from("portfolios")
@@ -118,7 +125,27 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
 
-  if (error) throw new Error(`Failed to load portfolios: ${error.message}`)
+  if (error) {
+    console.error("[v0] ❌ Database error loading portfolios:", error)
+    console.error("[v0] Error code:", error.code)
+    console.error("[v0] Error message:", error.message)
+    console.error("[v0] Error details:", error.details)
+    throw new Error(`Failed to load portfolios: ${error.message}`)
+  }
+
+  console.log("[v0] ✅ Query successful, raw data:", data)
+  console.log("[v0] Portfolio count:", data?.length || 0)
+
+  data?.forEach((p: any, i: number) => {
+    console.log(`[v0] Portfolio ${i + 1}:`, {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      community_id: p.community_id,
+      is_public: p.is_public,
+      has_community: !!p.community_id,
+    })
+  })
 
   const seen = new Set<string>()
   const deduped = []
@@ -128,6 +155,9 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     seen.add(key)
     deduped.push(p)
   }
+
+  console.log("[v0] After deduplication:", deduped.length, "portfolios")
+
   return deduped.map(
     (portfolio: any): UnifiedPortfolio => ({
       id: portfolio.id,

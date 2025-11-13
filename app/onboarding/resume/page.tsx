@@ -36,6 +36,19 @@ export default function ResumeOnboardingPage() {
     setError(null)
   }
 
+  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+    const bytes = new Uint8Array(buffer)
+    const chunkSize = 0x8000 // 32KB chunks to avoid stack overflow
+    let binary = ""
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length))
+      binary += String.fromCharCode.apply(null, Array.from(chunk))
+    }
+
+    return btoa(binary)
+  }
+
   const handleParse = async () => {
     if (!user) return
     if (uploadMode === "text" && !resumeText.trim()) return
@@ -49,9 +62,12 @@ export default function ResumeOnboardingPage() {
 
       if (uploadMode === "file" && selectedFile) {
         console.log("[v0] Converting PDF to base64...")
-        // Convert PDF to base64
+        console.log("[v0] File size:", selectedFile.size, "bytes")
+
         const arrayBuffer = await selectedFile.arrayBuffer()
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+        const base64 = arrayBufferToBase64(arrayBuffer)
+
+        console.log("[v0] Base64 conversion complete, length:", base64.length)
 
         // Send to API for extraction
         const parseResponse = await fetch("/api/parse-resume", {

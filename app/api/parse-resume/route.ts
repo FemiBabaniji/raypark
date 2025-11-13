@@ -62,6 +62,16 @@ export async function POST(request: NextRequest) {
       console.log("[v0] 📄 PDF file received:", filename)
       console.log("[v0] 📄 Base64 length:", pdfBase64.length)
 
+      const estimatedSizeMB = (pdfBase64.length * 0.75) / (1024 * 1024) // base64 is ~33% larger
+      console.log("[v0] 📄 Estimated PDF size:", estimatedSizeMB.toFixed(2), "MB")
+
+      if (estimatedSizeMB > 10) {
+        return NextResponse.json(
+          { error: "PDF file is too large. Please use a file smaller than 10MB." },
+          { status: 400 },
+        )
+      }
+
       try {
         resumeText = await extractPdfText(pdfBase64)
         console.log("[v0] ✅ PDF extracted, text length:", resumeText.length)

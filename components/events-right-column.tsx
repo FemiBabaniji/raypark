@@ -188,7 +188,7 @@ export default function EventsRightColumn() {
       router.push("/login?redirect=/portfolio/builder")
       return
     }
-    router.push("/portfolio/builder")
+    router.push("/onboarding/resume")
   }
 
   return (

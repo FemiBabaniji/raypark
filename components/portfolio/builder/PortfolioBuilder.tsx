@@ -848,6 +848,7 @@ export default function PortfolioBuilder({
         isPreviewMode={isPreviewMode}
         rightSlot={rightSlot}
         logoHref="/network"
+        logoSrc="/dmz-logo-white.svg"
       >
         <div
           className={`lg:w-1/2 relative transition-all duration-200 ${

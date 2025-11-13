@@ -59,6 +59,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    console.log("[v0] 🔐 Auth check:", authData?.user?.id || "no user", authError || "no error")
+
+    if (authData?.user?.id !== userId) {
+      console.log("[v0] ❌ Auth mismatch: authenticated user", authData?.user?.id, "!== requested user", userId)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { data: existingPortfolio } = await supabase
       .from("portfolios")
       .select("id")
@@ -84,7 +92,6 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] ✅ Found", widgetTypes.length, "widget types")
 
-    // Create a map of key -> id
     const widgetTypeMap = new Map<string, string>()
     widgetTypes.forEach((wt) => {
       widgetTypeMap.set(wt.key, wt.id)
@@ -114,189 +121,217 @@ export async function POST(request: NextRequest) {
 
     if (portfolioError) {
       console.error("[v0] ❌ Portfolio creation error:", portfolioError)
-      return NextResponse.json({ error: "Failed to create portfolio" }, { status: 500 })
+      console.error("[v0] ❌ Error code:", portfolioError.code)
+      console.error("[v0] ❌ Error message:", portfolioError.message)
+      console.error("[v0] ❌ Error details:", JSON.stringify(portfolioError, null, 2))
+      return NextResponse.json({ error: "Failed to create portfolio: " + portfolioError.message }, { status: 500 })
     }
 
     console.log("[v0] ✅ Portfolio created:", portfolio.id)
 
-    const pageKey = `page_${nanoid(12)}`
-    console.log("[v0] 🔑 Generated page key:", pageKey)
+    try {
+      const pageKey = `page_${nanoid(12)}`
+      console.log("[v0] 🔑 Generated page key:", pageKey)
 
-    const { data: page, error: pageError } = await supabase
-      .from("pages")
-      .insert({
+      const pageInsertData = {
         portfolio_id: portfolio.id,
         route: "/",
         key: pageKey,
         title: portfolioName,
-      })
-      .select("id")
-      .single()
+      }
+      console.log("[v0] 📄 Inserting page with data:", JSON.stringify(pageInsertData, null, 2))
 
-    if (pageError) {
-      console.error("[v0] ❌ Page creation error:", pageError)
-      return NextResponse.json({ error: `Failed to create page: ${pageError.message}` }, { status: 500 })
-    }
+      const { data: page, error: pageError } = await supabase.from("pages").insert(pageInsertData).select("id").single()
 
-    console.log("[v0] ✅ Page created:", page.id)
+      if (pageError) {
+        console.error("[v0] ❌ Page creation error:", pageError)
+        throw new Error(`Failed to create page: ${pageError.message}`)
+      }
 
-    const leftWidgets = ["identity", "education"]
-    const rightWidgets = ["description", "projects", "services", "meeting-scheduler"]
+      console.log("[v0] ✅ Page created:", page.id)
 
-    console.log("[v0] 📐 Creating layout with widgets:", { left: leftWidgets, right: rightWidgets })
+      const leftWidgets = ["identity", "education"]
+      const rightWidgets = ["description", "projects", "services", "meeting-scheduler"]
 
-    const { error: layoutError } = await supabase.from("page_layouts").upsert({
-      page_id: page.id,
-      portfolio_id: portfolio.id,
-      layout: {
-        left: { type: "vertical", widgets: leftWidgets },
-        right: { type: "vertical", widgets: rightWidgets },
-      },
-    })
+      console.log("[v0] 📐 Creating layout with widgets:", { left: leftWidgets, right: rightWidgets })
 
-    if (layoutError) {
-      console.error("[v0] ❌ Layout creation error:", layoutError)
-      return NextResponse.json({ error: `Failed to create layout: ${layoutError.message}` }, { status: 500 })
-    }
-
-    console.log("[v0] ✅ Layout created for page:", page.id)
-
-    const widgetInstances = []
-
-    // Identity widget
-    const identityTypeId = widgetTypeMap.get("identity")
-    if (identityTypeId) {
-      console.log("[v0] 🎨 Creating identity widget")
-      widgetInstances.push({
+      const layoutInsertData = {
         page_id: page.id,
-        widget_type_id: identityTypeId,
-        props: {
-          name: parsedData.personalInfo.name,
-          handle:
-            parsedData.personalInfo.email?.split("@")[0] ||
-            parsedData.personalInfo.name.toLowerCase().replace(/\s+/g, ""),
-          title: parsedData.experience?.[0]?.position || "Professional",
-          bio: parsedData.personalInfo.summary || "",
-          email: parsedData.personalInfo.email || "",
-          location: parsedData.personalInfo.location || "",
-          linkedin: parsedData.personalInfo.linkedin || "",
-          github: parsedData.personalInfo.github || "",
-          website: parsedData.personalInfo.website || "",
-          selectedColor: 5,
+        portfolio_id: portfolio.id,
+        layout: {
+          left: { type: "vertical", widgets: leftWidgets },
+          right: { type: "vertical", widgets: rightWidgets },
         },
-      })
-    }
+      }
 
-    // Education widget
-    if (parsedData.education && parsedData.education.length > 0) {
-      const educationTypeId = widgetTypeMap.get("education")
-      if (educationTypeId) {
-        console.log("[v0] 🎓 Creating education widget with", parsedData.education.length, "items")
+      const { error: layoutError } = await supabase.from("page_layouts").upsert(layoutInsertData)
+
+      if (layoutError) {
+        console.error("[v0] ❌ Layout creation error:", layoutError)
+        throw new Error(`Failed to create layout: ${layoutError.message}`)
+      }
+
+      console.log("[v0] ✅ Layout created for page:", page.id)
+
+      const widgetInstances = []
+
+      // Identity widget
+      const identityTypeId = widgetTypeMap.get("identity")
+      if (identityTypeId) {
+        console.log("[v0] 🎨 Creating identity widget")
         widgetInstances.push({
           page_id: page.id,
-          widget_type_id: educationTypeId,
+          widget_type_id: identityTypeId,
           props: {
-            title: "Education",
-            items: parsedData.education.map((edu) => ({
-              degree: `${edu.degree}${edu.field ? " in " + edu.field : ""}`,
-              school: edu.institution,
-              year: `${edu.startDate}-${edu.endDate}`,
-              description: edu.gpa ? `GPA: ${edu.gpa}` : "",
-            })),
+            name: parsedData.personalInfo.name,
+            handle:
+              parsedData.personalInfo.email?.split("@")[0] ||
+              parsedData.personalInfo.name.toLowerCase().replace(/\s+/g, ""),
+            title: parsedData.experience?.[0]?.position || "Professional",
+            bio: parsedData.personalInfo.summary || "",
+            email: parsedData.personalInfo.email || "",
+            location: parsedData.personalInfo.location || "",
+            linkedin: parsedData.personalInfo.linkedin || "",
+            github: parsedData.personalInfo.github || "",
+            website: parsedData.personalInfo.website || "",
+            selectedColor: 5,
           },
         })
       }
-    }
 
-    // Description widget
-    const descriptionTypeId = widgetTypeMap.get("description")
-    if (descriptionTypeId) {
-      console.log("[v0] 📄 Creating description widget")
-      widgetInstances.push({
-        page_id: page.id,
-        widget_type_id: descriptionTypeId,
-        props: {
-          title: "About Me",
-          content: parsedData.personalInfo.summary || "Professional with diverse experience and skills.",
-        },
-      })
-    }
+      // Education widget
+      if (parsedData.education && parsedData.education.length > 0) {
+        const educationTypeId = widgetTypeMap.get("education")
+        if (educationTypeId) {
+          console.log("[v0] 🎓 Creating education widget with", parsedData.education.length, "items")
+          widgetInstances.push({
+            page_id: page.id,
+            widget_type_id: educationTypeId,
+            props: {
+              title: "Education",
+              items: parsedData.education.map((edu) => ({
+                degree: `${edu.degree}${edu.field ? " in " + edu.field : ""}`,
+                school: edu.institution,
+                year: `${edu.startDate}-${edu.endDate}`,
+                description: edu.gpa ? `GPA: ${edu.gpa}` : "",
+              })),
+            },
+          })
+        }
+      }
 
-    // Projects widget
-    if (parsedData.projects && parsedData.projects.length > 0) {
-      const projectsTypeId = widgetTypeMap.get("projects")
-      if (projectsTypeId) {
-        console.log("[v0] 🚀 Creating projects widget with", parsedData.projects.length, "projects")
+      // Description widget
+      const descriptionTypeId = widgetTypeMap.get("description")
+      if (descriptionTypeId) {
+        console.log("[v0] 📄 Creating description widget")
         widgetInstances.push({
           page_id: page.id,
-          widget_type_id: projectsTypeId,
+          widget_type_id: descriptionTypeId,
           props: {
-            title: "Featured Projects",
-            items: parsedData.projects.map((proj) => ({
-              name: proj.name,
-              description: proj.description,
-              year: new Date().getFullYear().toString(),
-              tags: proj.technologies || [],
-              link: proj.link || "",
-            })),
+            title: "About Me",
+            content: parsedData.personalInfo.summary || "Professional with diverse experience and skills.",
           },
         })
       }
-    }
 
-    // Services/Skills widget
-    if (parsedData.skills) {
-      const servicesTypeId = widgetTypeMap.get("services")
-      if (servicesTypeId) {
-        const allSkills = [...(parsedData.skills.technical || []), ...(parsedData.skills.soft || [])]
-        console.log("[v0] 💼 Creating skills widget with", allSkills.length, "skills")
+      // Projects widget
+      if (parsedData.projects && parsedData.projects.length > 0) {
+        const projectsTypeId = widgetTypeMap.get("projects")
+        if (projectsTypeId) {
+          console.log("[v0] 🚀 Creating projects widget with", parsedData.projects.length, "projects")
+          widgetInstances.push({
+            page_id: page.id,
+            widget_type_id: projectsTypeId,
+            props: {
+              title: "Featured Projects",
+              items: parsedData.projects.map((proj) => ({
+                name: proj.name,
+                description: proj.description,
+                year: new Date().getFullYear().toString(),
+                tags: proj.technologies || [],
+                link: proj.link || "",
+              })),
+            },
+          })
+        }
+      }
 
+      // Services/Skills widget
+      if (parsedData.skills) {
+        const servicesTypeId = widgetTypeMap.get("services")
+        if (servicesTypeId) {
+          const allSkills = [...(parsedData.skills.technical || []), ...(parsedData.skills.soft || [])]
+          console.log("[v0] 💼 Creating skills widget with", allSkills.length, "skills")
+
+          widgetInstances.push({
+            page_id: page.id,
+            widget_type_id: servicesTypeId,
+            props: {
+              title: "Skills",
+              items: allSkills.slice(0, 8),
+            },
+          })
+        }
+      }
+
+      // Meeting scheduler widget
+      const meetingTypeId = widgetTypeMap.get("meeting-scheduler")
+      if (meetingTypeId) {
+        console.log("[v0] 📅 Creating meeting scheduler widget")
         widgetInstances.push({
           page_id: page.id,
-          widget_type_id: servicesTypeId,
+          widget_type_id: meetingTypeId,
           props: {
-            title: "Skills",
-            items: allSkills.slice(0, 8),
+            selectedColor: 5,
           },
         })
       }
-    }
 
-    // Meeting scheduler widget
-    const meetingTypeId = widgetTypeMap.get("meeting-scheduler")
-    if (meetingTypeId) {
-      console.log("[v0] 📅 Creating meeting scheduler widget")
-      widgetInstances.push({
-        page_id: page.id,
-        widget_type_id: meetingTypeId,
-        props: {
-          selectedColor: 5,
-        },
-      })
-    }
+      console.log("[v0] 💾 Inserting", widgetInstances.length, "widget instances")
 
-    console.log("[v0] 💾 Inserting", widgetInstances.length, "widget instances")
+      let successCount = 0
+      const errors = []
 
-    for (const widget of widgetInstances) {
-      const { error: widgetError } = await supabase.from("widget_instances").insert(widget)
+      for (let i = 0; i < widgetInstances.length; i++) {
+        const widget = widgetInstances[i]
+        console.log(`[v0] 💾 Inserting widget ${i + 1}/${widgetInstances.length}`)
 
-      if (widgetError) {
-        console.error("[v0] ❌ Widget creation error:", widgetError, "for widget:", widget)
-        // Continue with other widgets even if one fails
+        const { data: widgetData, error: widgetError } = await supabase
+          .from("widget_instances")
+          .insert(widget)
+          .select("id")
+
+        if (widgetError) {
+          console.error(`[v0] ❌ Widget ${i + 1} creation error:`, widgetError.message)
+          errors.push(widgetError.message)
+        } else {
+          console.log(`[v0] ✅ Widget ${i + 1} created successfully:`, widgetData?.id)
+          successCount++
+        }
       }
+
+      if (successCount === 0 && widgetInstances.length > 0) {
+        throw new Error(`Failed to create any widgets: ${errors.join(", ")}`)
+      }
+
+      console.log(`[v0] ✅ ${successCount}/${widgetInstances.length} widgets created successfully`)
+      console.log("[v0] ========== PORTFOLIO CREATION COMPLETE ==========")
+      console.log("[v0] 🎉 Portfolio ID:", portfolio.id)
+
+      return NextResponse.json({
+        success: true,
+        portfolioId: portfolio.id,
+        widgetsCreated: successCount,
+        totalWidgets: widgetInstances.length,
+      })
+    } catch (innerError: any) {
+      console.error("[v0] ❌ Page/widget creation failed, rolling back portfolio:", innerError.message)
+      await supabase.from("portfolios").delete().eq("id", portfolio.id)
+      console.log("[v0] 🔄 Portfolio deleted:", portfolio.id)
+      throw innerError
     }
-
-    console.log("[v0] ✅ All widgets created successfully")
-    console.log("[v0] ========== PORTFOLIO CREATION COMPLETE ==========")
-    console.log("[v0] 🎉 Portfolio ID:", portfolio.id)
-
-    return NextResponse.json({
-      success: true,
-      portfolioId: portfolio.id,
-    })
   } catch (error: any) {
     console.error("[v0] ❌ Portfolio creation error:", error)
-    console.error("[v0] Error stack:", error.stack)
     return NextResponse.json({ error: error.message || "Failed to create portfolio" }, { status: 500 })
   }
 }

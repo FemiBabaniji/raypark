@@ -208,9 +208,10 @@ export default function PortfolioBuilder({
             unsplash: identity.unsplash,
             instagram: identity.instagram,
           },
+          startup: widgetContent.startup || {},
         }
 
-        console.log("[v0] Saving with content:", contentToSave)
+        console.log("[v0] Saving with complete content payload:", contentToSave)
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
         if (typeof window !== "undefined") {
@@ -220,12 +221,14 @@ export default function PortfolioBuilder({
               const parsed = JSON.parse(savedData)
               const updated = {
                 ...parsed,
-                ...identity,
+                name: identity.name,
+                handle: identity.handle,
                 avatarUrl: identity.avatar,
+                selectedColor: identity.selectedColor,
                 isLive: state.is_public,
               }
               localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
-              console.log("[v0] Synced to localStorage")
+              console.log("[v0] Synced to localStorage:", updated)
             } catch (error) {
               console.error("[v0] Failed to sync localStorage:", error)
             }
@@ -241,7 +244,7 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent])
+  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent, saveTimeout])
 
   useEffect(() => {
     if (hasInitialized) {
@@ -252,11 +255,18 @@ export default function PortfolioBuilder({
     state.description,
     state.theme_id,
     state.is_public,
-    identity,
+    identity.name,
+    identity.handle,
+    identity.avatar,
+    identity.selectedColor,
+    identity.bio,
+    identity.email,
+    identity.location,
     leftWidgets,
     rightWidgets,
     widgetContent,
     hasInitialized,
+    debouncedSave,
   ])
 
   useEffect(() => {

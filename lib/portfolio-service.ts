@@ -66,11 +66,11 @@ export async function createPortfolioOnce(params: {
     .from("portfolios")
     .insert(insertData)
     .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
-    .single()
+    .maybeSingle()
 
-  if (error) {
+  if (error || !data) {
     console.error("[v0] ❌ Failed to create portfolio:", error)
-    throw new Error(`Failed to create portfolio: ${error.message}`)
+    throw new Error(`Failed to create portfolio: ${error?.message || "No data returned"}`)
   }
 
   console.log("[v0] ✅ Portfolio created successfully:", data.id)
@@ -80,11 +80,11 @@ export async function createPortfolioOnce(params: {
     .from("pages")
     .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
     .select("id")
-    .single()
+    .maybeSingle()
 
-  if (pageErr) {
+  if (pageErr || !page) {
     console.error("[v0] ❌ Failed to create page:", pageErr)
-    throw new Error(`Failed to create page: ${pageErr.message}`)
+    throw new Error(`Failed to create page: ${pageErr?.message || "No data returned"}`)
   }
 
   console.log("[v0] ✅ Page created successfully:", page.id)
@@ -267,18 +267,18 @@ async function insertPortfolioWithRetry(
       insertData.community_id = community_id
     }
 
-    const { data, error } = await supabase.from("portfolios").insert(insertData).select().single()
+    const { data, error } = await supabase.from("portfolios").insert(insertData).select().maybeSingle()
 
-    if (!error) return data
+    if (!error && data) return data
 
     // 23505 unique violation on portfolios_slug_idx → try next
-    if (error.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
+    if (error?.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
       console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
       continue
     }
 
     // other errors: bubble up
-    throw error
+    if (error) throw error
   }
   throw new Error("Could not create a unique slug after several attempts")
 }
@@ -319,7 +319,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
         .from("portfolios")
         .upsert(baseData, { onConflict: "id" })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error("[v0] Error upserting demo portfolio:", error)
@@ -351,7 +351,11 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   if (isUUID(portfolio.id)) {
     console.log("[v0] Upserting existing portfolio:", baseData)
 
-    const { data, error } = await supabase.from("portfolios").upsert(baseData, { onConflict: "id" }).select().single()
+    const { data, error } = await supabase
+      .from("portfolios")
+      .upsert(baseData, { onConflict: "id" })
+      .select()
+      .maybeSingle()
 
     if (error) {
       console.error("[v0] Error upserting portfolio:", error)
@@ -382,7 +386,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     .from("pages")
     .upsert(pageData, { onConflict: "portfolio_id,key" })
     .select()
-    .single()
+    .maybeSingle()
 
   if (pageError) {
     console.error("[v0] Error saving page:", pageError)
@@ -530,7 +534,7 @@ export async function deletePortfolio(portfolioId: string): Promise<void> {
 export async function getPortfolioBySlug(slug: string): Promise<any> {
   const supabase = createClient()
 
-  const { data, error } = await supabase.from("public_portfolio_by_slug").select("*").eq("slug", slug).single()
+  const { data, error } = await supabase.from("public_portfolio_by_slug").select("*").eq("slug", slug).maybeSingle()
 
   if (error) {
     console.error("Error loading portfolio by slug:", error)
@@ -554,7 +558,7 @@ export async function addWidgetToPage(
     .from("widget_types")
     .select("id")
     .eq("key", widgetKey)
-    .single()
+    .maybeSingle()
 
   if (widgetTypeError || !widgetType) {
     console.error("Error finding widget type:", widgetTypeError)
@@ -573,11 +577,11 @@ export async function addWidgetToPage(
     enabled: true,
   }
 
-  const { data, error } = await supabase.from("widget_instances").insert(widgetData).select("id").single()
+  const { data, error } = await supabase.from("widget_instances").insert(widgetData).select("id").maybeSingle()
 
-  if (error) {
+  if (error || !data) {
     console.error("Error adding widget:", error)
-    throw new Error(`Failed to add widget: ${error.message}`)
+    throw new Error(`Failed to add widget: ${error?.message || "No data returned"}`)
   }
 
   return data.id
@@ -597,7 +601,7 @@ export async function removeWidgetFromPage(instanceId: string): Promise<void> {
 export async function getCommunityByCode(code: string) {
   const supabase = createClient()
 
-  const { data, error } = await supabase.from("communities").select("*").eq("code", code).single()
+  const { data, error } = await supabase.from("communities").select("*").eq("code", code).maybeSingle()
 
   if (error) {
     console.error("Error fetching community:", error)
@@ -674,7 +678,7 @@ export async function saveWidgetLayout(
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
-    .maybeSingle() // Use maybeSingle instead of single to avoid 406 error
+    .maybeSingle()
 
   if (pageError) {
     console.error("[v0] ❌ Error fetching page:", pageError)

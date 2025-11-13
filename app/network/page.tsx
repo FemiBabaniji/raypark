@@ -12,7 +12,13 @@ export default function NetworkPage() {
     if (community === "DMZ Innovation Hub") {
       router.push("/dmz")
     }
-    // Add other community routes as needed
+    if (community === "Black Founders Network") {
+      router.push("/network/bfn/members/marcus-johnson")
+    }
+  }
+
+  const handleCardClick = (member: string) => {
+    router.push(member)
   }
 
   return (

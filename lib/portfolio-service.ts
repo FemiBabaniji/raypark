@@ -370,11 +370,26 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
         })
       }
 
-      if (identityWidgetType && content.identity) {
+      if (identityWidgetType) {
         widgets.push({
           page_id: pageId,
           widget_type_id: identityWidgetType.id,
-          props: content.identity,
+          props: {
+            name: portfolio.name,
+            handle: portfolio.handle,
+            avatarUrl: portfolio.avatarUrl,
+            selectedColor: portfolio.selectedColor,
+            title: portfolio.title,
+            email: portfolio.email,
+            location: portfolio.location,
+            bio: portfolio.bio,
+            linkedin: portfolio.linkedin,
+            dribbble: portfolio.dribbble,
+            behance: portfolio.behance,
+            twitter: portfolio.twitter,
+            unsplash: portfolio.unsplash,
+            instagram: portfolio.instagram,
+          },
           enabled: true,
         })
       }
@@ -545,9 +560,8 @@ export async function saveWidgetLayout(
 ) {
   console.log("[v0] ========== START SAVE WIDGET LAYOUT ==========")
   console.log("[v0] Portfolio ID:", portfolioId)
-  console.log("[v0] Left widgets:", leftWidgets)
-  console.log("[v0] Right widgets:", rightWidgets)
-  console.log("[v0] Widget content keys:", Object.keys(widgetContent))
+  console.log("[v0] Widget content identity:", widgetContent.identity)
+  console.log("[v0] selectedColor being saved:", widgetContent.identity?.selectedColor)
 
   const supabase = createClient()
 
@@ -701,6 +715,9 @@ export async function saveWidgetLayout(
         console.log(`  - Existing keys: ${Object.keys(existingProps).join(", ")}`)
         console.log(`  - Incoming keys: ${Object.keys(incoming).join(", ")}`)
         console.log(`  - Merged keys: ${Object.keys(merged).join(", ")}`)
+        if (key === "identity") {
+          console.log(`  - selectedColor in merged: ${merged.selectedColor}`)
+        }
       }
 
       merged.__column = col
@@ -820,6 +837,7 @@ export type IdentityProps = {
 
 export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
   const supabase = createClient()
+  console.log("[v0] getIdentityProps called for portfolio:", portfolioId)
 
   const { data: page, error: pageErr } = await supabase
     .from("pages")
@@ -827,14 +845,22 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
     .maybeSingle()
-  if (pageErr || !page?.id) return null
+
+  if (pageErr || !page?.id) {
+    console.log("[v0] No page found for portfolio:", pageErr?.message)
+    return null
+  }
 
   const { data: wt, error: wtErr } = await supabase
     .from("widget_types")
     .select("id")
     .eq("key", "identity")
     .maybeSingle()
-  if (wtErr || !wt?.id) return null
+
+  if (wtErr || !wt?.id) {
+    console.log("[v0] No identity widget type found:", wtErr?.message)
+    return null
+  }
 
   const { data: wi, error: wiErr } = await supabase
     .from("widget_instances")
@@ -842,7 +868,14 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .eq("page_id", page.id)
     .eq("widget_type_id", wt.id)
     .maybeSingle()
-  if (wiErr) return null
+
+  if (wiErr) {
+    console.log("[v0] Error fetching identity widget:", wiErr.message)
+    return null
+  }
+
+  console.log("[v0] Identity widget props:", wi?.props)
+  console.log("[v0] selectedColor in props:", wi?.props?.selectedColor, typeof wi?.props?.selectedColor)
 
   return (wi?.props as IdentityProps) ?? null
 }

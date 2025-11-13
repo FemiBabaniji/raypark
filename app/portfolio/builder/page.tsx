@@ -56,14 +56,19 @@ export default function PortfolioBuilderPage() {
             console.log("[v0] Fetching identity props for portfolio:", portfolio.id)
             const identity = await getIdentityProps(portfolio.id)
             console.log("[v0] Identity props loaded:", identity)
+            console.log("[v0] selectedColor type:", typeof identity?.selectedColor)
+            console.log("[v0] selectedColor value:", identity?.selectedColor)
 
             if (identity) {
+              const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
+              console.log("[v0] Final selectedColor value:", colorValue)
+
               const loadedIdentity = {
                 id: portfolio.id,
                 name: identity.name || portfolio.name || "",
                 handle: normalizeHandle(identity.handle),
                 avatarUrl: identity.avatarUrl,
-                selectedColor: (identity.selectedColor ?? 3) as ThemeIndex,
+                selectedColor: colorValue as ThemeIndex,
               }
 
               console.log("[v0] Setting identity state:", loadedIdentity)
@@ -99,19 +104,21 @@ export default function PortfolioBuilderPage() {
         }
       }
 
-      // Fallback to localStorage
       console.log("[v0] Falling back to localStorage")
       const savedData = localStorage.getItem("bea_portfolio_data")
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData)
           console.log("[v0] Loaded from localStorage:", parsed)
+
+          const colorValue = typeof parsed.selectedColor === "number" ? parsed.selectedColor : 3
+
           setActiveIdentity({
             id: parsed.id || "bea-portfolio",
             name: parsed.name || "",
             handle: normalizeHandle(parsed.handle),
             avatarUrl: parsed.avatarUrl,
-            selectedColor: (parsed.selectedColor || 3) as ThemeIndex,
+            selectedColor: colorValue as ThemeIndex,
           })
           setIsLive(parsed.isLive || false)
           return
@@ -120,7 +127,6 @@ export default function PortfolioBuilderPage() {
         }
       }
 
-      // Final fallback to user profile
       if (user) {
         console.log("[v0] Final fallback to user profile")
         setActiveIdentity({
@@ -146,6 +152,7 @@ export default function PortfolioBuilderPage() {
     }>,
   ) => {
     console.log("[v0] Identity change triggered:", next)
+    console.log("[v0] selectedColor in change:", next.selectedColor, typeof next.selectedColor)
 
     setActiveIdentity((prev) => {
       const merged = { ...prev, ...next }
@@ -161,7 +168,7 @@ export default function PortfolioBuilderPage() {
             window.dispatchEvent(new Event("portfolio-updated"))
           }
 
-          console.log("[v0] ✅ Identity saved to localStorage")
+          console.log("[v0] ✅ Identity saved to localStorage:", updated)
         } catch (error) {
           console.error("[v0] Failed to save portfolio data to localStorage:", error)
         }

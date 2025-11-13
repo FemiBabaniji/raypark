@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
+import { createClient } from "@/lib/supabase/client"
 
 interface SavedPortfolioData {
   name: string
@@ -29,11 +30,81 @@ export default function EventsRightColumn() {
   const router = useRouter()
 
   useEffect(() => {
-    const loadPortfolioData = () => {
+    const loadPortfolioData = async () => {
+      if (user?.id) {
+        try {
+          const supabase = createClient()
+
+          // Get BEA portfolio from database
+          const { data: portfolios } = await supabase
+            .from("portfolios")
+            .select("id, name, is_public, community_id")
+            .eq("user_id", user.id)
+            .not("community_id", "is", null) // Get BEA portfolios
+            .order("updated_at", { ascending: false })
+            .limit(1)
+
+          if (portfolios && portfolios.length > 0) {
+            const portfolio = portfolios[0]
+
+            // Get identity widget data
+            const { data: page } = await supabase
+              .from("pages")
+              .select("id")
+              .eq("portfolio_id", portfolio.id)
+              .eq("key", "main")
+              .maybeSingle()
+
+            if (page) {
+              const { data: widgetType } = await supabase
+                .from("widget_types")
+                .select("id")
+                .eq("key", "identity")
+                .maybeSingle()
+
+              if (widgetType) {
+                const { data: widget } = await supabase
+                  .from("widget_instances")
+                  .select("props")
+                  .eq("page_id", page.id)
+                  .eq("widget_type_id", widgetType.id)
+                  .maybeSingle()
+
+                if (widget?.props) {
+                  console.log("[v0] EventsRightColumn loaded from database:", widget.props)
+                  setSavedPortfolio({
+                    name: widget.props.name || portfolio.name,
+                    handle: widget.props.handle || "",
+                    avatarUrl: widget.props.avatarUrl,
+                    selectedColor: typeof widget.props.selectedColor === "number" ? widget.props.selectedColor : 3,
+                    isLive: portfolio.is_public,
+                    // Add default values for required fields
+                    title: widget.props.title || "Portfolio",
+                    email: widget.props.email || user.email,
+                    location: widget.props.location || "Location",
+                    industry: "",
+                    skills: [],
+                    goals: [],
+                    linkedinUrl: widget.props.linkedin || "",
+                    websiteUrl: "",
+                    twitterUrl: widget.props.twitter || "",
+                  })
+                  return
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("[v0] Failed to load from database, falling back to localStorage:", error)
+        }
+      }
+
+      // Fallback to localStorage
       const savedData = localStorage.getItem("bea_portfolio_data")
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData)
+          console.log("[v0] EventsRightColumn loaded from localStorage:", parsed)
           setSavedPortfolio(parsed)
         } catch (error) {
           console.error("Failed to parse saved portfolio data:", error)
@@ -41,7 +112,6 @@ export default function EventsRightColumn() {
       }
     }
 
-    // Load on mount
     loadPortfolioData()
 
     // Listen for storage events (when localStorage changes in another tab/window)
@@ -70,7 +140,7 @@ export default function EventsRightColumn() {
       window.removeEventListener("focus", handleFocus)
       window.removeEventListener("portfolio-updated", handlePortfolioUpdate)
     }
-  }, [])
+  }, [user?.id]) // Add user.id as dependency
 
   const userPortfolio: UnifiedPortfolio | null = savedPortfolio
     ? {

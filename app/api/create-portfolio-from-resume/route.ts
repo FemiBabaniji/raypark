@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { nanoid } from "nanoid"
 
 type ParsedResume = {
   personalInfo: {
@@ -114,11 +115,16 @@ export async function POST(request: NextRequest) {
       console.log("[v0] ⚠️ Page already exists, using:", existingPage.id)
       pageId = existingPage.id
     } else {
+      const pageKey = `page_${nanoid(12)}`
+      console.log("[v0] 🔑 Generated page key:", pageKey)
+
       const { data: page, error: pageError } = await supabase
         .from("pages")
         .insert({
           portfolio_id: portfolio.id,
           route: "/",
+          key: pageKey,
+          title: portfolioName,
         })
         .select("id")
         .single()

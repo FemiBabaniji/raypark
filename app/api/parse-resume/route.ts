@@ -138,18 +138,36 @@ Return only the JSON object, no markdown formatting or additional text.`,
 }
 
 async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
-  // Simple PDF text extraction
-  // In production, you'd use a library like pdf-parse or pdfjs-dist
-  // For now, we'll convert buffer to string and extract visible text
-
   const uint8Array = new Uint8Array(buffer)
-  const decoder = new TextDecoder("utf-8")
-  let text = decoder.decode(uint8Array)
+  let text = ""
 
-  // Remove PDF binary markers and extract readable text
-  // This is a simplified approach - in production use proper PDF parsing
-  text = text.replace(/[\x00-\x1F\x7F-\x9F]/g, " ")
-  text = text.replace(/\s+/g, " ")
+  // Try UTF-8 decoding first
+  try {
+    const decoder = new TextDecoder("utf-8")
+    text = decoder.decode(uint8Array)
+  } catch {
+    // Fallback to latin1 if UTF-8 fails
+    const decoder = new TextDecoder("latin1")
+    text = decoder.decode(uint8Array)
+  }
 
-  return text.trim()
+  // Extract text between PDF stream objects
+  // PDF format stores text in content streams
+  const textMatches = text.match(/$$([^)]+)$$/g) || []
+  const extractedText = textMatches.map((match) => match.replace(/[()]/g, "")).join(" ")
+
+  // Also extract text after "Tj" operators (text showing commands)
+  const tjMatches = text.match(/\[([^\]]+)\]\s*TJ/g) || []
+  const tjText = tjMatches.map((match) => match.replace(/[[\]]/g, "").replace(/TJ/g, "")).join(" ")
+
+  // Combine both extraction methods
+  const combinedText = (extractedText + " " + tjText)
+    .replace(/[\x00-\x1F\x7F-\x9F]/g, " ") // Remove control characters
+    .replace(/\\[nrt]/g, " ") // Remove escape sequences
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim()
+
+  console.log("[v0] 📝 Extracted text preview:", combinedText.substring(0, 200))
+
+  return combinedText
 }

@@ -171,8 +171,12 @@ export default function PortfolioBuilder({
   const [hasInitialized, setHasInitialized] = useState(false)
 
   const debouncedSave = useCallback(async () => {
-    if (!hasInitialized || !user?.id) return
+    if (!hasInitialized || !user?.id) {
+      console.log("[v0] Skipping save - not initialized or no user")
+      return
+    }
 
+    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout)
     }
@@ -181,6 +185,7 @@ export default function PortfolioBuilder({
       try {
         console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
+        console.log("[v0] Portfolio ID:", id)
 
         // Save portfolio metadata
         await updatePortfolioById(id, {
@@ -189,6 +194,7 @@ export default function PortfolioBuilder({
           theme_id: state.theme_id,
           is_public: !!state.is_public,
         })
+        console.log("[v0] Portfolio metadata saved")
 
         const contentToSave = {
           ...widgetContent,
@@ -214,6 +220,7 @@ export default function PortfolioBuilder({
         console.log("[v0] Saving with complete content payload:", contentToSave)
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
+        // Sync to localStorage
         if (typeof window !== "undefined") {
           const savedData = localStorage.getItem("bea_portfolio_data")
           if (savedData) {
@@ -244,10 +251,11 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent, saveTimeout])
+  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent])
 
   useEffect(() => {
     if (hasInitialized) {
+      console.log("[v0] State changed, triggering debounced save")
       debouncedSave()
     }
   }, [
@@ -266,7 +274,6 @@ export default function PortfolioBuilder({
     rightWidgets,
     widgetContent,
     hasInitialized,
-    debouncedSave,
   ])
 
   useEffect(() => {

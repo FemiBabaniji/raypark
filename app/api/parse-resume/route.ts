@@ -1,52 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { spawn } from "child_process"
 
 async function extractPdfText(pdfBase64: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    console.log("[v0] 🐍 Calling Python script for PDF extraction...")
+  try {
+    console.log("[v0] 📄 Extracting text from PDF using Node.js library...")
 
-    const python = spawn("python3", ["scripts/extract_pdf_text.py"])
+    // Dynamic import of pdf-parse
+    const pdfParse = (await import("pdf-parse")).default
 
-    let output = ""
-    let errorOutput = ""
+    // Convert base64 to buffer
+    const pdfBuffer = Buffer.from(pdfBase64, "base64")
+    console.log("[v0] 📄 PDF buffer size:", pdfBuffer.length, "bytes")
 
-    python.stdout.on("data", (data) => {
-      output += data.toString()
-    })
+    // Parse PDF
+    const data = await pdfParse(pdfBuffer)
 
-    python.stderr.on("data", (data) => {
-      errorOutput += data.toString()
-      console.error("[v0] Python stderr:", data.toString())
-    })
+    console.log("[v0] ✅ PDF parsed successfully")
+    console.log("[v0] 📄 Pages:", data.numpages)
+    console.log("[v0] 📄 Text length:", data.text.length)
 
-    python.on("close", (code) => {
-      if (code !== 0) {
-        console.error("[v0] ❌ Python script failed with code:", code)
-        console.error("[v0] Error output:", errorOutput)
-        reject(new Error("PDF extraction failed"))
-        return
-      }
-
-      try {
-        const result = JSON.parse(output)
-        if (result.success) {
-          console.log("[v0] ✅ PDF extracted successfully, length:", result.length)
-          resolve(result.text)
-        } else {
-          console.error("[v0] ❌ PDF extraction failed:", result.error)
-          reject(new Error(result.error))
-        }
-      } catch (e) {
-        console.error("[v0] ❌ Failed to parse Python output:", e)
-        reject(new Error("Failed to parse PDF extraction result"))
-      }
-    })
-
-    // Send PDF data to Python script
-    python.stdin.write(JSON.stringify({ pdf_base64: pdfBase64 }))
-    python.stdin.end()
-  })
+    return data.text
+  } catch (error: any) {
+    console.error("[v0] ❌ PDF parsing failed:", error.message)
+    throw new Error("Could not extract text from PDF. Please ensure it is a text-based PDF, not a scanned image.")
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -62,7 +39,7 @@ export async function POST(request: NextRequest) {
       console.log("[v0] 📄 PDF file received:", filename)
       console.log("[v0] 📄 Base64 length:", pdfBase64.length)
 
-      const estimatedSizeMB = (pdfBase64.length * 0.75) / (1024 * 1024) // base64 is ~33% larger
+      const estimatedSizeMB = (pdfBase64.length * 0.75) / (1024 * 1024)
       console.log("[v0] 📄 Estimated PDF size:", estimatedSizeMB.toFixed(2), "MB")
 
       if (estimatedSizeMB > 10) {
@@ -78,7 +55,7 @@ export async function POST(request: NextRequest) {
       } catch (error: any) {
         console.error("[v0] ❌ PDF extraction failed:", error)
         return NextResponse.json(
-          { error: "Could not extract text from PDF. Please ensure it is a text-based PDF, not a scanned image." },
+          { error: error.message || "Could not extract text from PDF. Please try pasting your resume text instead." },
           { status: 400 },
         )
       }
@@ -162,10 +139,8 @@ Return only the JSON object, no markdown formatting or additional text.`,
     console.log("[v0] 📄 Raw AI response:")
     console.log(parsedJson)
 
-    // Parse the JSON response
     let parsedData
     try {
-      // Remove any markdown code blocks if present
       const cleanJson = parsedJson.replace(/```json\n?|\n?```/g, "").trim()
       parsedData = JSON.parse(cleanJson)
 
@@ -178,7 +153,6 @@ Return only the JSON object, no markdown formatting or additional text.`,
       return NextResponse.json({ error: "Failed to parse resume data. Please try again." }, { status: 500 })
     }
 
-    // Validate required fields
     if (!parsedData.personalInfo?.name) {
       console.log("[v0] ❌ No name found in parsed data")
       return NextResponse.json(

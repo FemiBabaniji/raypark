@@ -142,6 +142,10 @@ export default function EventsRightColumn() {
     }
   }, [user?.id]) // Add user.id as dependency
 
+  const handleEditProfile = () => {
+    router.push("/portfolio/builder")
+  }
+
   const userPortfolio: UnifiedPortfolio | null = savedPortfolio
     ? {
         id: user?.id || "saved-portfolio",
@@ -176,7 +180,9 @@ export default function EventsRightColumn() {
         <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-1 text-white">Your Profile</h3>
-            <p className="text-xs text-zinc-400">Customize who you are and what you represent</p>
+            <p className="text-xs text-zinc-400">
+              {user ? "Customize who you are and what you represent" : "Sign in to save your profile permanently"}
+            </p>
           </div>
 
           {loading ? (
@@ -189,7 +195,7 @@ export default function EventsRightColumn() {
             <div className="mb-4">
               <UnifiedPortfolioCard
                 portfolio={userPortfolio}
-                onClick={(id) => router.push("/portfolio/builder")}
+                onClick={(id) => handleEditProfile()}
                 onShare={(id) => console.log("Share profile:", id)}
                 onMore={(id) => console.log("More options:", id)}
               />
@@ -204,10 +210,10 @@ export default function EventsRightColumn() {
           )}
 
           <button
-            onClick={() => router.push("/portfolio/builder")}
+            onClick={handleEditProfile}
             className="w-full py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 bg-zinc-800/60 text-white"
           >
-            Edit Profile
+            {user ? "Edit Profile" : "Create Profile"}
           </button>
         </div>
 

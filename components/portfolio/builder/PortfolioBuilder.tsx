@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Reorder, motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -252,6 +252,10 @@ export default function PortfolioBuilder({
         console.error("[v0] ❌ Failed to load portfolio data:", error)
       } finally {
         setIsLoadingData(false)
+        setTimeout(() => {
+          setHasInitialized(true)
+          console.log("[v0] ✅ Auto-save enabled")
+        }, 100)
       }
     }
 
@@ -269,8 +273,8 @@ export default function PortfolioBuilder({
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
 
-  const debouncedSave = useCallback(async () => {
-    if (!user?.id || !hasInitialized || isLoadingData) {
+  useEffect(() => {
+    if (!hasInitialized || isLoadingData || !user?.id) {
       return
     }
 
@@ -321,10 +325,19 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
+
+    // Cleanup
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
   }, [
     hasInitialized,
+    isLoadingData,
     user,
-    state,
+    state.name,
+    state.description,
+    state.theme_id,
+    state.is_public,
     identity,
     leftWidgets,
     rightWidgets,
@@ -332,32 +345,6 @@ export default function PortfolioBuilder({
     projectColors,
     widgetColors,
     galleryGroups,
-    isLoadingData,
-  ])
-
-  useEffect(() => {
-    if (hasInitialized) {
-      debouncedSave()
-    }
-  }, [
-    state.name,
-    state.description,
-    state.theme_id,
-    state.is_public,
-    identity.name,
-    identity.handle,
-    identity.avatar,
-    identity.selectedColor,
-    identity.bio,
-    identity.email,
-    identity.location,
-    leftWidgets,
-    rightWidgets,
-    widgetContent,
-    projectColors,
-    widgetColors,
-    galleryGroups,
-    hasInitialized,
   ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {

@@ -12,7 +12,7 @@ import { loadUserPortfolios, getIdentityProps, normalizeHandle } from "@/lib/por
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [activeIdentity, setActiveIdentity] = useState<{
     id: string
@@ -35,120 +35,67 @@ export default function PortfolioBuilderPage() {
 
     async function loadPortfolio() {
       console.log("[v0] ========== LOADING PORTFOLIO FOR BUILDER ==========")
+      console.log("[v0] Auth loading:", loading, "| User exists:", !!user)
 
-      console.log("[v0] User object exists:", !!user)
-      console.log("[v0] User ID:", user?.id)
-      console.log("[v0] User name:", user?.name)
-      console.log("[v0] User email:", user?.email)
+      if (!loading && user) {
+        try {
+          console.log("[v0] 🔍 Authenticated user - fetching from database")
+          const portfolios = await loadUserPortfolios(user)
+          console.log("[v0] ✅ Found", portfolios.length, "portfolios")
 
-      if (!user) {
-        console.warn("[v0] ⚠️ No user found, falling back to localStorage")
-        const savedData = localStorage.getItem("bea_portfolio_data")
-        if (savedData) {
-          try {
-            const parsed = JSON.parse(savedData)
-            console.log("[v0] Loaded from localStorage:", parsed)
+          if (portfolios.length > 0) {
+            const beaPortfolio = portfolios.find((p: any) => p.community_id)
+            const portfolio = beaPortfolio || portfolios[0]
 
-            const colorValue = typeof parsed.selectedColor === "number" ? parsed.selectedColor : 3
+            console.log("[v0] 📋 Selected portfolio:", portfolio.id, "| BEA:", !!beaPortfolio)
 
-            setActiveIdentity({
-              id: parsed.id || "bea-portfolio",
-              name: parsed.name || "",
-              handle: normalizeHandle(parsed.handle),
-              avatarUrl: parsed.avatarUrl,
-              selectedColor: colorValue as ThemeIndex,
-            })
-            setIsLive(parsed.isLive || false)
-          } catch (error) {
-            console.error("[v0] Failed to parse localStorage:", error)
+            const identity = await getIdentityProps(portfolio.id)
+            console.log("[v0] Identity props:", identity)
+
+            if (identity) {
+              const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
+              console.log("[v0] 🎨 Color from DB:", identity.selectedColor, "→", colorValue)
+
+              const loadedIdentity = {
+                id: portfolio.id,
+                name: identity.name || portfolio.name || "",
+                handle: normalizeHandle(identity.handle),
+                avatarUrl: identity.avatarUrl,
+                selectedColor: colorValue as ThemeIndex,
+              }
+
+              console.log("[v0] ✅ Loading identity from database")
+              setActiveIdentity(loadedIdentity)
+              setIsLive(Boolean((portfolio as any).is_public))
+
+              // Sync to localStorage
+              localStorage.setItem(
+                "bea_portfolio_data",
+                JSON.stringify({
+                  ...loadedIdentity,
+                  isLive: (portfolio as any).is_public,
+                  _source: "database",
+                }),
+              )
+              console.log("[v0] ✅ Synced to localStorage")
+              return
+            }
           }
+        } catch (error) {
+          console.error("[v0] ❌ Database load failed:", error)
         }
-        return
       }
 
-      try {
-        console.log("[v0] 🔍 Fetching portfolios from database for user:", user.id)
-        const portfolios = await loadUserPortfolios(user)
-        console.log("[v0] ✅ Database query successful, found", portfolios.length, "portfolios")
-
-        if (portfolios.length > 0) {
-          const beaPortfolio = portfolios.find((p: any) => p.community_id)
-          const portfolio = beaPortfolio || portfolios[0]
-
-          console.log("[v0] 📋 Selected portfolio:", {
-            id: portfolio.id,
-            name: portfolio.name,
-            community_id: (portfolio as any).community_id,
-            is_bea: !!beaPortfolio,
-            is_public: (portfolio as any).is_public,
-          })
-
-          console.log("[v0] 🔍 Fetching identity props for portfolio:", portfolio.id)
-          const identity = await getIdentityProps(portfolio.id)
-          console.log("[v0] ✅ Identity props loaded from database:", identity)
-
-          if (identity) {
-            const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
-            console.log("[v0] 🎨 selectedColor from database:", identity.selectedColor, "→", colorValue)
-
-            const loadedIdentity = {
-              id: portfolio.id,
-              name: identity.name || portfolio.name || "",
-              handle: normalizeHandle(identity.handle),
-              avatarUrl: identity.avatarUrl,
-              selectedColor: colorValue as ThemeIndex,
-            }
-
-            console.log("[v0] 💾 Setting identity state from database:", loadedIdentity)
-            setActiveIdentity(loadedIdentity)
-            setIsLive(Boolean((portfolio as any).is_public))
-
-            const syncData = {
-              ...loadedIdentity,
-              isLive: (portfolio as any).is_public,
-              _source: "database",
-              _timestamp: Date.now(),
-            }
-            localStorage.setItem("bea_portfolio_data", JSON.stringify(syncData))
-            console.log("[v0] ✅ Synced database data to localStorage")
-
-            return
-          } else {
-            console.warn("[v0] ⚠️ No identity widget found, using portfolio metadata")
-            const fallbackIdentity = {
-              id: portfolio.id,
-              name: portfolio.name || "",
-              handle: portfolio.name?.toLowerCase().replace(/\s+/g, "") || "",
-              selectedColor: 3 as ThemeIndex,
-            }
-            setActiveIdentity(fallbackIdentity)
-            setIsLive(Boolean((portfolio as any).is_public))
-
-            localStorage.setItem(
-              "bea_portfolio_data",
-              JSON.stringify({ ...fallbackIdentity, isLive: (portfolio as any).is_public, _source: "fallback" }),
-            )
-            return
-          }
-        } else {
-          console.warn("[v0] ⚠️ No portfolios found for user in database")
-        }
-      } catch (error) {
-        console.error("[v0] ❌ Database load failed with error:", error)
-        console.error("[v0] Error details:", {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-        })
-      }
-
-      console.log("[v0] 💾 Falling back to localStorage")
+      console.log("[v0] 💾 Loading from localStorage (unauthenticated or DB failed)")
       const savedData = localStorage.getItem("bea_portfolio_data")
+
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData)
-          console.log("[v0] ✅ Loaded from localStorage:", parsed)
+          console.log("[v0] ✅ localStorage data found:", parsed)
 
           const colorValue = typeof parsed.selectedColor === "number" ? parsed.selectedColor : 3
+          console.log("[v0] 🎨 Color from localStorage:", parsed.selectedColor, "→", colorValue)
 
           setActiveIdentity({
             id: parsed.id || "bea-portfolio",
@@ -158,14 +105,15 @@ export default function PortfolioBuilderPage() {
             selectedColor: colorValue as ThemeIndex,
           })
           setIsLive(parsed.isLive || false)
+          console.log("[v0] ✅ Portfolio loaded from localStorage")
           return
         } catch (error) {
           console.error("[v0] ❌ Failed to parse localStorage:", error)
         }
       }
 
+      console.log("[v0] 🆘 No data found - using default template")
       if (user) {
-        console.log("[v0] 🆘 Final fallback to user profile")
         setActiveIdentity({
           id: "bea-portfolio",
           name: user.name || "",
@@ -178,7 +126,7 @@ export default function PortfolioBuilderPage() {
     }
 
     loadPortfolio()
-  }, [user])
+  }, [user, loading])
 
   const handleIdentityChange = (
     next: Partial<{
@@ -188,27 +136,26 @@ export default function PortfolioBuilderPage() {
       selectedColor: ThemeIndex
     }>,
   ) => {
-    console.log("[v0] Identity change triggered:", next)
-    console.log("[v0] selectedColor in change:", next.selectedColor, typeof next.selectedColor)
+    console.log("[v0] 🔄 Identity change:", next)
 
     setActiveIdentity((prev) => {
       const merged = { ...prev, ...next }
 
-      if (JSON.stringify(merged) !== JSON.stringify(prev)) {
-        try {
-          const existing = localStorage.getItem("bea_portfolio_data")
-          const base = existing ? JSON.parse(existing) : {}
-          const updated = { ...base, ...merged, _ts: Date.now() }
-          localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
+      // Always save to localStorage for immediate persistence
+      try {
+        const existing = localStorage.getItem("bea_portfolio_data")
+        const base = existing ? JSON.parse(existing) : {}
+        const updated = { ...base, ...merged, _timestamp: Date.now() }
+        localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
+        console.log("[v0] ✅ Saved to localStorage")
 
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new Event("portfolio-updated"))
-          }
-
-          console.log("[v0] ✅ Identity saved to localStorage:", updated)
-        } catch (error) {
-          console.error("[v0] Failed to save portfolio data to localStorage:", error)
+        // Notify other components
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("portfolio-updated"))
+          window.dispatchEvent(new Event("storage"))
         }
+      } catch (error) {
+        console.error("[v0] ❌ localStorage save failed:", error)
       }
 
       return merged
@@ -216,18 +163,21 @@ export default function PortfolioBuilderPage() {
   }
 
   const handleToggleLive = (newIsLive: boolean) => {
+    console.log("[v0] 🔄 Toggle live:", newIsLive)
     setIsLive(newIsLive)
 
     try {
       const existing = localStorage.getItem("bea_portfolio_data")
       const base = existing ? JSON.parse(existing) : {}
-      localStorage.setItem("bea_portfolio_data", JSON.stringify({ ...base, isLive: newIsLive, _ts: Date.now() }))
+      localStorage.setItem("bea_portfolio_data", JSON.stringify({ ...base, isLive: newIsLive, _timestamp: Date.now() }))
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("portfolio-updated"))
+        window.dispatchEvent(new Event("storage"))
       }
+      console.log("[v0] ✅ Live status saved")
     } catch (error) {
-      console.error("[v0] Failed to save live status:", error)
+      console.error("[v0] ❌ Failed to save live status:", error)
     }
   }
 

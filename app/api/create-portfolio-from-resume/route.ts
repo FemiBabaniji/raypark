@@ -47,19 +47,39 @@ export async function POST(request: NextRequest) {
   try {
     const { parsedData, userId }: { parsedData: ParsedResume; userId: string } = await request.json()
 
-    console.log("[v0] Creating portfolio for user:", userId)
+    console.log("[v0] ========== PORTFOLIO CREATION STARTED ==========")
+    console.log("[v0] 👤 User ID:", userId)
+    console.log("[v0] 📊 Parsed data received:", JSON.stringify(parsedData, null, 2))
 
     if (!parsedData || !userId) {
+      console.log("[v0] ❌ Missing required data")
       return NextResponse.json({ error: "Missing required data" }, { status: 400 })
     }
 
     const supabase = await createClient()
+
+    const { data: existingPortfolio } = await supabase
+      .from("portfolios")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle()
+
+    if (existingPortfolio) {
+      console.log("[v0] ⚠️ User already has portfolio:", existingPortfolio.id)
+      return NextResponse.json({
+        success: true,
+        portfolioId: existingPortfolio.id,
+        message: "Using existing portfolio",
+      })
+    }
 
     const portfolioName = parsedData.personalInfo.name || "My Portfolio"
     const slug = portfolioName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
+
+    console.log("[v0] 📝 Creating portfolio with name:", portfolioName, "slug:", slug)
 
     const { data: portfolio, error: portfolioError } = await supabase
       .from("portfolios")
@@ -75,34 +95,50 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (portfolioError) {
-      console.error("[v0] Portfolio creation error:", portfolioError)
+      console.error("[v0] ❌ Portfolio creation error:", portfolioError)
       return NextResponse.json({ error: "Failed to create portfolio" }, { status: 500 })
     }
 
-    console.log("[v0] Portfolio created:", portfolio.id)
+    console.log("[v0] ✅ Portfolio created:", portfolio.id)
 
-    const { data: page, error: pageError } = await supabase
+    const { data: existingPage } = await supabase
       .from("pages")
-      .insert({
-        portfolio_id: portfolio.id,
-        key: "main",
-        route: "/",
-      })
       .select("id")
-      .single()
+      .eq("portfolio_id", portfolio.id)
+      .eq("route", "/")
+      .maybeSingle()
 
-    if (pageError) {
-      console.error("[v0] Page creation error:", pageError)
-      return NextResponse.json({ error: `Failed to create page: ${pageError.message}` }, { status: 500 })
+    let pageId: string
+
+    if (existingPage) {
+      console.log("[v0] ⚠️ Page already exists, using:", existingPage.id)
+      pageId = existingPage.id
+    } else {
+      const { data: page, error: pageError } = await supabase
+        .from("pages")
+        .insert({
+          portfolio_id: portfolio.id,
+          route: "/",
+        })
+        .select("id")
+        .single()
+
+      if (pageError) {
+        console.error("[v0] ❌ Page creation error:", pageError)
+        return NextResponse.json({ error: `Failed to create page: ${pageError.message}` }, { status: 500 })
+      }
+
+      console.log("[v0] ✅ Page created:", page.id)
+      pageId = page.id
     }
-
-    console.log("[v0] Page created:", page.id)
 
     const leftWidgets = ["identity", "education"]
     const rightWidgets = ["description", "projects", "services", "meeting-scheduler"]
 
-    const { error: layoutError } = await supabase.from("page_layouts").insert({
-      page_id: page.id,
+    console.log("[v0] 📐 Creating layout with widgets:", { left: leftWidgets, right: rightWidgets })
+
+    const { error: layoutError } = await supabase.from("page_layouts").upsert({
+      page_id: pageId,
       layout: {
         left: { type: "vertical", widgets: leftWidgets },
         right: { type: "vertical", widgets: rightWidgets },
@@ -110,16 +146,17 @@ export async function POST(request: NextRequest) {
     })
 
     if (layoutError) {
-      console.error("[v0] Layout creation error:", layoutError)
+      console.error("[v0] ❌ Layout creation error:", layoutError)
       return NextResponse.json({ error: `Failed to create layout: ${layoutError.message}` }, { status: 500 })
     }
 
-    console.log("[v0] Layout created for page:", page.id)
+    console.log("[v0] ✅ Layout created for page:", pageId)
 
     const widgetInstances = []
 
+    console.log("[v0] 🎨 Creating identity widget with data:", parsedData.personalInfo)
     widgetInstances.push({
-      page_id: page.id,
+      page_id: pageId,
       key: "identity",
       props: {
         name: parsedData.personalInfo.name,
@@ -138,8 +175,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (parsedData.education && parsedData.education.length > 0) {
+      console.log("[v0] 🎓 Creating education widget with", parsedData.education.length, "items")
       widgetInstances.push({
-        page_id: page.id,
+        page_id: pageId,
         key: "education",
         props: {
           title: "Education",
@@ -153,8 +191,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    console.log("[v0] 📄 Creating description widget")
     widgetInstances.push({
-      page_id: page.id,
+      page_id: pageId,
       key: "description",
       props: {
         title: "About Me",
@@ -163,8 +202,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (parsedData.projects && parsedData.projects.length > 0) {
+      console.log("[v0] 🚀 Creating projects widget with", parsedData.projects.length, "projects")
       widgetInstances.push({
-        page_id: page.id,
+        page_id: pageId,
         key: "projects",
         props: {
           title: "Featured Projects",
@@ -181,9 +221,10 @@ export async function POST(request: NextRequest) {
 
     if (parsedData.skills) {
       const allSkills = [...(parsedData.skills.technical || []), ...(parsedData.skills.soft || [])]
+      console.log("[v0] 💼 Creating skills widget with", allSkills.length, "skills")
 
       widgetInstances.push({
-        page_id: page.id,
+        page_id: pageId,
         key: "services",
         props: {
           title: "Skills",
@@ -192,31 +233,37 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    console.log("[v0] 📅 Creating meeting scheduler widget")
     widgetInstances.push({
-      page_id: page.id,
+      page_id: pageId,
       key: "meeting-scheduler",
       props: {
         selectedColor: 5,
       },
     })
 
-    console.log("[v0] Inserting widgets:", widgetInstances.length)
+    console.log("[v0] 💾 Inserting", widgetInstances.length, "widget instances")
 
-    const { error: widgetError } = await supabase.from("widget_instances").insert(widgetInstances)
+    const { error: widgetError } = await supabase.from("widget_instances").upsert(widgetInstances, {
+      onConflict: "page_id,key",
+    })
 
     if (widgetError) {
-      console.error("[v0] Widget creation error:", widgetError)
+      console.error("[v0] ❌ Widget creation error:", widgetError)
       return NextResponse.json({ error: `Failed to create widgets: ${widgetError.message}` }, { status: 500 })
     }
 
-    console.log("[v0] Portfolio creation complete:", portfolio.id)
+    console.log("[v0] ✅ All widgets created successfully")
+    console.log("[v0] ========== PORTFOLIO CREATION COMPLETE ==========")
+    console.log("[v0] 🎉 Portfolio ID:", portfolio.id)
 
     return NextResponse.json({
       success: true,
       portfolioId: portfolio.id,
     })
   } catch (error: any) {
-    console.error("[v0] Portfolio creation error:", error)
+    console.error("[v0] ❌ Portfolio creation error:", error)
+    console.error("[v0] Error stack:", error.stack)
     return NextResponse.json({ error: error.message || "Failed to create portfolio" }, { status: 500 })
   }
 }

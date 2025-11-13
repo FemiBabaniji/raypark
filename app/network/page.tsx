@@ -7,7 +7,7 @@ export default function NetworkPage() {
 
   const handleCommunitySelect = (community: string) => {
     if (community === "Black Entrepreneurship Alliance") {
-      router.push("/onboarding/bea")
+      router.push("/bea")
     }
     // Add other community routes as needed
   }

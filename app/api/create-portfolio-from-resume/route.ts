@@ -47,6 +47,8 @@ export async function POST(request: NextRequest) {
   try {
     const { parsedData, userId }: { parsedData: ParsedResume; userId: string } = await request.json()
 
+    console.log("[v0] Creating portfolio for user:", userId)
+
     if (!parsedData || !userId) {
       return NextResponse.json({ error: "Missing required data" }, { status: 400 })
     }
@@ -77,22 +79,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create portfolio" }, { status: 500 })
     }
 
+    console.log("[v0] Portfolio created:", portfolio.id)
+
     const { data: page, error: pageError } = await supabase
       .from("pages")
       .insert({
         portfolio_id: portfolio.id,
         key: "main",
-        title: portfolioName,
         route: "/",
-        is_demo: false,
       })
       .select("id")
       .single()
 
     if (pageError) {
       console.error("[v0] Page creation error:", pageError)
-      return NextResponse.json({ error: "Failed to create page" }, { status: 500 })
+      return NextResponse.json({ error: `Failed to create page: ${pageError.message}` }, { status: 500 })
     }
+
+    console.log("[v0] Page created:", page.id)
 
     const leftWidgets = ["identity", "education"]
     const rightWidgets = ["description", "projects", "services", "meeting-scheduler"]
@@ -107,42 +111,36 @@ export async function POST(request: NextRequest) {
 
     if (layoutError) {
       console.error("[v0] Layout creation error:", layoutError)
-      return NextResponse.json({ error: "Failed to create layout" }, { status: 500 })
+      return NextResponse.json({ error: `Failed to create layout: ${layoutError.message}` }, { status: 500 })
     }
 
-    const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
-    const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
+    console.log("[v0] Layout created for page:", page.id)
 
     const widgetInstances = []
 
-    // Identity widget
-    if (keyToId["identity"]) {
-      widgetInstances.push({
-        page_id: page.id,
-        widget_type_id: keyToId["identity"],
-        props: {
-          name: parsedData.personalInfo.name,
-          handle:
-            parsedData.personalInfo.email?.split("@")[0] ||
-            parsedData.personalInfo.name.toLowerCase().replace(/\s+/g, ""),
-          title: parsedData.experience?.[0]?.position || "Professional",
-          bio: parsedData.personalInfo.summary || "",
-          email: parsedData.personalInfo.email || "",
-          location: parsedData.personalInfo.location || "",
-          linkedin: parsedData.personalInfo.linkedin || "",
-          github: parsedData.personalInfo.github || "",
-          website: parsedData.personalInfo.website || "",
-          selectedColor: 5,
-        },
-        enabled: true,
-      })
-    }
+    widgetInstances.push({
+      page_id: page.id,
+      key: "identity",
+      props: {
+        name: parsedData.personalInfo.name,
+        handle:
+          parsedData.personalInfo.email?.split("@")[0] ||
+          parsedData.personalInfo.name.toLowerCase().replace(/\s+/g, ""),
+        title: parsedData.experience?.[0]?.position || "Professional",
+        bio: parsedData.personalInfo.summary || "",
+        email: parsedData.personalInfo.email || "",
+        location: parsedData.personalInfo.location || "",
+        linkedin: parsedData.personalInfo.linkedin || "",
+        github: parsedData.personalInfo.github || "",
+        website: parsedData.personalInfo.website || "",
+        selectedColor: 5,
+      },
+    })
 
-    // Education widget
-    if (keyToId["education"] && parsedData.education && parsedData.education.length > 0) {
+    if (parsedData.education && parsedData.education.length > 0) {
       widgetInstances.push({
         page_id: page.id,
-        widget_type_id: keyToId["education"],
+        key: "education",
         props: {
           title: "Education",
           items: parsedData.education.map((edu) => ({
@@ -152,31 +150,25 @@ export async function POST(request: NextRequest) {
             description: edu.gpa ? `GPA: ${edu.gpa}` : "",
           })),
         },
-        enabled: true,
       })
     }
 
-    // Description/About widget
-    if (keyToId["description"]) {
-      widgetInstances.push({
-        page_id: page.id,
-        widget_type_id: keyToId["description"],
-        props: {
-          title: "About Me",
-          content: parsedData.personalInfo.summary || "Professional with diverse experience and skills.",
-        },
-        enabled: true,
-      })
-    }
+    widgetInstances.push({
+      page_id: page.id,
+      key: "description",
+      props: {
+        title: "About Me",
+        content: parsedData.personalInfo.summary || "Professional with diverse experience and skills.",
+      },
+    })
 
-    // Projects widget
-    if (keyToId["projects"] && parsedData.projects && parsedData.projects.length > 0) {
+    if (parsedData.projects && parsedData.projects.length > 0) {
       widgetInstances.push({
         page_id: page.id,
-        widget_type_id: keyToId["projects"],
+        key: "projects",
         props: {
           title: "Featured Projects",
-          items: parsedData.projects.map((proj, idx) => ({
+          items: parsedData.projects.map((proj) => ({
             name: proj.name,
             description: proj.description,
             year: new Date().getFullYear().toString(),
@@ -184,43 +176,40 @@ export async function POST(request: NextRequest) {
             link: proj.link || "",
           })),
         },
-        enabled: true,
       })
     }
 
-    // Services/Skills widget
-    if (keyToId["services"] && parsedData.skills) {
+    if (parsedData.skills) {
       const allSkills = [...(parsedData.skills.technical || []), ...(parsedData.skills.soft || [])]
 
       widgetInstances.push({
         page_id: page.id,
-        widget_type_id: keyToId["services"],
+        key: "services",
         props: {
           title: "Skills",
-          items: allSkills.slice(0, 8), // Limit to 8 skills
+          items: allSkills.slice(0, 8),
         },
-        enabled: true,
       })
     }
 
-    // Meeting Scheduler widget (empty, user configures later)
-    if (keyToId["meeting-scheduler"]) {
-      widgetInstances.push({
-        page_id: page.id,
-        widget_type_id: keyToId["meeting-scheduler"],
-        props: {
-          selectedColor: 5,
-        },
-        enabled: true,
-      })
-    }
+    widgetInstances.push({
+      page_id: page.id,
+      key: "meeting-scheduler",
+      props: {
+        selectedColor: 5,
+      },
+    })
+
+    console.log("[v0] Inserting widgets:", widgetInstances.length)
 
     const { error: widgetError } = await supabase.from("widget_instances").insert(widgetInstances)
 
     if (widgetError) {
       console.error("[v0] Widget creation error:", widgetError)
-      return NextResponse.json({ error: "Failed to create widgets" }, { status: 500 })
+      return NextResponse.json({ error: `Failed to create widgets: ${widgetError.message}` }, { status: 500 })
     }
+
+    console.log("[v0] Portfolio creation complete:", portfolio.id)
 
     return NextResponse.json({
       success: true,

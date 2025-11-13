@@ -14,12 +14,7 @@ export default async function BeaNetworkPage() {
     redirect("/auth?redirect=/bea")
   }
 
-  const { data: portfolios, error } = await supabase.from("portfolios").select("id").eq("user_id", user.id).limit(1)
-
-  if (!error && (!portfolios || portfolios.length === 0)) {
-    // No portfolio exists, redirect to resume onboarding
-    redirect("/onboarding/resume")
-  }
+  // User can create portfolio from the UI if needed
 
   return <EventsPage />
 }

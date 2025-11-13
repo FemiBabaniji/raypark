@@ -53,7 +53,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isAuthPage = pathname === "/auth" || pathname === "/login" || pathname.startsWith("/auth/")
   const isDashboard = pathname === "/" || pathname === "/dashboard"
   const isNetworkWorkflow = pathname.startsWith("/network")
-  const shouldShowNavigation = isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow
+  const isCommunityPage = pathname === "/bea" || pathname === "/dmz"
+  const shouldShowNavigation =
+    isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow && !isCommunityPage
 
   return (
     <>

@@ -16,11 +16,7 @@ export default function EventsRightColumn() {
 
   useEffect(() => {
     async function loadBEAPortfolio() {
-      console.log("[v0] ========== EVENTS PAGE: LOADING PORTFOLIO ==========")
-      console.log("[v0] User:", user?.id, user?.email)
-
       if (!user?.id) {
-        console.log("[v0] ❌ No authenticated user, skipping portfolio load")
         setPortfolioLoading(false)
         setHasPortfolio(false)
         setPortfolio(null)
@@ -32,7 +28,6 @@ export default function EventsRightColumn() {
       try {
         const supabase = createClient()
 
-        console.log("[v0] Step 1: Querying portfolios for user:", user.id)
         const { data: portfolios, error: portfoliosError } = await supabase
           .from("portfolios")
           .select("id, name, is_public, community_id, slug")
@@ -40,17 +35,10 @@ export default function EventsRightColumn() {
           .order("updated_at", { ascending: false })
 
         if (portfoliosError) {
-          console.error("[v0] ❌ Database error loading portfolios:", portfoliosError)
           throw portfoliosError
         }
 
-        console.log("[v0] ✅ Found portfolios:", portfolios?.length || 0)
-        portfolios?.forEach((p, i) => {
-          console.log(`[v0]   Portfolio ${i + 1}:`, p.name, "| community_id:", p.community_id)
-        })
-
         if (!portfolios || portfolios.length === 0) {
-          console.log("[v0] No portfolio found for this user")
           setHasPortfolio(false)
           setPortfolio(null)
           setPortfolioLoading(false)
@@ -61,10 +49,7 @@ export default function EventsRightColumn() {
         const beaPortfolio = portfolios.find((p) => p.community_id)
         const targetPortfolio = beaPortfolio || portfolios[0]
 
-        console.log("[v0] Step 2: Selected portfolio:", targetPortfolio.id, "| Is BEA:", !!beaPortfolio)
-
         // Get page ID
-        console.log("[v0] Step 3: Fetching page for portfolio:", targetPortfolio.id)
         const { data: page, error: pageError } = await supabase
           .from("pages")
           .select("id")
@@ -73,7 +58,6 @@ export default function EventsRightColumn() {
           .maybeSingle()
 
         if (pageError || !page) {
-          console.log("[v0] ⚠️ No page found for portfolio, using basic data")
           setHasPortfolio(true)
           setPortfolio({
             id: targetPortfolio.id,
@@ -89,10 +73,7 @@ export default function EventsRightColumn() {
           return
         }
 
-        console.log("[v0] ✅ Page found:", page.id)
-
         // Get identity widget type
-        console.log("[v0] Step 4: Fetching identity widget type")
         const { data: widgetType, error: widgetTypeError } = await supabase
           .from("widget_types")
           .select("id")
@@ -100,7 +81,6 @@ export default function EventsRightColumn() {
           .maybeSingle()
 
         if (widgetTypeError || !widgetType) {
-          console.log("[v0] ⚠️ Identity widget type not found")
           setHasPortfolio(true)
           setPortfolio({
             id: targetPortfolio.id,
@@ -116,10 +96,7 @@ export default function EventsRightColumn() {
           return
         }
 
-        console.log("[v0] ✅ Identity widget type found:", widgetType.id)
-
         // Get identity widget instance
-        console.log("[v0] Step 5: Fetching identity widget instance")
         const { data: widget, error: widgetError } = await supabase
           .from("widget_instances")
           .select("props")
@@ -128,7 +105,6 @@ export default function EventsRightColumn() {
           .maybeSingle()
 
         if (widgetError || !widget?.props) {
-          console.log("[v0] ⚠️ No identity widget found or no props")
           setHasPortfolio(true)
           setPortfolio({
             id: targetPortfolio.id,
@@ -143,11 +119,6 @@ export default function EventsRightColumn() {
           setPortfolioLoading(false)
           return
         }
-
-        console.log("[v0] ✅ Identity widget props loaded:")
-        console.log("[v0]   - name:", widget.props.name)
-        console.log("[v0]   - handle:", widget.props.handle)
-        console.log("[v0]   - selectedColor:", widget.props.selectedColor, typeof widget.props.selectedColor)
 
         const loadedPortfolio: UnifiedPortfolio = {
           id: targetPortfolio.id,
@@ -161,34 +132,26 @@ export default function EventsRightColumn() {
           isLive: targetPortfolio.is_public,
         }
 
-        console.log(
-          "[v0] ✅ PORTFOLIO LOADED FROM DATABASE:",
-          loadedPortfolio.name,
-          "| Color:",
-          loadedPortfolio.selectedColor,
-        )
         setHasPortfolio(true)
         setPortfolio(loadedPortfolio)
       } catch (error) {
-        console.error("[v0] ❌ Failed to load portfolio from database:", error)
+        console.error("[v0] Failed to load portfolio:", error)
         setHasPortfolio(false)
         setPortfolio(null)
       } finally {
         setPortfolioLoading(false)
-        console.log("[v0] ========== PORTFOLIO LOAD COMPLETE ==========")
       }
     }
 
     if (!loading) {
       loadBEAPortfolio()
     }
-  }, [user?.id, loading])
+  }, [user?.id, loading, user?.email])
 
   useEffect(() => {
     if (!user?.id) return
 
     const handlePortfolioUpdate = () => {
-      console.log("[v0] Portfolio update event received, reloading...")
       // Reload will be triggered by the main useEffect
     }
 

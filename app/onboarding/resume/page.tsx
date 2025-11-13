@@ -58,87 +58,133 @@ export default function ResumeOnboardingPage() {
     setError(null)
 
     try {
-      const textToProcess = ""
+      // Added detailed step-by-step logging
+      console.log("[v0] ========== ONBOARDING FLOW STARTED ==========")
+      console.log("[v0] Step 0: User ID:", user.id)
+      console.log("[v0] Step 0: Upload mode:", uploadMode)
 
       if (uploadMode === "file" && selectedFile) {
-        console.log("[v0] Converting PDF to base64...")
-        console.log("[v0] File size:", selectedFile.size, "bytes")
+        console.log("[v0] Step 1: Converting PDF to base64...")
+        console.log("[v0] Step 1: File size:", selectedFile.size, "bytes")
 
         const arrayBuffer = await selectedFile.arrayBuffer()
         const base64 = arrayBufferToBase64(arrayBuffer)
 
-        console.log("[v0] Base64 conversion complete, length:", base64.length)
+        console.log("[v0] Step 1: Base64 conversion complete, length:", base64.length)
 
         // Send to API for extraction
+        console.log("[v0] Step 2: Calling /api/parse-resume...")
         const parseResponse = await fetch("/api/parse-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pdfBase64: base64, filename: selectedFile.name }),
         })
 
+        console.log("[v0] Step 2: Parse response status:", parseResponse.status)
+
         if (!parseResponse.ok) {
           const errorData = await parseResponse.json()
+          console.error("[v0] Step 2: Parse failed with error:", errorData)
           throw new Error(errorData.error || "Failed to parse resume")
         }
 
-        const { data: parsedData } = await parseResponse.json()
-        console.log("[v0] Resume parsed successfully:", parsedData)
+        const parseResult = await parseResponse.json()
+        console.log("[v0] Step 2: Parse result:", parseResult)
+
+        const parsedData = parseResult.data
+        console.log("[v0] Step 2: ✅ Resume parsed successfully")
+        console.log("[v0] Step 2: Parsed name:", parsedData?.personalInfo?.name)
 
         // Create portfolio from parsed data
+        console.log("[v0] Step 3: Calling /api/create-portfolio-from-resume...")
+        console.log("[v0] Step 3: Sending parsedData:", JSON.stringify(parsedData, null, 2))
+        console.log("[v0] Step 3: Sending userId:", user.id)
+
         const createResponse = await fetch("/api/create-portfolio-from-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ parsedData, userId: user.id }),
         })
 
+        console.log("[v0] Step 3: Create response status:", createResponse.status)
+
         if (!createResponse.ok) {
           const errorData = await createResponse.json()
+          console.error("[v0] Step 3: Creation failed with error:", errorData)
           throw new Error(errorData.error || "Failed to create portfolio")
         }
 
-        const { portfolioId } = await createResponse.json()
-        console.log("[v0] Portfolio created successfully:", portfolioId)
+        const createResult = await createResponse.json()
+        console.log("[v0] Step 3: Create result:", createResult)
+
+        const portfolioId = createResult.portfolioId
+        console.log("[v0] Step 3: ✅ Portfolio created successfully:", portfolioId)
 
         // Redirect to BEA page
+        console.log("[v0] Step 4: Redirecting to /bea...")
         router.push("/bea")
+        console.log("[v0] ========== ONBOARDING FLOW COMPLETE ==========")
       } else {
         // Text mode
-        console.log("[v0] Parsing resume text, length:", resumeText.length)
+        console.log("[v0] Step 1: Parsing resume text, length:", resumeText.length)
 
+        console.log("[v0] Step 2: Calling /api/parse-resume...")
         const parseResponse = await fetch("/api/parse-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: resumeText }),
         })
 
+        console.log("[v0] Step 2: Parse response status:", parseResponse.status)
+
         if (!parseResponse.ok) {
           const errorData = await parseResponse.json()
+          console.error("[v0] Step 2: Parse failed with error:", errorData)
           throw new Error(errorData.error || "Failed to parse resume")
         }
 
-        const { data: parsedData } = await parseResponse.json()
-        console.log("[v0] Resume parsed successfully:", parsedData)
+        const parseResult = await parseResponse.json()
+        console.log("[v0] Step 2: Parse result:", parseResult)
+
+        const parsedData = parseResult.data
+        console.log("[v0] Step 2: ✅ Resume parsed successfully")
+        console.log("[v0] Step 2: Parsed name:", parsedData?.personalInfo?.name)
 
         // Create portfolio from parsed data
+        console.log("[v0] Step 3: Calling /api/create-portfolio-from-resume...")
+        console.log("[v0] Step 3: Sending parsedData:", JSON.stringify(parsedData, null, 2))
+        console.log("[v0] Step 3: Sending userId:", user.id)
+
         const createResponse = await fetch("/api/create-portfolio-from-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ parsedData, userId: user.id }),
         })
 
+        console.log("[v0] Step 3: Create response status:", createResponse.status)
+
         if (!createResponse.ok) {
           const errorData = await createResponse.json()
+          console.error("[v0] Step 3: Creation failed with error:", errorData)
           throw new Error(errorData.error || "Failed to create portfolio")
         }
 
-        const { portfolioId } = await createResponse.json()
-        console.log("[v0] Portfolio created successfully:", portfolioId)
+        const createResult = await createResponse.json()
+        console.log("[v0] Step 3: Create result:", createResult)
+
+        const portfolioId = createResult.portfolioId
+        console.log("[v0] Step 3: ✅ Portfolio created successfully:", portfolioId)
 
         // Redirect to BEA page
+        console.log("[v0] Step 4: Redirecting to /bea...")
         router.push("/bea")
+        console.log("[v0] ========== ONBOARDING FLOW COMPLETE ==========")
       }
     } catch (err: any) {
-      console.error("[v0] Resume upload failed:", err)
+      console.error("[v0] ❌ ONBOARDING FLOW FAILED")
+      console.error("[v0] Error message:", err.message)
+      console.error("[v0] Error stack:", err.stack)
+      console.error("[v0] Full error object:", err)
       setError(err.message || "Something went wrong. Please try again.")
     } finally {
       setIsUploading(false)

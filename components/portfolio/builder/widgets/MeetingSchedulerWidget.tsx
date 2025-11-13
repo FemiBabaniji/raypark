@@ -16,6 +16,11 @@ import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
 
+export type MeetingSchedulerContent = {
+  mode?: "custom" | "calendly"
+  calendlyUrl?: string
+}
+
 export default function MeetingSchedulerWidget({
   widgetId,
   column,
@@ -23,6 +28,8 @@ export default function MeetingSchedulerWidget({
   onDelete,
   selectedColor = 5 as ThemeIndex,
   onColorChange,
+  content,
+  onContentChange,
 }: {
   widgetId: string
   column: "left" | "right"
@@ -30,9 +37,11 @@ export default function MeetingSchedulerWidget({
   onDelete?: () => void
   selectedColor?: ThemeIndex
   onColorChange?: (color: ThemeIndex) => void
+  content?: MeetingSchedulerContent
+  onContentChange?: (content: MeetingSchedulerContent) => void
 }) {
-  const [mode, setMode] = useState<"custom" | "calendly">("custom")
-  const [calendlyUrl, setCalendlyUrl] = useState("https://calendly.com/your-username/30min")
+  const [mode, setMode] = useState<"custom" | "calendly">(content?.mode || "custom")
+  const [calendlyUrl, setCalendlyUrl] = useState(content?.calendlyUrl || "https://calendly.com/your-username/30min")
   const [isEditingUrl, setIsEditingUrl] = useState(false)
 
   const [view, setView] = useState<"calendar" | "events" | "zones" | "slots" | "confirmation">("calendar")
@@ -44,6 +53,12 @@ export default function MeetingSchedulerWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
+
+  useEffect(() => {
+    if (onContentChange) {
+      onContentChange({ mode, calendlyUrl })
+    }
+  }, [mode, calendlyUrl, onContentChange])
 
   useEffect(() => {
     if (mode === "calendly") {

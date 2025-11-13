@@ -16,10 +16,10 @@ import {
   ServicesWidget,
   GalleryWidget,
   StartupWidget,
-  MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
+  MeetingSchedulerWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
-import type { ThemeIndex } from "@/lib/theme" // Declare ThemeIndex variable
+import type { ThemeIndex } from "@/lib/theme"
 
 type Props = {
   isPreviewMode?: boolean
@@ -72,6 +72,7 @@ export default function PortfolioBuilder({
 
   const [portfolioId, setPortfolioId] = useState<string | null>(initialPortfolio?.id ?? null)
   const createInFlight = useRef<Promise<string> | null>(null)
+  const prevUserRef = useRef(user)
 
   const draftKey = useMemo(
     () => `pf-draft:${user?.id ?? "anon"}:${initialPortfolio?.id ?? "new"}`,
@@ -171,8 +172,13 @@ export default function PortfolioBuilder({
   const [hasInitialized, setHasInitialized] = useState(false)
 
   const debouncedSave = useCallback(async () => {
-    if (!hasInitialized || !user?.id) {
-      console.log("[v0] Skipping save - not initialized or no user")
+    if (!user?.id) {
+      console.log("[v0] Skipping save - user not authenticated")
+      return
+    }
+
+    if (!hasInitialized) {
+      console.log("[v0] Skipping save - not initialized")
       return
     }
 
@@ -251,7 +257,7 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user?.id, state, identity, leftWidgets, rightWidgets, widgetContent])
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent])
 
   useEffect(() => {
     if (hasInitialized) {
@@ -299,6 +305,27 @@ export default function PortfolioBuilder({
       return [{ id: "identity", type: "identity" }, ...rest]
     })
   }, [])
+
+  useEffect(() => {
+    if (user?.id && !portfolioId && !createInFlight.current) {
+      console.log("[v0] User authenticated, initializing portfolio...")
+      ensurePortfolioId().catch((err) => {
+        console.error("[v0] Failed to initialize portfolio:", err)
+      })
+    }
+  }, [user, portfolioId])
+
+  useEffect(() => {
+    const wasUnauthenticated = !prevUserRef.current?.id
+    const isNowAuthenticated = !!user?.id
+
+    if (wasUnauthenticated && isNowAuthenticated && hasInitialized) {
+      console.log("[v0] User just authenticated, retrying save...")
+      debouncedSave()
+    }
+
+    prevUserRef.current = user
+  }, [user, hasInitialized])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget

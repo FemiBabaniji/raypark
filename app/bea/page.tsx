@@ -1,33 +1,17 @@
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 import EventsPage from "@/components/events-page"
-import { useAuth } from "@/lib/auth"
 
-export default function BeaNetworkPage() {
-  const router = useRouter()
-  const { user, loading } = useAuth()
+export const dynamic = "force-dynamic"
 
-  useEffect(() => {
-    if (!loading && !user) {
-      console.log("[v0] No authenticated user, redirecting to /auth")
-      router.push("/auth?redirect=/bea")
-    }
-  }, [user, loading, router])
+export default async function BeaNetworkPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    )
-  }
-
-  // Don't render page if not authenticated
   if (!user) {
-    return null
+    redirect("/auth?redirect=/bea")
   }
 
   return <EventsPage />

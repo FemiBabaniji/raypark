@@ -46,9 +46,14 @@ type ParsedResume = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { parsedData, userId }: { parsedData: ParsedResume; userId: string } = await request.json()
+    const {
+      parsedData,
+      userId,
+      mode = "create",
+    }: { parsedData: ParsedResume; userId: string; mode?: "create" | "update" } = await request.json()
 
     console.log("[v0] ========== PORTFOLIO CREATION STARTED ==========")
+    console.log("[v0] 🔄 Mode:", mode)
     console.log("[v0] 👤 User ID:", userId)
     console.log("[v0] 📊 Parsed name:", parsedData?.personalInfo?.name)
 
@@ -67,13 +72,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    let portfolioId: string | null = null
+
     const { data: existingPortfolio } = await supabase
       .from("portfolios")
       .select("id")
       .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
       .maybeSingle()
 
-    if (existingPortfolio) {
+    if (existingPortfolio && mode === "update") {
+      portfolioId = existingPortfolio.id
+      console.log("[v0] ⚙️ Updating existing portfolio:", portfolioId)
+    } else if (existingPortfolio && mode === "create") {
       console.log("[v0] ⚠️ User already has portfolio:", existingPortfolio.id)
       return NextResponse.json({
         success: true,
@@ -104,51 +115,73 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
 
-    console.log("[v0] 📝 Creating portfolio with name:", portfolioName, "slug:", slug)
+    if (!portfolioId) {
+      console.log("[v0] 📝 Creating portfolio with name:", portfolioName, "slug:", slug)
 
-    const { data: portfolio, error: portfolioError } = await supabase
-      .from("portfolios")
-      .insert({
-        user_id: userId,
-        name: portfolioName,
-        slug: slug,
-        description: parsedData.personalInfo.summary || `${portfolioName}'s professional portfolio`,
-        is_public: false,
-        is_demo: false,
-      })
-      .select("id")
-      .single()
+      const { data: portfolio, error: portfolioError } = await supabase
+        .from("portfolios")
+        .insert({
+          user_id: userId,
+          name: portfolioName,
+          slug: slug,
+          description: parsedData.personalInfo.summary || `${portfolioName}'s professional portfolio`,
+          is_public: false,
+          is_demo: false,
+        })
+        .select("id")
+        .single()
 
-    if (portfolioError) {
-      console.error("[v0] ❌ Portfolio creation error:", portfolioError)
-      console.error("[v0] ❌ Error code:", portfolioError.code)
-      console.error("[v0] ❌ Error message:", portfolioError.message)
-      console.error("[v0] ❌ Error details:", JSON.stringify(portfolioError, null, 2))
-      return NextResponse.json({ error: "Failed to create portfolio: " + portfolioError.message }, { status: 500 })
+      if (portfolioError) {
+        console.error("[v0] ❌ Portfolio creation error:", portfolioError)
+        console.error("[v0] ❌ Error code:", portfolioError.code)
+        console.error("[v0] ❌ Error message:", portfolioError.message)
+        console.error("[v0] ❌ Error details:", JSON.stringify(portfolioError, null, 2))
+        return NextResponse.json({ error: "Failed to create portfolio: " + portfolioError.message }, { status: 500 })
+      }
+
+      portfolioId = portfolio.id
+      console.log("[v0] ✅ Portfolio created:", portfolioId)
     }
 
-    console.log("[v0] ✅ Portfolio created:", portfolio.id)
-
     try {
-      const pageKey = `page_${nanoid(12)}`
-      console.log("[v0] 🔑 Generated page key:", pageKey)
+      let pageId: string | null = null
 
-      const pageInsertData = {
-        portfolio_id: portfolio.id,
-        route: "/",
-        key: pageKey,
-        title: portfolioName,
+      const { data: existingPage } = await supabase
+        .from("pages")
+        .select("id")
+        .eq("portfolio_id", portfolioId)
+        .eq("route", "/")
+        .maybeSingle()
+
+      if (existingPage) {
+        pageId = existingPage.id
+        console.log("[v0] ✅ Using existing page:", pageId)
+      } else {
+        const pageKey = `page_${nanoid(12)}`
+        console.log("[v0] 🔑 Generated page key:", pageKey)
+
+        const pageInsertData = {
+          portfolio_id: portfolioId,
+          route: "/",
+          key: pageKey,
+          title: portfolioName,
+        }
+        console.log("[v0] 📄 Inserting page with data:", JSON.stringify(pageInsertData, null, 2))
+
+        const { data: page, error: pageError } = await supabase
+          .from("pages")
+          .insert(pageInsertData)
+          .select("id")
+          .single()
+
+        if (pageError) {
+          console.error("[v0] ❌ Page creation error:", pageError)
+          throw new Error(`Failed to create page: ${pageError.message}`)
+        }
+
+        pageId = page.id
+        console.log("[v0] ✅ Page created:", pageId)
       }
-      console.log("[v0] 📄 Inserting page with data:", JSON.stringify(pageInsertData, null, 2))
-
-      const { data: page, error: pageError } = await supabase.from("pages").insert(pageInsertData).select("id").single()
-
-      if (pageError) {
-        console.error("[v0] ❌ Page creation error:", pageError)
-        throw new Error(`Failed to create page: ${pageError.message}`)
-      }
-
-      console.log("[v0] ✅ Page created:", page.id)
 
       const leftWidgets = ["identity", "education"]
       const rightWidgets = ["description", "projects", "services", "meeting-scheduler"]
@@ -156,8 +189,8 @@ export async function POST(request: NextRequest) {
       console.log("[v0] 📐 Creating layout with widgets:", { left: leftWidgets, right: rightWidgets })
 
       const layoutInsertData = {
-        page_id: page.id,
-        portfolio_id: portfolio.id,
+        page_id: pageId,
+        portfolio_id: portfolioId,
         layout: {
           left: { type: "vertical", widgets: leftWidgets },
           right: { type: "vertical", widgets: rightWidgets },
@@ -171,7 +204,7 @@ export async function POST(request: NextRequest) {
         throw new Error(`Failed to create layout: ${layoutError.message}`)
       }
 
-      console.log("[v0] ✅ Layout created for page:", page.id)
+      console.log("[v0] ✅ Layout created for page:", pageId)
 
       const widgetInstances = []
 
@@ -180,7 +213,7 @@ export async function POST(request: NextRequest) {
       if (identityTypeId) {
         console.log("[v0] 🎨 Creating identity widget")
         widgetInstances.push({
-          page_id: page.id,
+          page_id: pageId,
           widget_type_id: identityTypeId,
           props: {
             name: parsedData.personalInfo.name,
@@ -205,7 +238,7 @@ export async function POST(request: NextRequest) {
         if (educationTypeId) {
           console.log("[v0] 🎓 Creating education widget with", parsedData.education.length, "items")
           widgetInstances.push({
-            page_id: page.id,
+            page_id: pageId,
             widget_type_id: educationTypeId,
             props: {
               title: "Education",
@@ -225,7 +258,7 @@ export async function POST(request: NextRequest) {
       if (descriptionTypeId) {
         console.log("[v0] 📄 Creating description widget")
         widgetInstances.push({
-          page_id: page.id,
+          page_id: pageId,
           widget_type_id: descriptionTypeId,
           props: {
             title: "About Me",
@@ -240,7 +273,7 @@ export async function POST(request: NextRequest) {
         if (projectsTypeId) {
           console.log("[v0] 🚀 Creating projects widget with", parsedData.projects.length, "projects")
           widgetInstances.push({
-            page_id: page.id,
+            page_id: pageId,
             widget_type_id: projectsTypeId,
             props: {
               title: "Featured Projects",
@@ -264,7 +297,7 @@ export async function POST(request: NextRequest) {
           console.log("[v0] 💼 Creating skills widget with", allSkills.length, "skills")
 
           widgetInstances.push({
-            page_id: page.id,
+            page_id: pageId,
             widget_type_id: servicesTypeId,
             props: {
               title: "Skills",
@@ -279,7 +312,7 @@ export async function POST(request: NextRequest) {
       if (meetingTypeId) {
         console.log("[v0] 📅 Creating meeting scheduler widget")
         widgetInstances.push({
-          page_id: page.id,
+          page_id: pageId,
           widget_type_id: meetingTypeId,
           props: {
             selectedColor: 5,
@@ -288,6 +321,16 @@ export async function POST(request: NextRequest) {
       }
 
       console.log("[v0] 💾 Inserting", widgetInstances.length, "widget instances")
+
+      if (mode === "update") {
+        const { error: deleteError } = await supabase.from("widget_instances").delete().eq("page_id", pageId)
+
+        if (deleteError) {
+          console.error("[v0] ⚠️ Failed to delete old widgets:", deleteError.message)
+        } else {
+          console.log("[v0] 🗑️ Deleted old widget instances")
+        }
+      }
 
       let successCount = 0
       const errors = []
@@ -315,19 +358,23 @@ export async function POST(request: NextRequest) {
       }
 
       console.log(`[v0] ✅ ${successCount}/${widgetInstances.length} widgets created successfully`)
-      console.log("[v0] ========== PORTFOLIO CREATION COMPLETE ==========")
-      console.log("[v0] 🎉 Portfolio ID:", portfolio.id)
+      console.log("[v0] ========== PORTFOLIO", mode.toUpperCase(), "COMPLETE ==========")
+      console.log("[v0] 🎉 Portfolio ID:", portfolioId)
 
       return NextResponse.json({
         success: true,
-        portfolioId: portfolio.id,
+        portfolioId: portfolioId,
         widgetsCreated: successCount,
         totalWidgets: widgetInstances.length,
+        mode: mode,
       })
     } catch (innerError: any) {
-      console.error("[v0] ❌ Page/widget creation failed, rolling back portfolio:", innerError.message)
-      await supabase.from("portfolios").delete().eq("id", portfolio.id)
-      console.log("[v0] 🔄 Portfolio deleted:", portfolio.id)
+      console.error("[v0] ❌ Page/widget creation failed:", innerError.message)
+      if (mode === "create" && portfolioId) {
+        console.error("[v0] 🔄 Rolling back portfolio:", portfolioId)
+        await supabase.from("portfolios").delete().eq("id", portfolioId)
+        console.log("[v0] 🗑️ Portfolio deleted:", portfolioId)
+      }
       throw innerError
     }
   } catch (error: any) {

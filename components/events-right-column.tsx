@@ -5,6 +5,7 @@ import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
+import { Upload } from "lucide-react"
 
 export default function EventsRightColumn() {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -191,6 +192,14 @@ export default function EventsRightColumn() {
     router.push("/onboarding/resume")
   }
 
+  const handleUpdateFromResume = () => {
+    if (!user) {
+      router.push("/login?redirect=/onboarding/resume")
+      return
+    }
+    router.push("/onboarding/resume?mode=update")
+  }
+
   return (
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
       <div className="space-y-6">
@@ -238,6 +247,16 @@ export default function EventsRightColumn() {
           >
             {!user ? "Sign In" : hasPortfolio ? "Edit Profile" : "Create New Profile"}
           </button>
+
+          {hasPortfolio && user && (
+            <button
+              onClick={handleUpdateFromResume}
+              className="w-full mt-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 bg-white/10 text-white border border-white/20"
+            >
+              <Upload className="w-4 h-4 inline mr-2" />
+              Update from Resume
+            </button>
+          )}
         </div>
 
         {/* AI Assistant */}

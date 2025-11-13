@@ -3,19 +3,22 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Loader2, Sparkles, Upload, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth"
 
 export default function ResumeOnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [resumeText, setResumeText] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadMode, setUploadMode] = useState<"text" | "file">("file")
+
+  const isUpdateMode = searchParams.get("mode") === "update"
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -58,10 +61,10 @@ export default function ResumeOnboardingPage() {
     setError(null)
 
     try {
-      // Added detailed step-by-step logging
       console.log("[v0] ========== ONBOARDING FLOW STARTED ==========")
       console.log("[v0] Step 0: User ID:", user.id)
       console.log("[v0] Step 0: Upload mode:", uploadMode)
+      console.log("[v0] Step 0: Mode:", isUpdateMode ? "UPDATE" : "CREATE")
 
       if (uploadMode === "file" && selectedFile) {
         console.log("[v0] Step 1: Converting PDF to base64...")
@@ -72,7 +75,6 @@ export default function ResumeOnboardingPage() {
 
         console.log("[v0] Step 1: Base64 conversion complete, length:", base64.length)
 
-        // Send to API for extraction
         console.log("[v0] Step 2: Calling /api/parse-resume...")
         const parseResponse = await fetch("/api/parse-resume", {
           method: "POST",
@@ -95,15 +97,19 @@ export default function ResumeOnboardingPage() {
         console.log("[v0] Step 2: ✅ Resume parsed successfully")
         console.log("[v0] Step 2: Parsed name:", parsedData?.personalInfo?.name)
 
-        // Create portfolio from parsed data
         console.log("[v0] Step 3: Calling /api/create-portfolio-from-resume...")
         console.log("[v0] Step 3: Sending parsedData:", JSON.stringify(parsedData, null, 2))
         console.log("[v0] Step 3: Sending userId:", user.id)
+        console.log("[v0] Step 3: Mode:", isUpdateMode ? "UPDATE" : "CREATE")
 
         const createResponse = await fetch("/api/create-portfolio-from-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ parsedData, userId: user.id }),
+          body: JSON.stringify({
+            parsedData,
+            userId: user.id,
+            mode: isUpdateMode ? "update" : "create",
+          }),
         })
 
         console.log("[v0] Step 3: Create response status:", createResponse.status)
@@ -118,9 +124,8 @@ export default function ResumeOnboardingPage() {
         console.log("[v0] Step 3: Create result:", createResult)
 
         const portfolioId = createResult.portfolioId
-        console.log("[v0] Step 3: ✅ Portfolio created successfully:", portfolioId)
+        console.log("[v0] Step 3: ✅ Portfolio", isUpdateMode ? "updated" : "created", "successfully:", portfolioId)
 
-        // Redirect to BEA page
         console.log("[v0] Step 4: Redirecting to /bea...")
         router.push("/bea")
         console.log("[v0] ========== ONBOARDING FLOW COMPLETE ==========")
@@ -150,15 +155,19 @@ export default function ResumeOnboardingPage() {
         console.log("[v0] Step 2: ✅ Resume parsed successfully")
         console.log("[v0] Step 2: Parsed name:", parsedData?.personalInfo?.name)
 
-        // Create portfolio from parsed data
         console.log("[v0] Step 3: Calling /api/create-portfolio-from-resume...")
         console.log("[v0] Step 3: Sending parsedData:", JSON.stringify(parsedData, null, 2))
         console.log("[v0] Step 3: Sending userId:", user.id)
+        console.log("[v0] Step 3: Mode:", isUpdateMode ? "UPDATE" : "CREATE")
 
         const createResponse = await fetch("/api/create-portfolio-from-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ parsedData, userId: user.id }),
+          body: JSON.stringify({
+            parsedData,
+            userId: user.id,
+            mode: isUpdateMode ? "update" : "create",
+          }),
         })
 
         console.log("[v0] Step 3: Create response status:", createResponse.status)
@@ -173,9 +182,8 @@ export default function ResumeOnboardingPage() {
         console.log("[v0] Step 3: Create result:", createResult)
 
         const portfolioId = createResult.portfolioId
-        console.log("[v0] Step 3: ✅ Portfolio created successfully:", portfolioId)
+        console.log("[v0] Step 3: ✅ Portfolio", isUpdateMode ? "updated" : "created", "successfully:", portfolioId)
 
-        // Redirect to BEA page
         console.log("[v0] Step 4: Redirecting to /bea...")
         router.push("/bea")
         console.log("[v0] ========== ONBOARDING FLOW COMPLETE ==========")
@@ -197,9 +205,13 @@ export default function ResumeOnboardingPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-white">Create Your Portfolio</h1>
+          <h1 className="text-4xl font-bold text-white">
+            {isUpdateMode ? "Update Your Portfolio" : "Create Your Portfolio"}
+          </h1>
           <p className="text-white/60 text-lg">
-            Upload your resume and we'll generate a beautiful portfolio automatically
+            {isUpdateMode
+              ? "Upload your resume to update your portfolio with the latest information"
+              : "Upload your resume and we'll generate a beautiful portfolio automatically"}
           </p>
         </div>
 
@@ -291,12 +303,12 @@ University of Technology
             {isUploading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating Your Portfolio...
+                {isUpdateMode ? "Updating Your Portfolio..." : "Creating Your Portfolio..."}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate Portfolio with AI
+                {isUpdateMode ? "Update Portfolio with AI" : "Generate Portfolio with AI"}
               </>
             )}
           </Button>
@@ -313,8 +325,8 @@ University of Technology
 
         {/* Info Section */}
         <div className="text-center text-white/40 text-sm space-y-2">
-          <p>✨ AI will extract your information and create a professional portfolio</p>
-          <p>🎨 You can customize colors, layout, and content after creation</p>
+          <p>✨ AI will extract your information and {isUpdateMode ? "update" : "create"} a professional portfolio</p>
+          <p>🎨 You can customize colors, layout, and content after {isUpdateMode ? "updating" : "creation"}</p>
           <p>🔒 Your data is secure and only visible to you by default</p>
         </div>
       </div>

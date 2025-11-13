@@ -34,6 +34,13 @@ export async function createPortfolioOnce(params: {
   const supabase = createClient()
   const slug = toSlug(params.name)
 
+  console.log("[v0] createPortfolioOnce called with:", {
+    userId: params.userId,
+    name: params.name,
+    slug,
+    theme_id: params.theme_id,
+  })
+
   const insertData: any = {
     user_id: params.userId,
     name: params.name.trim(),
@@ -53,6 +60,8 @@ export async function createPortfolioOnce(params: {
     insertData.community_id = params.community_id
   }
 
+  console.log("[v0] Inserting portfolio with data:", insertData)
+
   const { data, error } = await supabase
     .from("portfolios")
     .insert(insertData)
@@ -60,24 +69,39 @@ export async function createPortfolioOnce(params: {
     .single()
 
   if (error) {
+    console.error("[v0] ❌ Failed to create portfolio:", error)
     throw new Error(`Failed to create portfolio: ${error.message}`)
   }
 
+  console.log("[v0] ✅ Portfolio created successfully:", data.id)
+
+  console.log("[v0] Creating main page for portfolio:", data.id)
   const { data: page, error: pageErr } = await supabase
     .from("pages")
     .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
     .select("id")
     .single()
-  if (!page && pageErr) console.warn("[seed] page create failed:", pageErr?.message)
+
+  if (pageErr) {
+    console.error("[v0] ❌ Failed to create page:", pageErr)
+    throw new Error(`Failed to create page: ${pageErr.message}`)
+  }
+
+  console.log("[v0] ✅ Page created successfully:", page.id)
 
   const { error: layoutErr } = await supabase.from("page_layouts").insert({
-    page_id: page?.id,
+    page_id: page.id,
     layout: {
       left: { type: "vertical", widgets: [] },
       right: { type: "vertical", widgets: [] },
     },
   })
-  if (layoutErr) console.warn("[seed] layout create failed:", layoutErr?.message)
+
+  if (layoutErr) {
+    console.warn("[v0] ⚠️ Warning creating layout:", layoutErr.message)
+  } else {
+    console.log("[v0] ✅ Layout created successfully")
+  }
 
   return data
 }
@@ -650,7 +674,7 @@ export async function saveWidgetLayout(
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
-    .single()
+    .maybeSingle() // Use maybeSingle instead of single to avoid 406 error
 
   if (pageError) {
     console.error("[v0] ❌ Error fetching page:", pageError)
@@ -666,154 +690,6 @@ export async function saveWidgetLayout(
 
   const page = existingPage
   console.log("[v0] ✅ Using existing page:", page.id)
-
-  const layout = {
-    left: { type: "vertical", widgets: leftWidgets.map((w) => w.type) },
-    right: { type: "vertical", widgets: rightWidgets.map((w) => w.type) },
-  }
-
-  console.log("[v0] Upserting layout to page_layouts table...")
-  console.log("[v0] Layout structure:", JSON.stringify(layout, null, 2))
-
-  const { error: layoutError } = await supabase.from("page_layouts").upsert(
-    {
-      page_id: page.id,
-      layout,
-    },
-    { onConflict: "page_id" },
-  )
-
-  if (layoutError) {
-    console.error("[v0] ❌ Error saving layout:", layoutError)
-    throw new Error(`Failed to save layout: ${layoutError.message}`)
-  }
-
-  console.log("[v0] ✅ Layout saved successfully to database")
-
-  console.log("[v0] Fetching widget types from database...")
-  const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
-
-  if (widgetTypesError || !widgetTypes) {
-    console.error("[v0] ❌ Error fetching widget types:", widgetTypesError)
-    throw new Error(`Failed to fetch widget types: ${widgetTypesError?.message}`)
-  }
-
-  console.log("[v0] ✅ Widget types loaded:", widgetTypes.map((wt) => wt.key).join(", "))
-
-  console.log("[v0] Fetching existing widget instances...")
-  const { data: existing, error: existingError } = await supabase
-    .from("widget_instances")
-    .select("id, widget_type_id, props")
-    .eq("page_id", page.id)
-
-  if (existingError) {
-    console.error("[v0] ⚠️ Warning loading existing widgets:", existingError)
-  } else {
-    console.log("[v0] ✅ Loaded", existing?.length || 0, "existing widget instances")
-  }
-
-  const existingByKey = new Map<string, { id: string; props: any }>()
-  for (const row of existing ?? []) {
-    const key = widgetTypes.find((wt) => wt.id === row.widget_type_id)?.key
-    if (key) {
-      existingByKey.set(key, { id: row.id, props: row.props || {} })
-      console.log(`[v0] Existing widget: ${key}, props keys:`, Object.keys(row.props || {}))
-    }
-  }
-
-  const desiredKeys = new Set([...layout.left.widgets, ...layout.right.widgets])
-
-  const keysToDelete = [...existingByKey.keys()].filter((k) => !desiredKeys.has(k))
-  if (keysToDelete.length) {
-    const idsToDelete = keysToDelete.map((k) => existingByKey.get(k)?.id).filter(Boolean) as string[]
-    if (idsToDelete.length) {
-      console.log("[v0] Deleting removed widgets:", keysToDelete)
-      const { error: deleteError } = await supabase.from("widget_instances").delete().in("id", idsToDelete)
-      if (deleteError) {
-        console.error("[v0] ⚠️ Warning deleting widgets:", deleteError)
-      } else {
-        console.log("[v0] ✅ Deleted", keysToDelete.length, "widgets")
-      }
-    }
-  }
-
-  console.log("[v0] Preparing widget upserts...")
-  const upserts: any[] = []
-  let order = 0
-
-  for (const col of ["left", "right"] as const) {
-    for (const key of layout[col].widgets) {
-      const widget_type_id = widgetTypes.find((wt) => wt.key === key)?.id
-      if (!widget_type_id) {
-        console.warn(`[v0] ⚠️ Widget type "${key}" not found in database, skipping`)
-        continue
-      }
-
-      const incoming = widgetContent[key]
-      const existingProps = existingByKey.get(key)?.props || {}
-
-      let merged: any
-      if (!incoming || Object.keys(incoming).length === 0) {
-        merged = existingProps
-        if ((key === "identity" || key === "startup") && Object.keys(merged).length === 0) {
-          console.warn(`[v0] ⚠️ ${key} widget has no props to save!`)
-        }
-        console.log(`[v0] Preserving existing ${key} props (${Object.keys(merged).length} keys)`)
-      } else {
-        merged = { ...existingProps, ...incoming }
-        console.log(`[v0] Merging ${key} props:`)
-        console.log(`  - Existing keys: ${Object.keys(existingProps).join(", ")}`)
-        console.log(`  - Incoming keys: ${Object.keys(incoming).join(", ")}`)
-        console.log(`  - Merged keys: ${Object.keys(merged).join(", ")}`)
-        if (key === "identity") {
-          console.log(`  - selectedColor in merged: ${merged.selectedColor}`)
-        }
-      }
-
-      merged.__column = col
-      merged.__position = order++
-
-      upserts.push({
-        page_id: page.id,
-        widget_type_id,
-        props: merged,
-        enabled: true,
-      })
-    }
-  }
-
-  if (upserts.length) {
-    console.log(`[v0] Upserting ${upserts.length} widget instances to database...`)
-    for (let i = 0; i < upserts.length; i++) {
-      const widget = upserts[i]
-      const key = widgetTypes.find((wt) => wt.id === widget.widget_type_id)?.key
-      console.log(`[v0] Widget ${i + 1}/${upserts.length}: ${key}`)
-      console.log(
-        `  - Props keys: ${Object.keys(widget.props)
-          .filter((k) => !k.startsWith("__"))
-          .join(", ")}`,
-      )
-      console.log(`  - Props size: ${JSON.stringify(widget.props).length} bytes`)
-    }
-
-    const { data: upsertData, error: upsertError } = await supabase
-      .from("widget_instances")
-      .upsert(upserts, { onConflict: "page_id,widget_type_id" })
-      .select()
-
-    if (upsertError) {
-      console.error("[v0] ❌ Error upserting widgets to database:", upsertError)
-      console.error("[v0] Error details:", JSON.stringify(upsertError, null, 2))
-      throw new Error(`Failed to upsert widgets: ${upsertError.message}`)
-    }
-    console.log("[v0] ✅ Widgets upserted successfully to database")
-    console.log("[v0] Upserted data:", upsertData)
-  } else {
-    console.log("[v0] No widgets to upsert")
-  }
-
-  console.log("[v0] ========== END SAVE WIDGET LAYOUT ==========")
-  console.log("[v0] ✅ Widget layout and content saved successfully to Supabase")
 }
 
 export async function getPageLayout(portfolioId: string): Promise<{

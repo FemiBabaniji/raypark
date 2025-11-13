@@ -27,6 +27,7 @@ export default function PortfolioBuilderPage() {
     selectedColor: 3 as ThemeIndex,
   })
   const [isLive, setIsLive] = useState(false)
+  const lastFetchedUserIdRef = useRef<string | null>(null)
   const hasFetchedRef = useRef(false)
 
   useEffect(() => {

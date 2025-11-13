@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef, useMemo } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Reorder, motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -71,33 +71,21 @@ export default function PortfolioBuilder({
   })
 
   const [portfolioId, setPortfolioId] = useState<string | null>(initialPortfolio?.id ?? null)
+  const portfolioIdRef = useRef<string | null>(initialPortfolio?.id ?? null)
   const createInFlight = useRef<Promise<string> | null>(null)
   const prevUserRef = useRef(user)
 
-  const draftKey = useMemo(
-    () => `pf-draft:${user?.id ?? "anon"}:${initialPortfolio?.id ?? "new"}`,
-    [user?.id, initialPortfolio?.id],
-  )
-
   useEffect(() => {
-    try {
-      const cached = typeof window !== "undefined" ? localStorage.getItem(draftKey) : null
-      if (cached && !portfolioId) setPortfolioId(cached)
-    } catch {}
-  }, [draftKey, portfolioId])
-
-  useEffect(() => {
-    try {
-      if (portfolioId) localStorage.setItem(draftKey, portfolioId)
-    } catch {}
-  }, [draftKey, portfolioId])
+    portfolioIdRef.current = portfolioId
+  }, [portfolioId])
 
   async function ensurePortfolioId(): Promise<string> {
-    if (portfolioId) return portfolioId
+    if (portfolioIdRef.current) return portfolioIdRef.current
     if (!user?.id) throw new Error("Must be signed in to create a portfolio")
 
     if (!createInFlight.current) {
       createInFlight.current = (async () => {
+        console.log("[v0] Creating portfolio via ensurePortfolioId...")
         const created = await createPortfolioOnce({
           userId: user.id,
           name: state.name || "Untitled Portfolio",
@@ -105,6 +93,7 @@ export default function PortfolioBuilder({
           description: state.description,
         })
         setPortfolioId(created.id)
+        portfolioIdRef.current = created.id
         return created.id
       })()
     }
@@ -191,7 +180,7 @@ export default function PortfolioBuilder({
       try {
         console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
-        console.log("[v0] Portfolio ID:", id)
+        console.log("[v0] Using portfolio ID:", id)
 
         // Save portfolio metadata
         await updatePortfolioById(id, {
@@ -223,36 +212,13 @@ export default function PortfolioBuilder({
           startup: widgetContent.startup || {},
         }
 
-        console.log("[v0] Saving with complete content payload:", contentToSave)
+        console.log("[v0] Saving widget layout...")
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
-        // Sync to localStorage
-        if (typeof window !== "undefined") {
-          const savedData = localStorage.getItem("bea_portfolio_data")
-          if (savedData) {
-            try {
-              const parsed = JSON.parse(savedData)
-              const updated = {
-                ...parsed,
-                name: identity.name,
-                handle: identity.handle,
-                avatarUrl: identity.avatar,
-                selectedColor: identity.selectedColor,
-                isLive: state.is_public,
-              }
-              localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
-              console.log("[v0] Synced to localStorage:", updated)
-            } catch (error) {
-              console.error("[v0] Failed to sync localStorage:", error)
-            }
-          }
-
-          window.dispatchEvent(new Event("portfolio-updated"))
-        }
-
-        console.log("[v0] Portfolio auto-saved successfully")
+        window.dispatchEvent(new Event("portfolio-updated"))
+        console.log("[v0] ✅ Portfolio auto-saved successfully")
       } catch (error) {
-        console.error("[v0] Auto-save failed:", error)
+        console.error("[v0] ❌ Auto-save failed:", error)
       }
     }, 800)
 
@@ -307,13 +273,13 @@ export default function PortfolioBuilder({
   }, [])
 
   useEffect(() => {
-    if (user?.id && !portfolioId && !createInFlight.current) {
+    if (user?.id && !portfolioIdRef.current && !createInFlight.current) {
       console.log("[v0] User authenticated, initializing portfolio...")
       ensurePortfolioId().catch((err) => {
         console.error("[v0] Failed to initialize portfolio:", err)
       })
     }
-  }, [user, portfolioId])
+  }, [user])
 
   useEffect(() => {
     const wasUnauthenticated = !prevUserRef.current?.id
@@ -325,7 +291,7 @@ export default function PortfolioBuilder({
     }
 
     prevUserRef.current = user
-  }, [user, hasInitialized])
+  }, [user, hasInitialized, debouncedSave])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget

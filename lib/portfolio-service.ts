@@ -24,6 +24,51 @@ const toSlug = (name: string) =>
     .replace(/(^-|-$)/g, "")
     .slice(0, 64)
 
+export async function ensureMainPage(supabase: ReturnType<typeof createClient>, portfolioId: string): Promise<string> {
+  console.log("[v0] ensureMainPage: Checking for existing page...")
+
+  const { data: existing } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  let pageId = existing?.id
+
+  if (!pageId) {
+    console.log("[v0] No page found, creating new page...")
+    const { data, error } = await supabase
+      .from("pages")
+      .insert({ portfolio_id: portfolioId, key: "main", title: "Main", route: "/", is_demo: false })
+      .select("id")
+      .single()
+
+    if (error) throw error
+    pageId = data.id
+    console.log("[v0] ✅ Page created:", pageId)
+  } else {
+    console.log("[v0] ✅ Using existing page:", pageId)
+  }
+
+  // Ensure page_layouts row exists (idempotent)
+  const { data: pl } = await supabase.from("page_layouts").select("id").eq("page_id", pageId).maybeSingle()
+
+  if (!pl?.id) {
+    console.log("[v0] Creating page_layouts for page:", pageId)
+    const defaultLayout = {
+      left: { type: "vertical", widgets: ["identity"] },
+      right: { type: "vertical", widgets: [] },
+    }
+    const { error } = await supabase.from("page_layouts").insert({ page_id: pageId, layout: defaultLayout })
+
+    if (error) throw error
+    console.log("[v0] ✅ Layout created successfully")
+  }
+
+  return pageId
+}
+
 export async function createPortfolioOnce(params: {
   userId: string
   name: string
@@ -32,175 +77,92 @@ export async function createPortfolioOnce(params: {
   community_id?: string
 }) {
   const supabase = createClient()
-  const slug = toSlug(params.name)
+  const baseName = params.name?.trim() || "portfolio"
+  const baseSlug = toSlug(baseName)
 
-  console.log("[v0] createPortfolioOnce called with:", {
-    userId: params.userId,
-    name: params.name,
-    slug,
-    theme_id: params.theme_id,
-  })
+  console.log("[v0] createPortfolioOnce: Starting for user:", params.userId)
 
-  console.log("[v0] Checking for existing portfolio...")
-  const { data: existingPortfolio, error: checkError } = await supabase
+  // Step 1: Try to find existing portfolio for this user
+  const { data: existingPortfolios, error: checkError } = await supabase
     .from("portfolios")
-    .select("id, name, slug")
+    .select("id, slug, name")
     .eq("user_id", params.userId)
-    .maybeSingle()
+    .order("updated_at", { ascending: false })
+    .limit(1)
 
-  if (checkError) {
-    console.error("[v0] ❌ Error checking for existing portfolio:", checkError)
-    throw new Error(`Failed to check existing portfolio: ${checkError.message}`)
+  if (!checkError && existingPortfolios && existingPortfolios.length > 0) {
+    console.log("[v0] ✅ Found existing portfolio:", existingPortfolios[0].id)
+    await ensureMainPage(supabase, existingPortfolios[0].id)
+    return existingPortfolios[0]
   }
 
-  if (existingPortfolio) {
-    console.log("[v0] ✅ Portfolio already exists:", existingPortfolio.id)
+  // Step 2: No portfolio exists, create with conflict handling
+  const slug = baseSlug
+  let inserted: any = null
 
-    // Check if the existing portfolio has a page
-    const { data: existingPage, error: pageCheckError } = await supabase
-      .from("pages")
-      .select("id")
-      .eq("portfolio_id", existingPortfolio.id)
-      .eq("key", "main")
-      .maybeSingle()
+  for (let i = 0; i < 5; i++) {
+    const trySlug = i === 0 ? slug : `${slug}-${i + 1}`
+    console.log("[v0] Attempting to create portfolio with slug:", trySlug)
 
-    if (pageCheckError) {
-      console.error("[v0] ❌ Error checking for existing page:", pageCheckError)
-      throw new Error(`Failed to check existing page: ${pageCheckError.message}`)
+    const insertData: any = {
+      user_id: params.userId,
+      name: baseName,
+      slug: trySlug,
+      description: params.description?.trim() || `${baseName}'s portfolio`,
+      is_public: false,
+      is_demo: false,
     }
 
-    if (existingPage) {
-      console.log("[v0] ✅ Portfolio has a page, returning existing portfolio")
-      return existingPortfolio
+    if (params.theme_id && isUUID(params.theme_id)) {
+      insertData.theme_id = params.theme_id
     }
 
-    // Portfolio exists but no page - create the page
-    console.log("[v0] Portfolio exists but missing page, creating page...")
-    const { data: page, error: pageErr } = await supabase
-      .from("pages")
-      .insert({
-        portfolio_id: existingPortfolio.id,
-        key: "main",
-        title: "Main",
-        route: "/",
-        is_demo: false,
-      })
-      .select("id")
-      .maybeSingle()
-
-    if (pageErr || !page) {
-      console.error("[v0] ❌ Failed to create page:", pageErr)
-      throw new Error(`Failed to create page: ${pageErr?.message || "No data returned"}`)
+    if (params.community_id) {
+      insertData.community_id = params.community_id
     }
 
-    console.log("[v0] ✅ Page created successfully:", page.id)
+    const { data, error } = await supabase.from("portfolios").insert(insertData).select("id, slug, name").single()
 
-    // Create page layout
-    const layoutStructure = {
-      left: {
-        type: "vertical" as const,
-        widgets: [] as string[],
-      },
-      right: {
-        type: "vertical" as const,
-        widgets: [] as string[],
-      },
+    if (!error && data) {
+      inserted = data
+      console.log("[v0] ✅ Portfolio created:", data.id)
+      break
     }
 
-    const { error: layoutErr } = await supabase.from("page_layouts").insert({
-      page_id: page.id,
-      layout: layoutStructure,
-    })
-
-    if (layoutErr) {
-      console.error("[v0] ❌ Failed to create layout:", layoutErr)
-      throw new Error(`Failed to create page layout: ${layoutErr.message}`)
+    // If slug conflict (23505), try next suffix
+    if (error && error.code === "23505") {
+      console.log("[v0] Slug conflict, trying next suffix...")
+      continue
     }
 
-    console.log("[v0] ✅ Layout created successfully")
-    return existingPortfolio
+    // For other errors, throw
+    if (error) {
+      console.error("[v0] ❌ Error creating portfolio:", error)
+      throw error
+    }
   }
 
-  console.log("[v0] No existing portfolio found, creating new one...")
+  // Step 3: Final fallback - select existing portfolio (race condition safety)
+  if (!inserted) {
+    console.log("[v0] All slug attempts failed, selecting existing portfolio...")
+    const { data } = await supabase
+      .from("portfolios")
+      .select("id, slug, name")
+      .eq("user_id", params.userId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
 
-  const insertData: any = {
-    user_id: params.userId,
-    name: params.name.trim(),
-    slug,
-    description: params.description?.trim() || `${params.name}'s portfolio`,
-    is_public: false,
-    is_demo: false,
+    if (!data || !data.length) {
+      throw new Error("Could not create or find a portfolio")
+    }
+    inserted = data[0]
+    console.log("[v0] ✅ Using existing portfolio from fallback:", inserted.id)
   }
 
-  if (params.theme_id && isUUID(params.theme_id)) {
-    insertData.theme_id = params.theme_id
-  }
+  // Step 4: Ensure main page exists
+  await ensureMainPage(supabase, inserted.id)
 
-  if (params.community_id) {
-    insertData.community_id = params.community_id
-  }
-
-  console.log("[v0] Inserting portfolio with data:", insertData)
-
-  const { data, error } = await supabase
-    .from("portfolios")
-    .insert(insertData)
-    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
-    .maybeSingle()
-
-  if (error || !data) {
-    console.error("[v0] ❌ Failed to create portfolio:", error)
-    throw new Error(`Failed to create portfolio: ${error?.message || "No data returned"}`)
-  }
-
-  console.log("[v0] ✅ Portfolio created successfully:", data.id)
-
-  console.log("[v0] Creating main page for portfolio:", data.id)
-  const { data: page, error: pageErr } = await supabase
-    .from("pages")
-    .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
-    .select("id")
-    .maybeSingle()
-
-  if (pageErr || !page) {
-    console.error("[v0] ❌ Failed to create page:", pageErr)
-    throw new Error(`Failed to create page: ${pageErr?.message || "No data returned"}`)
-  }
-
-  console.log("[v0] ✅ Page created successfully:", page.id)
-
-  const layoutStructure = {
-    left: {
-      type: "vertical" as const,
-      widgets: [] as string[],
-    },
-    right: {
-      type: "vertical" as const,
-      widgets: [] as string[],
-    },
-  }
-
-  const layoutData = {
-    page_id: page.id,
-    layout: layoutStructure,
-  }
-
-  console.log("[v0] Inserting page_layout:")
-  console.log(JSON.stringify(layoutData, null, 2))
-
-  const { data: insertedLayout, error: layoutErr } = await supabase.from("page_layouts").insert(layoutData).select()
-
-  if (layoutErr) {
-    console.error("[v0] ❌ Failed to create layout:", layoutErr)
-    console.error("[v0] Error code:", layoutErr.code)
-    console.error("[v0] Error details:", layoutErr.details)
-    console.error("[v0] Error hint:", layoutErr.hint)
-    throw new Error(`Failed to create page layout: ${layoutErr.message}`)
-  }
-
-  console.log("[v0] ✅ Layout created successfully:", insertedLayout)
-
-  return data
+  return inserted
 }
 
 /**
@@ -751,46 +713,83 @@ export async function saveWidgetLayout(
 ) {
   console.log("[v0] ========== START SAVE WIDGET LAYOUT ==========")
   console.log("[v0] Portfolio ID:", portfolioId)
-  console.log("[v0] Widget content identity:", widgetContent.identity)
-  console.log("[v0] selectedColor being saved:", widgetContent.identity?.selectedColor)
 
   const supabase = createClient()
 
-  console.log("[v0] Testing Supabase connection...")
-  try {
-    const { data: testData, error: testError } = await supabase.from("portfolios").select("id").limit(1)
-    if (testError) {
-      console.error("[v0] ❌ Supabase connection test FAILED:", testError)
-      throw new Error(`Supabase connection failed: ${testError.message}`)
+  // Step 1: Always ensure main page exists (idempotent)
+  const pageId = await ensureMainPage(supabase, portfolioId)
+  console.log("[v0] ✅ Page ID confirmed:", pageId)
+
+  // Step 2: Upsert layout object
+  const layout = {
+    left: { type: "vertical", widgets: leftWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
+    right: { type: "vertical", widgets: rightWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
+  }
+
+  console.log("[v0] Upserting layout:", layout)
+
+  const { error: upsertLayoutErr } = await supabase
+    .from("page_layouts")
+    .upsert({ page_id: pageId, layout }, { onConflict: "page_id" })
+
+  if (upsertLayoutErr) {
+    console.error("[v0] ❌ Failed to upsert layout:", upsertLayoutErr)
+    throw upsertLayoutErr
+  }
+
+  console.log("[v0] ✅ Layout upserted successfully")
+
+  // Step 3: Resolve widget_type IDs once
+  const { data: types, error: typesError } = await supabase.from("widget_types").select("id, key")
+
+  if (typesError) {
+    console.error("[v0] ❌ Failed to fetch widget types:", typesError)
+    throw typesError
+  }
+
+  const keyToId = Object.fromEntries((types ?? []).map((t) => [t.key, t.id]))
+  console.log("[v0] Widget type mapping:", keyToId)
+
+  // Step 4: Upsert content for each visible widget (merge with existing)
+  const allKeys = [...layout.left.widgets, ...layout.right.widgets]
+  console.log("[v0] Processing widgets:", allKeys)
+
+  for (const key of allKeys) {
+    const widget_type_id = keyToId[key]
+    if (!widget_type_id) {
+      console.log("[v0] ⚠️  Skipping unknown widget type:", key)
+      continue
     }
-    console.log("[v0] ✅ Supabase connection test passed")
-  } catch (err) {
-    console.error("[v0] ❌ Supabase connection error:", err)
-    throw err
+
+    const incomingProps = widgetContent?.[key] ?? {}
+
+    // Read existing props to preserve fields not in incoming update
+    const { data: existing } = await supabase
+      .from("widget_instances")
+      .select("props")
+      .eq("page_id", pageId)
+      .eq("widget_type_id", widget_type_id)
+      .maybeSingle()
+
+    const mergedProps = { ...(existing?.props ?? {}), ...incomingProps }
+
+    console.log("[v0] Upserting widget:", key, "with props:", mergedProps)
+
+    const { error: upsertErr } = await supabase
+      .from("widget_instances")
+      .upsert(
+        { page_id: pageId, widget_type_id, props: mergedProps, enabled: true },
+        { onConflict: "page_id,widget_type_id" },
+      )
+
+    if (upsertErr) {
+      console.error("[v0] ❌ Failed to upsert widget:", key, upsertErr)
+      throw upsertErr
+    }
   }
 
-  console.log("[v0] Fetching page for portfolio...")
-  const { data: existingPage, error: pageError } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (pageError) {
-    console.error("[v0] ❌ Error fetching page:", pageError)
-    throw new Error(`Failed to fetch page: ${pageError.message}`)
-  }
-
-  if (!existingPage) {
-    console.error("[v0] ❌ No page found for portfolio. Portfolio may not be properly initialized.")
-    throw new Error(
-      `No page found for portfolio ${portfolioId}. Please ensure the portfolio is created with createPortfolioOnce() which creates both the portfolio and its main page.`,
-    )
-  }
-
-  const page = existingPage
-  console.log("[v0] ✅ Using existing page:", page.id)
+  console.log("[v0] ✅ All widgets saved successfully")
+  console.log("[v0] ========== END SAVE WIDGET LAYOUT ==========")
 }
 
 export async function getPageLayout(portfolioId: string): Promise<{

@@ -8,6 +8,7 @@ import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
+import { loadUserPortfolios } from "@/lib/portfolio-service"
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
@@ -28,29 +29,71 @@ export default function PortfolioBuilderPage() {
   const [isLive, setIsLive] = useState(false)
 
   useEffect(() => {
-    const savedData = localStorage.getItem("bea_portfolio_data")
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData)
+    async function loadPortfolio() {
+      if (user) {
+        try {
+          console.log("[v0] Fetching portfolios from database...")
+          const portfolios = await loadUserPortfolios(user)
+
+          if (portfolios.length > 0) {
+            const latestPortfolio = portfolios[0]
+            console.log("[v0] Loaded portfolio from database:", latestPortfolio)
+
+            setActiveIdentity({
+              id: latestPortfolio.id || "bea-portfolio",
+              name: latestPortfolio.name || "",
+              handle: latestPortfolio.handle || "",
+              avatarUrl: (latestPortfolio as any).avatarUrl,
+              selectedColor: (latestPortfolio.selectedColor || 3) as ThemeIndex,
+            })
+            setIsLive(latestPortfolio.isLive || false)
+
+            // Sync to localStorage
+            localStorage.setItem(
+              "bea_portfolio_data",
+              JSON.stringify({
+                name: latestPortfolio.name,
+                handle: latestPortfolio.handle,
+                avatarUrl: (latestPortfolio as any).avatarUrl,
+                selectedColor: latestPortfolio.selectedColor,
+                isLive: latestPortfolio.isLive,
+              }),
+            )
+
+            return // Exit early if database load successful
+          }
+        } catch (error) {
+          console.error("[v0] Failed to load from database, falling back to localStorage:", error)
+        }
+      }
+
+      // Fallback to localStorage if database fetch fails or no user
+      const savedData = localStorage.getItem("bea_portfolio_data")
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData)
+          setActiveIdentity({
+            id: "bea-portfolio",
+            name: parsed.name || "",
+            handle: parsed.handle || "",
+            avatarUrl: parsed.avatarUrl,
+            selectedColor: (parsed.selectedColor || 3) as ThemeIndex,
+          })
+          setIsLive(parsed.isLive || false)
+        } catch (error) {
+          console.error("Failed to load portfolio data:", error)
+        }
+      } else if (user) {
         setActiveIdentity({
           id: "bea-portfolio",
-          name: parsed.name || "",
-          handle: parsed.handle || "",
-          avatarUrl: parsed.avatarUrl,
-          selectedColor: (parsed.selectedColor || 3) as ThemeIndex,
+          name: user.name || "",
+          handle: user.name?.toLowerCase().replace(/\s+/g, "") || "",
+          selectedColor: 3 as ThemeIndex,
         })
-        setIsLive(parsed.isLive || false)
-      } catch (error) {
-        console.error("Failed to load portfolio data:", error)
       }
-    } else if (user) {
-      setActiveIdentity({
-        id: "bea-portfolio",
-        name: user.name || "",
-        handle: user.name?.toLowerCase().replace(/\s+/g, "") || "",
-        selectedColor: 3 as ThemeIndex,
-      })
     }
+
+    loadPortfolio()
   }, [user])
 
   const handleIdentityChange = (

@@ -323,6 +323,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
       const profileWidgetType = widgetTypes?.find((wt) => wt.key === "profile")
       const descriptionWidgetType = widgetTypes?.find((wt) => wt.key === "description")
       const projectsWidgetType = widgetTypes?.find((wt) => wt.key === "projects")
+      const identityWidgetType = widgetTypes?.find((wt) => wt.key === "identity")
 
       const widgets = []
 
@@ -365,6 +366,15 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
             projectColors: content.projectColors,
             galleryGroups: content.galleryGroups,
           },
+          enabled: true,
+        })
+      }
+
+      if (identityWidgetType && content.identity) {
+        widgets.push({
+          page_id: pageId,
+          widget_type_id: identityWidgetType.id,
+          props: content.identity,
           enabled: true,
         })
       }
@@ -672,3 +682,51 @@ export async function saveWidgetLayout(
 }
 
 const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars
+
+export type IdentityProps = {
+  name?: string
+  handle?: string
+  avatarUrl?: string
+  selectedColor?: number
+  title?: string
+  email?: string
+  location?: string
+  bio?: string
+  linkedin?: string
+  dribbble?: string
+  behance?: string
+  twitter?: string
+  unsplash?: string
+  instagram?: string
+}
+
+export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
+  const supabase = createClient()
+
+  const { data: page, error: pageErr } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+  if (pageErr || !page?.id) return null
+
+  const { data: wt, error: wtErr } = await supabase
+    .from("widget_types")
+    .select("id")
+    .eq("key", "identity")
+    .maybeSingle()
+  if (wtErr || !wt?.id) return null
+
+  const { data: wi, error: wiErr } = await supabase
+    .from("widget_instances")
+    .select("props")
+    .eq("page_id", page.id)
+    .eq("widget_type_id", wt.id)
+    .maybeSingle()
+  if (wiErr) return null
+
+  return (wi?.props as IdentityProps) ?? null
+}
+
+export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")

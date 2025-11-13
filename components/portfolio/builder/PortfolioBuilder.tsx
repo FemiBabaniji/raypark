@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
-import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout } from "@/lib/portfolio-service"
+import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout, loadPortfolioData } from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -75,6 +75,9 @@ export default function PortfolioBuilder({
   const createInFlight = useRef<Promise<string> | null>(null)
   const prevUserRef = useRef(user)
 
+  const [isLoadingData, setIsLoadingData] = useState(false)
+  const hasLoadedDataRef = useRef(false)
+
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
@@ -85,7 +88,6 @@ export default function PortfolioBuilder({
 
     if (!createInFlight.current) {
       createInFlight.current = (async () => {
-        console.log("[v0] Creating portfolio via ensurePortfolioId...")
         const created = await createPortfolioOnce({
           userId: user.id,
           name: state.name || "Untitled Portfolio",
@@ -150,6 +152,70 @@ export default function PortfolioBuilder({
   })
 
   useEffect(() => {
+    async function loadData() {
+      if (!portfolioId || hasLoadedDataRef.current || isLoadingData) {
+        return
+      }
+
+      setIsLoadingData(true)
+      hasLoadedDataRef.current = true
+
+      try {
+        console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
+
+        const data = await loadPortfolioData(portfolioId)
+
+        if (data) {
+          console.log("[v0] ✅ Loaded data from database:", data)
+
+          // Update layout
+          if (data.layout.left.length > 0) {
+            setLeftWidgets(data.layout.left)
+          }
+          if (data.layout.right.length > 0) {
+            setRightWidgets(data.layout.right)
+          }
+
+          // Update widget content
+          if (Object.keys(data.widgetContent).length > 0) {
+            setWidgetContent(data.widgetContent)
+          }
+
+          // Update identity if it has data
+          if (data.identity && data.identity.name) {
+            onIdentityChange(data.identity)
+          }
+
+          // Update project colors
+          if (data.projectColors && Object.keys(data.projectColors).length > 0) {
+            setProjectColors(data.projectColors)
+          }
+
+          // Update widget colors
+          if (data.widgetColors && Object.keys(data.widgetColors).length > 0) {
+            setWidgetColors(data.widgetColors)
+          }
+
+          // Update gallery groups
+          if (data.galleryGroups && Object.keys(data.galleryGroups).length > 0) {
+            setGalleryGroups(data.galleryGroups)
+          }
+
+          console.log("[v0] ✅ Data loaded and state updated successfully")
+        } else {
+          console.log("[v0] ℹ️ No saved data found, using defaults")
+        }
+      } catch (error) {
+        console.error("[v0] ❌ Failed to load portfolio data:", error)
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    loadData()
+  }, [portfolioId, onIdentityChange])
+
+  useEffect(() => {
     setState((prev) => ({
       ...prev,
       name: identity.name || "Untitled Portfolio",
@@ -161,13 +227,7 @@ export default function PortfolioBuilder({
   const [hasInitialized, setHasInitialized] = useState(false)
 
   const debouncedSave = useCallback(async () => {
-    if (!user?.id) {
-      console.log("[v0] Skipping save - user not authenticated")
-      return
-    }
-
-    if (!hasInitialized) {
-      console.log("[v0] Skipping save - not initialized")
+    if (!user?.id || !hasInitialized || isLoadingData) {
       return
     }
 
@@ -178,9 +238,7 @@ export default function PortfolioBuilder({
 
     const timeout = setTimeout(async () => {
       try {
-        console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
-        console.log("[v0] Using portfolio ID:", id)
 
         // Save portfolio metadata
         await updatePortfolioById(id, {
@@ -189,7 +247,6 @@ export default function PortfolioBuilder({
           theme_id: state.theme_id,
           is_public: !!state.is_public,
         })
-        console.log("[v0] Portfolio metadata saved")
 
         const contentToSave = {
           ...widgetContent,
@@ -212,22 +269,19 @@ export default function PortfolioBuilder({
           startup: widgetContent.startup || {},
         }
 
-        console.log("[v0] Saving widget layout...")
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
         window.dispatchEvent(new Event("portfolio-updated"))
-        console.log("[v0] ✅ Portfolio auto-saved successfully")
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
       }
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent])
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData])
 
   useEffect(() => {
     if (hasInitialized) {
-      console.log("[v0] State changed, triggering debounced save")
       debouncedSave()
     }
   }, [
@@ -250,11 +304,13 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setHasInitialized(true)
-    }, 1000) // Wait 1 second before enabling auto-save
+      if (!isLoadingData) {
+        setHasInitialized(true)
+      }
+    }, 1500) // Wait 1.5 seconds after loading completes
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [isLoadingData])
 
   useEffect(() => {
     return () => {
@@ -274,7 +330,6 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     if (user?.id && !portfolioIdRef.current && !createInFlight.current) {
-      console.log("[v0] User authenticated, initializing portfolio...")
       ensurePortfolioId().catch((err) => {
         console.error("[v0] Failed to initialize portfolio:", err)
       })
@@ -286,7 +341,6 @@ export default function PortfolioBuilder({
     const isNowAuthenticated = !!user?.id
 
     if (wasUnauthenticated && isNowAuthenticated && hasInitialized) {
-      console.log("[v0] User just authenticated, retrying save...")
       debouncedSave()
     }
 

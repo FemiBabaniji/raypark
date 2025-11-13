@@ -45,9 +45,20 @@ export default function EventsRightColumn() {
           return
         }
 
-        // Prioritize BEA portfolio (has community_id)
-        const beaPortfolio = portfolios.find((p) => p.community_id)
+        // Priority: BEA portfolio (has community_id) > Most recently updated
+        const beaPortfolio = portfolios.find((p) => p.community_id !== null && p.community_id !== undefined)
         const targetPortfolio = beaPortfolio || portfolios[0]
+
+        console.log("[v0] Portfolio selection:", {
+          totalPortfolios: portfolios.length,
+          beaPortfolioFound: !!beaPortfolio,
+          selectedPortfolio: {
+            id: targetPortfolio.id,
+            name: targetPortfolio.name,
+            hasCommunityId: !!targetPortfolio.community_id,
+            communityId: targetPortfolio.community_id,
+          },
+        })
 
         // Get page ID
         const { data: page, error: pageError } = await supabase

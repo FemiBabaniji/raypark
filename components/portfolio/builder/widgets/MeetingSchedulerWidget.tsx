@@ -61,6 +61,13 @@ export default function MeetingSchedulerWidget({
   }, [mode, calendlyUrl, onContentChange])
 
   useEffect(() => {
+    if (content) {
+      setMode(content.mode || "custom")
+      setCalendlyUrl(content.calendlyUrl || "https://calendly.com/your-username/30min")
+    }
+  }, [content])
+
+  useEffect(() => {
     if (mode === "calendly") {
       const script = document.createElement("script")
       script.src = "https://assets.calendly.com/assets/external/widget.js"
@@ -359,23 +366,24 @@ export default function MeetingSchedulerWidget({
 
           {view === "events" && (
             <div className="space-y-2">
-              {getEventsForDay(selectedDay!).map((event) => (
-                <button
-                  key={event.id}
-                  onClick={() => handleEventClick(event)}
-                  className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
-                >
-                  <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
-                  <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
-                    <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-xs">{event.location}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-white/80">
-                    <Clock className="w-3 h-3 flex-shrink-0" />
-                    <span className="text-xs">{event.time}</span>
-                  </div>
-                </button>
-              ))}
+              {selectedDay &&
+                getEventsForDay(selectedDay).map((event) => (
+                  <button
+                    key={event.id}
+                    onClick={() => handleEventClick(event)}
+                    className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
+                  >
+                    <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
+                    <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
+                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs">{event.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-white/80">
+                      <Clock className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-xs">{event.time}</span>
+                    </div>
+                  </button>
+                ))}
             </div>
           )}
 
@@ -426,19 +434,19 @@ export default function MeetingSchedulerWidget({
               <div className="bg-white/20 rounded-xl p-3 space-y-2">
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Event</div>
-                  <div className="font-semibold text-xs">{selectedEvent.name}</div>
+                  <div className="font-semibold text-xs">{selectedEvent?.name}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Location</div>
-                  <div className="font-medium text-xs">{selectedEvent.location}</div>
+                  <div className="font-medium text-xs">{selectedEvent?.location}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
-                  <div className="font-medium text-xs">{selectedZone.name}</div>
+                  <div className="font-medium text-xs">{selectedZone?.name}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Time</div>
-                  <div className="font-medium text-xs">{selectedSlot.time} (25 minutes)</div>
+                  <div className="font-medium text-xs">{selectedSlot?.time} (25 minutes)</div>
                 </div>
               </div>
 

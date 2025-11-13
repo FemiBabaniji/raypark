@@ -594,9 +594,9 @@ export default function PortfolioBuilder({
               onDelete={() => deleteWidget(w.id, column)}
               selectedColor={widgetColors[w.id] ?? 5}
               onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.id]: color }))}
-              content={widgetContent["meeting-scheduler"]}
+              content={widgetContent[w.id]}
               onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, "meeting-scheduler": content }))
+                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
               }
             />
           </motion.div>

@@ -16,5 +16,5 @@ export default async function DmzNetworkPage() {
 
   // User can create portfolio from the UI if needed
 
-  return <EventsPage />
+  return <EventsPage logo="/dmz-logo-white.svg" />
 }

@@ -167,7 +167,7 @@ const eventData = {
   },
 }
 
-export default function EventsPage() {
+export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
 
   const handleEventClick = (eventId: string) => {
@@ -220,6 +220,14 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      <div className="absolute top-12 left-0 right-0 z-10">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center ml-6">
+            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="h-12 w-auto" />
+          </div>
+        </div>
+      </div>
+
       <main className="w-full pl-12 px-6 relative overflow-hidden">
         <div className="flex gap-8">
           <motion.div

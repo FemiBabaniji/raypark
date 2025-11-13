@@ -11,7 +11,7 @@ export default function Login() {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/bea"
+  const redirectTo = searchParams.get("redirect") || "/network"
 
   const handleGoogleSignIn = async () => {
     try {

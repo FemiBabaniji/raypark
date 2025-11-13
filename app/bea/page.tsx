@@ -16,5 +16,5 @@ export default async function BeaNetworkPage() {
 
   // User can create portfolio from the UI if needed
 
-  return <EventsPage />
+  return <EventsPage logo="/bea-logo.svg" />
 }

@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import type { EventDetailData } from "@/components/event-detail"
+import { FilterTabs, FILTER_TABS } from "@/components/event-nav"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -169,6 +170,7 @@ const eventData = {
 
 export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("Home")
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -220,15 +222,20 @@ export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <div className="absolute top-12 left-0 right-0 z-10">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center ml-6">
-            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="h-12 w-auto" />
+      <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
+        <div className="px-6 py-6">
+          <div className="flex items-center gap-4 mb-6 ml-6">
+            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="h-10 w-auto" />
+            <h1 className="text-3xl font-bold text-white tracking-tight">DMZ</h1>
+          </div>
+          
+          <div className="ml-6">
+            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
         </div>
       </div>
 
-      <main className="w-full pl-12 px-6 relative overflow-hidden">
+      <main className="w-full pl-12 px-6 relative overflow-hidden mt-8">
         <div className="flex gap-8">
           <motion.div
             className="w-[calc(100%-22rem)]"
@@ -242,6 +249,8 @@ export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }
               selectedEvent={selectedEvent}
               selectedEventData={mappedEventData}
               onBackClick={handleBackClick}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
           </motion.div>
 

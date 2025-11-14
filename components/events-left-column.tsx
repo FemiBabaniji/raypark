@@ -1,14 +1,11 @@
 "use client"
 import { useState } from "react"
-import { useRouter } from "next/navigation" // Added useRouter import for navigation
+import { useRouter } from 'next/navigation'
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { EventCard, AnnouncementCard } from "@/components/cards"
 import EventDetailView from "@/components/event-detail-view"
 import {
-  FilterTabs,
-  EventSearch,
   CategoryFilters,
-  FILTER_TABS,
   EVENT_CATEGORY_FILTERS,
   MEMBER_ROLE_FILTERS,
 } from "@/components/event-nav"
@@ -32,7 +29,7 @@ const mockMembers = [
     avatarUrl: "/man-developer.png",
     role: "Developer",
     isLive: true,
-    portfolioUrl: "/network/bfn/members/marcus-johnson", // Updated mock members to link to the portfolio pages I created
+    portfolioUrl: "/network/bfn/members/marcus-johnson",
   },
   {
     id: "sarah-chen",
@@ -134,14 +131,17 @@ export default function EventsLeftColumn({
   selectedEvent,
   selectedEventData,
   onBackClick,
+  activeTab = "Home",
+  onTabChange,
 }: {
   onEventClick?: (eventId: string) => void
   selectedEvent?: string | null
   selectedEventData?: EventDetailData | null
   onBackClick?: () => void
+  activeTab?: string
+  onTabChange?: (tab: string) => void
 }) {
-  const router = useRouter() // Added router for navigation
-  const [active, setActive] = useState("Home")
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [networkSearchQuery, setNetworkSearchQuery] = useState("")
@@ -259,23 +259,7 @@ export default function EventsLeftColumn({
   return (
     <div className="w-full flex justify-center px-8 md:px-12 lg:px-16">
       <div className="w-full max-w-[1200px]">
-        <div className="flex flex-col items-center space-y-4">
-          <EventSearch
-            value={active === "Networks" ? networkSearchQuery : active === "Meetings" ? "" : searchQuery}
-            onChange={active === "Networks" ? setNetworkSearchQuery : active === "Meetings" ? () => {} : setSearchQuery}
-            placeholder={
-              active === "Networks"
-                ? "Search networks by name, role, or location..."
-                : active === "Meetings"
-                  ? "Search meetings..."
-                  : "Search workshops by name, description, or tags..."
-            }
-          />
-
-          <FilterTabs tabs={FILTER_TABS} activeTab={active} onTabChange={setActive} />
-        </div>
-
-        {active === "Home" && selectedEvent && selectedEventData ? (
+        {activeTab === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
             <EventDetailView
               event={{
@@ -309,7 +293,7 @@ export default function EventsLeftColumn({
               onBack={onBackClick || (() => {})}
             />
           </div>
-        ) : active === "Home" ? (
+        ) : activeTab === "Home" ? (
           <>
             <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
               <div className="w-full xl:w-[70%] xl:flex-shrink-0">
@@ -411,7 +395,7 @@ export default function EventsLeftColumn({
                       <p className="text-zinc-400 text-xs">Connect with community networks</p>
                     </div>
                     <button
-                      onClick={() => setActive("Networks")}
+                      onClick={() => onTabChange?.("Networks")}
                       className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
                     >
                       View All
@@ -444,7 +428,7 @@ export default function EventsLeftColumn({
           </>
         ) : null}
 
-        {active === "Networks" && (
+        {activeTab === "Networks" && (
           <div className="mt-6 space-y-6">
             <CategoryFilters
               filters={MEMBER_ROLE_FILTERS}
@@ -472,7 +456,7 @@ export default function EventsLeftColumn({
           </div>
         )}
 
-        {active === "Events" && (
+        {activeTab === "Events" && (
           <>
             <div
               className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px] flex flex-col overflow-hidden`}
@@ -560,7 +544,7 @@ export default function EventsLeftColumn({
           </>
         )}
 
-        {active === "Meetings" && (
+        {activeTab === "Meetings" && (
           <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
@@ -570,7 +554,7 @@ export default function EventsLeftColumn({
           </div>
         )}
 
-        {active === "Projects" && (
+        {activeTab === "Projects" && (
           <div className="mt-8 text-center py-12">
             <p className="text-zinc-500">Projects section coming soon...</p>
           </div>

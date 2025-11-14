@@ -665,46 +665,7 @@ export async function saveWidgetLayout(
 
   const allKeys = [...layout.left.widgets, ...layout.right.widgets]
 
-  const meetingSchedulerIds = allKeys.filter(
-    (id: string) => typeof id === "string" && id.startsWith("meeting-scheduler"),
-  )
-  const otherKeys = allKeys.filter((id: string) => typeof id === "string" && !id.startsWith("meeting-scheduler"))
-
-  // Save meeting scheduler widgets as a single database row with all instances
-  if (meetingSchedulerIds.length > 0) {
-    const widget_type_id = keyToId["meeting-scheduler"]
-    if (widget_type_id) {
-      const { data: existing } = await supabase
-        .from("widget_instances")
-        .select("props")
-        .eq("page_id", pageId)
-        .eq("widget_type_id", widget_type_id)
-        .maybeSingle()
-
-      // Merge all meeting scheduler content into one props object keyed by widget ID
-      const meetingSchedulerProps = { ...(existing?.props ?? {}) }
-      for (const widgetId of meetingSchedulerIds) {
-        if (widgetContent[widgetId]) {
-          meetingSchedulerProps[widgetId] = widgetContent[widgetId]
-        }
-      }
-
-      const { error: upsertErr } = await supabase
-        .from("widget_instances")
-        .upsert(
-          { page_id: pageId, widget_type_id, props: meetingSchedulerProps, enabled: true },
-          { onConflict: "page_id,widget_type_id" },
-        )
-
-      if (upsertErr) {
-        console.error("[v0] ❌ Failed to upsert meeting-scheduler widget:", upsertErr)
-        throw upsertErr
-      }
-    }
-  }
-
-  // Save other widgets normally
-  for (const key of otherKeys) {
+  for (const key of allKeys) {
     const widget_type_id = keyToId[key]
     if (!widget_type_id) {
       continue
@@ -948,48 +909,19 @@ export async function loadPortfolioData(portfolioId: string): Promise<{
       // Extract gallery groups if they exist
       const widgetId = leftWidgetKeys.includes(key) || rightWidgetKeys.includes(key) ? key : `${key}-${Date.now()}`
       galleryGroups[widgetId] = props.galleryGroups
-    } else if (key === "meeting-scheduler") {
-      const allWidgetIds = [...leftWidgetKeys, ...rightWidgetKeys]
-      const meetingSchedulerIds = allWidgetIds.filter((id: string) => id.startsWith("meeting-scheduler"))
-
-      // For each meeting scheduler widget in the layout, load its content
-      for (const widgetId of meetingSchedulerIds) {
-        // Check if this specific instance has saved content
-        const instanceContent = props[widgetId]
-        if (instanceContent) {
-          widgetContent[widgetId] = instanceContent
-
-          // Also extract widget color if present
-          if (typeof instanceContent.selectedColor === "number") {
-            widgetColors[widgetId] = instanceContent.selectedColor
-          }
-        }
-      }
-      continue // Skip the default widgetContent storage below
+    } else if (key === "meeting-scheduler" && typeof props.selectedColor === "number") {
+      // Extract widget color for meeting scheduler
+      const widgetId = leftWidgetKeys.includes(key) || rightWidgetKeys.includes(key) ? key : `${key}-${Date.now()}`
+      widgetColors[widgetId] = props.selectedColor
     }
 
-    // Store all props in widgetContent using the widget type key
+    // Store all props in widgetContent
     widgetContent[key] = props
   }
 
-  // Extract widget type from ID: for "meeting-scheduler-1763018464890", type should be "meeting-scheduler"
-  const extractWidgetType = (widgetId: string): string => {
-    // Check if it's a timestamped widget (ends with a large number)
-    const lastDashIndex = widgetId.lastIndexOf("-")
-    if (lastDashIndex > 0) {
-      const afterLastDash = widgetId.substring(lastDashIndex + 1)
-      // If it's a timestamp (all digits and long), remove it
-      if (/^\d{13,}$/.test(afterLastDash)) {
-        return widgetId.substring(0, lastDashIndex)
-      }
-    }
-    // Otherwise, the whole ID is the type
-    return widgetId
-  }
-
   // Convert widget keys to WidgetDef format
-  const leftWidgets = leftWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
-  const rightWidgets = rightWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
+  const leftWidgets = leftWidgetKeys.map((key: string) => ({ id: key, type: key }))
+  const rightWidgets = rightWidgetKeys.map((key: string) => ({ id: key, type: key }))
 
   return {
     layout: {

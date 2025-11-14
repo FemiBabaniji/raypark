@@ -20,7 +20,6 @@ import {
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
-import type { MeetingSchedulerContent } from "./widgets/MeetingSchedulerWidget"
 
 type Props = {
   isPreviewMode?: boolean
@@ -149,10 +148,6 @@ export default function PortfolioBuilder({
       title: "About Me",
       content:
         "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
-    },
-    "meeting-scheduler": {
-      mode: "custom",
-      calendlyUrl: "https://calendly.com/your-username/30min",
     },
   })
 
@@ -594,10 +589,6 @@ export default function PortfolioBuilder({
               onDelete={() => deleteWidget(w.id, column)}
               selectedColor={widgetColors[w.id] ?? 5}
               onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.id]: color }))}
-              content={widgetContent[w.id]}
-              onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
-              }
             />
           </motion.div>
         )
@@ -848,7 +839,6 @@ export default function PortfolioBuilder({
         isPreviewMode={isPreviewMode}
         rightSlot={rightSlot}
         logoHref="/network"
-        logoSrc="/dmz-logo-white.svg"
       >
         <div
           className={`lg:w-1/2 relative transition-all duration-200 ${

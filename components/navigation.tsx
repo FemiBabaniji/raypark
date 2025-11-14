@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from "lucide-react"
+import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon, Calendar, CalendarDays } from 'lucide-react'
 
 interface NavigationProps {
   currentView: string
@@ -104,6 +104,29 @@ export function Navigation({
                   >
                     <NetworkIcon className="w-4 h-4" />
                     Network
+                  </a>
+
+                  <a
+                    href="/events"
+                    className={`w-full px-4 py-2 text-left flex items-center gap-3 transition-colors text-sm ${
+                      currentView === "events"
+                        ? "text-white bg-zinc-700"
+                        : "text-zinc-300 hover:text-white hover:bg-zinc-700"
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Events
+                  </a>
+                  <a
+                    href="/calendars"
+                    className={`w-full px-4 py-2 text-left flex items-center gap-3 transition-colors text-sm ${
+                      currentView === "calendars"
+                        ? "text-white bg-zinc-700"
+                        : "text-zinc-300 hover:text-white hover:bg-zinc-700"
+                    }`}
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    Calendars
                   </a>
 
                   <div className="my-2 border-t border-zinc-700" />

@@ -29,7 +29,6 @@ export default function PortfolioBuilderPage() {
   const [isLive, setIsLive] = useState(false)
   const lastFetchedUserIdRef = useRef<string | null>(null)
   const hasFetchedRef = useRef(false)
-  const [communityId, setCommunityId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,11 +56,6 @@ export default function PortfolioBuilderPage() {
           const portfolio = beaPortfolio || portfolios[0]
 
           console.log("[v0] Selected portfolio:", portfolio.id, "| BEA:", !!beaPortfolio)
-
-          if ((portfolio as any).community_id) {
-            setCommunityId((portfolio as any).community_id)
-            console.log("[v0] Community ID stored:", (portfolio as any).community_id)
-          }
 
           const identity = await getIdentityProps(portfolio.id)
           console.log("[v0] Identity props:", identity)
@@ -173,7 +167,7 @@ export default function PortfolioBuilderPage() {
   }
 
   const handleBack = () => {
-    router.push("/dmz")
+    router.push("/bea")
   }
 
   const togglePreview = () => {

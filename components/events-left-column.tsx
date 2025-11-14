@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react"
-import { useRouter } from "next/navigation" // Added useRouter import for navigation
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { EventCard, AnnouncementCard } from "@/components/cards"
 import EventDetailView from "@/components/event-detail-view"
@@ -21,48 +20,6 @@ const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow
 
 const mockMembers = [
   {
-    id: "marcus-johnson",
-    name: "Marcus Johnson",
-    title: "Software Engineer",
-    email: "marcus@techstartup.io",
-    location: "San Francisco, CA",
-    handle: "@marcuscodes",
-    initials: "MJ",
-    selectedColor: 1 as const,
-    avatarUrl: "/man-developer.png",
-    role: "Developer",
-    isLive: true,
-    portfolioUrl: "/network/bfn/members/marcus-johnson", // Updated mock members to link to the portfolio pages I created
-  },
-  {
-    id: "sarah-chen",
-    name: "Sarah Chen",
-    title: "Product Designer",
-    email: "sarah@designstudio.io",
-    location: "Toronto, ON",
-    handle: "@sarahdesigns",
-    initials: "SC",
-    selectedColor: 5 as const,
-    avatarUrl: "/woman-designer.png",
-    role: "Designer",
-    isLive: true,
-    portfolioUrl: "/network/dmz/members/sarah-chen",
-  },
-  {
-    id: "alex-thompson",
-    name: "Alex Thompson",
-    title: "Startup Founder",
-    email: "alex@startup.co",
-    location: "Toronto, ON",
-    handle: "@alexfounder",
-    initials: "AT",
-    selectedColor: 3 as const,
-    avatarUrl: "/man-developer.png",
-    role: "Manager",
-    isLive: true,
-    portfolioUrl: "/network/dmz/members/alex-thompson",
-  },
-  {
     id: "oluwafemi-babaniji",
     name: "Oluwafemi Babaniji",
     title: "Senior Data Scientist",
@@ -73,6 +30,32 @@ const mockMembers = [
     selectedColor: 3 as const,
     avatarUrl: "/man-developer.png",
     role: "Developer",
+    isLive: true,
+  },
+  {
+    id: "sarah-chen",
+    name: "Sarah Chen",
+    title: "AI Engineer",
+    email: "sarah@techstartup.io",
+    location: "San Francisco, CA",
+    handle: "@sarahcodes",
+    initials: "SC",
+    selectedColor: 3 as const,
+    avatarUrl: "/professional-headshot.png",
+    role: "Developer",
+    isLive: true,
+  },
+  {
+    id: "marcus-johnson",
+    name: "Marcus Johnson",
+    title: "Product Designer",
+    email: "marcus@designstudio.com",
+    location: "New York, NY",
+    handle: "@marcusdesign",
+    initials: "MJ",
+    selectedColor: 1 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Designer",
     isLive: true,
   },
   {
@@ -115,6 +98,19 @@ const mockMembers = [
     isLive: true,
   },
   {
+    id: "alex-thompson",
+    name: "Alex Thompson",
+    title: "Data Scientist",
+    email: "alex@datascience.com",
+    location: "Boston, MA",
+    handle: "@alexdata",
+    initials: "AT",
+    selectedColor: 0 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Developer",
+    isLive: true,
+  },
+  {
     id: "amara-okafor",
     name: "Amara Okafor",
     title: "Founder & CEO",
@@ -140,7 +136,6 @@ export default function EventsLeftColumn({
   selectedEventData?: EventDetailData | null
   onBackClick?: () => void
 }) {
-  const router = useRouter() // Added router for navigation
   const [active, setActive] = useState("Home")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -248,13 +243,6 @@ export default function EventsLeftColumn({
   const filteredNetworks = filterNetworks()
   const filteredHomeNetworks = filterHomeNetworksByRole()
   const filteredAttendees = filterAttendees()
-
-  const handleMemberClick = (memberId: string) => {
-    const member = mockMembers.find((m) => m.id === memberId)
-    if (member?.portfolioUrl) {
-      router.push(member.portfolioUrl)
-    }
-  }
 
   return (
     <div className="w-full flex justify-center px-8 md:px-12 lg:px-16">
@@ -431,7 +419,7 @@ export default function EventsLeftColumn({
                       <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
                         <UnifiedPortfolioCard
                           portfolio={member}
-                          onClick={(id) => handleMemberClick(id)}
+                          onClick={(id) => console.log("View network profile:", id)}
                           onShare={(id) => console.log("Share network:", id)}
                           onMore={(id) => console.log("More options for network:", id)}
                         />
@@ -458,7 +446,7 @@ export default function EventsLeftColumn({
                   <UnifiedPortfolioCard
                     key={member.id}
                     portfolio={member}
-                    onClick={(id) => handleMemberClick(id)}
+                    onClick={(id) => console.log("View network profile:", id)}
                     onShare={(id) => console.log("Share network:", id)}
                     onMore={(id) => console.log("More options for network:", id)}
                   />

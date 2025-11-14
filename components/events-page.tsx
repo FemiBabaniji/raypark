@@ -228,8 +228,8 @@ export default function EventsPage({
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <div className="px-8 md:px-12 lg:px-16 pt-4 pb-3">
-        <div className="ml-6 flex items-center gap-3">
+      <div className="px-8 md:px-12 lg:px-16 pt-2 pb-2">
+        <div className="ml-6 flex items-center gap-6">
           <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
           <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
         </div>
@@ -243,7 +243,7 @@ export default function EventsPage({
         </div>
       </div>
 
-      <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
+      <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-6">
         <div className="flex gap-8 pl-6">
           <motion.div
             className="w-[calc(100%-22rem)]"

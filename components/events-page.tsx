@@ -281,19 +281,19 @@ export default function EventsPage({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div 
-                className="flex items-center justify-center rounded-[2rem] aspect-square"
+                className="flex items-center justify-center rounded-[1.5rem] aspect-square"
                 style={{
-                  height: '5rem',
-                  background: 'linear-gradient(135deg, #3730A3 0%, #5B21B6 50%, #6366F1 100%)',
-                  boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)'
+                  height: '4rem',
+                  background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
+                  boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
                 }}
               >
-                <span className="text-white font-bold text-3xl tracking-tight">
+                <span className="text-zinc-900 font-bold text-2xl tracking-tight">
                   {communityName}
                 </span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
                 <span className="text-white">Your hub. </span>
                 <span style={{ color: "#4169E1" }}>Your community.</span>
               </h1>

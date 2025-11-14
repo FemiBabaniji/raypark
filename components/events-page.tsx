@@ -1,11 +1,10 @@
 "use client"
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import type { EventDetailData } from "@/components/event-detail"
 import { FilterTabs, FILTER_TABS } from "@/components/event-nav"
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const eventData = {
   "ai-ml-workshop": {
@@ -178,7 +177,6 @@ export default function EventsPage({
 }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("Home")
-  const [isRightColumnCollapsed, setIsRightColumnCollapsed] = useState(false)
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -246,11 +244,11 @@ export default function EventsPage({
       </div>
 
       <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-        <div className={`flex gap-8 pl-6 ${isRightColumnCollapsed ? 'justify-center' : ''}`}>
+        <div className="flex gap-8 pl-6">
           <motion.div
-            className={isRightColumnCollapsed ? "w-full max-w-[1200px]" : "w-[calc(100%-22rem)]"}
+            className="w-[calc(100%-22rem)]"
             animate={{
-              width: isRightColumnCollapsed ? "100%" : "calc(100% - 22rem)",
+              width: "calc(100% - 22rem)",
             }}
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -264,39 +262,15 @@ export default function EventsPage({
             />
           </motion.div>
 
-          <AnimatePresence>
-            {!isRightColumnCollapsed && (
-              <motion.div
-                initial={{ x: "0%" }}
-                animate={{ x: "0%" }}
-                exit={{ x: "100%" }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                className="w-80 flex-shrink-0 relative"
-              >
-                <button
-                  onClick={() => setIsRightColumnCollapsed(true)}
-                  className="absolute -left-4 top-20 z-30 w-8 h-16 rounded-l-xl bg-white/10 backdrop-blur-xl border border-white/20 border-r-0 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
-                  aria-label="Collapse sidebar"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <EventsRightColumn />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {isRightColumnCollapsed && (
-            <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => setIsRightColumnCollapsed(false)}
-              className="fixed right-0 top-40 z-30 w-10 h-16 rounded-l-xl bg-white/10 backdrop-blur-xl border border-white/20 border-r-0 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
-              aria-label="Expand sidebar"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </motion.button>
-          )}
+          <motion.div
+            className="w-80 flex-shrink-0"
+            animate={{
+              x: "0%",
+            }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <EventsRightColumn />
+          </motion.div>
         </div>
       </main>
     </div>

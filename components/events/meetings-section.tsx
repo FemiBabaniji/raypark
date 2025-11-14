@@ -1,18 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { LayoutGrid, Calendar, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { MeetingsCalendarView } from "./meetings-calendar-view"
-
-interface Meeting {
-  id: string
-  title: string
-  date: string
-  time: string
-  host: string
-  attendees: number
-  type: "1-on-1" | "team" | "all-hands"
-}
+import { MeetingCard } from "@/components/cards/meeting-card"
+import { Meeting } from "@/types/meeting"
 
 interface MeetingsSectionProps {
   onMeetingClick?: (meetingId: string) => void
@@ -60,21 +52,8 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
     },
   ]
 
-  const getTypeStyles = (type: Meeting["type"]) => {
-    switch (type) {
-      case "1-on-1":
-        return "bg-zinc-800/50 hover:bg-zinc-800/70 border-l-4 border-l-purple-500/70"
-      case "team":
-        return "bg-zinc-800/50 hover:bg-zinc-800/70 border-l-4 border-l-blue-500/70"
-      case "all-hands":
-        return "bg-zinc-800/50 hover:bg-zinc-800/70 border-l-4 border-l-cyan-500/70"
-      default:
-        return "bg-zinc-800/50 hover:bg-zinc-800/70 border-l-4 border-l-zinc-500/70"
-    }
-  }
-
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full max-h-[600px] flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div>
           <h2 className="text-xl font-semibold text-white">My Meetings</h2>
@@ -110,32 +89,15 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         {viewMode === "list" ? (
-          <div className="space-y-3 h-full overflow-y-auto pr-2">
+          <div className="space-y-2 h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
             {upcomingMeetings.map((meeting) => (
-              <button
-                key={meeting.id}
-                onClick={() => onMeetingClick?.(meeting.id)}
-                className={`w-full text-left ${getTypeStyles(meeting.type)} rounded-xl p-4 transition-all border border-white/5`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white text-base mb-1">{meeting.title}</h3>
-                    <p className="text-sm text-zinc-400">{meeting.host}</p>
-                  </div>
-                  <div className="text-xs text-zinc-500 bg-zinc-900/50 px-2 py-1 rounded">
-                    {meeting.type}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm border-t border-white/5 pt-3">
-                  <div className="text-zinc-400">
-                    <div>{meeting.date}</div>
-                    <div className="text-xs">{meeting.time}</div>
-                  </div>
-                  <span className="text-zinc-400 text-xs">{meeting.attendees} attending</span>
-                </div>
-              </button>
+              <MeetingCard 
+                key={meeting.id} 
+                meeting={meeting} 
+                onClick={onMeetingClick}
+              />
             ))}
           </div>
         ) : (

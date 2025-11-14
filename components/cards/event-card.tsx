@@ -20,31 +20,80 @@ export function EventCard({ title, date, description, time, attending, location,
   const [isHovered, setIsHovered] = useState(false)
 
   const getGradient = (title: string) => {
-    if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#3B82F6]/70 to-[#06B6D4]/70" // Friends Mix - Blue (softer)
-    } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-[#34D399]/70 to-[#6EE7B7]/70" // Chill Mix - Green (softer)
-    } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-[#A855F7]/70 to-[#7C3AED]/70" // Favourites Mix - Purple (softer)
+    // Workshop (Blue)
+    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
+      return "from-[#5b7fc9]/70 to-[#4a6bb3]/70"
+    } 
+    // Networking/Mixer (Green)
+    else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
+      return "from-[#5fb88f]/70 to-[#4a9e7c]/70"
+    } 
+    // Masterclass (Purple)
+    else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
+      return "from-[#8b7fc9]/70 to-[#7568b3]/70"
     }
-    return "from-[#F87171]/70 to-[#FB7185]/70" // New Music Mix - Red/Pink (softer)
+    // Conference (Orange)
+    else if (title.includes("Conference")) {
+      return "from-[#d9926f]/70 to-[#c0795d]/70"
+    }
+    // Mixer (Teal) - already covered above with Networking
+    // Seminar (Coral)
+    else if (title.includes("Seminar")) {
+      return "from-[#e07a7a]/70 to-[#c96868]/70"
+    }
+    // Hackathon (Cyan)
+    else if (title.includes("Hackathon")) {
+      return "from-[#5bc9e0]/70 to-[#4ab3c9]/70"
+    }
+    // Meetup (Pink)
+    else if (title.includes("Meetup")) {
+      return "from-[#d97fc9]/70 to-[#c068b3]/70"
+    }
+    // Summit (Amber)
+    else if (title.includes("Summit")) {
+      return "from-[#e0b85f]/70 to-[#c9a54a]/70"
+    }
+    // Social (Magenta)
+    else if (title.includes("Social")) {
+      return "from-[#c97fe0]/70 to-[#b368c9]/70"
+    }
+    // Default to Workshop blue
+    return "from-[#5b7fc9]/70 to-[#4a6bb3]/70"
   }
 
   const getTitleGradient = (title: string) => {
-    if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-white via-white to-[#3B82F6]" // Blue tint
-    } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-white via-white to-[#34D399]" // Green tint
-    } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-white via-white to-[#A855F7]" // Purple tint
+    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
+      return "from-white via-white to-[#5b7fc9]" // Blue
+    } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
+      return "from-white via-white to-[#5fb88f]" // Green
+    } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
+      return "from-white via-white to-[#8b7fc9]" // Purple
+    } else if (title.includes("Conference")) {
+      return "from-white via-white to-[#d9926f]" // Orange
+    } else if (title.includes("Seminar")) {
+      return "from-white via-white to-[#e07a7a]" // Coral
+    } else if (title.includes("Hackathon")) {
+      return "from-white via-white to-[#5bc9e0]" // Cyan
+    } else if (title.includes("Meetup")) {
+      return "from-white via-white to-[#d97fc9]" // Pink
+    } else if (title.includes("Summit")) {
+      return "from-white via-white to-[#e0b85f]" // Amber
+    } else if (title.includes("Social")) {
+      return "from-white via-white to-[#c97fe0]" // Magenta
     }
-    return "from-white via-white to-[#F87171]" // Red/Pink tint
+    return "from-white via-white to-[#5b7fc9]" // Default blue
   }
 
   const getEventType = (title: string) => {
     if (title.includes("Workshop")) return "Workshop"
     if (title.includes("Mixer") || title.includes("Networking")) return "Networking"
     if (title.includes("Masterclass")) return "Masterclass"
+    if (title.includes("Conference")) return "Conference"
+    if (title.includes("Seminar")) return "Seminar"
+    if (title.includes("Hackathon")) return "Hackathon"
+    if (title.includes("Meetup")) return "Meetup"
+    if (title.includes("Summit")) return "Summit"
+    if (title.includes("Social")) return "Social"
     return "Event"
   }
 

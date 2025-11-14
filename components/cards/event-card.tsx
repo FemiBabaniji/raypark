@@ -129,7 +129,7 @@ export function EventCard({ title, date, description, time, attending, location,
         text-left text-white
         w-56 sm:w-64
         flex-shrink-0
-        border border-white/10
+        shadow-lg
       `}
       style={{
         minHeight: "260px",

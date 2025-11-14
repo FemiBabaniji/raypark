@@ -14,7 +14,7 @@ import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
 import type { EventDetailData } from "@/components/event-detail"
 
-const CONTAINER_STYLES = "bg-white/[0.03] backdrop-blur-xl rounded-3xl p-5 border border-white/10"
+const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-5 shadow-lg"
 
 const mockMembers = [
   {

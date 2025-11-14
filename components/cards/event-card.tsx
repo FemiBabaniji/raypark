@@ -132,13 +132,13 @@ export function EventCard({ title, date, description, time, attending, location,
         shadow-lg
       `}
       style={{
-        minHeight: "240px",
+        height: "240px",
         maxWidth: "208px",
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
-      <div className="relative flex flex-col justify-between h-full">
+      <div className="relative flex flex-col justify-between" style={{ height: '100%' }}>
         <div className="mb-3">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
           <h3

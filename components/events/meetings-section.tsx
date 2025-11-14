@@ -108,7 +108,7 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
                 <button
                   key={meeting.id}
                   onClick={() => onMeetingClick?.(meeting.id)}
-                  className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-xl rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-900/60 border border-white/10`}
+                  className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-xl rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-900/70 border border-white/10`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">

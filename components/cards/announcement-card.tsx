@@ -28,11 +28,11 @@ export function AnnouncementCard({
       onClick={() => setIsExpanded(!isExpanded)}
     >
       <div
-        className={`relative overflow-hidden rounded-2xl bg-zinc-900/40 backdrop-blur-xl border transition-all duration-300 ${
+        className={`relative overflow-hidden rounded-2xl bg-zinc-900/50 backdrop-blur-xl border transition-all duration-300 ${
           isImportant
             ? "border-purple-500/30 hover:border-purple-500/50 shadow-lg shadow-purple-500/10"
             : "border-zinc-700/50 hover:border-zinc-600/50 shadow-lg"
-        } ${isExpanded ? "" : "hover:bg-zinc-900/60"}`}
+        } ${isExpanded ? "" : "hover:bg-zinc-900/70"}`}
       >
         {isImportant && (
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-fuchsia-500" />

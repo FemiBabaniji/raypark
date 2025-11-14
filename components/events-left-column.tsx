@@ -15,7 +15,7 @@ import { MeetingsSection } from "@/components/events/meetings-section"
 import type { EventDetailData } from "@/components/event-detail"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-5 shadow-lg"
+const CONTAINER_STYLES = "bg-zinc-900/30 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-white/5"
 
 const mockMembers = [
   {

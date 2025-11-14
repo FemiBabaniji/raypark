@@ -227,52 +227,97 @@ export default function EventsPage({
     : null
 
   return (
-    <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <div className="px-8 md:px-12 lg:px-16 pt-6 pb-12">
-        <div className="ml-6 flex items-center gap-3">
-          <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
-          <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
-        </div>
+    <div className="min-h-screen pt-12 relative overflow-hidden" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Large blue gradient orb - top left */}
+        <div 
+          className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Purple gradient orb - top right */}
+        <div 
+          className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Blue gradient orb - middle left */}
+        <div 
+          className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Purple/Violet gradient orb - bottom right */}
+        <div 
+          className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Smaller accent blue orb - bottom left */}
+        <div 
+          className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
+          }}
+        />
       </div>
       
-      <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
-        <div className="px-8 md:px-12 lg:px-16">
-          <div className="ml-6">
-            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Content layer */}
+      <div className="relative z-10">
+        <div className="px-8 md:px-12 lg:px-16 pt-6 pb-12">
+          <div className="ml-6 flex items-center gap-3">
+            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
+            <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
           </div>
         </div>
-      </div>
-
-      <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-        <div className="flex gap-8 pl-6 items-start">
-          <motion.div
-            className="w-[calc(100%-18rem)]"
-            animate={{
-              width: "calc(100% - 18rem)",
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <EventsLeftColumn
-              onEventClick={handleEventClick}
-              selectedEvent={selectedEvent}
-              selectedEventData={mappedEventData}
-              onBackClick={handleBackClick}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
-          </motion.div>
-
-          <motion.div
-            className="w-64 flex-shrink-0 sticky top-24"
-            animate={{
-              x: "0%",
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <EventsRightColumn />
-          </motion.div>
+        
+        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
+          <div className="px-8 md:px-12 lg:px-16">
+            <div className="ml-6">
+              <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+          </div>
         </div>
-      </main>
+
+        <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
+          <div className="flex gap-8 pl-6 items-start">
+            <motion.div
+              className="w-[calc(100%-18rem)]"
+              animate={{
+                width: "calc(100% - 18rem)",
+              }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <EventsLeftColumn
+                onEventClick={handleEventClick}
+                selectedEvent={selectedEvent}
+                selectedEventData={mappedEventData}
+                onBackClick={handleBackClick}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+              />
+            </motion.div>
+
+            <motion.div
+              className="w-64 flex-shrink-0 sticky top-24"
+              animate={{
+                x: "0%",
+              }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <EventsRightColumn />
+            </motion.div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

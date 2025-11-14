@@ -349,7 +349,7 @@ export default function EventsLeftColumn({
                         )}
                         <div 
                           id="events-scroll-home"
-                          className="flex gap-6 overflow-x-auto pb-2 scrollbar-thin"
+                          className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
                           onScroll={handleScroll}
                         >
                           {filteredUpcomingEvents.length > 0 ? (
@@ -552,7 +552,7 @@ export default function EventsLeftColumn({
                     )}
                     <div 
                       id="events-scroll-events-tab"
-                      className="flex gap-6 overflow-x-auto pb-2 scrollbar-thin"
+                      className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
                       onScroll={handleScroll}
                     >
                       {filteredUpcomingEvents.length > 0 ? (

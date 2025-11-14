@@ -279,8 +279,20 @@ export default function EventsPage({
       <div className="relative z-10">
         <div className="pt-4 pb-4 px-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
+            <div className="flex items-center gap-6">
+              <div 
+                className="flex items-center justify-center rounded-[2rem] aspect-square"
+                style={{
+                  height: '5rem',
+                  background: 'linear-gradient(135deg, #3730A3 0%, #5B21B6 50%, #6366F1 100%)',
+                  boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)'
+                }}
+              >
+                <span className="text-white font-bold text-3xl tracking-tight">
+                  {communityName}
+                </span>
+              </div>
+              
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                 <span className="text-white">Your hub. </span>
                 <span style={{ color: "#4169E1" }}>Your community.</span>

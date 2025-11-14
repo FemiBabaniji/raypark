@@ -223,20 +223,15 @@ export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
-        <div className="px-6 py-6">
-          <div className="flex items-center gap-4 mb-6 ml-6">
-            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="h-10 w-auto" />
-            <h1 className="text-3xl font-bold text-white tracking-tight">DMZ</h1>
-          </div>
-          
+        <div className="py-6 px-8 md:px-12 lg:px-16">
           <div className="ml-6">
             <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
         </div>
       </div>
 
-      <main className="w-full pl-12 px-6 relative overflow-hidden mt-8">
-        <div className="flex gap-8">
+      <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
+        <div className="flex gap-8 pl-6">
           <motion.div
             className="w-[calc(100%-22rem)]"
             animate={{

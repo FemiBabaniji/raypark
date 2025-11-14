@@ -9,7 +9,7 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, activeTab, onTabChange }: FilterTabsProps) {
   return (
-    <div className="flex gap-8 border-b border-white/5">
+    <div className="flex gap-8">
       {tabs.map((tab) => (
         <button
           key={tab}

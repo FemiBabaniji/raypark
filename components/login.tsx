@@ -2,19 +2,16 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from "next/navigation"
 import BackButton from "@/components/ui/back-button"
-import { PasskeyAuthModal } from "@/components/auth/passkey-auth-modal"
-import { Key } from 'lucide-react'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/bea"
+  const redirectTo = searchParams.get("redirect") || "/network"
 
   const handleGoogleSignIn = async () => {
     try {
@@ -119,14 +116,6 @@ export default function Login() {
             {loading ? "Signing in..." : "Continue with Google"}
           </button>
 
-          <button
-            onClick={() => setShowPasskeyModal(true)}
-            className="w-full flex items-center justify-center gap-3 bg-zinc-800 hover:bg-zinc-700 text-white py-4 px-6 rounded-2xl transition-colors"
-          >
-            <Key className="w-5 h-5" />
-            Sign in with Passkey
-          </button>
-
           {/* Phone Sign In */}
           <button
             onClick={handlePhoneSignIn}
@@ -152,11 +141,6 @@ export default function Login() {
           </p>
         </div>
       </div>
-
-      <PasskeyAuthModal
-        open={showPasskeyModal}
-        onClose={() => setShowPasskeyModal(false)}
-      />
     </div>
   )
 }

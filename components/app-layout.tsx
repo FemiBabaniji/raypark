@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from "next/navigation"
 import { Navigation } from "./navigation"
 import { useAuth } from "@/lib/auth"
 
@@ -25,11 +25,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     else if (pathname === "/dashboard") setCurrentView("dashboard")
     else if (pathname === "/network") setCurrentView("network")
     else if (pathname === "/discover") setCurrentView("discover")
-    else if (pathname === "/events") setCurrentView("events")
-    else if (pathname === "/calendars") setCurrentView("calendars")
     else if (pathname.startsWith("/network/")) setCurrentView("network")
-    else if (pathname.startsWith("/events/")) setCurrentView("events")
-    else if (pathname.startsWith("/calendars/")) setCurrentView("calendars")
     else setCurrentView("dashboard")
   }, [pathname])
 
@@ -48,13 +44,6 @@ export function AppLayout({ children }: AppLayoutProps) {
       case "network":
         router.push("/network")
         break
-      case "events":
-        router.push("/events")
-        break
-      case "calendars":
-        router.push("/calendars")
-        break
-      // </CHANGE>
       default:
         break
     }
@@ -63,10 +52,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isPortfolioBuilder = pathname.startsWith("/portfolio")
   const isAuthPage = pathname === "/auth" || pathname === "/login" || pathname.startsWith("/auth/")
   const isDashboard = pathname === "/" || pathname === "/dashboard"
-  const isNetworkWorkflow = pathname.startsWith("/network") && pathname !== "/network"
-  const isEventsOrCalendars = pathname.startsWith("/events") || pathname.startsWith("/calendars")
-  
-  const shouldShowNavigation = isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow && (isEventsOrCalendars || pathname === "/events" || pathname === "/calendars")
+  const isNetworkWorkflow = pathname.startsWith("/network")
+  const isCommunityPage = pathname === "/bea" || pathname === "/dmz"
+  const shouldShowNavigation =
+    isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow && !isCommunityPage
 
   return (
     <>
@@ -79,7 +68,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           setCurrentView={handleSetCurrentView}
           setIsSearchExpanded={setIsSearchExpanded}
           setIsUserDropdownOpen={setIsUserDropdownOpen}
-          setIsLoggedIn={() => {}}
+          setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
         />
       )}
       <div>{children}</div>

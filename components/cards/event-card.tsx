@@ -22,42 +22,42 @@ export function EventCard({ title, date, description, time, attending, location,
   const getGradient = (title: string) => {
     // Workshop (Blue) - deeper blue
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#4a6bb3]/75 to-[#3a5a9d]/75"
+      return "from-[#4a6bb3] to-[#3a5a9d]"
     } 
     // Networking/Mixer (Green) - deeper green
     else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-[#4a9e7c]/75 to-[#3a8866]/75"
+      return "from-[#4a9e7c] to-[#3a8866]"
     } 
     // Masterclass (Purple) - deeper purple
     else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-[#7568b3]/75 to-[#5f529d]/75"
+      return "from-[#7568b3] to-[#5f529d]"
     }
     // Conference (Orange) - deeper orange
     else if (title.includes("Conference")) {
-      return "from-[#c0795d]/75 to-[#a66347]/75"
+      return "from-[#c0795d] to-[#a66347]"
     }
     // Seminar (Coral) - deeper coral
     else if (title.includes("Seminar")) {
-      return "from-[#c96868]/75 to-[#b35252]/75"
+      return "from-[#c96868] to-[#b35252]"
     }
     // Hackathon (Cyan) - deeper cyan
     else if (title.includes("Hackathon")) {
-      return "from-[#4ab3c9]/75 to-[#3a9db3]/75"
+      return "from-[#4ab3c9] to-[#3a9db3]"
     }
     // Meetup (Pink) - deeper pink
     else if (title.includes("Meetup")) {
-      return "from-[#c068b3]/75 to-[#a6529d]/75"
+      return "from-[#c068b3] to-[#a6529d]"
     }
     // Summit (Amber) - deeper amber
     else if (title.includes("Summit")) {
-      return "from-[#c9a54a]/75 to-[#b38f3a]/75"
+      return "from-[#c9a54a] to-[#b38f3a]"
     }
     // Social (Magenta) - deeper magenta
     else if (title.includes("Social")) {
-      return "from-[#b368c9]/75 to-[#9d52b3]/75"
+      return "from-[#b368c9] to-[#9d52b3]"
     }
     // Default to Workshop blue
-    return "from-[#4a6bb3]/75 to-[#3a5a9d]/75"
+    return "from-[#4a6bb3] to-[#3a5a9d]"
   }
 
   const getTitleGradient = (title: string) => {
@@ -136,7 +136,6 @@ export function EventCard({ title, date, description, time, attending, location,
         maxWidth: "256px",
       }}
     >
-      <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
       <div className="relative flex flex-col justify-between h-full">
         <div className="mb-3">

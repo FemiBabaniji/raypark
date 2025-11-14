@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+import { redirect } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import EventsPage from "@/components/events-page"
 
@@ -14,7 +14,5 @@ export default async function BeaNetworkPage() {
     redirect("/auth?redirect=/bea")
   }
 
-  // User can create portfolio from the UI if needed
-
-  return <EventsPage logo="/bea-logo.svg" />
+  return <EventsPage logo="/bea-logo.svg" communityName="BEA" />
 }

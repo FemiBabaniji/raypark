@@ -168,7 +168,13 @@ const eventData = {
   },
 }
 
-export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }) {
+export default function EventsPage({ 
+  logo = "/bea-logo.svg",
+  communityName = "BEA" 
+}: { 
+  logo?: string
+  communityName?: string 
+}) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("Home")
 
@@ -222,6 +228,13 @@ export default function EventsPage({ logo = "/bea-logo.svg" }: { logo?: string }
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      <div className="px-8 md:px-12 lg:px-16 pt-8 pb-4">
+        <div className="ml-6 flex items-center gap-3">
+          <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
+          <h1 className="text-3xl font-bold text-white">{communityName}</h1>
+        </div>
+      </div>
+      
       <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
         <div className="py-6 px-8 md:px-12 lg:px-16">
           <div className="ml-6">

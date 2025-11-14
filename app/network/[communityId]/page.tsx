@@ -1,9 +1,9 @@
 "use client"
 
-import { useRouter, useParams } from "next/navigation"
+import { useRouter, useParams } from 'next/navigation'
 import { motion, AnimatePresence } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Calendar, Plus, Video } from 'lucide-react'
 import { useState } from "react"
 
 const communityData = {
@@ -107,6 +107,65 @@ const communityData = {
   },
 }
 
+const meetingsData = {
+  "tech-innovators-sf": [
+    {
+      id: "meet-1",
+      title: "Product Strategy Discussion",
+      participant: "Sarah Chen",
+      participantRole: "Product Lead",
+      date: "Dec 16, 2024",
+      time: "2:00 PM - 3:00 PM",
+      type: "video" as const,
+      status: "upcoming" as const,
+      avatarUrl: "/professional-headshot.png",
+    },
+    {
+      id: "meet-2",
+      title: "Tech Architecture Review",
+      participant: "Marcus Johnson",
+      participantRole: "Senior Engineer",
+      date: "Dec 18, 2024",
+      time: "10:00 AM - 11:00 AM",
+      type: "video" as const,
+      status: "upcoming" as const,
+    },
+    {
+      id: "meet-3",
+      title: "Coffee Chat",
+      participant: "Elena Rodriguez",
+      participantRole: "Founder",
+      date: "Dec 20, 2024",
+      time: "4:00 PM - 4:30 PM",
+      type: "in-person" as const,
+      status: "upcoming" as const,
+    },
+  ],
+  "black-entrepreneurship-alliance": [
+    {
+      id: "meet-bea-1",
+      title: "Mentorship Session",
+      participant: "Alex Thompson",
+      participantRole: "Business Advisor",
+      date: "Dec 17, 2024",
+      time: "3:00 PM - 4:00 PM",
+      type: "video" as const,
+      status: "upcoming" as const,
+    },
+    {
+      id: "meet-bea-2",
+      title: "Investment Strategy Discussion",
+      participant: "Jessica Wu",
+      participantRole: "VC Partner",
+      date: "Dec 19, 2024",
+      time: "11:00 AM - 12:00 PM",
+      type: "video" as const,
+      status: "upcoming" as const,
+      avatarUrl: "/woman-designer.png",
+    },
+  ],
+}
+
 export default function CommunityHubPage() {
   const router = useRouter()
   const params = useParams()
@@ -114,6 +173,7 @@ export default function CommunityHubPage() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
 
   const community = communityData[communityId as keyof typeof communityData]
+  const meetings = meetingsData[communityId as keyof typeof meetingsData] || []
 
   if (!community) {
     return <div>Community not found</div>
@@ -157,8 +217,97 @@ export default function CommunityHubPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-8">
-          {/* Left Column: Announcements + Events */}
+          {/* Left Column: My Meetings + Announcements + Events */}
           <div className="space-y-8">
+            {/* My Meetings */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="bg-zinc-800/30 rounded-2xl p-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <h2 className="text-lg font-medium text-white">My Meetings</h2>
+                </div>
+                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  <Plus className="w-4 h-4" />
+                  Create
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {meetings.length > 0 ? (
+                  meetings.map((meeting, index) => (
+                    <motion.div
+                      key={meeting.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                      className="bg-zinc-700/50 rounded-xl p-4 hover:bg-zinc-700/70 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {meeting.avatarUrl ? (
+                            <img
+                              src={meeting.avatarUrl || "/placeholder.svg"}
+                              alt={meeting.participant}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-white font-semibold text-sm">
+                              {meeting.participant
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Meeting Details */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-medium mb-1 truncate">{meeting.title}</h3>
+                          <p className="text-zinc-400 text-sm mb-2">
+                            {meeting.participant} • {meeting.participantRole}
+                          </p>
+                          <div className="flex items-center gap-3 text-xs text-zinc-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{meeting.date}</span>
+                            </div>
+                            <span>•</span>
+                            <span>{meeting.time}</span>
+                          </div>
+                        </div>
+
+                        {/* Meeting Type Badge */}
+                        <div className="flex-shrink-0">
+                          {meeting.type === "video" ? (
+                            <div className="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                              <Video className="w-3 h-3" />
+                              Video
+                            </div>
+                          ) : (
+                            <div className="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-xs font-medium">
+                              In Person
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                    <p className="text-zinc-500 text-sm">No upcoming meetings</p>
+                    <p className="text-zinc-600 text-xs mt-1">Schedule your first 1:1 meeting</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
             {/* Latest Announcements */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}

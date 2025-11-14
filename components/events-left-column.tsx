@@ -1,10 +1,10 @@
 "use client"
 import { useState } from "react"
-import { ChevronDown, Search } from 'lucide-react'
+import { ChevronDown, Search } from "lucide-react"
 import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
-const FILTERS = ["Events", "Meetings", "Projects", "Members"]
+const FILTERS = ["Events", "Projects", "Members"]
 
 function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -691,113 +691,6 @@ export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eve
             </div>
           </section>
         </>
-      )}
-
-      {active === "Meetings" && (
-        <div className="mt-8 space-y-8">
-          {/* My Meetings header with Create button */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-white">My Meetings</h2>
-            <button className="px-4 py-2 bg-neutral-800/90 backdrop-blur-xl rounded-xl text-white text-sm font-medium hover:bg-neutral-700/90 transition-colors flex items-center gap-2">
-              <span className="text-lg">+</span>
-              Create
-            </button>
-          </div>
-
-          {/* Meetings list - vertical cards */}
-          <div className="space-y-4">
-            {/* Meeting Card 1 */}
-            <Panel
-              variant="module"
-              className="p-6 hover:shadow-lg transition-all cursor-pointer"
-              style={{ backgroundColor: "#1F1F1F", border: "none" }}
-            >
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400/20 to-blue-600/20 flex items-center justify-center flex-shrink-0">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center text-white text-xs font-bold">
-                    SC
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-1">1:1 with Sarah Chen</h3>
-                  <div className="text-sm text-gray-400 mb-2">Tomorrow, Dec 15 at 2:00 PM</div>
-                  <div className="text-sm text-gray-300 line-clamp-1">
-                    Discuss AI implementation strategy and project roadmap
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <div className="px-3 py-1 bg-sky-500/20 text-sky-300 text-xs rounded-lg font-medium">30 min</div>
-                </div>
-              </div>
-            </Panel>
-
-            {/* Meeting Card 2 */}
-            <Panel
-              variant="module"
-              className="p-6 hover:shadow-lg transition-all cursor-pointer"
-              style={{ backgroundColor: "#1F1F1F", border: "none" }}
-            >
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400/20 to-teal-600/20 flex items-center justify-center flex-shrink-0">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
-                    MJ
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-1">Team Sync with Marcus</h3>
-                  <div className="text-sm text-gray-400 mb-2">Dec 16 at 10:00 AM</div>
-                  <div className="text-sm text-gray-300 line-clamp-1">Weekly sync on product design and feedback</div>
-                </div>
-                <div className="flex-shrink-0">
-                  <div className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-lg font-medium">
-                    45 min
-                  </div>
-                </div>
-              </div>
-            </Panel>
-
-            {/* Meeting Card 3 */}
-            <Panel
-              variant="module"
-              className="p-6 hover:shadow-lg transition-all cursor-pointer"
-              style={{ backgroundColor: "#1F1F1F", border: "none" }}
-            >
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/20 to-purple-600/20 flex items-center justify-center flex-shrink-0">
-                  <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center text-white text-xs font-bold">
-                    ER
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-1">Coffee Chat with Elena</h3>
-                  <div className="text-sm text-gray-400 mb-2">Dec 18 at 3:30 PM</div>
-                  <div className="text-sm text-gray-300 line-clamp-1">Casual conversation about career growth</div>
-                </div>
-                <div className="flex-shrink-0">
-                  <div className="px-3 py-1 bg-violet-500/20 text-violet-300 text-xs rounded-lg font-medium">
-                    60 min
-                  </div>
-                </div>
-              </div>
-            </Panel>
-          </div>
-
-          {/* No meetings state (optional, hidden when there are meetings) */}
-          {/* <Panel
-            variant="module"
-            className="p-8 text-center"
-            style={{ backgroundColor: "#1F1F1F", border: "none" }}
-          >
-            <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-8 h-8 text-gray-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">No Meetings Scheduled</h3>
-            <p className="text-sm text-gray-400 mb-4">You have no upcoming meetings. Create one to get started.</p>
-            <button className="px-6 py-2 bg-white text-zinc-900 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors">
-              Schedule Meeting
-            </button>
-          </Panel> */}
-        </div>
       )}
     </div>
   )

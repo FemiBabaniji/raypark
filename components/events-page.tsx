@@ -294,7 +294,7 @@ export default function EventsPage({
 
         {/* Main content area */}
         <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${!showRightColumn ? 'flex justify-center' : ''}`}>
-          <div className={`flex items-start gap-10 md:gap-12 lg:gap-16 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+          <div className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
             <div className={`transition-all duration-300 ease-out ${showRightColumn ? 'w-[520px] md:w-[680px] lg:w-[760px] xl:w-[850px] 2xl:w-[1000px]' : 'w-[520px] md:w-[680px] lg:w-[760px] xl:w-[850px] 2xl:w-[1000px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}

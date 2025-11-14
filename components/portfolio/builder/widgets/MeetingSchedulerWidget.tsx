@@ -1,7 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, ChevronLeft, Clock, MapPin, X, GripVertical, Palette, ExternalLink, Video, User } from 'lucide-react'
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Clock,
+  X,
+  GripVertical,
+  Palette,
+  ExternalLink,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
@@ -10,42 +20,6 @@ export type MeetingSchedulerContent = {
   mode?: "custom" | "calendly"
   calendlyUrl?: string
 }
-
-const mockMeetings = [
-  {
-    id: "1",
-    title: "Product Strategy Discussion",
-    date: "Nov 15, 2025",
-    time: "2:00 PM - 3:00 PM",
-    location: "Virtual - Zoom",
-    attendees: 5,
-    host: "Sarah Chen",
-    description: "Quarterly product roadmap review and strategic planning session.",
-    type: "strategy",
-  },
-  {
-    id: "2",
-    title: "1:1 with Alex",
-    date: "Nov 18, 2025",
-    time: "10:00 AM - 10:30 AM",
-    location: "Office - Conference Room B",
-    attendees: 2,
-    host: "Alex Thompson",
-    description: "Weekly check-in to discuss project progress and upcoming milestones.",
-    type: "one-on-one",
-  },
-  {
-    id: "3",
-    title: "Design Review Session",
-    date: "Nov 20, 2025",
-    time: "3:30 PM - 4:30 PM",
-    location: "Virtual - Google Meet",
-    attendees: 8,
-    host: "Jessica Wu",
-    description: "Review and provide feedback on the latest design iterations for the mobile app.",
-    type: "review",
-  },
-]
 
 export default function MeetingSchedulerWidget({
   widgetId,
@@ -69,9 +43,14 @@ export default function MeetingSchedulerWidget({
   const [mode, setMode] = useState<"custom" | "calendly">(content?.mode || "custom")
   const [calendlyUrl, setCalendlyUrl] = useState(content?.calendlyUrl || "https://calendly.com/your-username/30min")
   const [isEditingUrl, setIsEditingUrl] = useState(false)
+
+  const [view, setView] = useState<"calendar" | "events" | "zones" | "slots" | "confirmation">("calendar")
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  const [selectedZone, setSelectedZone] = useState<any>(null)
+  const [selectedSlot, setSelectedSlot] = useState<any>(null)
   const [showColorPicker, setShowColorPicker] = useState(false)
-  
-  const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(null)
 
   const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
 
@@ -101,15 +80,105 @@ export default function MeetingSchedulerWidget({
     }
   }, [mode])
 
-  const getMeetingGradient = (type: string) => {
-    if (type === "strategy") return "from-[#3B82F6]/70 to-[#06B6D4]/70"
-    if (type === "one-on-one") return "from-[#34D399]/70 to-[#6EE7B7]/70"
-    if (type === "review") return "from-[#A855F7]/70 to-[#7C3AED]/70"
-    return "from-[#F87171]/70 to-[#FB7185]/70"
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+  const startingDayOfWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay()
+
+  const events = [
+    {
+      id: 1,
+      name: "Tech Networking Mixer",
+      location: "Downtown Hub",
+      time: "6:00 PM - 9:00 PM",
+      date: 15,
+    },
+    {
+      id: 2,
+      name: "Startup Founders Meetup",
+      location: "Innovation Center",
+      time: "5:30 PM - 8:30 PM",
+      date: 22,
+    },
+  ]
+
+  const zones = [
+    { id: 1, name: "Zone A", available: 5 },
+    { id: 2, name: "Zone B", available: 3 },
+    { id: 3, name: "Zone C", available: 0 },
+    { id: 4, name: "Zone D", available: 2 },
+  ]
+
+  const timeSlots = [
+    { id: 1, time: "6:00 PM", available: true },
+    { id: 2, time: "6:30 PM", available: true },
+    { id: 3, time: "7:00 PM", available: false },
+    { id: 4, time: "7:30 PM", available: true },
+    { id: 5, time: "8:00 PM", available: true },
+    { id: 6, time: "8:30 PM", available: false },
+  ]
+
+  const hasEvent = (day: number) => {
+    return events.some((event) => event.date === day)
   }
 
-  const handleMeetingClick = (meetingId: string) => {
-    setExpandedMeetingId(expandedMeetingId === meetingId ? null : meetingId)
+  const getEventsForDay = (day: number) => {
+    return events.filter((event) => event.date === day)
+  }
+
+  const handleDayClick = (day: number) => {
+    if (hasEvent(day)) {
+      setSelectedDay(day)
+      setView("events")
+    }
+  }
+
+  const handleEventClick = (event: any) => {
+    setSelectedEvent(event)
+    setView("zones")
+  }
+
+  const handleZoneClick = (zone: any) => {
+    if (zone.available > 0) {
+      setSelectedZone(zone)
+      setView("slots")
+    }
+  }
+
+  const handleSlotClick = (slot: any) => {
+    if (slot.available) {
+      setSelectedSlot(slot)
+      setView("confirmation")
+    }
+  }
+
+  const handleBack = () => {
+    if (view === "events") setView("calendar")
+    else if (view === "zones") setView("events")
+    else if (view === "slots") setView("zones")
+    else if (view === "confirmation") setView("slots")
+  }
+
+  const handleConfirm = () => {
+    alert("Meeting invitation sent!")
+    setView("calendar")
+    setSelectedDay(null)
+    setSelectedEvent(null)
+    setSelectedZone(null)
+    setSelectedSlot(null)
   }
 
   return (
@@ -118,19 +187,19 @@ export default function MeetingSchedulerWidget({
     >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          {mode === "custom" && expandedMeetingId && (
-            <button
-              onClick={() => setExpandedMeetingId(null)}
-              className="text-white/70 hover:text-white transition"
-            >
+          {mode === "custom" && view !== "calendar" && (
+            <button onClick={handleBack} className="text-white/70 hover:text-white transition">
               <ChevronLeft className="w-4 h-4" />
             </button>
           )}
           <Calendar className="w-4 h-4" />
           <h2 className="text-sm font-bold">
             {mode === "calendly" && "Schedule Meeting"}
-            {mode === "custom" && !expandedMeetingId && "Upcoming Meetings"}
-            {mode === "custom" && expandedMeetingId && "Meeting Details"}
+            {mode === "custom" && view === "calendar" && "Schedule Meeting"}
+            {mode === "custom" && view === "events" && "Select Event"}
+            {mode === "custom" && view === "zones" && "Select Zone"}
+            {mode === "custom" && view === "slots" && "Pick Time"}
+            {mode === "custom" && view === "confirmation" && "Confirm"}
           </h2>
         </div>
         {!isPreviewMode && (
@@ -179,14 +248,14 @@ export default function MeetingSchedulerWidget({
         )}
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-4">
         <button
           onClick={() => setMode("custom")}
           className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium transition ${
             mode === "custom" ? "bg-white/30 text-white" : "bg-white/10 text-white/60 hover:bg-white/20"
           }`}
         >
-          My Meetings
+          Custom Scheduler
         </button>
         <button
           onClick={() => setMode("calendly")}
@@ -194,7 +263,7 @@ export default function MeetingSchedulerWidget({
             mode === "calendly" ? "bg-white/30 text-white" : "bg-white/10 text-white/60 hover:bg-white/20"
           }`}
         >
-          Schedule New
+          Calendly
         </button>
       </div>
 
@@ -239,125 +308,157 @@ export default function MeetingSchedulerWidget({
       )}
 
       {mode === "custom" && (
-        <div className="space-y-4">
-          {!expandedMeetingId ? (
-            <>
-              {mockMeetings.map((meeting) => {
-                const meetingGradient = getMeetingGradient(meeting.type)
-                return (
-                  <button
-                    key={meeting.id}
-                    onClick={() => handleMeetingClick(meeting.id)}
-                    className={`
-                      w-full text-left
-                      relative overflow-hidden
-                      bg-gradient-to-br ${meetingGradient}
-                      backdrop-blur-xl
-                      rounded-2xl 
-                      p-4
-                      transition-all duration-300 ease-out
-                      hover:scale-[1.02] hover:shadow-2xl
-                      shadow-lg
-                    `}
-                  >
-                    <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
-                    
-                    <div className="relative">
-                      <h3 className="text-base font-bold mb-2 text-white">{meeting.title}</h3>
-                      
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 text-xs text-white/85">
-                          <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                          <span className="font-medium">{meeting.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-white/85">
-                          <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                          <span className="font-medium">{meeting.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-white/85">
-                          {meeting.location.includes("Virtual") ? (
-                            <Video className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                          ) : (
-                            <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                          )}
-                          <span className="font-medium">{meeting.location}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-                          <User className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-xs">{meeting.attendees}</span>
-                        </div>
-                        <div className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
-                          View Details
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                )
-              })}
-            </>
-          ) : (
-            <>
-              {mockMeetings
-                .filter((m) => m.id === expandedMeetingId)
-                .map((meeting) => {
-                  const meetingGradient = getMeetingGradient(meeting.type)
+        <>
+          {view === "calendar" && (
+            <div>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <button
+                  onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </button>
+                <h3 className="text-xs font-semibold">
+                  {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                </h3>
+                <button
+                  onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                  className="p-1 hover:bg-white/20 rounded-lg transition"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
+                  <div key={i} className="text-center text-xs text-white/70 font-medium py-0.5">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+                  <div key={`empty-${i}`} className="aspect-square"></div>
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1
+                  const isEventDay = hasEvent(day)
                   return (
-                    <div key={meeting.id} className="space-y-4">
-                      <div
-                        className={`
-                          relative overflow-hidden
-                          bg-gradient-to-br ${meetingGradient}
-                          backdrop-blur-xl
-                          rounded-2xl 
-                          p-5
-                        `}
-                      >
-                        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
-                        
-                        <div className="relative">
-                          <h3 className="text-xl font-bold mb-3 text-white">{meeting.title}</h3>
-                          
-                          <p className="text-white/80 text-sm mb-4 leading-relaxed">{meeting.description}</p>
-                          
-                          <div className="space-y-2.5">
-                            <div className="flex items-center gap-2 text-sm text-white/90">
-                              <Calendar className="w-4 h-4 flex-shrink-0 opacity-70" />
-                              <span className="font-medium">{meeting.date}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/90">
-                              <Clock className="w-4 h-4 flex-shrink-0 opacity-70" />
-                              <span className="font-medium">{meeting.time}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/90">
-                              {meeting.location.includes("Virtual") ? (
-                                <Video className="w-4 h-4 flex-shrink-0 opacity-70" />
-                              ) : (
-                                <MapPin className="w-4 h-4 flex-shrink-0 opacity-70" />
-                              )}
-                              <span className="font-medium">{meeting.location}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/90">
-                              <User className="w-4 h-4 flex-shrink-0 opacity-70" />
-                              <span className="font-medium">Hosted by {meeting.host}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <button
-                        className="w-full bg-white/30 hover:bg-white/40 backdrop-blur-sm font-semibold py-3 rounded-xl transition text-sm text-white"
-                      >
-                        Join Meeting
-                      </button>
-                    </div>
+                    <button
+                      key={day}
+                      onClick={() => handleDayClick(day)}
+                      disabled={!isEventDay}
+                      className={`aspect-square rounded-lg flex flex-col items-center justify-center relative transition text-xs ${
+                        isEventDay
+                          ? "bg-white/30 hover:bg-white/40 cursor-pointer font-medium"
+                          : "bg-white/10 text-white/40 cursor-default"
+                      }`}
+                    >
+                      <span>{day}</span>
+                      {isEventDay && <div className="absolute bottom-0.5 w-0.5 h-0.5 bg-white rounded-full"></div>}
+                    </button>
                   )
                 })}
-            </>
+              </div>
+            </div>
           )}
-        </div>
+
+          {view === "events" && (
+            <div className="space-y-2">
+              {selectedDay &&
+                getEventsForDay(selectedDay).map((event) => (
+                  <button
+                    key={event.id}
+                    onClick={() => handleEventClick(event)}
+                    className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
+                  >
+                    <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
+                    <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
+                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs">{event.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-white/80">
+                      <Clock className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-xs">{event.time}</span>
+                    </div>
+                  </button>
+                ))}
+            </div>
+          )}
+
+          {view === "zones" && (
+            <div className="grid grid-cols-2 gap-2">
+              {zones.map((zone) => (
+                <button
+                  key={zone.id}
+                  onClick={() => handleZoneClick(zone)}
+                  disabled={zone.available === 0}
+                  className={`rounded-xl p-3 text-center transition ${
+                    zone.available > 0
+                      ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                      : "bg-white/10 opacity-60 cursor-not-allowed"
+                  }`}
+                >
+                  <div className="text-base font-bold mb-1">{zone.name}</div>
+                  <div className="text-xs text-white/80">
+                    {zone.available > 0 ? `${zone.available} slots` : "Fully booked"}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {view === "slots" && (
+            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+              {timeSlots.map((slot) => (
+                <button
+                  key={slot.id}
+                  onClick={() => handleSlotClick(slot)}
+                  disabled={!slot.available}
+                  className={`rounded-xl p-2.5 text-center transition ${
+                    slot.available
+                      ? "bg-white/30 hover:bg-white/40 cursor-pointer"
+                      : "bg-white/10 opacity-60 cursor-not-allowed"
+                  }`}
+                >
+                  <div className={`font-semibold text-xs ${!slot.available ? "line-through" : ""}`}>{slot.time}</div>
+                  <div className="text-xs text-white/80 mt-0.5">25 min</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {view === "confirmation" && (
+            <div className="space-y-3">
+              <div className="bg-white/20 rounded-xl p-3 space-y-2">
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Event</div>
+                  <div className="font-semibold text-xs">{selectedEvent?.name}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Location</div>
+                  <div className="font-medium text-xs">{selectedEvent?.location}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
+                  <div className="font-medium text-xs">{selectedZone?.name}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-white/70 mb-0.5">Time</div>
+                  <div className="font-medium text-xs">{selectedSlot?.time} (25 minutes)</div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleConfirm}
+                className="w-full bg-white/30 hover:bg-white/40 font-semibold py-2 rounded-xl transition text-xs"
+              >
+                Send Meeting Invitation
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

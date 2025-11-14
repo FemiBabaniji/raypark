@@ -338,16 +338,20 @@ export default function EventsPage({
           </div>
         </div>
 
-        <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-          <div 
-            className={`flex items-start transition-all duration-300 ${
-              showRightColumn ? 'justify-between pl-6' : 'justify-center'
-            }`}
+        <main className="w-full relative overflow-hidden mt-8">
+          <motion.div 
+            className="flex items-start gap-8"
+            animate={{
+              paddingLeft: showRightColumn ? "5rem" : "0",
+              paddingRight: showRightColumn ? "5rem" : "0",
+              justifyContent: showRightColumn ? "space-between" : "center",
+            }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
             <motion.div
               className="max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"
               animate={{
-                width: showRightColumn ? "calc(100% - 24rem)" : "100%",
+                width: "100%",
               }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
@@ -364,14 +368,15 @@ export default function EventsPage({
             <motion.div
               className="w-64 flex-shrink-0 sticky top-24"
               animate={{
-                x: showRightColumn ? "0%" : "100%",
+                x: showRightColumn ? 0 : "calc(100% + 5rem)",
                 opacity: showRightColumn ? 1 : 0,
               }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              style={{ originX: 0 }}
             >
               <EventsRightColumn />
             </motion.div>
-          </div>
+          </motion.div>
         </main>
       </div>
     </div>

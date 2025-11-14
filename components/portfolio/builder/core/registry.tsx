@@ -9,7 +9,8 @@ import {
   DescriptionWidget,
   ServicesWidget,
   GalleryWidget,
-  StartupWidget, // Added StartupWidget import
+  StartupWidget,
+  MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -128,7 +129,7 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           onGroupClick={() => {}}
         />
       )
-    case "startup": // Added startup widget case
+    case "startup":
       return (
         <StartupWidget
           key={w.id}
@@ -141,6 +142,18 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           onMove={move}
           editingField={deps.editingField}
           setEditingField={deps.setEditingField}
+        />
+      )
+    case "meeting-scheduler": // Added meeting-scheduler case
+      return (
+        <MeetingSchedulerWidget
+          key={w.id}
+          widgetId={w.id}
+          column={column}
+          isPreviewMode={deps.isPreviewMode}
+          content={deps.widgetContent[w.id]}
+          onContentChange={(c) => deps.onContentChange(w.id, c)}
+          onDelete={del}
         />
       )
     default:

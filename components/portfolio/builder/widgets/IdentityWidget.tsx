@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { GripVertical, Palette } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { GripVertical, Palette, LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { Identity, ThemeIndex } from "../types"
@@ -22,9 +22,30 @@ export default function IdentityWidget({
   setEditingField,
 }: Props) {
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
+  const [editingSocial, setEditingSocial] = useState<string | null>(null)
+  const [socialLinks, setSocialLinks] = useState({
+    linkedin: identity.linkedin || "",
+    dribbble: identity.dribbble || "",
+    behance: identity.behance || "",
+    twitter: identity.twitter || "",
+    unsplash: identity.unsplash || "",
+    instagram: identity.instagram || "",
+  })
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
   const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
+
+  const defaultBio = `${identity.name || "jenny wilson"} ${identity.title || "is a digital product designer"} ${identity.subtitle || "currently designing at acme."}`
+  const displayBio = identity.bio || defaultBio
+
+  useEffect(() => {
+    if (textareaRef.current && editingField === "identity-bio") {
+      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [displayBio, editingField])
 
   return (
     <div
@@ -82,77 +103,101 @@ export default function IdentityWidget({
       </div>
 
       <div className="space-y-4">
-        <h1 className="text-3xl font-bold leading-tight text-white">
-          {editingField === "identity-name" ? (
-            <input
-              type="text"
-              value={identity.name || ""}
-              onChange={(e) => onChange({ name: e.target.value })}
+        <div
+          className="relative"
+          onMouseEnter={() => !isPreviewMode && setIsHovering(true)}
+          onMouseLeave={() => !isPreviewMode && setIsHovering(false)}
+        >
+          {editingField === "identity-bio" ? (
+            <textarea
+              ref={textareaRef}
+              value={displayBio}
+              onChange={(e) => {
+                onChange({ bio: e.target.value })
+                // Auto-resize on change
+                e.target.style.height = "auto"
+                e.target.style.height = `${e.target.scrollHeight}px`
+              }}
               onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-              className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  setEditingField?.(null)
+                }
+                if (e.key === "Escape") {
+                  setEditingField?.(null)
+                }
+              }}
+              className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-3xl font-bold text-white w-full resize-none leading-tight p-3 transition-all duration-200 break-words"
               autoFocus
+              style={{
+                overflow: "hidden",
+                minHeight: "3.75rem",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+              }}
             />
           ) : (
-            <span
-              onClick={() => !isPreviewMode && setEditingField?.("identity-name")}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
+            <h1
+              onClick={() => !isPreviewMode && setEditingField?.("identity-bio")}
+              className={`text-3xl font-bold leading-tight text-white transition-all duration-200 break-words ${
+                !isPreviewMode
+                  ? `cursor-text rounded-xl p-3 -m-3 ${isHovering ? "bg-white/5 backdrop-blur-sm" : ""}`
+                  : ""
+              }`}
             >
-              {identity.name || "jenny wilson"}
-            </span>
+              {displayBio}
+            </h1>
           )}
-          <br />
-          {editingField === "identity-title" ? (
-            <input
-              type="text"
-              value={identity.title || ""}
-              onChange={(e) => onChange({ title: e.target.value })}
-              onBlur={() => setEditingField?.(null)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-              className="bg-transparent border-none outline-none text-3xl font-bold text-white w-full"
-              autoFocus
-            />
-          ) : (
-            <span
-              onClick={() => !isPreviewMode && setEditingField?.("identity-title")}
-              className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-            >
-              {identity.title || "is a digital product designer"}
-            </span>
-          )}
-          <br />
-          <span className="text-white/70">
-            {editingField === "identity-subtitle" ? (
-              <input
-                type="text"
-                value={identity.subtitle || ""}
-                onChange={(e) => onChange({ subtitle: e.target.value })}
-                onBlur={() => setEditingField?.(null)}
-                onKeyDown={(e) => e.key === "Enter" && setEditingField?.(null)}
-                className="bg-transparent border-none outline-none text-3xl font-bold text-white/70 w-full"
-                autoFocus
-              />
-            ) : (
-              <span
-                onClick={() => !isPreviewMode && setEditingField?.("identity-subtitle")}
-                className={!isPreviewMode ? "cursor-text hover:bg-white/10 rounded px-1 -mx-1" : ""}
-              >
-                {identity.subtitle || "currently designing at acme."}
-              </span>
-            )}
-          </span>
-        </h1>
+        </div>
 
         <div className="flex flex-wrap gap-3 pt-4">
-          {["linkedin.", "dribbble.", "behance.", "twitter.", "unsplash.", "instagram."].map((social) => (
-            <Button
-              key={social}
-              variant="outline"
-              size="sm"
-              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
-            >
-              {social}
-            </Button>
+          {(["linkedin", "dribbble", "behance", "twitter", "unsplash", "instagram"] as const).map((social) => (
+            <div key={social} className="relative group/social">
+              {editingSocial === social && !isPreviewMode ? (
+                <input
+                  type="url"
+                  value={socialLinks[social]}
+                  onChange={(e) => {
+                    setSocialLinks({ ...socialLinks, [social]: e.target.value })
+                    onChange({ [social]: e.target.value })
+                  }}
+                  onBlur={() => setEditingSocial(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      setEditingSocial(null)
+                    }
+                    if (e.key === "Escape") {
+                      setEditingSocial(null)
+                    }
+                  }}
+                  placeholder={`${social}.com/username`}
+                  className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent text-white text-sm px-3 py-2 w-48 transition-all duration-200"
+                  autoFocus
+                />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 transition-all duration-200 relative"
+                  onClick={() => socialLinks[social] && window.open(socialLinks[social], "_blank")}
+                >
+                  {social}.
+                  {!isPreviewMode && (
+                    <div
+                      className="absolute -right-2 -top-2 opacity-0 group-hover/social:opacity-100 transition-opacity duration-200 bg-white/90 rounded-full p-1 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingSocial(social)
+                      }}
+                    >
+                      <LinkIcon className="w-3 h-3 text-neutral-900" />
+                    </div>
+                  )}
+                </Button>
+              )}
+            </div>
           ))}
         </div>
       </div>

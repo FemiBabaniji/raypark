@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Share } from "lucide-react"
+import { MoreHorizontal, Share } from 'lucide-react'
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
 
 export interface UnifiedPortfolio {
@@ -43,7 +43,7 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
       tabIndex={0}
       onClick={() => onClick?.(portfolio.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick?.(portfolio.id)}
-      className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer focus:outline-none
+      className="relative w-full aspect-square rounded-3xl overflow-hidden cursor-pointer focus:outline-none
                  focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
     >
       {portfolio.isLive && (
@@ -58,7 +58,7 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
         <button
           type="button"
           aria-label="More options"
-          className="absolute top-3 right-3 p-1.5 rounded-md bg-white/10 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 transition-colors"
           onClick={(e) => {
             e.stopPropagation()
             onMore?.(portfolio.id)
@@ -68,7 +68,7 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
         </button>
 
         {/* Avatar */}
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center mb-5">
           {portfolio.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -77,7 +77,7 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-base font-semibold text-white">{initials}</span>
+            <span className="text-lg font-semibold text-white">{initials}</span>
           )}
         </div>
 
@@ -88,32 +88,18 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
         </div>
 
         {/* Contact */}
-        <div className="mt-auto space-y-1">
-          {portfolio.email ? <div className="text-white font-semibold text-sm truncate">{portfolio.email}</div> : null}
+        <div className="mt-auto space-y-1.5">
+          {portfolio.email ? <div className="text-white font-medium text-sm truncate">{portfolio.email}</div> : null}
           {portfolio.location ? <div className="text-white/90 text-sm truncate">{portfolio.location}</div> : null}
         </div>
 
-        {/* Footer: handle + share */}
-        <div className="mt-4 flex items-center justify-between">
+        {/* Footer: handle */}
+        <div className="mt-4">
           {portfolio.handle ? (
-            <Badge className="bg-white/15 text-white border-white/25 px-3 py-1 rounded-full text-xs font-medium">
+            <Badge className="bg-white/15 text-white border-white/25 px-3 py-1.5 rounded-full text-xs font-medium">
               @{portfolio.handle.replace(/^@/, "")}
             </Badge>
-          ) : (
-            <span />
-          )}
-
-          <button
-            type="button"
-            aria-label="Share portfolio"
-            className="p-2 rounded-md bg-white/10 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
-            onClick={(e) => {
-              e.stopPropagation()
-              onShare?.(portfolio.id)
-            }}
-          >
-            <Share className="w-4 h-4 text-white" />
-          </button>
+          ) : null}
         </div>
       </div>
     </div>

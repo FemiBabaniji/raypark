@@ -231,7 +231,7 @@ export default function EventsPage({
     : null
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+    <div className="min-h-screen relative overflow-hidden pt-6" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {useGradient && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large blue gradient orb - top left */}

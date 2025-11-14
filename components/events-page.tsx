@@ -313,7 +313,7 @@ export default function EventsPage({
               </div>
 
               <div 
-                className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none absolute'}`}
+                className={`w-64 flex-shrink-0 sticky top-1/2 -translate-y-1/2 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none absolute'}`}
               >
                 <EventsRightColumn />
               </div>

@@ -317,11 +317,11 @@ export default function EventsPage({
         </div>
 
         <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-          <div className="flex gap-8 pl-6 items-start">
+          <div className="flex justify-between items-start pl-6">
             <motion.div
-              className="w-[calc(100%-18rem)]"
+              className="w-[calc(100%-24rem)] max-w-[1200px]"
               animate={{
-                width: "calc(100% - 18rem)",
+                width: "calc(100% - 24rem)",
               }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >

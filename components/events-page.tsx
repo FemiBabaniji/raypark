@@ -277,19 +277,14 @@ export default function EventsPage({
       
       {/* Content layer */}
       <div className="relative z-10">
-        <div className="pt-6 pb-8 px-8">
+        <div className="pt-4 pb-4 px-8">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                  <span className="text-white">Your hub. </span>
-                  <span style={{ color: "#4169E1" }}>Your community.</span>
-                </h1>
-              </div>
-              <p className="text-lg text-white/60 ml-[60px]">
-                Connect, collaborate, and grow with {communityName}
-              </p>
+            <div className="flex items-center gap-3">
+              <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+                <span className="text-white">Your hub. </span>
+                <span style={{ color: "#4169E1" }}>Your community.</span>
+              </h1>
             </div>
             
             <div className="flex items-center gap-3">
@@ -335,9 +330,9 @@ export default function EventsPage({
           </div>
         </div>
 
-        <main className="w-full relative mt-8 px-8">
+        <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${showRightColumn ? 'px-8' : 'px-0'}`}>
           <div className={`flex items-start gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px] mx-auto'}`}>
+            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}

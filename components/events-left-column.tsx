@@ -13,6 +13,7 @@ import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
 import type { EventDetailData } from "@/components/event-detail"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-5 shadow-lg"
 
@@ -151,6 +152,26 @@ export default function EventsLeftColumn({
 
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
   const [attendeeFilter, setAttendeeFilter] = useState("all")
+
+  const [showLeftArrow, setShowLeftArrow] = useState(false)
+  const [showRightArrow, setShowRightArrow] = useState(true)
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    setShowLeftArrow(target.scrollLeft > 0)
+    setShowRightArrow(target.scrollLeft < target.scrollWidth - target.clientWidth - 10)
+  }
+
+  const scrollContainer = (direction: 'left' | 'right', containerId: string) => {
+    const container = document.getElementById(containerId)
+    if (container) {
+      const scrollAmount = 400
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   const upcomingEvents = [
     {
@@ -316,27 +337,51 @@ export default function EventsLeftColumn({
 
                   <div className="flex-1 overflow-hidden mt-4 flex flex-col">
                     {view === "grid" ? (
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                        {filteredUpcomingEvents.length > 0 ? (
-                          filteredUpcomingEvents.map((event, index) => (
-                            <EventCard
-                              key={index}
-                              title={event.title}
-                              date={event.date}
-                              description={event.description}
-                              time={event.time}
-                              attending={event.attending}
-                              dateLabel={event.dateLabel}
-                              location={event.location}
-                              instructor={event.instructor}
-                              tags={event.tags}
-                              onEventClick={onEventClick}
-                            />
-                          ))
-                        ) : (
-                          <div className="w-full text-center py-12">
-                            <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                          </div>
+                      <div className="relative group">
+                        {showLeftArrow && (
+                          <button
+                            onClick={() => scrollContainer('left', 'events-scroll-home')}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                            aria-label="Scroll left"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                        )}
+                        <div 
+                          id="events-scroll-home"
+                          className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
+                          onScroll={handleScroll}
+                        >
+                          {filteredUpcomingEvents.length > 0 ? (
+                            filteredUpcomingEvents.map((event, index) => (
+                              <EventCard
+                                key={index}
+                                title={event.title}
+                                date={event.date}
+                                description={event.description}
+                                time={event.time}
+                                attending={event.attending}
+                                dateLabel={event.dateLabel}
+                                location={event.location}
+                                instructor={event.instructor}
+                                tags={event.tags}
+                                onEventClick={onEventClick}
+                              />
+                            ))
+                          ) : (
+                            <div className="w-full text-center py-12">
+                              <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                            </div>
+                          )}
+                        </div>
+                        {showRightArrow && (
+                          <button
+                            onClick={() => scrollContainer('right', 'events-scroll-home')}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                            aria-label="Scroll right"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
                         )}
                       </div>
                     ) : (
@@ -410,17 +455,33 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                    {filteredHomeNetworks.slice(0, 8).map((member) => (
-                      <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
-                        <UnifiedPortfolioCard
-                          portfolio={member}
-                          onClick={(id) => handleMemberClick(id)}
-                          onShare={(id) => console.log("Share network:", id)}
-                          onMore={(id) => console.log("More options for network:", id)}
-                        />
-                      </div>
-                    ))}
+                  <div className="relative group">
+                    <button
+                      onClick={() => scrollContainer('left', 'networks-scroll-home')}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                      aria-label="Scroll left"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div id="networks-scroll-home" className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                      {filteredHomeNetworks.slice(0, 8).map((member) => (
+                        <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
+                          <UnifiedPortfolioCard
+                            portfolio={member}
+                            onClick={(id) => handleMemberClick(id)}
+                            onShare={(id) => console.log("Share network:", id)}
+                            onMore={(id) => console.log("More options for network:", id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => scrollContainer('right', 'networks-scroll-home')}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                      aria-label="Scroll right"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -479,27 +540,51 @@ export default function EventsLeftColumn({
 
               <div className="flex-1 overflow-hidden mt-5 flex flex-col">
                 {view === "grid" ? (
-                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                    {filteredUpcomingEvents.length > 0 ? (
-                      filteredUpcomingEvents.map((event, index) => (
-                        <EventCard
-                          key={index}
-                          title={event.title}
-                          date={event.date}
-                          description={event.description}
-                          time={event.time}
-                          attending={event.attending}
-                          dateLabel={event.dateLabel}
-                          location={event.location}
-                          instructor={event.instructor}
-                          tags={event.tags}
-                          onEventClick={onEventClick}
-                        />
-                      ))
-                    ) : (
-                      <div className="w-full text-center py-12">
-                        <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                      </div>
+                  <div className="relative group">
+                    {showLeftArrow && (
+                      <button
+                        onClick={() => scrollContainer('left', 'events-scroll-events-tab')}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                        aria-label="Scroll left"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                    )}
+                    <div 
+                      id="events-scroll-events-tab"
+                      className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
+                      onScroll={handleScroll}
+                    >
+                      {filteredUpcomingEvents.length > 0 ? (
+                        filteredUpcomingEvents.map((event, index) => (
+                          <EventCard
+                            key={index}
+                            title={event.title}
+                            date={event.date}
+                            description={event.description}
+                            time={event.time}
+                            attending={event.attending}
+                            dateLabel={event.dateLabel}
+                            location={event.location}
+                            instructor={event.instructor}
+                            tags={event.tags}
+                            onEventClick={onEventClick}
+                          />
+                        ))
+                      ) : (
+                        <div className="w-full text-center py-12">
+                          <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                        </div>
+                      )}
+                    </div>
+                    {showRightArrow && (
+                      <button
+                        onClick={() => scrollContainer('right', 'events-scroll-events-tab')}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                        aria-label="Scroll right"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
                     )}
                   </div>
                 ) : (
@@ -512,7 +597,7 @@ export default function EventsLeftColumn({
 
             <section className="mt-12">
               <div className="mb-6">
-                <h2 className="text-3xl font-bold text-white mb-2">Announcements</h2>
+                <h2 className="text-3xl font-bold text-white mb-1.5">Announcements</h2>
                 <p className="text-zinc-400">Stay updated with the latest community news</p>
               </div>
 

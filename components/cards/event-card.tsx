@@ -20,68 +20,67 @@ export function EventCard({ title, date, description, time, attending, location,
   const [isHovered, setIsHovered] = useState(false)
 
   const getGradient = (title: string) => {
-    // Workshop (Blue)
+    // Workshop (Blue) - deeper blue
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#5b7fc9]/70 to-[#4a6bb3]/70"
+      return "from-[#4a6bb3]/75 to-[#3a5a9d]/75"
     } 
-    // Networking/Mixer (Green)
+    // Networking/Mixer (Green) - deeper green
     else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-[#5fb88f]/70 to-[#4a9e7c]/70"
+      return "from-[#4a9e7c]/75 to-[#3a8866]/75"
     } 
-    // Masterclass (Purple)
+    // Masterclass (Purple) - deeper purple
     else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-[#8b7fc9]/70 to-[#7568b3]/70"
+      return "from-[#7568b3]/75 to-[#5f529d]/75"
     }
-    // Conference (Orange)
+    // Conference (Orange) - deeper orange
     else if (title.includes("Conference")) {
-      return "from-[#d9926f]/70 to-[#c0795d]/70"
+      return "from-[#c0795d]/75 to-[#a66347]/75"
     }
-    // Mixer (Teal) - already covered above with Networking
-    // Seminar (Coral)
+    // Seminar (Coral) - deeper coral
     else if (title.includes("Seminar")) {
-      return "from-[#e07a7a]/70 to-[#c96868]/70"
+      return "from-[#c96868]/75 to-[#b35252]/75"
     }
-    // Hackathon (Cyan)
+    // Hackathon (Cyan) - deeper cyan
     else if (title.includes("Hackathon")) {
-      return "from-[#5bc9e0]/70 to-[#4ab3c9]/70"
+      return "from-[#4ab3c9]/75 to-[#3a9db3]/75"
     }
-    // Meetup (Pink)
+    // Meetup (Pink) - deeper pink
     else if (title.includes("Meetup")) {
-      return "from-[#d97fc9]/70 to-[#c068b3]/70"
+      return "from-[#c068b3]/75 to-[#a6529d]/75"
     }
-    // Summit (Amber)
+    // Summit (Amber) - deeper amber
     else if (title.includes("Summit")) {
-      return "from-[#e0b85f]/70 to-[#c9a54a]/70"
+      return "from-[#c9a54a]/75 to-[#b38f3a]/75"
     }
-    // Social (Magenta)
+    // Social (Magenta) - deeper magenta
     else if (title.includes("Social")) {
-      return "from-[#c97fe0]/70 to-[#b368c9]/70"
+      return "from-[#b368c9]/75 to-[#9d52b3]/75"
     }
     // Default to Workshop blue
-    return "from-[#5b7fc9]/70 to-[#4a6bb3]/70"
+    return "from-[#4a6bb3]/75 to-[#3a5a9d]/75"
   }
 
   const getTitleGradient = (title: string) => {
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-white via-white to-[#5b7fc9]" // Blue
+      return "from-white via-white to-[#4a6bb3]" // Deeper Blue
     } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-white via-white to-[#5fb88f]" // Green
+      return "from-white via-white to-[#4a9e7c]" // Deeper Green
     } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-white via-white to-[#8b7fc9]" // Purple
+      return "from-white via-white to-[#7568b3]" // Deeper Purple
     } else if (title.includes("Conference")) {
-      return "from-white via-white to-[#d9926f]" // Orange
+      return "from-white via-white to-[#c0795d]" // Deeper Orange
     } else if (title.includes("Seminar")) {
-      return "from-white via-white to-[#e07a7a]" // Coral
+      return "from-white via-white to-[#c96868]" // Deeper Coral
     } else if (title.includes("Hackathon")) {
-      return "from-white via-white to-[#5bc9e0]" // Cyan
+      return "from-white via-white to-[#4ab3c9]" // Deeper Cyan
     } else if (title.includes("Meetup")) {
-      return "from-white via-white to-[#d97fc9]" // Pink
+      return "from-white via-white to-[#c068b3]" // Deeper Pink
     } else if (title.includes("Summit")) {
-      return "from-white via-white to-[#e0b85f]" // Amber
+      return "from-white via-white to-[#c9a54a]" // Deeper Amber
     } else if (title.includes("Social")) {
-      return "from-white via-white to-[#c97fe0]" // Magenta
+      return "from-white via-white to-[#b368c9]" // Deeper Magenta
     }
-    return "from-white via-white to-[#5b7fc9]" // Default blue
+    return "from-white via-white to-[#4a6bb3]" // Default deeper blue
   }
 
   const getEventType = (title: string) => {

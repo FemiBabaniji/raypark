@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
@@ -173,7 +173,11 @@ export default function PortfolioBuilderPage() {
   }
 
   const handleBack = () => {
-    router.push("/dmz")
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.push("/dmz") // Fallback to DMZ if no history
+    }
   }
 
   const togglePreview = () => {

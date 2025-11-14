@@ -11,19 +11,6 @@ interface MeetingCardProps {
 export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  const getBorderColor = (type: Meeting["type"]) => {
-    switch (type) {
-      case "1-on-1":
-        return "border-r-purple-500"
-      case "team":
-        return "border-r-blue-500"
-      case "all-hands":
-        return "border-r-cyan-500"
-      default:
-        return "border-r-zinc-500"
-    }
-  }
-
   return (
     <button
       type="button"
@@ -32,14 +19,11 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className={`
         relative overflow-hidden
-        bg-zinc-900/80
-        backdrop-blur-xl
-        border-r-4 border-y border-l border-white/10
-        ${getBorderColor(meeting.type)}
+        bg-gradient-to-br from-zinc-800 to-zinc-900
         rounded-2xl 
         p-4
         transition-all duration-300 ease-out
-        ${isHovered ? "scale-[1.01] border-l-white/20 border-y-white/20" : ""}
+        ${isHovered ? "scale-[1.01]" : ""}
         text-left text-white
         w-full
         shadow-lg

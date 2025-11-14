@@ -205,9 +205,9 @@ export default function EventsRightColumn() {
       <div className="space-y-5">
         {/* Profile editing card */}
         <div className="rounded-3xl p-5">
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold mb-1 text-white">Your Profile</h3>
-            <p className="text-xs text-zinc-400">Customize who you are and what you represent</p>
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-bold mb-2 text-white">Your Profile</h3>
+            <p className="text-sm text-zinc-400">Customize who you are and what you represent</p>
           </div>
 
           {loading || portfolioLoading ? (
@@ -263,13 +263,12 @@ export default function EventsRightColumn() {
 
         {/* AI Assistant */}
         <div className="rounded-3xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-bold mb-2 text-white">AI Assistant</h3>
+            <p className="text-sm text-zinc-400">
+              Get instant help with events, networking, and profile optimization
+            </p>
           </div>
-
-          <p className="text-xs mb-4 text-zinc-400">
-            Get instant help with events, networking, and profile optimization
-          </p>
 
           <button
             onClick={() => setIsChatOpen(!isChatOpen)}

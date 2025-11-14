@@ -90,49 +90,52 @@ export function EventCard({ title, date, description, time, attending, location,
     >
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
-      <div className="relative flex flex-col h-full">
+      <div className="relative flex flex-col justify-between h-full">
         <div className="mb-3">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
           <h3
-            className={`text-2xl font-bold mb-2 leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
+            className={`text-3xl font-bold leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
           >
             {title}
           </h3>
         </div>
 
-
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-xs text-white/85">
-            <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-            <span className="font-medium">{date}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-white/85">
-            <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-            <span className="font-medium">{time}</span>
-          </div>
-          {location && (
+        <div className="mt-auto space-y-4">
+          {/* Date, time, location metadata */}
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-white/85">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-medium">{location}</span>
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+              <span className="font-medium">{date}</span>
             </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between pt-3 mt-auto">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-            <Users className="w-3.5 h-3.5" />
-            <span className="font-semibold text-xs">{attending}</span>
+            <div className="flex items-center gap-2 text-xs text-white/85">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+              <span className="font-medium">{time}</span>
+            </div>
+            {location && (
+              <div className="flex items-center gap-2 text-xs text-white/85">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+                <span className="font-medium">{location}</span>
+              </div>
+            )}
           </div>
-          <div
-            className={`
-              px-4 py-2 
-              bg-white/95 text-black 
-              font-semibold rounded-full text-xs
-              transition-all
-              ${isHovered ? "bg-white" : ""}
-            `}
-          >
-            View
+
+          {/* Bottom buttons */}
+          <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
+              <Users className="w-3.5 h-3.5" />
+              <span className="font-semibold text-xs">{attending}</span>
+            </div>
+            <div
+              className={`
+                px-4 py-2 
+                bg-white/95 text-black 
+                font-semibold rounded-full text-xs
+                transition-all
+                ${isHovered ? "bg-white" : ""}
+              `}
+            >
+              View
+            </div>
           </div>
         </div>
       </div>

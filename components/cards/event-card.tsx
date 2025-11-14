@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Clock, MapPin, Users } from "lucide-react"
+import { Calendar, Clock, MapPin, Users } from 'lucide-react'
 
 interface EventCardProps {
   title: string
@@ -83,7 +83,7 @@ export function EventCard({ title, date, description, time, attending, location,
         flex-shrink-0
       `}
       style={{
-        minHeight: "340px",
+        minHeight: "260px",
         maxWidth: "256px",
         boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
@@ -100,7 +100,6 @@ export function EventCard({ title, date, description, time, attending, location,
           </h3>
         </div>
 
-        <p className="text-white/75 mb-4 leading-relaxed text-xs text-pretty flex-grow">{description}</p>
 
         <div className="space-y-2 mb-4">
           <div className="flex items-center gap-2 text-xs text-white/85">

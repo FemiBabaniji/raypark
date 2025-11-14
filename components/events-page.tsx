@@ -295,8 +295,8 @@ export default function EventsPage({
         {/* Main content area */}
         <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${!showRightColumn ? 'flex justify-center' : ''}`}>
           {/* Reduced gap from gap-6 md:gap-8 to gap-3 md:gap-4 (half the size) */}
-          <div className={`flex items-start gap-3 md:gap-4 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-            <div className={`transition-all duration-300 ease-out ${showRightColumn ? 'w-[520px] md:w-[680px] lg:w-[760px] xl:w-[850px] 2xl:w-[1000px]' : 'w-[520px] md:w-[680px] lg:w-[760px] xl:w-[850px] 2xl:w-[1000px]'}`}>
+          <div className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+            <div className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}

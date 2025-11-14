@@ -277,7 +277,7 @@ export default function EventsPage({
       )}
       
       {/* Content layer */}
-      <div className="relative z-10 max-w-[1800px] mx-auto">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <EventsHeader 
           communityName={communityName}
           useGradient={useGradient}
@@ -289,14 +289,12 @@ export default function EventsPage({
         <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
           backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
         }}>
-          <div className="px-8">
-            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-          </div>
+          <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
-        <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${showRightColumn ? 'px-8' : 'px-0'}`}>
-          <div className={`flex items-start gap-6 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
+        <main className="w-full relative mt-8">
+          <div className={`flex items-start gap-12 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[500px] md:max-w-[650px] lg:max-w-[750px] xl:max-w-[850px]' : 'max-w-[500px] md:max-w-[650px] lg:max-w-[750px] xl:max-w-[850px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}

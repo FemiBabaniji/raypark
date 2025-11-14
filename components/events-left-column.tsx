@@ -279,7 +279,7 @@ export default function EventsLeftColumn({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-[900px]">
+      <div className="w-full max-w-[1200px]">
         {activeTab === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
             <EventDetailView

@@ -1,164 +1,190 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth"
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import NetworkAnimation from "@/components/network-animation"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight } from 'lucide-react'
+import Image from "next/image"
 
 export default function HomePage() {
-  const { user, loading } = useAuth()
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    console.log("HomePage mounted, loading:", loading, "user:", user ? "exists" : "null")
-  }, [loading, user])
-
-  const handleGetStarted = () => {
-    console.log("Get Started clicked, directing to login")
-    setIsTransitioning(true)
-
-    // Delay navigation to allow slide animation
-    setTimeout(() => {
-      router.push("/login")
-    }, 800)
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-    exit: {
-      x: "-100%",
-      transition: {
-        duration: 0.8,
-        ease: "easeInOut",
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
-    },
-  }
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <AnimatePresence mode="wait">
-      {!isTransitioning && (
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">P</span>
+            </div>
+            <span className="font-semibold text-lg">Pathwai</span>
+          </div>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Platform</button>
+            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Communities</button>
+            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Resources</button>
+          </nav>
+
+          {/* CTA */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              className="text-sm"
+              onClick={() => router.push("/login")}
+            >
+              Sign in
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-full px-6"
+              onClick={() => router.push("/onboarding")}
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+          >
+            The{" "}
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Community-First
+            </span>{" "}
+            Platform
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+          >
+            Build thriving communities where members connect, collaborate, and grow together. Your space for meaningful relationships and shared success.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Button
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-full px-10 py-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => router.push("/onboarding")}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              Get Started
+              <ArrowRight className={`w-5 h-5 ml-2 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="pb-20 px-6 lg:px-8">
         <motion.div
-          className="min-h-screen bg-neutral-950 relative overflow-hidden"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="max-w-6xl mx-auto"
         >
-          {/* Header comment */}
-          <div className="absolute top-6 left-6 right-6 z-10">
-            <div className="font-mono text-xs text-neutral-600">
-              <span className="text-neutral-500">01</span>
-              <span className="ml-6 text-neutral-500">
-                {"<!--"} NETWORK BUILDERS WANTED {"-->"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex min-h-screen">
-            {/* Left Content */}
-            <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 py-20">
-              <motion.div className="text-center max-w-2xl" variants={containerVariants}>
-                <motion.h1
-                  className="text-6xl lg:text-7xl font-black text-white mb-6 tracking-tight"
-                  variants={itemVariants}
-                >
-                  pathwai
-                </motion.h1>
-
-                <motion.h2 className="text-xl lg:text-2xl font-light text-white mb-4" variants={itemVariants}>
-                  Your digital workroom to grow and connect
-                </motion.h2>
-
-                <motion.p className="text-neutral-400 text-lg mb-12 leading-relaxed" variants={itemVariants}>
-                  Where what you do meets who you need—and new paths open.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-4 text-base font-medium transition-all duration-300 group"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full px-8 py-4 text-base font-medium backdrop-blur-xl"
-                    onClick={() => router.push("/login")}
-                  >
-                    Sign In
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </div>
-
-            {/* Right Visual Area */}
-            <div className="flex-1 flex items-center justify-center relative min-h-screen p-8">
-              {/* Network Animation Card with Grid Background */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="relative w-full h-full max-w-2xl max-h-[600px] bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden"
-              >
-                {/* Grid background inside card */}
-                <div className="absolute inset-0 opacity-20">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: `
-                        linear-gradient(rgba(115, 115, 115, 0.4) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(115, 115, 115, 0.4) 1px, transparent 1px)
-                      `,
-                      backgroundSize: "40px 40px",
-                    }}
-                  />
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+            {/* Product screenshot placeholder with gradient background */}
+            <div className="aspect-[16/10] bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+              {/* Decorative elements to suggest interface */}
+              <div className="absolute inset-0 p-8">
+                {/* Mock header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600" />
+                    <div className="space-y-1">
+                      <div className="w-24 h-3 bg-gray-300 rounded" />
+                      <div className="w-32 h-2 bg-gray-200 rounded" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-8 h-8 bg-gray-200 rounded-lg" />
+                    <div className="w-8 h-8 bg-gray-200 rounded-lg" />
+                    <div className="w-20 h-8 bg-blue-600 rounded-lg" />
+                  </div>
                 </div>
 
-                {/* Network Animation Container */}
-                <div className="relative z-10 w-full h-full">
-                  <NetworkAnimation />
+                {/* Mock content grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                      <div className="w-full h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mb-3" />
+                      <div className="w-3/4 h-3 bg-gray-200 rounded mb-2" />
+                      <div className="w-1/2 h-2 bg-gray-150 rounded" />
+                    </div>
+                  ))}
                 </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Footer comment */}
-          <div className="absolute bottom-6 left-6 right-6 z-10">
-            <div className="font-mono text-xs text-neutral-600">
-              <span className="text-neutral-500">02</span>
-              <span className="ml-6 text-neutral-500">
-                {"<!--"} START BUILDING {"-->"}
-              </span>
+              </div>
             </div>
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </section>
+
+      <section className="py-20 px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-xl">🤝</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Community Connections</h3>
+              <p className="text-gray-600">Foster meaningful relationships within your community with intelligent member matching</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-xl">📊</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Member Profiles</h3>
+              <p className="text-gray-600">Empower members to showcase their skills and contributions to the community</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-12 h-12 bg-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-xl">🎯</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Events & Meetings</h3>
+              <p className="text-gray-600">Bring your community together with seamless event management and engagement</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

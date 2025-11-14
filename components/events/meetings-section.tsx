@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LayoutGrid, Calendar, ChevronRight } from "lucide-react"
+import { LayoutGrid, Calendar, ChevronRight } from 'lucide-react'
 import { MeetingsCalendarView } from "./meetings-calendar-view"
 
 interface Meeting {
@@ -75,8 +75,11 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 flex-shrink-0">
-        <h3 className="text-lg font-semibold text-white">Meetings</h3>
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <div>
+          <h3 className="text-xl font-bold text-white mb-0.5">Meetings</h3>
+          <p className="text-zinc-400 text-xs">Your upcoming schedule</p>
+        </div>
         <div className="flex gap-1 bg-zinc-900/50 rounded-lg p-1">
           <button
             onClick={() => setViewMode("list")}
@@ -103,16 +106,16 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
             <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
               <ChevronRight className="h-5 w-5 text-zinc-600 animate-pulse" />
             </div>
-            <div className="space-y-3 h-full overflow-y-auto overflow-x-auto pr-2">
+            <div className="space-y-4 h-full overflow-y-auto overflow-x-auto pr-2">
               {upcomingMeetings.map((meeting) => (
                 <button
                   key={meeting.id}
                   onClick={() => onMeetingClick?.(meeting.id)}
-                  className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-sm rounded-2xl p-4 transition-all hover:scale-[1.02] hover:bg-zinc-800/50 shadow-lg shadow-black/10`}
+                  className={`w-full text-left ${getTypeStyles(meeting.type)} backdrop-blur-sm rounded-2xl p-5 transition-all hover:scale-[1.02] hover:bg-zinc-800/50 shadow-lg shadow-black/10`}
                 >
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1">{meeting.title}</h3>
+                      <h3 className="font-semibold text-white text-base mb-1.5 line-clamp-1">{meeting.title}</h3>
                       <p className="text-xs text-zinc-400">{meeting.host}</p>
                     </div>
                   </div>

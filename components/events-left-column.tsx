@@ -15,7 +15,7 @@ import { MeetingsSection } from "@/components/events/meetings-section"
 import type { EventDetailData } from "@/components/event-detail"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const CONTAINER_STYLES = "bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-8 shadow-lg"
+const CONTAINER_STYLES = "bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-5 shadow-lg"
 
 const mockMembers = [
   {
@@ -335,13 +335,13 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="flex-1 overflow-hidden mt-6 flex flex-col px-4 -mx-4">
+                  <div className="flex-1 overflow-hidden mt-4 flex flex-col">
                     {view === "grid" ? (
                       <div className="relative group">
                         {showLeftArrow && (
                           <button
                             onClick={() => scrollContainer('left', 'events-scroll-home')}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                             aria-label="Scroll left"
                           >
                             <ChevronLeft className="w-5 h-5" />
@@ -349,7 +349,7 @@ export default function EventsLeftColumn({
                         )}
                         <div 
                           id="events-scroll-home"
-                          className="flex gap-6 overflow-x-auto pb-2 scrollbar-thin px-4"
+                          className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
                           onScroll={handleScroll}
                         >
                           {filteredUpcomingEvents.length > 0 ? (
@@ -377,7 +377,7 @@ export default function EventsLeftColumn({
                         {showRightArrow && (
                           <button
                             onClick={() => scrollContainer('right', 'events-scroll-home')}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                             aria-label="Scroll right"
                           >
                             <ChevronRight className="w-5 h-5" />
@@ -455,15 +455,15 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="relative group -mx-4 px-4">
+                  <div className="relative group">
                     <button
                       onClick={() => scrollContainer('left', 'networks-scroll-home')}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                       aria-label="Scroll left"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <div id="networks-scroll-home" className="flex gap-5 overflow-x-auto pb-2 scrollbar-thin px-4">
+                    <div id="networks-scroll-home" className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredHomeNetworks.slice(0, 8).map((member) => (
                         <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
                           <UnifiedPortfolioCard
@@ -477,7 +477,7 @@ export default function EventsLeftColumn({
                     </div>
                     <button
                       onClick={() => scrollContainer('right', 'networks-scroll-home')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                       aria-label="Scroll right"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -520,7 +520,7 @@ export default function EventsLeftColumn({
         {activeTab === "Events" && (
           <>
             <div
-              className={`mt-6 ${CONTAINER_STYLES} min-h-[480px] flex flex-col overflow-hidden`}
+              className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px] flex flex-col overflow-hidden`}
             >
               <div className="mb-5 flex items-start justify-between flex-shrink-0">
                 <div>
@@ -538,13 +538,13 @@ export default function EventsLeftColumn({
                 />
               </div>
 
-              <div className="flex-1 overflow-hidden mt-6 flex flex-col px-4 -mx-4">
+              <div className="flex-1 overflow-hidden mt-5 flex flex-col">
                 {view === "grid" ? (
                   <div className="relative group">
                     {showLeftArrow && (
                       <button
                         onClick={() => scrollContainer('left', 'events-scroll-events-tab')}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                         aria-label="Scroll left"
                       >
                         <ChevronLeft className="w-5 h-5" />
@@ -552,7 +552,7 @@ export default function EventsLeftColumn({
                     )}
                     <div 
                       id="events-scroll-events-tab"
-                      className="flex gap-6 overflow-x-auto pb-2 scrollbar-thin px-4"
+                      className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
                       onScroll={handleScroll}
                     >
                       {filteredUpcomingEvents.length > 0 ? (
@@ -580,7 +580,7 @@ export default function EventsLeftColumn({
                     {showRightArrow && (
                       <button
                         onClick={() => scrollContainer('right', 'events-scroll-events-tab')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
                         aria-label="Scroll right"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -630,7 +630,7 @@ export default function EventsLeftColumn({
         )}
 
         {activeTab === "Meetings" && (
-          <div className={`mt-6 ${CONTAINER_STYLES} min-h-[480px]`}>
+          <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
               <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>

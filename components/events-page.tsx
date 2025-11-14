@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
@@ -246,17 +246,8 @@ export default function EventsPage({
       </div>
 
       <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-        <div className="flex gap-8 pl-6">
-          <motion.div
-            className="w-[calc(100%-22rem)]"
-            animate={{
-              width: isRightColumnVisible ? "calc(100% - 22rem)" : "100%",
-              marginLeft: isRightColumnVisible ? "0" : "auto",
-              marginRight: isRightColumnVisible ? "0" : "auto",
-              maxWidth: isRightColumnVisible ? "none" : "1200px",
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
+        <div className={`grid gap-8 pl-6 transition-all duration-300 ${isRightColumnVisible ? 'grid-cols-[1fr_320px]' : 'justify-center'}`}>
+          <div>
             <EventsLeftColumn
               onEventClick={handleEventClick}
               selectedEvent={selectedEvent}
@@ -265,39 +256,45 @@ export default function EventsPage({
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="w-80 flex-shrink-0 relative"
-            animate={{
-              x: isRightColumnVisible ? "0%" : "100%",
-              opacity: isRightColumnVisible ? 1 : 0,
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <EventsRightColumn />
-            
-            <button
-              onClick={() => setIsRightColumnVisible(false)}
-              className="absolute -left-10 top-1/2 -translate-y-1/2 w-8 h-16 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-l-xl flex items-center justify-center text-white/60 hover:text-white hover:bg-zinc-800/50 transition-all"
-              aria-label="Hide sidebar"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </motion.div>
+          <AnimatePresence>
+            {isRightColumnVisible && (
+              <motion.div
+                initial={{ x: 360, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 360, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="relative"
+              >
+                <EventsRightColumn />
+                
+                <button
+                  onClick={() => setIsRightColumnVisible(false)}
+                  className="absolute -left-10 top-8 w-8 h-16 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-l-xl flex items-center justify-center text-white/60 hover:text-white hover:bg-zinc-800/50 transition-all hover:w-9"
+                  aria-label="Hide sidebar"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {!isRightColumnVisible && (
-            <motion.button
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              onClick={() => setIsRightColumnVisible(true)}
-              className="fixed right-6 top-1/2 -translate-y-1/2 w-12 h-16 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white hover:bg-zinc-800/50 transition-all shadow-lg z-30"
-              aria-label="Show sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </motion.button>
-          )}
+          <AnimatePresence>
+            {!isRightColumnVisible && (
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => setIsRightColumnVisible(true)}
+                className="fixed right-8 top-32 w-12 h-16 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white hover:bg-zinc-800/50 transition-all shadow-2xl z-30 hover:w-14"
+                aria-label="Show sidebar"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
       </main>
     </div>

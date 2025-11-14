@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Pin } from "lucide-react"
+import { ChevronDown, Pin } from 'lucide-react'
 
 interface AnnouncementCardProps {
   title: string
@@ -28,11 +28,11 @@ export function AnnouncementCard({
       onClick={() => setIsExpanded(!isExpanded)}
     >
       <div
-        className={`relative overflow-hidden rounded-2xl bg-zinc-800/30 backdrop-blur-sm border transition-all duration-300 ${
+        className={`relative overflow-hidden rounded-2xl bg-white/[0.03] backdrop-blur-xl border transition-all duration-300 ${
           isImportant
             ? "border-purple-500/30 hover:border-purple-500/50"
-            : "border-zinc-700/30 hover:border-zinc-600/50"
-        } ${isExpanded ? "shadow-xl" : "hover:bg-zinc-800/40"}`}
+            : "border-white/10 hover:border-white/20"
+        } ${isExpanded ? "" : "hover:bg-white/[0.04]"}`}
       >
         {isImportant && (
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-fuchsia-500" />

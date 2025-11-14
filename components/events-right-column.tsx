@@ -1,11 +1,11 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
-import { Upload } from "lucide-react"
+import { Upload } from 'lucide-react'
 
 export default function EventsRightColumn() {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -204,23 +204,21 @@ export default function EventsRightColumn() {
     <div className="fixed top-1/2 -translate-y-1/2 right-12 w-80 pl-6">
       <div className="space-y-6">
         {/* Profile editing card */}
-        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-3xl p-5 border border-white/10">
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-1 text-white">Your Profile</h3>
             <p className="text-xs text-zinc-400">Customize who you are and what you represent</p>
           </div>
 
           {loading || portfolioLoading ? (
-            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg animate-pulse">
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white backdrop-blur-xl border border-white/5 animate-pulse">
               <div className="h-10 w-10 rounded-full bg-white/20"></div>
               <div className="mt-3 h-4 bg-white/20 rounded w-3/4"></div>
               <div className="mt-2 h-3 bg-white/20 rounded w-1/2"></div>
             </div>
           ) : !user ? (
-            <div className="rounded-2xl p-4 bg-gradient-to-br from-blue-600/40 to-cyan-600/40 text-white shadow-lg mb-4">
-              <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white text-xl">
-                →
-              </div>
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-blue-600/40 to-cyan-600/40 text-white backdrop-blur-xl border border-white/5 mb-4">
+              <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white">→</div>
               <div className="mt-3 text-base font-semibold text-white">Sign In Required</div>
               <div className="text-sm text-white/90">Create your portfolio</div>
             </div>
@@ -234,7 +232,7 @@ export default function EventsRightColumn() {
               />
             </div>
           ) : (
-            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white shadow-lg mb-4">
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white backdrop-blur-xl border border-white/5 mb-4">
               <div className="h-10 w-10 rounded-full bg-white/20 grid place-items-center font-bold text-white">?</div>
               <div className="mt-3 text-base font-semibold text-white">No Profile Yet</div>
               <div className="text-sm text-white/90">Create your portfolio</div>
@@ -251,7 +249,7 @@ export default function EventsRightColumn() {
           {hasPortfolio && user && (
             <button
               onClick={handleUpdateFromResume}
-              className="w-full mt-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 bg-white/10 text-white border border-white/20"
+              className="w-full mt-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-80 flex items-center justify-center gap-2 bg-zinc-800/60 text-white"
             >
               <Upload className="w-4 h-4 inline mr-2" />
               Update from Resume
@@ -260,7 +258,7 @@ export default function EventsRightColumn() {
         </div>
 
         {/* AI Assistant */}
-        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-3xl p-5 border border-white/10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
           </div>

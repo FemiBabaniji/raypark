@@ -125,15 +125,15 @@ export function EventCard({ title, date, description, time, attending, location,
         rounded-3xl 
         p-5
         transition-all duration-300 ease-out
-        ${isHovered ? "scale-[1.02] shadow-2xl" : "shadow-lg"}
+        ${isHovered ? "scale-[1.02]" : ""}
         text-left text-white
         w-56 sm:w-64
         flex-shrink-0
+        border border-white/10
       `}
       style={{
         minHeight: "260px",
         maxWidth: "256px",
-        boxShadow: isHovered ? "0 25px 50px -12px rgba(0, 0, 0, 0.4)" : "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
       }}
     >
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />

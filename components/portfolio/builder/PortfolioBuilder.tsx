@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { Reorder, motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
-import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout, loadPortfolioData } from "@/lib/portfolio-service"
+import { createPortfolioOnce, updatePortfolioById } from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -16,16 +16,15 @@ import {
   ServicesWidget,
   GalleryWidget,
   StartupWidget,
-  MeetingSchedulerWidget,
+  MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
-import type { ThemeIndex } from "@/lib/theme"
-import type { MeetingSchedulerContent } from "./widgets/MeetingSchedulerWidget"
+import type { ThemeIndex } from "@/lib/theme" // Declare ThemeIndex variable
 
 type Props = {
   isPreviewMode?: boolean
   identity: Identity
-  onIdentityChange: (updates: Partial<Identity>) => void
+  onIdentityChange: (identity: Identity) => void
   onExportData?: (data: PortfolioExportData) => void
   onSavePortfolio?: (data: any) => void
   isLive?: boolean
@@ -72,19 +71,28 @@ export default function PortfolioBuilder({
   })
 
   const [portfolioId, setPortfolioId] = useState<string | null>(initialPortfolio?.id ?? null)
-  const portfolioIdRef = useRef<string | null>(initialPortfolio?.id ?? null)
   const createInFlight = useRef<Promise<string> | null>(null)
-  const prevUserRef = useRef(user)
 
-  const [isLoadingData, setIsLoadingData] = useState(false)
-  const hasLoadedDataRef = useRef(false)
+  const draftKey = useMemo(
+    () => `pf-draft:${user?.id ?? "anon"}:${initialPortfolio?.id ?? "new"}`,
+    [user?.id, initialPortfolio?.id],
+  )
 
   useEffect(() => {
-    portfolioIdRef.current = portfolioId
-  }, [portfolioId])
+    try {
+      const cached = typeof window !== "undefined" ? localStorage.getItem(draftKey) : null
+      if (cached && !portfolioId) setPortfolioId(cached)
+    } catch {}
+  }, [draftKey, portfolioId])
+
+  useEffect(() => {
+    try {
+      if (portfolioId) localStorage.setItem(draftKey, portfolioId)
+    } catch {}
+  }, [draftKey, portfolioId])
 
   async function ensurePortfolioId(): Promise<string> {
-    if (portfolioIdRef.current) return portfolioIdRef.current
+    if (portfolioId) return portfolioId
     if (!user?.id) throw new Error("Must be signed in to create a portfolio")
 
     if (!createInFlight.current) {
@@ -96,7 +104,6 @@ export default function PortfolioBuilder({
           description: state.description,
         })
         setPortfolioId(created.id)
-        portfolioIdRef.current = created.id
         return created.id
       })()
     }
@@ -150,75 +157,7 @@ export default function PortfolioBuilder({
       content:
         "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
     },
-    "meeting-scheduler": {
-      mode: "custom",
-      calendlyUrl: "https://calendly.com/your-username/30min",
-    },
   })
-
-  useEffect(() => {
-    async function loadData() {
-      if (!portfolioId || hasLoadedDataRef.current || isLoadingData) {
-        return
-      }
-
-      setIsLoadingData(true)
-      hasLoadedDataRef.current = true
-
-      try {
-        console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
-
-        const data = await loadPortfolioData(portfolioId)
-
-        if (data) {
-          console.log("[v0] ✅ Loaded data from database:", data)
-
-          // Update layout
-          if (data.layout.left.length > 0) {
-            setLeftWidgets(data.layout.left)
-          }
-          if (data.layout.right.length > 0) {
-            setRightWidgets(data.layout.right)
-          }
-
-          // Update widget content
-          if (Object.keys(data.widgetContent).length > 0) {
-            setWidgetContent(data.widgetContent)
-          }
-
-          // Update identity if it has data
-          if (data.identity && data.identity.name) {
-            onIdentityChange(data.identity)
-          }
-
-          // Update project colors
-          if (data.projectColors && Object.keys(data.projectColors).length > 0) {
-            setProjectColors(data.projectColors)
-          }
-
-          // Update widget colors
-          if (data.widgetColors && Object.keys(data.widgetColors).length > 0) {
-            setWidgetColors(data.widgetColors)
-          }
-
-          // Update gallery groups
-          if (data.galleryGroups && Object.keys(data.galleryGroups).length > 0) {
-            setGalleryGroups(data.galleryGroups)
-          }
-
-          console.log("[v0] ✅ Data loaded and state updated successfully")
-        } else {
-          console.log("[v0] ℹ️ No saved data found, using defaults")
-        }
-      } catch (error) {
-        console.error("[v0] ❌ Failed to load portfolio data:", error)
-      } finally {
-        setIsLoadingData(false)
-      }
-    }
-
-    loadData()
-  }, [portfolioId, onIdentityChange])
 
   useEffect(() => {
     setState((prev) => ({
@@ -232,90 +171,54 @@ export default function PortfolioBuilder({
   const [hasInitialized, setHasInitialized] = useState(false)
 
   const debouncedSave = useCallback(async () => {
-    if (!user?.id || !hasInitialized || isLoadingData) {
-      return
-    }
+    if (!hasInitialized || !user?.id) return
 
-    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout)
     }
 
     const timeout = setTimeout(async () => {
       try {
+        console.log("[v0] Auto-saving portfolio...")
         const id = await ensurePortfolioId()
-
-        // Save portfolio metadata
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
           theme_id: state.theme_id,
           is_public: !!state.is_public,
-        })
-
-        const contentToSave = {
-          ...widgetContent,
           identity: {
             name: identity.name,
-            handle: identity.handle,
-            avatarUrl: identity.avatar,
-            selectedColor: identity.selectedColor,
             title: identity.title,
+            subtitle: identity.subtitle,
+            selectedColor: identity.selectedColor,
+            initials: identity.initials,
             email: identity.email,
             location: identity.location,
-            bio: identity.bio,
-            linkedin: identity.linkedin,
-            dribbble: identity.dribbble,
-            behance: identity.behance,
-            twitter: identity.twitter,
-            unsplash: identity.unsplash,
-            instagram: identity.instagram,
+            handle: identity.handle,
           },
-          startup: widgetContent.startup || {},
-        }
-
-        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
-
-        window.dispatchEvent(new Event("portfolio-updated"))
+        })
+        console.log("[v0] Portfolio auto-saved successfully")
       } catch (error) {
-        console.error("[v0] ❌ Auto-save failed:", error)
+        console.error("[v0] Auto-save failed:", error)
       }
-    }, 800)
+    }, 800) // 800ms debounce
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData])
+  }, [hasInitialized, user?.id, state, identity]) // Added identity to dependencies
 
   useEffect(() => {
     if (hasInitialized) {
       debouncedSave()
     }
-  }, [
-    state.name,
-    state.description,
-    state.theme_id,
-    state.is_public,
-    identity.name,
-    identity.handle,
-    identity.avatar,
-    identity.selectedColor,
-    identity.bio,
-    identity.email,
-    identity.location,
-    leftWidgets,
-    rightWidgets,
-    widgetContent,
-    hasInitialized,
-  ])
+  }, [state, hasInitialized, debouncedSave])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!isLoadingData) {
-        setHasInitialized(true)
-      }
-    }, 1500) // Wait 1.5 seconds after loading completes
+      setHasInitialized(true)
+    }, 1000) // Wait 1 second before enabling auto-save
 
     return () => clearTimeout(timer)
-  }, [isLoadingData])
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -332,25 +235,6 @@ export default function PortfolioBuilder({
       return [{ id: "identity", type: "identity" }, ...rest]
     })
   }, [])
-
-  useEffect(() => {
-    if (user?.id && !portfolioIdRef.current && !createInFlight.current) {
-      ensurePortfolioId().catch((err) => {
-        console.error("[v0] Failed to initialize portfolio:", err)
-      })
-    }
-  }, [user])
-
-  useEffect(() => {
-    const wasUnauthenticated = !prevUserRef.current?.id
-    const isNowAuthenticated = !!user?.id
-
-    if (wasUnauthenticated && isNowAuthenticated && hasInitialized) {
-      debouncedSave()
-    }
-
-    prevUserRef.current = user
-  }, [user, hasInitialized, debouncedSave])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -594,10 +478,6 @@ export default function PortfolioBuilder({
               onDelete={() => deleteWidget(w.id, column)}
               selectedColor={widgetColors[w.id] ?? 5}
               onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.id]: color }))}
-              content={widgetContent[w.id]}
-              onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
-              }
             />
           </motion.div>
         )
@@ -848,7 +728,6 @@ export default function PortfolioBuilder({
         isPreviewMode={isPreviewMode}
         rightSlot={rightSlot}
         logoHref="/network"
-        logoSrc="/dmz-logo-white.svg"
       >
         <div
           className={`lg:w-1/2 relative transition-all duration-200 ${

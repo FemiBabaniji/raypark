@@ -1,24 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const redirect = searchParams.get("redirect") || "/network"
-
-  useEffect(() => {
-    const errorParam = searchParams.get("error")
-    if (errorParam) {
-      setError(errorParam)
-    }
-  }, [searchParams])
 
   const handleGoogleSignIn = async () => {
     try {
@@ -28,7 +18,7 @@ export default function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
@@ -62,7 +52,7 @@ export default function AuthPage() {
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-white text-xl font-medium leading-tight">
-            A place for your
+            A  place for your
             <br />
             digital workspace
           </h1>

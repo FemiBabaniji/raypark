@@ -16,11 +16,6 @@ import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
 
-export type MeetingSchedulerContent = {
-  mode?: "custom" | "calendly"
-  calendlyUrl?: string
-}
-
 export default function MeetingSchedulerWidget({
   widgetId,
   column,
@@ -28,8 +23,6 @@ export default function MeetingSchedulerWidget({
   onDelete,
   selectedColor = 5 as ThemeIndex,
   onColorChange,
-  content,
-  onContentChange,
 }: {
   widgetId: string
   column: "left" | "right"
@@ -37,11 +30,9 @@ export default function MeetingSchedulerWidget({
   onDelete?: () => void
   selectedColor?: ThemeIndex
   onColorChange?: (color: ThemeIndex) => void
-  content?: MeetingSchedulerContent
-  onContentChange?: (content: MeetingSchedulerContent) => void
 }) {
-  const [mode, setMode] = useState<"custom" | "calendly">(content?.mode || "custom")
-  const [calendlyUrl, setCalendlyUrl] = useState(content?.calendlyUrl || "https://calendly.com/your-username/30min")
+  const [mode, setMode] = useState<"custom" | "calendly">("custom")
+  const [calendlyUrl, setCalendlyUrl] = useState("https://calendly.com/your-username/30min")
   const [isEditingUrl, setIsEditingUrl] = useState(false)
 
   const [view, setView] = useState<"calendar" | "events" | "zones" | "slots" | "confirmation">("calendar")
@@ -53,19 +44,6 @@ export default function MeetingSchedulerWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
-
-  useEffect(() => {
-    if (onContentChange) {
-      onContentChange({ mode, calendlyUrl })
-    }
-  }, [mode, calendlyUrl, onContentChange])
-
-  useEffect(() => {
-    if (content) {
-      setMode(content.mode || "custom")
-      setCalendlyUrl(content.calendlyUrl || "https://calendly.com/your-username/30min")
-    }
-  }, [content])
 
   useEffect(() => {
     if (mode === "calendly") {
@@ -366,24 +344,23 @@ export default function MeetingSchedulerWidget({
 
           {view === "events" && (
             <div className="space-y-2">
-              {selectedDay &&
-                getEventsForDay(selectedDay).map((event) => (
-                  <button
-                    key={event.id}
-                    onClick={() => handleEventClick(event)}
-                    className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
-                  >
-                    <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
-                    <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
-                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs">{event.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-white/80">
-                      <Clock className="w-3 h-3 flex-shrink-0" />
-                      <span className="text-xs">{event.time}</span>
-                    </div>
-                  </button>
-                ))}
+              {getEventsForDay(selectedDay!).map((event) => (
+                <button
+                  key={event.id}
+                  onClick={() => handleEventClick(event)}
+                  className="w-full bg-white/20 hover:bg-white/30 rounded-xl p-3 text-left transition"
+                >
+                  <h3 className="font-semibold text-xs mb-1.5">{event.name}</h3>
+                  <div className="flex items-start gap-1.5 text-xs text-white/80 mb-1">
+                    <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">{event.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-white/80">
+                    <Clock className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-xs">{event.time}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
 
@@ -434,19 +411,19 @@ export default function MeetingSchedulerWidget({
               <div className="bg-white/20 rounded-xl p-3 space-y-2">
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Event</div>
-                  <div className="font-semibold text-xs">{selectedEvent?.name}</div>
+                  <div className="font-semibold text-xs">{selectedEvent.name}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Location</div>
-                  <div className="font-medium text-xs">{selectedEvent?.location}</div>
+                  <div className="font-medium text-xs">{selectedEvent.location}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Networking Zone</div>
-                  <div className="font-medium text-xs">{selectedZone?.name}</div>
+                  <div className="font-medium text-xs">{selectedZone.name}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/70 mb-0.5">Time</div>
-                  <div className="font-medium text-xs">{selectedSlot?.time} (25 minutes)</div>
+                  <div className="font-medium text-xs">{selectedSlot.time} (25 minutes)</div>
                 </div>
               </div>
 

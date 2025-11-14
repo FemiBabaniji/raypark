@@ -2,9 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import PortfolioShell from "./portfolio/portfolio-shell"
-import MeetingSchedulerWidget from "./portfolio/builder/widgets/MeetingSchedulerWidget"
 
-export default function SarahChenPortfolio({ isPreviewMode = false }: { isPreviewMode?: boolean }) {
+export default function SarahChenPortfolio() {
   const ProfileWidget = () => (
     <div className="bg-gradient-to-br from-blue-500/70 to-cyan-500/70 backdrop-blur-xl rounded-3xl p-8">
       <div className="flex items-start gap-4 mb-6">
@@ -263,7 +262,7 @@ export default function SarahChenPortfolio({ isPreviewMode = false }: { isPrevie
   )
 
   return (
-    <PortfolioShell title="sarah chen." isPreviewMode={true} logoHref="/network" logoSrc="/dmz-logo-white.svg">
+    <PortfolioShell title="sarah chen." isPreviewMode={true} logoHref="/network">
       <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
         <ProfileWidget />
         <EducationWidget />
@@ -273,7 +272,6 @@ export default function SarahChenPortfolio({ isPreviewMode = false }: { isPrevie
       <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
         <AboutWidget />
         <ProjectsWidget />
-        <MeetingSchedulerWidget widgetId="meeting-scheduler-sarah" column="right" isPreviewMode={isPreviewMode} />
         <ExperienceWidget />
       </div>
     </PortfolioShell>

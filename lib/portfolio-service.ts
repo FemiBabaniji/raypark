@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
-import type { ThemeIndex } from "@/types/theme"
 
 export interface PortfolioData {
   id: string
@@ -10,7 +9,6 @@ export interface PortfolioData {
   is_public: boolean
   is_demo: boolean
   theme_id?: string
-  community_id?: string // Optional community association
   created_at?: string
   updated_at?: string
 }
@@ -25,148 +23,49 @@ const toSlug = (name: string) =>
     .replace(/(^-|-$)/g, "")
     .slice(0, 64)
 
-export async function ensureMainPage(supabase: ReturnType<typeof createClient>, portfolioId: string): Promise<string> {
-  const { data: existing } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  let pageId = existing?.id
-
-  if (!pageId) {
-    const { data, error } = await supabase
-      .from("pages")
-      .insert({ portfolio_id: portfolioId, key: "main", title: "Main", route: "/", is_demo: false })
-      .select("id")
-      .single()
-
-    if (error) throw error
-    pageId = data.id
-  }
-
-  // Ensure page_layouts row exists (idempotent)
-  const { data: pl } = await supabase.from("page_layouts").select("id").eq("page_id", pageId).maybeSingle()
-
-  if (!pl?.id) {
-    const defaultLayout = {
-      left: { type: "vertical", widgets: ["identity"] },
-      right: { type: "vertical", widgets: [] },
-    }
-    const { error } = await supabase.from("page_layouts").insert({ page_id: pageId, layout: defaultLayout })
-
-    if (error) throw error
-  }
-
-  return pageId
-}
-
 export async function createPortfolioOnce(params: {
   userId: string
   name: string
   theme_id: string
   description?: string
-  community_id?: string
 }) {
   const supabase = createClient()
-  const baseName = params.name?.trim() || "portfolio"
-  const baseSlug = toSlug(baseName)
+  // slug is decided ONCE at creation; do not recompute on edits
+  const slug = toSlug(params.name)
 
-  const { data: existingPortfolios, error: checkError } = await supabase
+  const { data, error } = await supabase
     .from("portfolios")
-    .select("id, slug, name")
-    .eq("user_id", params.userId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-
-  if (!checkError && existingPortfolios && existingPortfolios.length > 0) {
-    await ensureMainPage(supabase, existingPortfolios[0].id)
-    return existingPortfolios[0]
-  }
-
-  const slug = baseSlug
-  let inserted: any = null
-
-  for (let i = 0; i < 5; i++) {
-    const trySlug = i === 0 ? slug : `${slug}-${i + 1}`
-
-    const insertData: any = {
+    .insert({
       user_id: params.userId,
-      name: baseName,
-      slug: trySlug,
-      description: params.description?.trim() || `${baseName}'s portfolio`,
+      name: params.name.trim(),
+      slug,
+      description: params.description?.trim() || `${params.name}'s portfolio`,
+      theme_id: params.theme_id,
       is_public: false,
       is_demo: false,
-    }
-
-    if (params.theme_id && isUUID(params.theme_id)) {
-      insertData.theme_id = params.theme_id
-    }
-
-    if (params.community_id) {
-      insertData.community_id = params.community_id
-    }
-
-    const { data, error } = await supabase.from("portfolios").insert(insertData).select("id, slug, name").single()
-
-    if (!error && data) {
-      inserted = data
-      break
-    }
-
-    if (error && error.code === "23505") {
-      continue
-    }
-
-    if (error) {
-      console.error("[v0] ❌ Error creating portfolio:", error)
-      throw error
-    }
-  }
-
-  if (!inserted) {
-    const { data } = await supabase
-      .from("portfolios")
-      .select("id, slug, name")
-      .eq("user_id", params.userId)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-
-    if (!data || !data.length) {
-      throw new Error("Could not create or find a portfolio")
-    }
-    inserted = data[0]
-  }
-
-  await ensureMainPage(supabase, inserted.id)
-
-  return inserted
-}
-
-export async function ensureUserPortfolio(): Promise<{
-  portfolio_id: string
-  page_id: string
-  is_new: boolean
-}> {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.rpc("ensure_user_portfolio").single()
+    })
+    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .single()
 
   if (error) {
-    console.error("[v0] Error calling ensure_user_portfolio:", error)
-    throw new Error(`Failed to ensure portfolio: ${error.message}`)
+    // if slug is globally unique and already taken, you may see 23505; handle if needed
+    throw new Error(`Failed to create portfolio: ${error.message}`)
   }
 
-  if (!data) {
-    throw new Error("No data returned from ensure_user_portfolio")
-  }
+  // Optional: seed a main page + layout for the editor to bind to
+  const { data: page, error: pageErr } = await supabase
+    .from("pages")
+    .insert({ portfolio_id: data.id, key: "main", title: "Main", route: "/", is_demo: false })
+    .select("id")
+    .single()
+  if (!page && pageErr) console.warn("[seed] page create failed:", pageErr?.message)
 
-  return {
-    portfolio_id: data.portfolio_id,
-    page_id: data.page_id,
-    is_new: data.is_new,
-  }
+  const { error: layoutErr } = await supabase
+    .from("page_layouts")
+    .insert({ page_id: page?.id, layout: { columns: { left: [], right: [] } } })
+  if (layoutErr) console.warn("[seed] layout create failed:", layoutErr?.message)
+
+  return data
 }
 
 export async function updatePortfolioById(
@@ -176,41 +75,34 @@ export async function updatePortfolioById(
     description?: string
     theme_id?: string
     is_public?: boolean
-    community_id?: string
+    // intentionally no slug here — slug changes should be explicit via a separate function/flow
   },
 ) {
   if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
 
-  const response = await fetch(`/api/portfolios/${portfolioId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(patch),
-  })
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("portfolios")
+    .update(patch)
+    .eq("id", portfolioId)
+    .select("id, name, slug, description, theme_id, is_public, is_demo, created_at, updated_at")
+    .single()
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(`Failed to update portfolio: ${error.error}`)
-  }
-
-  return await response.json()
+  if (error) throw new Error(`Failed to update portfolio: ${error.message}`)
+  return data
 }
 
 export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]> {
   const supabase = createClient()
-  if (!user?.id) {
-    return []
-  }
+  if (!user?.id) return []
 
   const { data, error } = await supabase
     .from("portfolios")
-    .select("id, user_id, name, slug, is_public, is_demo, theme_id, community_id, created_at, updated_at")
+    .select("id, user_id, name, slug, is_public, is_demo, theme_id, created_at, updated_at")
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
 
-  if (error) {
-    console.error("[v0] ❌ Database error loading portfolios:", error)
-    throw new Error(`Failed to load portfolios: ${error.message}`)
-  }
+  if (error) throw new Error(`Failed to load portfolios: ${error.message}`)
 
   const seen = new Set<string>()
   const deduped = []
@@ -220,7 +112,6 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
     seen.add(key)
     deduped.push(p)
   }
-
   return deduped.map(
     (portfolio: any): UnifiedPortfolio => ({
       id: portfolio.id,
@@ -248,54 +139,56 @@ async function insertPortfolioWithRetry(
     is_public?: boolean
     is_demo?: boolean
     id?: string
-    community_id?: string
   },
 ) {
-  const { community_id, ...basePayload } = payload
-
+  // try base, then slug-<n>, then slug-<random>
   const candidates = [payload.slug]
   for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
   candidates.push(`${payload.slug}-${makeSuffix()}`)
 
   for (const slug of candidates) {
-    const insertData = { ...basePayload, slug }
+    const { data, error } = await supabase
+      .from("portfolios")
+      .insert({ ...payload, slug })
+      .select()
+      .single()
 
-    if (payload.theme_id && isUUID(payload.theme_id)) {
-      insertData.theme_id = payload.theme_id
-    }
+    if (!error) return data
 
-    if (community_id) {
-      insertData.community_id = community_id
-    }
-
-    const { data, error } = await supabase.from("portfolios").insert(insertData).select().maybeSingle()
-
-    if (!error && data) return data
-
-    if (error?.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
+    // 23505 unique violation on portfolios_slug_idx → try next
+    if (error.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
       console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
       continue
     }
 
-    if (error) throw error
+    // other errors: bubble up
+    throw error
   }
   throw new Error("Could not create a unique slug after several attempts")
 }
 
+// Client-side functions
 export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
+  console.log("[v0] Starting portfolio save for:", portfolio.name)
+
   let supabase
   try {
     supabase = createClient()
+    console.log("[v0] Supabase client created successfully")
   } catch (error) {
     console.error("[v0] Failed to create Supabase client:", error)
     throw new Error(`Supabase configuration error: ${error}`)
   }
 
+  console.log("[v0] User from parameter:", { user: user?.id })
+
   const baseSlug = toSlug(portfolio.name)
 
   if (!user) {
+    console.log("[v0] No authenticated user, saving as demo portfolio")
+
     const baseData = {
-      ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}),
+      ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
       user_id: "demo-user",
       name: portfolio.name,
       slug: baseSlug,
@@ -303,12 +196,14 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
       is_demo: true,
     }
 
+    console.log("[v0] Upserting demo portfolio:", baseData)
+
     if (isUUID(portfolio.id)) {
       const { data: savedPortfolio, error } = await supabase
         .from("portfolios")
         .upsert(baseData, { onConflict: "id" })
         .select()
-        .maybeSingle()
+        .single()
 
       if (error) {
         console.error("[v0] Error upserting demo portfolio:", error)
@@ -323,7 +218,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
   }
 
   const baseData = {
-    ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}),
+    ...(isUUID(portfolio.id) ? { id: portfolio.id } : {}), // Only include valid UUID
     user_id: user.id,
     name: portfolio.name,
     slug: baseSlug,
@@ -331,20 +226,12 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     is_demo: false,
   }
 
-  if ((portfolio as any).community_id) {
-    baseData.community_id = (portfolio as any).community_id
-  }
-
   let savedPortfolio
 
   if (isUUID(portfolio.id)) {
     console.log("[v0] Upserting existing portfolio:", baseData)
 
-    const { data, error } = await supabase
-      .from("portfolios")
-      .upsert(baseData, { onConflict: "id" })
-      .select()
-      .maybeSingle()
+    const { data, error } = await supabase.from("portfolios").upsert(baseData, { onConflict: "id" }).select().single()
 
     if (error) {
       console.error("[v0] Error upserting portfolio:", error)
@@ -375,7 +262,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
     .from("pages")
     .upsert(pageData, { onConflict: "portfolio_id,key" })
     .select()
-    .maybeSingle()
+    .single()
 
   if (pageError) {
     console.error("[v0] Error saving page:", pageError)
@@ -384,14 +271,16 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   console.log("[v0] Page saved successfully with ID:", savedPage?.id)
 
+  // Save template data using direct widget insertion
   if (portfolio.isTemplate && (portfolio as any).content) {
     console.log("[v0] Saving template content:", (portfolio as any).content)
     const content = (portfolio as any).content
-    const pageId = savedPage?.id
+    const pageId = savedPage?.id // Use actual saved page ID
 
     try {
       console.log("[v0] Using direct widget insertion")
 
+      // Get widget type IDs first
       const { data: widgetTypes, error: widgetTypesError } = await supabase.from("widget_types").select("id, key")
 
       if (widgetTypesError) {
@@ -404,7 +293,6 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
       const profileWidgetType = widgetTypes?.find((wt) => wt.key === "profile")
       const descriptionWidgetType = widgetTypes?.find((wt) => wt.key === "description")
       const projectsWidgetType = widgetTypes?.find((wt) => wt.key === "projects")
-      const identityWidgetType = widgetTypes?.find((wt) => wt.key === "identity")
 
       const widgets = []
 
@@ -451,30 +339,6 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
         })
       }
 
-      if (identityWidgetType) {
-        widgets.push({
-          page_id: pageId,
-          widget_type_id: identityWidgetType.id,
-          props: {
-            name: portfolio.name,
-            handle: portfolio.handle,
-            avatarUrl: portfolio.avatarUrl,
-            selectedColor: typeof portfolio.selectedColor === "number" ? portfolio.selectedColor : 0,
-            title: portfolio.title,
-            email: portfolio.email,
-            location: portfolio.location,
-            bio: portfolio.bio,
-            linkedin: portfolio.linkedin,
-            dribbble: portfolio.dribbble,
-            behance: portfolio.behance,
-            twitter: portfolio.twitter,
-            unsplash: portfolio.unsplash,
-            instagram: portfolio.instagram,
-          },
-          enabled: true,
-        })
-      }
-
       console.log("[v0] Upserting widgets:", widgets)
 
       if (widgets.length > 0) {
@@ -501,6 +365,7 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 export async function deletePortfolio(portfolioId: string): Promise<void> {
   const supabase = createClient()
 
+  // Get current user
   const {
     data: { user },
     error: userError,
@@ -509,7 +374,7 @@ export async function deletePortfolio(portfolioId: string): Promise<void> {
     throw new Error("User must be authenticated to delete portfolios")
   }
 
-  const { error } = await supabase.from("portfolios").delete().eq("id", portfolioId).eq("user_id", user.id)
+  const { error } = await supabase.from("portfolios").delete().eq("id", portfolioId).eq("user_id", user.id) // Ensure user can only delete their own portfolios
 
   if (error) {
     console.error("Error deleting portfolio:", error)
@@ -520,7 +385,7 @@ export async function deletePortfolio(portfolioId: string): Promise<void> {
 export async function getPortfolioBySlug(slug: string): Promise<any> {
   const supabase = createClient()
 
-  const { data, error } = await supabase.from("public_portfolio_by_slug").select("*").eq("slug", slug).maybeSingle()
+  const { data, error } = await supabase.from("public_portfolio_by_slug").select("*").eq("slug", slug).single()
 
   if (error) {
     console.error("Error loading portfolio by slug:", error)
@@ -539,17 +404,19 @@ export async function addWidgetToPage(
 ): Promise<string> {
   const supabase = createClient()
 
+  // Get the widget type ID first
   const { data: widgetType, error: widgetTypeError } = await supabase
     .from("widget_types")
     .select("id")
     .eq("key", widgetKey)
-    .maybeSingle()
+    .single()
 
   if (widgetTypeError || !widgetType) {
     console.error("Error finding widget type:", widgetTypeError)
     throw new Error(`Widget type '${widgetKey}' not found`)
   }
 
+  // Insert the widget instance directly
   const widgetData = {
     page_id: pageId,
     widget_type_id: widgetType.id,
@@ -561,11 +428,11 @@ export async function addWidgetToPage(
     enabled: true,
   }
 
-  const { data, error } = await supabase.from("widget_instances").insert(widgetData).select("id").maybeSingle()
+  const { data, error } = await supabase.from("widget_instances").insert(widgetData).select("id").single()
 
-  if (error || !data) {
+  if (error) {
     console.error("Error adding widget:", error)
-    throw new Error(`Failed to add widget: ${error?.message || "No data returned"}`)
+    throw new Error(`Failed to add widget: ${error.message}`)
   }
 
   return data.id
@@ -582,424 +449,4 @@ export async function removeWidgetFromPage(instanceId: string): Promise<void> {
   }
 }
 
-export async function getCommunityByCode(code: string) {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.from("communities").select("*").eq("code", code).maybeSingle()
-
-  if (error) {
-    console.error("Error fetching community:", error)
-    return null
-  }
-
-  return data
-}
-
-export async function joinCommunity(communityCode: string, userId: string, metadata?: Record<string, any>) {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.rpc("join_community", {
-    p_community_code: communityCode,
-    p_user_id: userId,
-    p_metadata: metadata || {},
-  })
-
-  if (error) {
-    console.error("Error joining community:", error)
-    throw new Error(`Failed to join community: ${error.message}`)
-  }
-
-  return data
-}
-
-export async function getCommunityPortfolios(communityId: string) {
-  const supabase = createClient()
-
-  const { data, error } = await supabase
-    .from("community_portfolios")
-    .select("*")
-    .eq("community_id", communityId)
-    .eq("is_public", true)
-    .order("updated_at", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching community portfolios:", error)
-    throw new Error(`Failed to fetch community portfolios: ${error.message}`)
-  }
-
-  return data
-}
-
-export async function saveWidgetLayout(
-  portfolioId: string,
-  leftWidgets: Array<{ id: string; type: string }>,
-  rightWidgets: Array<{ id: string; type: string }>,
-  widgetContent: Record<string, any>,
-) {
-  const supabase = createClient()
-
-  const pageId = await ensureMainPage(supabase, portfolioId)
-
-  const layout = {
-    left: { type: "vertical", widgets: leftWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
-    right: { type: "vertical", widgets: rightWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
-  }
-
-  const { error: upsertLayoutErr } = await supabase
-    .from("page_layouts")
-    .upsert({ page_id: pageId, layout }, { onConflict: "page_id" })
-
-  if (upsertLayoutErr) {
-    console.error("[v0] ❌ Failed to upsert layout:", upsertLayoutErr)
-    throw upsertLayoutErr
-  }
-
-  const { data: types, error: typesError } = await supabase.from("widget_types").select("id, key")
-
-  if (typesError) {
-    console.error("[v0] ❌ Failed to fetch widget types:", typesError)
-    throw typesError
-  }
-
-  const keyToId = Object.fromEntries((types ?? []).map((t) => [t.key, t.id]))
-
-  const allKeys = [...layout.left.widgets, ...layout.right.widgets]
-
-  const meetingSchedulerIds = allKeys.filter(
-    (id: string) => typeof id === "string" && id.startsWith("meeting-scheduler"),
-  )
-  const otherKeys = allKeys.filter((id: string) => typeof id === "string" && !id.startsWith("meeting-scheduler"))
-
-  // Save meeting scheduler widgets as a single database row with all instances
-  if (meetingSchedulerIds.length > 0) {
-    const widget_type_id = keyToId["meeting-scheduler"]
-    if (widget_type_id) {
-      const { data: existing } = await supabase
-        .from("widget_instances")
-        .select("props")
-        .eq("page_id", pageId)
-        .eq("widget_type_id", widget_type_id)
-        .maybeSingle()
-
-      // Merge all meeting scheduler content into one props object keyed by widget ID
-      const meetingSchedulerProps = { ...(existing?.props ?? {}) }
-      for (const widgetId of meetingSchedulerIds) {
-        if (widgetContent[widgetId]) {
-          meetingSchedulerProps[widgetId] = widgetContent[widgetId]
-        }
-      }
-
-      const { error: upsertErr } = await supabase
-        .from("widget_instances")
-        .upsert(
-          { page_id: pageId, widget_type_id, props: meetingSchedulerProps, enabled: true },
-          { onConflict: "page_id,widget_type_id" },
-        )
-
-      if (upsertErr) {
-        console.error("[v0] ❌ Failed to upsert meeting-scheduler widget:", upsertErr)
-        throw upsertErr
-      }
-    }
-  }
-
-  // Save other widgets normally
-  for (const key of otherKeys) {
-    const widget_type_id = keyToId[key]
-    if (!widget_type_id) {
-      continue
-    }
-
-    const incomingProps = widgetContent?.[key] ?? {}
-
-    const { data: existing } = await supabase
-      .from("widget_instances")
-      .select("props")
-      .eq("page_id", pageId)
-      .eq("widget_type_id", widget_type_id)
-      .maybeSingle()
-
-    const mergedProps = { ...(existing?.props ?? {}), ...incomingProps }
-
-    const { error: upsertErr } = await supabase
-      .from("widget_instances")
-      .upsert(
-        { page_id: pageId, widget_type_id, props: mergedProps, enabled: true },
-        { onConflict: "page_id,widget_type_id" },
-      )
-
-    if (upsertErr) {
-      console.error("[v0] ❌ Failed to upsert widget:", key, upsertErr)
-      throw upsertErr
-    }
-  }
-
-  console.log("[v0] ✅ All widgets saved successfully")
-}
-
-export async function getPageLayout(portfolioId: string): Promise<{
-  left: { type: string; widgets: string[] }
-  right: { type: string; widgets: string[] }
-} | null> {
-  const supabase = createClient()
-
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (!page?.id) return null
-
-  const { data: layout } = await supabase.from("page_layouts").select("layout").eq("page_id", page.id).maybeSingle()
-
-  return layout?.layout as any
-}
-
-export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: string; props: any }>> {
-  const supabase = createClient()
-
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (!page?.id) return []
-
-  const { data: instances } = await supabase
-    .from("widget_instances")
-    .select(
-      `
-      props,
-      widget_types!inner(key)
-    `,
-    )
-    .eq("page_id", page.id)
-
-  return (
-    instances?.map((i: any) => ({
-      key: i.widget_types.key,
-      props: i.props || {},
-    })) || []
-  )
-}
-
-const makeSuffix = () => Math.random().toString(36).slice(2, 7)
-
-export type IdentityProps = {
-  name?: string
-  handle?: string
-  avatarUrl?: string
-  selectedColor?: number
-  title?: string
-  email?: string
-  location?: string
-  bio?: string
-  linkedin?: string
-  dribbble?: string
-  behance?: string
-  twitter?: string
-  unsplash?: string
-  instagram?: string
-}
-
-export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
-  const supabase = createClient()
-
-  const { data: page, error: pageErr } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (pageErr || !page?.id) {
-    return null
-  }
-
-  const { data: wt, error: wtErr } = await supabase
-    .from("widget_types")
-    .select("id")
-    .eq("key", "identity")
-    .maybeSingle()
-
-  if (wtErr || !wt?.id) {
-    return null
-  }
-
-  const { data: wi, error: wiErr } = await supabase
-    .from("widget_instances")
-    .select("props")
-    .eq("page_id", page.id)
-    .eq("widget_type_id", wt.id)
-    .maybeSingle()
-
-  if (wiErr) {
-    return null
-  }
-
-  return (wi?.props as IdentityProps) ?? null
-}
-
-export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")
-
-export async function loadPortfolioData(portfolioId: string): Promise<{
-  layout: {
-    left: Array<{ id: string; type: string }>
-    right: Array<{ id: string; type: string }>
-  }
-  widgetContent: Record<string, any>
-  identity: any
-  projectColors?: Record<string, string>
-  widgetColors?: Record<string, ThemeIndex>
-  galleryGroups?: Record<string, any[]>
-} | null> {
-  const supabase = createClient()
-
-  // Get the main page
-  const { data: page, error: pageError } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (pageError || !page?.id) {
-    console.error("[v0] Failed to load page:", pageError)
-    return null
-  }
-
-  // Get page layout
-  const { data: layoutData, error: layoutError } = await supabase
-    .from("page_layouts")
-    .select("layout")
-    .eq("page_id", page.id)
-    .maybeSingle()
-
-  if (layoutError) {
-    console.error("[v0] Failed to load layout:", layoutError)
-    return null
-  }
-
-  const rawLayout = layoutData?.layout as any
-  const leftWidgetKeys = rawLayout?.left?.widgets || []
-  const rightWidgetKeys = rawLayout?.right?.widgets || []
-
-  // Get widget_types lookup
-  const { data: widgetTypes, error: typesError } = await supabase.from("widget_types").select("id, key")
-
-  if (typesError) {
-    console.error("[v0] Failed to load widget types:", typesError)
-    return null
-  }
-
-  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
-  const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
-
-  // Get all widget instances for this page
-  const { data: instances, error: instancesError } = await supabase
-    .from("widget_instances")
-    .select("widget_type_id, props")
-    .eq("page_id", page.id)
-
-  if (instancesError) {
-    console.error("[v0] Failed to load widget instances:", instancesError)
-    return null
-  }
-
-  // Build widgetContent map from database props
-  const widgetContent: Record<string, any> = {}
-  let identity: any = {}
-  let projectColors: Record<string, string> = {}
-  const widgetColors: Record<string, ThemeIndex> = {}
-  const galleryGroups: Record<string, any[]> = {}
-
-  for (const instance of instances || []) {
-    const key = idToKey[instance.widget_type_id]
-    if (!key) continue
-
-    const props = instance.props || {}
-
-    if (key === "identity") {
-      // Identity widget maps directly to identity state
-      identity = {
-        name: props.name || "",
-        handle: props.handle || "",
-        avatar: props.avatarUrl || "",
-        selectedColor: typeof props.selectedColor === "number" ? props.selectedColor : 0,
-        title: props.title || "",
-        email: props.email || "",
-        location: props.location || "",
-        bio: props.bio || "",
-        linkedin: props.linkedin || "",
-        dribbble: props.dribbble || "",
-        behance: props.behance || "",
-        twitter: props.twitter || "",
-        unsplash: props.unsplash || "",
-        instagram: props.instagram || "",
-      }
-    } else if (key === "projects" && props.projectColors) {
-      // Extract project colors if they exist
-      projectColors = props.projectColors
-    } else if (key === "gallery" && props.galleryGroups) {
-      // Extract gallery groups if they exist
-      const widgetId = leftWidgetKeys.includes(key) || rightWidgetKeys.includes(key) ? key : `${key}-${Date.now()}`
-      galleryGroups[widgetId] = props.galleryGroups
-    } else if (key === "meeting-scheduler") {
-      const allWidgetIds = [...leftWidgetKeys, ...rightWidgetKeys]
-      const meetingSchedulerIds = allWidgetIds.filter((id: string) => id.startsWith("meeting-scheduler"))
-
-      // For each meeting scheduler widget in the layout, load its content
-      for (const widgetId of meetingSchedulerIds) {
-        // Check if this specific instance has saved content
-        const instanceContent = props[widgetId]
-        if (instanceContent) {
-          widgetContent[widgetId] = instanceContent
-
-          // Also extract widget color if present
-          if (typeof instanceContent.selectedColor === "number") {
-            widgetColors[widgetId] = instanceContent.selectedColor
-          }
-        }
-      }
-      continue // Skip the default widgetContent storage below
-    }
-
-    // Store all props in widgetContent using the widget type key
-    widgetContent[key] = props
-  }
-
-  // Extract widget type from ID: for "meeting-scheduler-1763018464890", type should be "meeting-scheduler"
-  const extractWidgetType = (widgetId: string): string => {
-    // Check if it's a timestamped widget (ends with a large number)
-    const lastDashIndex = widgetId.lastIndexOf("-")
-    if (lastDashIndex > 0) {
-      const afterLastDash = widgetId.substring(lastDashIndex + 1)
-      // If it's a timestamp (all digits and long), remove it
-      if (/^\d{13,}$/.test(afterLastDash)) {
-        return widgetId.substring(0, lastDashIndex)
-      }
-    }
-    // Otherwise, the whole ID is the type
-    return widgetId
-  }
-
-  // Convert widget keys to WidgetDef format
-  const leftWidgets = leftWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
-  const rightWidgets = rightWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
-
-  return {
-    layout: {
-      left: leftWidgets,
-      right: rightWidgets,
-    },
-    widgetContent,
-    identity,
-    projectColors,
-    widgetColors,
-    galleryGroups,
-  }
-}
+const makeSuffix = () => Math.random().toString(36).slice(2, 7) // 5 chars

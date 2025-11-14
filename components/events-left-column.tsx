@@ -1,65 +1,295 @@
 "use client"
 import { useState } from "react"
-import { useRouter } from 'next/navigation'
+import { ChevronDown, Search } from 'lucide-react'
+import { Panel } from "@/components/ui/panel"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
-import { EventCard, AnnouncementCard } from "@/components/cards"
-import EventDetailView from "@/components/event-detail-view"
-import {
-  CategoryFilters,
-  EVENT_CATEGORY_FILTERS,
-  MEMBER_ROLE_FILTERS,
-} from "@/components/event-nav"
-import { ViewToggle } from "@/components/event-nav/view-toggle"
-import { CalendarView } from "@/components/events/calendar-view"
-import { MeetingsSection } from "@/components/events/meetings-section"
-import type { EventDetailData } from "@/components/event-detail"
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const CONTAINER_STYLES = "bg-zinc-900/30 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-white/5"
+const FILTERS = ["Events", "Meetings", "Projects", "Members"]
+
+function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-8 py-3 font-medium transition-all duration-200 border rounded-2xl text-xs"
+      style={{
+        backgroundColor: active ? "#393939" : "transparent",
+        color: active ? "#FFFFFF" : "#B3B3B3",
+        borderColor: "#444",
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function CardSkeleton({
+  title,
+  date,
+  description,
+  time,
+  attending,
+  location,
+  instructor,
+  tags,
+  dateLabel,
+  onEventClick, // Added onEventClick prop
+}: {
+  title: string
+  date: string
+  description: string
+  time: string
+  attending: number
+  location?: string
+  instructor?: string
+  tags?: string[]
+  dateLabel?: string
+  onEventClick?: (eventId: string) => void // Added onEventClick prop type
+}) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const getEventColors = (title: string) => {
+    if (title.includes("AI") || title.includes("Machine Learning")) {
+      return {
+        accent: "#0EA5E9", // Electric Blue
+        gradient: "from-sky-400/35 to-blue-600/20",
+      }
+    } else if (title.includes("Networking") || title.includes("Founder")) {
+      return {
+        accent: "#10B981", // Emerald
+        gradient: "from-emerald-400/35 to-teal-600/20",
+      }
+    } else if (title.includes("Design") || title.includes("Product")) {
+      return {
+        accent: "#8B5CF6", // Purple
+        gradient: "from-violet-400/35 to-purple-600/20",
+      }
+    }
+    return {
+      accent: "#06B6D4", // Cyan
+      gradient: "from-cyan-400/35 to-blue-600/20",
+    }
+  }
+
+  const colors = getEventColors(title)
+
+  const handleEventClick = () => {
+    if (onEventClick) {
+      if (title.includes("AI & Machine Learning")) {
+        onEventClick("ai-ml-workshop")
+      } else if (title.includes("Founder Networking")) {
+        onEventClick("founder-networking-mixer")
+      } else if (title.includes("Product Design")) {
+        onEventClick("product-design-masterclass")
+      }
+    }
+  }
+
+  return (
+    <div className="w-64 flex-shrink-0">
+      <Panel
+        variant="tile"
+        className={`transition-all duration-300 ease-out overflow-visible group relative bg-gradient-to-br ${colors.gradient} cursor-pointer`}
+        style={{
+          backgroundColor: "#1F1F1F",
+          width: "255px",
+          height: isHovered ? "360px" : "276px",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleEventClick}
+      >
+        <div className="relative z-10 h-full flex flex-col text-center">
+          <div className="flex-shrink-0 mb-4">
+            <div className="text-lg font-semibold mb-3 line-clamp-2" style={{ color: "#FFFFFF" }}>
+              {title}
+            </div>
+            <div className="text-sm leading-relaxed line-clamp-3" style={{ color: "#B3B3B3" }}>
+              {description.split(".")[0]}.
+            </div>
+          </div>
+
+          <div className="flex-1" />
+
+          <div className="flex-shrink-0 space-y-4">
+            <div className="text-center">
+              <div className="text-sm mb-2" style={{ color: "#B3B3B3" }}>
+                {time}
+              </div>
+              <div
+                className="inline-block px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: colors.accent,
+                  color: "#FFFFFF",
+                }}
+              >
+                {attending} attending
+              </div>
+            </div>
+
+            <div
+              className={`transition-all duration-300 ease-out ${
+                isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+              style={{
+                maxHeight: isHovered ? "120px" : "0px",
+                overflow: "hidden",
+              }}
+            >
+              {location && instructor && (
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div
+                    className="p-2 rounded-lg bg-gradient-to-br from-white/10 to-white/5"
+                    style={{ backdropFilter: "blur(10px)" }}
+                  >
+                    <div className="text-xs font-medium mb-1" style={{ color: "#B3B3B3" }}>
+                      LOCATION
+                    </div>
+                    <div className="text-xs font-medium truncate" style={{ color: "#FFFFFF" }}>
+                      {location.split(",")[0]}
+                    </div>
+                  </div>
+                  <div
+                    className="p-2 rounded-lg bg-gradient-to-br from-white/10 to-white/5"
+                    style={{ backdropFilter: "blur(10px)" }}
+                  >
+                    <div className="text-xs font-medium mb-1" style={{ color: "#B3B3B3" }}>
+                      INSTRUCTOR
+                    </div>
+                    <div className="text-xs font-medium truncate" style={{ color: "#FFFFFF" }}>
+                      {instructor.split(",")[0]}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {tags && (
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {tags.slice(0, 2).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: colors.accent,
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Panel>
+    </div>
+  )
+}
+
+function AnnouncementItem({
+  title,
+  content,
+  author,
+  timeAgo,
+  avatarColor,
+  isImportant = false,
+}: {
+  title: string
+  content: string
+  author: string
+  timeAgo: string
+  avatarColor: string
+  isImportant?: boolean
+}) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  return (
+    <li className="group">
+      <Panel
+        variant="module"
+        className={`transition-all duration-300 ease-out overflow-hidden cursor-pointer hover:shadow-lg ${
+          isExpanded ? "shadow-xl" : ""
+        }`}
+        style={{
+          backgroundColor: isImportant ? "#2A1A4A" : "#1F1F1F",
+          border: "none",
+          boxShadow: "none",
+          height: isExpanded ? "auto" : "80px",
+        }}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4 flex-1">
+              <div
+                className="h-12 w-12 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white text-sm"
+                style={{ backgroundColor: avatarColor }}
+              >
+                {author.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-base font-semibold text-white truncate">{title}</h3>
+                  {isImportant && (
+                    <span className="px-2 py-0.5 bg-violet-500 text-white text-xs rounded-full font-medium">
+                      Important
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-400 mb-2">
+                  {author} • {timeAgo}
+                </div>
+                <div
+                  className={`text-sm text-gray-300 leading-relaxed transition-all duration-300 ${
+                    isExpanded ? "line-clamp-none" : "line-clamp-1"
+                  }`}
+                >
+                  {content}
+                </div>
+              </div>
+            </div>
+            <button
+              className={`h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 hover:bg-white/10 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+            >
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            </button>
+          </div>
+
+          {/* Expanded content */}
+          <div
+            className={`transition-all duration-300 ease-out ${
+              isExpanded ? "opacity-100 mt-4" : "opacity-0 h-0 overflow-hidden"
+            }`}
+          >
+            <div className="border-t border-gray-700 pt-4">
+              <div className="bg-gradient-to-r from-white/5 to-white/10 rounded-xl p-4 backdrop-blur-sm">
+                <p className="text-sm text-gray-200 leading-relaxed mb-3">{content}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <button className="px-3 py-1.5 bg-blue-500/20 text-blue-300 text-xs rounded-lg hover:bg-blue-500/30 transition-colors">
+                      Read More
+                    </button>
+                    <button className="px-3 py-1.5 bg-gray-500/20 text-gray-300 text-xs rounded-lg hover:bg-gray-500/30 transition-colors">
+                      Mark as Read
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-500">12 reactions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Panel>
+    </li>
+  )
+}
 
 const mockMembers = [
-  {
-    id: "marcus-johnson",
-    name: "Marcus Johnson",
-    title: "Software Engineer",
-    email: "marcus@techstartup.io",
-    location: "San Francisco, CA",
-    handle: "@marcuscodes",
-    initials: "MJ",
-    selectedColor: 1 as const,
-    avatarUrl: "/man-developer.png",
-    role: "Developer",
-    isLive: true,
-    portfolioUrl: "/network/bfn/members/marcus-johnson",
-  },
-  {
-    id: "sarah-chen",
-    name: "Sarah Chen",
-    title: "Product Designer",
-    email: "sarah@designstudio.io",
-    location: "Toronto, ON",
-    handle: "@sarahdesigns",
-    initials: "SC",
-    selectedColor: 5 as const,
-    avatarUrl: "/woman-designer.png",
-    role: "Designer",
-    isLive: true,
-    portfolioUrl: "/network/dmz/members/sarah-chen",
-  },
-  {
-    id: "alex-thompson",
-    name: "Alex Thompson",
-    title: "Startup Founder",
-    email: "alex@startup.co",
-    location: "Toronto, ON",
-    handle: "@alexfounder",
-    initials: "AT",
-    selectedColor: 3 as const,
-    avatarUrl: "/man-developer.png",
-    role: "Manager",
-    isLive: true,
-    portfolioUrl: "/network/dmz/members/alex-thompson",
-  },
   {
     id: "oluwafemi-babaniji",
     name: "Oluwafemi Babaniji",
@@ -71,6 +301,32 @@ const mockMembers = [
     selectedColor: 3 as const,
     avatarUrl: "/man-developer.png",
     role: "Developer",
+    isLive: true,
+  },
+  {
+    id: "sarah-chen",
+    name: "Sarah Chen",
+    title: "AI Engineer",
+    email: "sarah@techstartup.io",
+    location: "San Francisco, CA",
+    handle: "@sarahcodes",
+    initials: "SC",
+    selectedColor: 3 as const,
+    avatarUrl: "/professional-headshot.png",
+    role: "Developer",
+    isLive: true,
+  },
+  {
+    id: "marcus-johnson",
+    name: "Marcus Johnson",
+    title: "Product Designer",
+    email: "marcus@designstudio.com",
+    location: "New York, NY",
+    handle: "@marcusdesign",
+    initials: "MJ",
+    selectedColor: 1 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Designer",
     isLive: true,
   },
   {
@@ -113,6 +369,19 @@ const mockMembers = [
     isLive: true,
   },
   {
+    id: "alex-thompson",
+    name: "Alex Thompson",
+    title: "Data Scientist",
+    email: "alex@datascience.com",
+    location: "Boston, MA",
+    handle: "@alexdata",
+    initials: "AT",
+    selectedColor: 0 as const,
+    avatarUrl: "/man-developer.png",
+    role: "Developer",
+    isLive: true,
+  },
+  {
     id: "amara-okafor",
     name: "Amara Okafor",
     title: "Founder & CEO",
@@ -127,51 +396,38 @@ const mockMembers = [
   },
 ]
 
-export default function EventsLeftColumn({
-  onEventClick,
-  selectedEvent,
-  selectedEventData,
-  onBackClick,
-  activeTab = "Home",
-  onTabChange,
-}: {
-  onEventClick?: (eventId: string) => void
-  selectedEvent?: string | null
-  selectedEventData?: EventDetailData | null
-  onBackClick?: () => void
-  activeTab?: string
-  onTabChange?: (tab: string) => void
-}) {
-  const router = useRouter()
+export default function EventsLeftColumn({ onEventClick }: { onEventClick?: (eventId: string) => void }) {
+  const [active, setActive] = useState("Events")
+  const [showPastEvents, setShowPastEvents] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [networkSearchQuery, setNetworkSearchQuery] = useState("")
-  const [selectedNetworkRole, setSelectedNetworkRole] = useState("all")
-  const [homeSelectedNetworkRole, setHomeSelectedNetworkRole] = useState("all")
-  const [view, setView] = useState<"grid" | "calendar">("grid")
+  const [memberSearchQuery, setMemberSearchQuery] = useState("")
+  const [selectedMemberRole, setSelectedMemberRole] = useState("all")
 
-  const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
-  const [attendeeFilter, setAttendeeFilter] = useState("all")
-
-  const [showLeftArrow, setShowLeftArrow] = useState(false)
-  const [showRightArrow, setShowRightArrow] = useState(true)
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget
-    setShowLeftArrow(target.scrollLeft > 0)
-    setShowRightArrow(target.scrollLeft < target.scrollWidth - target.clientWidth - 10)
-  }
-
-  const scrollContainer = (direction: 'left' | 'right', containerId: string) => {
-    const container = document.getElementById(containerId)
-    if (container) {
-      const scrollAmount = 400
-      container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      })
-    }
-  }
+  const pastEvents = [
+    {
+      title: "Startup Pitch Competition",
+      date: "15 Aug 2025",
+      description: "Entrepreneurs pitched their innovative ideas to a panel of investors and industry experts.",
+      time: "6:00 PM - 9:00 PM",
+      attending: 67,
+      location: "Main Auditorium",
+      instructor: "Panel of VCs",
+      tags: ["Pitching", "Investment", "Competition", "Startups"],
+      category: "networking",
+    },
+    {
+      title: "Blockchain & Web3 Summit",
+      date: "8 Aug 2025",
+      description: "Exploring the future of decentralized technologies and cryptocurrency innovations.",
+      time: "1:00 PM - 6:00 PM",
+      attending: 89,
+      location: "Conference Hall A",
+      instructor: "Crypto Industry Leaders",
+      tags: ["Blockchain", "Web3", "Crypto", "DeFi"],
+      category: "technical",
+    },
+  ]
 
   const upcomingEvents = [
     {
@@ -224,427 +480,325 @@ export default function EventsLeftColumn({
     })
   }
 
-  const filterNetworks = () => {
+  const filterMembers = () => {
     return mockMembers.filter((member) => {
       const matchesSearch =
-        member.name.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
-        member.title.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
-        member.email?.toLowerCase().includes(networkSearchQuery.toLowerCase()) ||
-        member.location?.toLowerCase().includes(networkSearchQuery.toLowerCase())
+        member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.title.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.email?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.location?.toLowerCase().includes(memberSearchQuery.toLowerCase())
 
-      if (selectedNetworkRole === "all") return matchesSearch
-      return matchesSearch && member.role === selectedNetworkRole
-    })
-  }
-
-  const filterHomeNetworksByRole = () => {
-    if (homeSelectedNetworkRole === "all") return mockMembers
-    return mockMembers.filter((member) => member.role === homeSelectedNetworkRole)
-  }
-
-  const eventAttendees = selectedEventData ? selectedEventData.attendees || [] : []
-
-  const filterAttendees = () => {
-    if (!selectedEventData) return []
-
-    const attendees = eventAttendees
-    return attendees.filter((attendee) => {
-      const matchesSearch =
-        attendee.name?.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
-        attendee.title?.toLowerCase().includes(attendeeSearchQuery.toLowerCase())
-
-      const department = attendee.title?.toLowerCase() || ""
-      const matchesFilter =
-        attendeeFilter === "all" ||
-        (attendeeFilter === "design" && (department.includes("design") || department.includes("ux"))) ||
-        (attendeeFilter === "engineering" && (department.includes("engineer") || department.includes("developer"))) ||
-        (attendeeFilter === "product" && department.includes("product")) ||
-        (attendeeFilter === "data" && (department.includes("data") || department.includes("scientist")))
-
-      return matchesSearch && matchesFilter
+      if (selectedMemberRole === "all") return matchesSearch
+      return matchesSearch && member.role === selectedMemberRole
     })
   }
 
   const filteredUpcomingEvents = filterEvents(upcomingEvents)
-  const filteredNetworks = filterNetworks()
-  const filteredHomeNetworks = filterHomeNetworksByRole()
-  const filteredAttendees = filterAttendees()
-
-  const handleMemberClick = (memberId: string) => {
-    const member = mockMembers.find((m) => m.id === memberId)
-    if (member?.portfolioUrl) {
-      router.push(member.portfolioUrl)
-    }
-  }
+  const filteredPastEvents = filterEvents(pastEvents)
+  const filteredMembers = filterMembers()
 
   return (
-    <div className="w-full flex justify-center">
-      <div className="w-full max-w-[1200px]">
-        {activeTab === "Home" && selectedEvent && selectedEventData ? (
-          <div className="mt-6 w-full">
-            <EventDetailView
-              event={{
-                id: selectedEventData.id,
-                title: selectedEventData.title,
-                description: selectedEventData.description,
-                fullDescription: selectedEventData.fullDescription,
-                date: selectedEventData.date,
-                time: selectedEventData.time,
-                location: selectedEventData.location?.name || "Location TBD",
-                fullAddress: selectedEventData.location?.addressLine,
-                venue: selectedEventData.location?.venue,
-                venueDetails: selectedEventData.location?.venueDetails,
-                dressCode: selectedEventData.dressCode,
-                host: selectedEventData.host?.name,
-                hostDescription: selectedEventData.host?.description,
-                agenda: selectedEventData.agenda,
-                partners: selectedEventData.partners,
-                tags: selectedEventData.tags,
-                attending: selectedEventData.attending,
-                gradient: selectedEventData.gradient || "from-sky-400/35 to-blue-600/20",
-                accent: selectedEventData.accent || "#06b6d4",
-                type: selectedEventData.type || "workshop",
-                attendees:
-                  selectedEventData.attendees ||
-                  mockMembers.slice(0, 8).map((m) => ({
-                    ...m,
-                    selectedColor: m.selectedColor as number,
-                  })),
-              }}
-              onBack={onBackClick || (() => {})}
+    <div className="w-full">
+      <div className="flex gap-4">
+        {FILTERS.map((f) => (
+          <Chip key={f} label={f} active={f === active} onClick={() => setActive(f)} />
+        ))}
+      </div>
+
+      {active === "Members" && (
+        <div className="mt-8 space-y-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Search members by name, role, or location..."
+              value={memberSearchQuery}
+              onChange={(e) => setMemberSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
             />
           </div>
-        ) : activeTab === "Home" ? (
-          <>
-            <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-              <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
-                  <div className="mb-4 flex items-start justify-between flex-shrink-0">
-                    <div>
-                      <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
-                      <p className="text-zinc-400 text-sm">Discover and join community events</p>
-                    </div>
-                    <ViewToggle view={view} onViewChange={setView} />
-                  </div>
 
-                  <div className="mt-3 flex-shrink-0">
-                    <CategoryFilters
-                      filters={EVENT_CATEGORY_FILTERS}
-                      selectedCategory={selectedCategory}
-                      onCategoryChange={setSelectedCategory}
-                    />
-                  </div>
+          {/* Role Filters */}
+          <div className="flex gap-2">
+            {[
+              { key: "all", label: "All" },
+              { key: "Designer", label: "Designers" },
+              { key: "Developer", label: "Developers" },
+              { key: "Manager", label: "Managers" },
+            ].map((filter) => (
+              <button
+                key={filter.key}
+                onClick={() => setSelectedMemberRole(filter.key)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  selectedMemberRole === filter.key
+                    ? "bg-white text-zinc-900"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
 
-                  <div className="flex-1 overflow-hidden mt-4 flex flex-col">
-                    {view === "grid" ? (
-                      <div className="relative group">
-                        {showLeftArrow && (
-                          <button
-                            onClick={() => scrollContainer('left', 'events-scroll-home')}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                            aria-label="Scroll left"
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                          </button>
-                        )}
-                        <div 
-                          id="events-scroll-home"
-                          className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
-                          onScroll={handleScroll}
-                        >
-                          {filteredUpcomingEvents.length > 0 ? (
-                            filteredUpcomingEvents.map((event, index) => (
-                              <EventCard
-                                key={index}
-                                title={event.title}
-                                date={event.date}
-                                description={event.description}
-                                time={event.time}
-                                attending={event.attending}
-                                dateLabel={event.dateLabel}
-                                location={event.location}
-                                instructor={event.instructor}
-                                tags={event.tags}
-                                onEventClick={onEventClick}
-                              />
-                            ))
-                          ) : (
-                            <div className="w-full text-center py-12">
-                              <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                            </div>
-                          )}
-                        </div>
-                        {showRightArrow && (
-                          <button
-                            onClick={() => scrollContainer('right', 'events-scroll-home')}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                            aria-label="Scroll right"
-                          >
-                            <ChevronRight className="w-5 h-5" />
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex-1 overflow-hidden">
-                        <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
-                      </div>
-                    )}
-                  </div>
-                </div>
+          {/* Members Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
+                <UnifiedPortfolioCard
+                  key={member.id}
+                  portfolio={member}
+                  onClick={(id) => console.log("View member profile:", id)}
+                  onShare={(id) => console.log("Share member:", id)}
+                  onMore={(id) => console.log("More options for member:", id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-zinc-500">No members found matching your criteria.</p>
               </div>
+            )}
+          </div>
+        </div>
+      )}
 
-              <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} min-h-[320px]`}>
-                  <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
-                </div>
-              </div>
+      {active === "Events" && (
+        <>
+          <div className="mt-8 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search workshops by name, description, or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-12 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
+              />
             </div>
 
-            <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-              <div className="w-full lg:w-[30%] lg:flex-shrink-0">
-                <div className={CONTAINER_STYLES}>
-                  <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
-
-                  <div className="space-y-3">
-                    <AnnouncementCard
-                      title="New Partnership with TechCorp"
-                      content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
-                      author="Admin"
-                      timeAgo="2 hours ago"
-                      avatarColor="#8B5CF6"
-                      isImportant={true}
-                    />
-                    <AnnouncementCard
-                      title="Upcoming Hackathon Registration"
-                      content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
-                      author="Events Team"
-                      timeAgo="1 day ago"
-                      avatarColor="#10B981"
-                    />
-                    <AnnouncementCard
-                      title="New Workspace Hours"
-                      content="Starting next week, our co-working space will be open 24/7 for all premium members."
-                      author="Facilities"
-                      timeAgo="3 days ago"
-                      avatarColor="#F59E0B"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full lg:w-[70%] lg:flex-shrink-0">
-                <div className={CONTAINER_STYLES}>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Networks</h2>
-                      <p className="text-zinc-400 text-xs">Connect with community networks</p>
-                    </div>
-                    <button
-                      onClick={() => onTabChange?.("Networks")}
-                      className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
-                    >
-                      View All
-                    </button>
-                  </div>
-
-                  <div className="mb-4">
-                    <CategoryFilters
-                      filters={MEMBER_ROLE_FILTERS}
-                      selectedCategory={homeSelectedNetworkRole}
-                      onCategoryChange={setHomeSelectedNetworkRole}
-                    />
-                  </div>
-
-                  <div className="relative group">
-                    <button
-                      onClick={() => scrollContainer('left', 'networks-scroll-home')}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                      aria-label="Scroll left"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <div id="networks-scroll-home" className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                      {filteredHomeNetworks.slice(0, 8).map((member) => (
-                        <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
-                          <UnifiedPortfolioCard
-                            portfolio={member}
-                            onClick={(id) => handleMemberClick(id)}
-                            onShare={(id) => console.log("Share network:", id)}
-                            onMore={(id) => console.log("More options for network:", id)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => scrollContainer('right', 'networks-scroll-home')}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                      aria-label="Scroll right"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {/* Category Filters */}
+            <div className="flex gap-2">
+              {[
+                { key: "all", label: "All Events" },
+                { key: "workshop", label: "Workshops" },
+                { key: "mixer", label: "Mixers" },
+                { key: "masterclass", label: "Masterclasses" },
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setSelectedCategory(filter.key)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    selectedCategory === filter.key
+                      ? "bg-white text-zinc-900"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
             </div>
-          </>
-        ) : null}
+          </div>
 
-        {activeTab === "Networks" && (
-          <div className="mt-6 space-y-6">
-            <CategoryFilters
-              filters={MEMBER_ROLE_FILTERS}
-              selectedCategory={selectedNetworkRole}
-              onCategoryChange={setSelectedNetworkRole}
-            />
+          <div className="mt-8 flex items-center gap-8 text-sm">
+            <button onClick={() => setShowPastEvents(false)} className="relative transition-colors duration-200">
+              <div className={`font-semibold text-xl py-0.5 ${!showPastEvents ? "text-white" : "text-gray-400"}`}>
+                Upcoming
+              </div>
+              {!showPastEvents && <div className="absolute left-0 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
+            </button>
+            <button onClick={() => setShowPastEvents(true)} className="relative transition-colors duration-200">
+              <div className={`text-xl px-14 py-2 ${showPastEvents ? "text-white font-semibold" : "text-gray-400"}`}>
+                Past
+              </div>
+              {showPastEvents && <div className="absolute left-14 -bottom-2 h-[2px] w-10 rounded-full bg-white" />}
+            </button>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mt-6">
-              {filteredNetworks.length > 0 ? (
-                filteredNetworks.map((member) => (
-                  <UnifiedPortfolioCard
-                    key={member.id}
-                    portfolio={member}
-                    onClick={(id) => handleMemberClick(id)}
-                    onShare={(id) => console.log("Share network:", id)}
-                    onMore={(id) => console.log("More options for network:", id)}
+          <div className="mt-6 flex gap-6 overflow-x-auto pb-2">
+            {!showPastEvents ? (
+              filteredUpcomingEvents.length > 0 ? (
+                filteredUpcomingEvents.map((event, index) => (
+                  <CardSkeleton
+                    key={index}
+                    title={event.title}
+                    date={event.date}
+                    description={event.description}
+                    time={event.time}
+                    attending={event.attending}
+                    dateLabel={event.dateLabel}
+                    location={event.location}
+                    instructor={event.instructor}
+                    tags={event.tags}
+                    onEventClick={onEventClick}
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-zinc-500">No networks found matching your criteria.</p>
+                <div className="w-full text-center py-12">
+                  <p className="text-zinc-500">No workshops found matching your criteria.</p>
                 </div>
-              )}
-            </div>
+              )
+            ) : filteredPastEvents.length > 0 ? (
+              filteredPastEvents.map((event, index) => (
+                <CardSkeleton
+                  key={index}
+                  title={event.title}
+                  date={event.date}
+                  description={event.description}
+                  time={event.time}
+                  attending={event.attending}
+                  location={event.location}
+                  instructor={event.instructor}
+                  tags={event.tags}
+                  onEventClick={onEventClick}
+                />
+              ))
+            ) : (
+              <div className="w-full text-center py-12">
+                <p className="text-zinc-500">No past workshops found matching your criteria.</p>
+              </div>
+            )}
           </div>
-        )}
 
-        {activeTab === "Events" && (
-          <>
-            <div
-              className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px] flex flex-col overflow-hidden`}
+          <section className="mt-12">
+            <h2 className="text-3xl font-bold mb-8" style={{ color: "#FFFFFF" }}>
+              Announcements
+            </h2>
+
+            <div className="space-y-4">
+              <AnnouncementItem
+                title="New Partnership with TechCorp"
+                content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
+                author="Admin"
+                timeAgo="2 hours ago"
+                avatarColor="#8B5CF6"
+                isImportant={true}
+              />
+              <AnnouncementItem
+                title="Upcoming Hackathon Registration"
+                content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
+                author="Events Team"
+                timeAgo="1 day ago"
+                avatarColor="#10B981"
+              />
+              <AnnouncementItem
+                title="New Workspace Hours"
+                content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
+                author="Facilities"
+                timeAgo="3 days ago"
+                avatarColor="#F59E0B"
+              />
+            </div>
+          </section>
+        </>
+      )}
+
+      {active === "Meetings" && (
+        <div className="mt-8 space-y-8">
+          {/* My Meetings header with Create button */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-white">My Meetings</h2>
+            <button className="px-4 py-2 bg-neutral-800/90 backdrop-blur-xl rounded-xl text-white text-sm font-medium hover:bg-neutral-700/90 transition-colors flex items-center gap-2">
+              <span className="text-lg">+</span>
+              Create
+            </button>
+          </div>
+
+          {/* Meetings list - vertical cards */}
+          <div className="space-y-4">
+            {/* Meeting Card 1 */}
+            <Panel
+              variant="module"
+              className="p-6 hover:shadow-lg transition-all cursor-pointer"
+              style={{ backgroundColor: "#1F1F1F", border: "none" }}
             >
-              <div className="mb-5 flex items-start justify-between flex-shrink-0">
-                <div>
-                  <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
-                  <p className="text-zinc-400 text-base">Discover and join community events</p>
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400/20 to-blue-600/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center text-white text-xs font-bold">
+                    SC
+                  </div>
                 </div>
-                <ViewToggle view={view} onViewChange={setView} />
-              </div>
-
-              <div className="mt-4 flex-shrink-0">
-                <CategoryFilters
-                  filters={EVENT_CATEGORY_FILTERS}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-              </div>
-
-              <div className="flex-1 overflow-hidden mt-5 flex flex-col">
-                {view === "grid" ? (
-                  <div className="relative group">
-                    {showLeftArrow && (
-                      <button
-                        onClick={() => scrollContainer('left', 'events-scroll-events-tab')}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                        aria-label="Scroll left"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                    )}
-                    <div 
-                      id="events-scroll-events-tab"
-                      className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
-                      onScroll={handleScroll}
-                    >
-                      {filteredUpcomingEvents.length > 0 ? (
-                        filteredUpcomingEvents.map((event, index) => (
-                          <EventCard
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            description={event.description}
-                            time={event.time}
-                            attending={event.attending}
-                            dateLabel={event.dateLabel}
-                            location={event.location}
-                            instructor={event.instructor}
-                            tags={event.tags}
-                            onEventClick={onEventClick}
-                          />
-                        ))
-                      ) : (
-                        <div className="w-full text-center py-12">
-                          <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                        </div>
-                      )}
-                    </div>
-                    {showRightArrow && (
-                      <button
-                        onClick={() => scrollContainer('right', 'events-scroll-events-tab')}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                        aria-label="Scroll right"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-white mb-1">1:1 with Sarah Chen</h3>
+                  <div className="text-sm text-gray-400 mb-2">Tomorrow, Dec 15 at 2:00 PM</div>
+                  <div className="text-sm text-gray-300 line-clamp-1">
+                    Discuss AI implementation strategy and project roadmap
                   </div>
-                ) : (
-                  <div className="flex-1 overflow-hidden">
-                    <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="px-3 py-1 bg-sky-500/20 text-sky-300 text-xs rounded-lg font-medium">30 min</div>
+                </div>
+              </div>
+            </Panel>
+
+            {/* Meeting Card 2 */}
+            <Panel
+              variant="module"
+              className="p-6 hover:shadow-lg transition-all cursor-pointer"
+              style={{ backgroundColor: "#1F1F1F", border: "none" }}
+            >
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400/20 to-teal-600/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
+                    MJ
                   </div>
-                )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-white mb-1">Team Sync with Marcus</h3>
+                  <div className="text-sm text-gray-400 mb-2">Dec 16 at 10:00 AM</div>
+                  <div className="text-sm text-gray-300 line-clamp-1">Weekly sync on product design and feedback</div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs rounded-lg font-medium">
+                    45 min
+                  </div>
+                </div>
               </div>
-            </div>
+            </Panel>
 
-            <section className="mt-12">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold text-white mb-1.5">Announcements</h2>
-                <p className="text-zinc-400">Stay updated with the latest community news</p>
+            {/* Meeting Card 3 */}
+            <Panel
+              variant="module"
+              className="p-6 hover:shadow-lg transition-all cursor-pointer"
+              style={{ backgroundColor: "#1F1F1F", border: "none" }}
+            >
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400/20 to-purple-600/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center text-white text-xs font-bold">
+                    ER
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-white mb-1">Coffee Chat with Elena</h3>
+                  <div className="text-sm text-gray-400 mb-2">Dec 18 at 3:30 PM</div>
+                  <div className="text-sm text-gray-300 line-clamp-1">Casual conversation about career growth</div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="px-3 py-1 bg-violet-500/20 text-violet-300 text-xs rounded-lg font-medium">
+                    60 min
+                  </div>
+                </div>
               </div>
-
-              <div className="space-y-5">
-                <AnnouncementCard
-                  title="New Partnership with TechCorp"
-                  content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
-                  author="Admin"
-                  timeAgo="2 hours ago"
-                  avatarColor="#8B5CF6"
-                  isImportant={true}
-                />
-                <AnnouncementCard
-                  title="Upcoming Hackathon Registration"
-                  content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
-                  author="Events Team"
-                  timeAgo="1 day ago"
-                  avatarColor="#10B981"
-                />
-                <AnnouncementCard
-                  title="New Workspace Hours"
-                  content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
-                  author="Facilities"
-                  timeAgo="3 days ago"
-                  avatarColor="#F59E0B"
-                />
-              </div>
-            </section>
-          </>
-        )}
-
-        {activeTab === "Meetings" && (
-          <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
-            <div className="mb-5">
-              <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
-              <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>
-            </div>
-            <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
+            </Panel>
           </div>
-        )}
 
-        {activeTab === "Projects" && (
-          <div className="mt-8 text-center py-12">
-            <p className="text-zinc-500">Projects section coming soon...</p>
-          </div>
-        )}
-      </div>
+          {/* No meetings state (optional, hidden when there are meetings) */}
+          {/* <Panel
+            variant="module"
+            className="p-8 text-center"
+            style={{ backgroundColor: "#1F1F1F", border: "none" }}
+          >
+            <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-gray-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">No Meetings Scheduled</h3>
+            <p className="text-sm text-gray-400 mb-4">You have no upcoming meetings. Create one to get started.</p>
+            <button className="px-6 py-2 bg-white text-zinc-900 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors">
+              Schedule Meeting
+            </button>
+          </Panel> */}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,10 +1,12 @@
 "use client"
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { Search, Home } from "lucide-react"
+import { BackButton } from "@/components/ui/back-button"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
-import type { EventDetailData } from "@/components/event-detail"
-import { FilterTabs, FILTER_TABS } from "@/components/event-nav"
+import EventDetail, { type EventDetailData } from "@/components/event-detail"
+import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -168,23 +170,19 @@ const eventData = {
   },
 }
 
-export default function EventsPage({ 
-  logo = "/bea-logo.svg",
-  communityName = "BEA" 
-}: { 
-  logo?: string
-  communityName?: string 
-}) {
+export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("Home")
-  const [useGradient, setUseGradient] = useState(true)
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
   }
 
   const handleBackClick = () => {
-    setSelectedEvent(null)
+    if (selectedEvent) {
+      setSelectedEvent(null)
+    } else {
+      window.history.back()
+    }
   }
 
   const selectedEventData = selectedEvent ? eventData[selectedEvent as keyof typeof eventData] : null
@@ -223,130 +221,110 @@ export default function EventsPage({
           avatarText: "TC",
         },
         partners: ["Google", "Microsoft", "AWS", "Meta"],
-        attendees: selectedEventData.attendees,
       }
     : null
 
   return (
-    <div className="min-h-screen pt-12 relative overflow-hidden" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {useGradient && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Large blue gradient orb - top left */}
-          <div 
-            className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Purple gradient orb - top right */}
-          <div 
-            className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Blue gradient orb - middle left */}
-          <div 
-            className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Purple/Violet gradient orb - bottom right */}
-          <div 
-            className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Smaller accent blue orb - bottom left */}
-          <div 
-            className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
-            }}
-          />
-        </div>
-      )}
-      
-      {/* Content layer */}
-      <div className="relative z-10">
-        <div className="px-8 md:px-12 lg:px-16 pt-6 pb-8">
-          <div className="ml-6 flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
-                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                  <span className="text-white">Your hub. </span>
-                  <span style={{ color: "#4169E1" }}>Your community.</span>
-                </h1>
+    <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+      {!selectedEvent && (
+        <header className="h-14 flex items-center px-6">
+          <div className="absolute top-6 left-6">
+            <BackButton onClick={handleBackClick} />
+          </div>
+          <div className="flex-1 ml-20">
+            <div className="max-w-6xl mx-auto">
+              <div
+                className="relative h-10 w-full max-w-md rounded-2xl"
+                style={{ backgroundColor: "oklch(0.145 0 0)" }}
+              >
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: "#B3B3B3" }} />
+                <input
+                  placeholder="Search"
+                  className="h-full w-full bg-transparent outline-none pl-12 pr-4 text-sm border-none shadow-none"
+                  style={{ color: "#FFFFFF" }}
+                />
               </div>
-              <p className="text-lg text-white/60 ml-[60px]">
-                Connect, collaborate, and grow with {communityName}
-              </p>
-            </div>
-            
-            {/* Toggle button for background */}
-            <button
-              onClick={() => setUseGradient(!useGradient)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-              aria-label="Toggle background"
-            >
-              <div className="w-4 h-4 rounded-full" style={{
-                background: useGradient 
-                  ? "linear-gradient(135deg, #4169E1, #8B5CF6)" 
-                  : "#52525b"
-              }} />
-              <span className="text-sm text-white/70">{useGradient ? "Gradient" : "Grey"}</span>
-            </button>
-          </div>
-        </div>
-        
-        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
-          backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
-        }}>
-          <div className="px-8 md:px-12 lg:px-16">
-            <div className="ml-6">
-              <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
             </div>
           </div>
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="w-10 h-10 bg-neutral-800/90 backdrop-blur-xl rounded-xl flex items-center justify-center text-white hover:bg-neutral-700/90 transition-colors"
+          >
+            <Home className="w-5 h-5" fill="white" />
+          </button>
+        </header>
+      )}
+
+      {selectedEvent && mappedEventData ? (
+        <div className="pt-6">
+          <EventDetail
+            event={mappedEventData}
+            onBack={handleBackClick}
+            onRSVP={(eventId) => {
+              console.log("RSVP for event:", eventId)
+            }}
+            onShare={(eventId) => {
+              console.log("Share event:", eventId)
+            }}
+          />
+
+          <div className="px-6 py-12 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-7 h-7 bg-cyan-600 rounded flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-white rounded-sm"></div>
+              </div>
+              <h2 className="text-3xl font-bold text-white">Event Attendees</h2>
+              <span className="text-lg text-neutral-400">({selectedEventData.attendees.length})</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {selectedEventData.attendees.map((attendee) => (
+                <UnifiedPortfolioCard
+                  key={attendee.id}
+                  portfolio={attendee}
+                  onClick={(id) => {
+                    if (id === "john-doe") {
+                      window.location.href = "/network/john-doe"
+                    } else if (id === "sarah-chen") {
+                      window.location.href = "/network/sarah-chen"
+                    } else {
+                      console.log("View attendee profile:", id)
+                    }
+                  }}
+                  onShare={(id) => console.log("Share attendee:", id)}
+                  onMore={(id) => console.log("More options for attendee:", id)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
+      ) : (
+        <main className="px-6 py-4">
+          <div className="max-w-6xl mx-auto relative overflow-hidden">
+            <div className="flex gap-6">
+              <motion.div
+                className="flex-1"
+                animate={{
+                  width: "auto",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <EventsLeftColumn onEventClick={handleEventClick} />
+              </motion.div>
 
-        <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
-          <div className="flex gap-8 pl-6 items-start">
-            <motion.div
-              className="w-[calc(100%-18rem)]"
-              animate={{
-                width: "calc(100% - 18rem)",
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <EventsLeftColumn
-                onEventClick={handleEventClick}
-                selectedEvent={selectedEvent}
-                selectedEventData={mappedEventData}
-                onBackClick={handleBackClick}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-              />
-            </motion.div>
-
-            <motion.div
-              className="w-64 flex-shrink-0 sticky top-24"
-              animate={{
-                x: "0%",
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <EventsRightColumn />
-            </motion.div>
+              <motion.div
+                className="w-80 flex-shrink-0"
+                animate={{
+                  x: "0%",
+                }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <EventsRightColumn />
+              </motion.div>
+            </div>
           </div>
         </main>
-      </div>
+      )}
     </div>
   )
 }

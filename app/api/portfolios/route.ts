@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
     }
 
-    const { name, theme_id, description, community_id } = body
+    const { name, theme_id, description } = body
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       console.log("[v0] Missing or invalid portfolio name:", name)
@@ -77,16 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log(
-      "[v0] Creating portfolio for user:",
-      user.id,
-      "Name:",
-      name,
-      "Theme:",
-      theme_id,
-      "Community:",
-      community_id,
-    )
+    console.log("[v0] Creating portfolio for user:", user.id, "Name:", name, "Theme:", theme_id)
 
     const slug = name
       .toLowerCase()
@@ -103,7 +94,6 @@ export async function POST(request: NextRequest) {
         theme_id,
         is_public: false,
         is_demo: false,
-        community_id: community_id || null,
       })
       .select()
       .single()

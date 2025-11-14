@@ -30,7 +30,7 @@ export default function StarterPortfolio({
   onSavePortfolio?: (portfolio: any) => void // Added onSavePortfolio prop type
 }) {
   const [step, setStep] = useState<Step>(0)
-  const [showOnboarding, setShowOnboarding] = useState(false) // Changed from true to false
+  const [showOnboarding, setShowOnboarding] = useState(true) // Always start with onboarding visible
   const [profileColorIdx, setProfileColorIdx] = useState<ThemeIndex>(activeIdentity?.selectedColor ?? 0)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [projectColors, setProjectColors] = useState({

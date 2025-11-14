@@ -275,11 +275,19 @@ export default function EventsPage({
       
       {/* Content layer */}
       <div className="relative z-10">
-        <div className="px-8 md:px-12 lg:px-16 pt-6 pb-12">
-          <div className="ml-6 flex items-center gap-3 justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
-              <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
+        <div className="px-8 md:px-12 lg:px-16 pt-6 pb-8">
+          <div className="ml-6 flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
+                <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+                  <span className="text-white">Your hub. </span>
+                  <span style={{ color: "#4169E1" }}>Your community.</span>
+                </h1>
+              </div>
+              <p className="text-lg text-white/60 ml-[60px]">
+                Connect, collaborate, and grow with {communityName}
+              </p>
             </div>
             
             {/* Toggle button for background */}
@@ -298,7 +306,9 @@ export default function EventsPage({
           </div>
         </div>
         
-        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
+        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
+          backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
+        }}>
           <div className="px-8 md:px-12 lg:px-16">
             <div className="ml-6">
               <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />

@@ -39,12 +39,12 @@ export default function HomePage() {
             >
               Sign in
             </Button>
-            <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6"
-              onClick={() => router.push("/onboarding")}
+            <button
+              className="bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-3 px-6 rounded-2xl transition-colors"
+              onClick={() => router.push("/login")}
             >
               Get Started
-            </Button>
+            </button>
           </div>
         </div>
       </header>
@@ -79,16 +79,15 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-10 py-6 shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => router.push("/onboarding")}
+            <button
+              className="bg-zinc-800 hover:bg-zinc-700 text-white text-lg py-4 px-10 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
+              onClick={() => router.push("/login")}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
               Get Started
-              <ArrowRight className={`w-5 h-5 ml-2 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
-            </Button>
+              <ArrowRight className={`w-5 h-5 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
+            </button>
           </motion.div>
         </div>
       </section>

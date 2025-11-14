@@ -228,7 +228,7 @@ export default function EventsPage({
 
   return (
     <div className="min-h-screen pt-12" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <div className="px-8 md:px-12 lg:px-16 pt-8 pb-4">
+      <div className="px-8 md:px-12 lg:px-16 pt-4 pb-3">
         <div className="ml-6 flex items-center gap-3">
           <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
           <h1 className="text-3xl font-bold text-white">{communityName}</h1>
@@ -236,7 +236,7 @@ export default function EventsPage({
       </div>
       
       <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
-        <div className="py-6 px-8 md:px-12 lg:px-16">
+        <div className="px-8 md:px-12 lg:px-16">
           <div className="ml-6">
             <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
           </div>

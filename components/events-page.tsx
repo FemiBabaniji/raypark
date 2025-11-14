@@ -277,7 +277,7 @@ export default function EventsPage({
       )}
       
       {/* Content layer */}
-      <div className="relative z-10">
+      <div className="relative z-10 max-w-[1800px] mx-auto">
         <EventsHeader 
           communityName={communityName}
           useGradient={useGradient}
@@ -294,8 +294,8 @@ export default function EventsPage({
           </div>
         </div>
 
-        <main className={`w-full relative mt-8 mx-12 transition-all duration-300 ease-out`}>
-          <div className={`flex items-start gap-4 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+        <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${showRightColumn ? 'px-8' : 'px-0'}`}>
+          <div className={`flex items-start gap-6 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
             <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}

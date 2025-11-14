@@ -340,8 +340,8 @@ export default function EventsPage({
 
         <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
           <div 
-            className={`flex items-start pl-6 transition-all duration-300 ${
-              showRightColumn ? 'justify-between' : 'justify-center'
+            className={`flex items-start transition-all duration-300 ${
+              showRightColumn ? 'justify-between pl-6' : 'justify-center'
             }`}
           >
             <motion.div

@@ -17,9 +17,8 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <div
       onClick={() => router.push(`/events/${event.id}`)}
-      className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-muted-foreground/20 transition-all duration-300 hover:shadow-lg"
+      className="group cursor-pointer floating-card rounded-2xl overflow-hidden"
     >
-      {/* Cover Image */}
       <div className="relative h-48 bg-gradient-to-br from-purple-500/10 to-pink-500/10 overflow-hidden">
         {event.cover_image_url ? (
           <Image
@@ -29,12 +28,13 @@ export function EventCard({ event }: EventCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl opacity-20">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-purple">
+            <div className="text-7xl opacity-30">
               {event.calendar?.icon_emoji || "📅"}
             </div>
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
       </div>
 
       {/* Content */}

@@ -53,9 +53,9 @@ export function EventsList() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-32">
         <div className="text-center max-w-md mx-auto">
-          <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="monochrome-icon w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
-              className="w-12 h-12 text-muted-foreground"
+              className="w-12 h-12"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

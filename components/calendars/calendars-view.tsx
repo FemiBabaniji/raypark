@@ -101,9 +101,9 @@ export function CalendarsView() {
           </div>
 
           {myCalendars.length === 0 ? (
-            <div className="bg-card rounded-2xl border border-border p-12 text-center">
-              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                <CalendarIcon className="w-10 h-10 text-muted-foreground" />
+            <div className="floating-card rounded-2xl p-12 text-center">
+              <div className="monochrome-icon w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CalendarIcon className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-semibold mb-2">No Calendars</h3>
               <p className="text-muted-foreground mb-6">You are not an admin of any calendars.</p>
@@ -126,9 +126,9 @@ export function CalendarsView() {
           <h2 className="text-2xl font-semibold mb-6">Subscribed Calendars</h2>
 
           {subscribedCalendars.length === 0 ? (
-            <div className="bg-card rounded-2xl border border-border p-12 text-center">
-              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                <CalendarIcon className="w-10 h-10 text-muted-foreground" />
+            <div className="floating-card rounded-2xl p-12 text-center">
+              <div className="monochrome-icon w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CalendarIcon className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-semibold mb-2">No Subscriptions</h3>
               <p className="text-muted-foreground">You have not subscribed to any calendars.</p>
@@ -152,7 +152,7 @@ function CalendarCard({ calendar }: { calendar: Calendar }) {
   return (
     <div
       onClick={() => router.push(`/calendars/${calendar.slug}`)}
-      className="group cursor-pointer bg-card rounded-2xl border border-border hover:border-muted-foreground/20 transition-all duration-300 hover:shadow-lg overflow-hidden"
+      className="group cursor-pointer floating-card rounded-2xl overflow-hidden"
     >
       {/* Cover */}
       <div

@@ -277,43 +277,49 @@ export default function EventsPage({
       )}
       
       {/* Content layer */}
-      <div className="relative z-10 max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
-        <EventsHeader 
-          communityName={communityName}
-          useGradient={useGradient}
-          showRightColumn={showRightColumn}
-          onToggleGradient={() => setUseGradient(!useGradient)}
-          onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
-        />
+      <div className="relative z-10">
+        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
+          <EventsHeader 
+            communityName={communityName}
+            useGradient={useGradient}
+            showRightColumn={showRightColumn}
+            onToggleGradient={() => setUseGradient(!useGradient)}
+            onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
+          />
+        </div>
         
         <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
           backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
         }}>
-          <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
+            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
         </div>
 
         {/* Main content area */}
-        <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${!showRightColumn ? 'flex justify-center' : ''}`}>
-          {/* Reduced gap from gap-6 md:gap-8 to gap-3 md:gap-4 (half the size) */}
-          <div className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-            <div className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
-              <EventsLeftColumn
-                onEventClick={handleEventClick}
-                selectedEvent={selectedEvent}
-                selectedEventData={mappedEventData}
-                onBackClick={handleBackClick}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-              />
-            </div>
+        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
+          <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${!showRightColumn ? 'flex justify-center' : ''}`}>
+            {/* Reduced gap from gap-6 md:gap-8 to gap-3 md:gap-4 (half the size) */}
+            <div className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+              <div className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
+                <EventsLeftColumn
+                  onEventClick={handleEventClick}
+                  selectedEvent={selectedEvent}
+                  selectedEventData={mappedEventData}
+                  onBackClick={handleBackClick}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                />
+              </div>
 
-            <div 
-              className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none absolute'}`}
-            >
-              <EventsRightColumn />
+              <div 
+                className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none absolute'}`}
+              >
+                <EventsRightColumn />
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   )

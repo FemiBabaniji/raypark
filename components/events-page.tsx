@@ -231,7 +231,7 @@ export default function EventsPage({
     : null
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-6" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+    <div className="min-h-screen relative overflow-hidden pt-6 px-[5vw]" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {useGradient && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large blue gradient orb - top left */}
@@ -277,7 +277,7 @@ export default function EventsPage({
       )}
       
       {/* Content layer */}
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8">
+      <div className="relative z-10">
         <EventsHeader 
           communityName={communityName}
           useGradient={useGradient}
@@ -293,8 +293,8 @@ export default function EventsPage({
         </div>
 
         <main className="w-full relative mt-8">
-          <div className={`flex items-start transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
+          <div className={`flex items-start gap-[3vw] transition-all duration-300 ease-out ${showRightColumn ? 'justify-start' : 'justify-center'}`}>
+            <div className={`transition-all duration-300 ease-out ${showRightColumn ? 'flex-1 min-w-0' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}

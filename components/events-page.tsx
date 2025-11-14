@@ -231,41 +231,46 @@ export default function EventsPage({
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Large blue gradient orb - top left */}
         <div 
-          className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+          className="absolute -top-1/4 -left-1/4 w-[1000px] h-[1000px] rounded-full opacity-40 blur-[120px]"
           style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+            background: "radial-gradient(circle, #4169E1 0%, rgba(65, 105, 225, 0.6) 30%, transparent 70%)",
+            mixBlendMode: "screen",
           }}
         />
         
         {/* Purple gradient orb - top right */}
         <div 
-          className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
+          className="absolute -top-1/3 right-0 w-[800px] h-[800px] rounded-full opacity-35 blur-[120px]"
           style={{
-            background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
+            background: "radial-gradient(circle, #7B68EE 0%, rgba(123, 104, 238, 0.5) 30%, transparent 70%)",
+            mixBlendMode: "screen",
           }}
         />
         
         {/* Blue gradient orb - middle left */}
         <div 
-          className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
+          className="absolute top-1/2 -left-1/4 w-[900px] h-[900px] rounded-full opacity-30 blur-[120px]"
           style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+            background: "radial-gradient(circle, #4169E1 0%, rgba(65, 105, 225, 0.4) 30%, transparent 70%)",
+            mixBlendMode: "screen",
           }}
         />
         
         {/* Purple/Violet gradient orb - bottom right */}
         <div 
-          className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
+          className="absolute bottom-0 right-1/4 w-[1100px] h-[1100px] rounded-full opacity-35 blur-[120px]"
           style={{
-            background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
+            background: "radial-gradient(circle, #8B5CF6 0%, rgba(139, 92, 246, 0.5) 30%, transparent 70%)",
+            mixBlendMode: "screen",
           }}
         />
         
         {/* Smaller accent blue orb - bottom left */}
         <div 
-          className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
+          className="absolute bottom-1/4 left-1/3 w-[600px] h-[600px] rounded-full opacity-25 blur-[100px]"
           style={{
-            background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
+            background: "radial-gradient(circle, #0EA5E9 0%, rgba(14, 165, 233, 0.4) 30%, transparent 70%)",
+            mixBlendMode: "screen",
           }}
         />
       </div>
@@ -279,7 +284,7 @@ export default function EventsPage({
           </div>
         </div>
         
-        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
+        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/10">
           <div className="px-8 md:px-12 lg:px-16">
             <div className="ml-6">
               <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />

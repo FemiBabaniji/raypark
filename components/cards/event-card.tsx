@@ -127,18 +127,18 @@ export function EventCard({ title, date, description, time, attending, location,
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02]" : ""}
         text-left text-white
-        w-48 sm:w-52
+        w-56 sm:w-64
         flex-shrink-0
         shadow-lg
       `}
       style={{
-        height: "240px",
-        maxWidth: "208px",
+        minHeight: "260px",
+        maxWidth: "256px",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
 
-      <div className="relative flex flex-col justify-between" style={{ height: '100%' }}>
+      <div className="relative flex flex-col justify-between h-full">
         <div className="mb-3">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
           <h3

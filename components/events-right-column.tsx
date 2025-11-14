@@ -204,7 +204,7 @@ export default function EventsRightColumn() {
     <div className="fixed top-1/2 -translate-y-1/2 right-8 w-[340px]">
       <div className="space-y-5">
         {/* Profile editing card */}
-        <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-white/5">
+        <div className="rounded-3xl p-6">
           <div className="mb-5">
             <h3 className="text-base font-semibold mb-1.5 text-white">Your Profile</h3>
             <p className="text-sm text-zinc-400">Customize who you are and what you represent</p>
@@ -262,7 +262,7 @@ export default function EventsRightColumn() {
         </div>
 
         {/* AI Assistant */}
-        <div className="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-white/5">
+        <div className="rounded-3xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-white">AI Assistant</h3>
           </div>

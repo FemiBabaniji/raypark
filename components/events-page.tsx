@@ -319,7 +319,7 @@ export default function EventsPage({
         <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
           <div className="flex justify-between items-start pl-6">
             <motion.div
-              className="w-[calc(100%-24rem)] max-w-[1200px]"
+              className="w-[calc(100%-24rem)] max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"
               animate={{
                 width: "calc(100% - 24rem)",
               }}

@@ -231,7 +231,7 @@ export default function EventsPage({
     : null
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-6 px-[5vw]" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
+    <div className="min-h-screen relative overflow-hidden pt-6" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {useGradient && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large blue gradient orb - top left */}
@@ -277,7 +277,7 @@ export default function EventsPage({
       )}
       
       {/* Content layer */}
-      <div className="relative z-10">
+      <div className="relative z-10 max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
         <EventsHeader 
           communityName={communityName}
           useGradient={useGradient}
@@ -292,9 +292,10 @@ export default function EventsPage({
           <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
-        <main className="w-full relative mt-8">
-          <div className={`flex items-start gap-[3vw] transition-all duration-300 ease-out ${showRightColumn ? 'justify-start' : 'justify-center'}`}>
-            <div className={`transition-all duration-300 ease-out ${showRightColumn ? 'flex-1 min-w-0' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
+        {/* Main content area */}
+        <main className={`w-full relative mt-8 transition-all duration-300 ease-out ${!showRightColumn ? 'flex justify-center' : ''}`}>
+          <div className={`flex items-start gap-10 md:gap-12 lg:gap-16 transition-all duration-300 ease-out ${showRightColumn ? 'w-full' : 'w-auto'}`}>
+            <div className={`flex-1 transition-all duration-300 ease-out ${showRightColumn ? 'min-w-0 max-w-full' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}
@@ -306,7 +307,7 @@ export default function EventsPage({
             </div>
 
             <div 
-              className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
+              className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none absolute'}`}
             >
               <EventsRightColumn />
             </div>

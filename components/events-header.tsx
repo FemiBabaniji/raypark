@@ -18,7 +18,7 @@ export default function EventsHeader({
   onToggleRightColumn
 }: EventsHeaderProps) {
   return (
-    <div className="pt-1 pb-4 px-8">
+    <div className="pt-1 pb-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div 

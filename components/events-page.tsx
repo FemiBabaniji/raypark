@@ -276,32 +276,18 @@ export default function EventsPage({
       {/* Content layer */}
       <div className="relative z-10">
         <div className="px-8 md:px-12 lg:px-16 pt-6 pb-8">
-          <div className="ml-6 flex items-start justify-between">
-            <div className="flex flex-col gap-6">
-              {/* Logo with gradient circle background */}
-              <div className="relative w-fit">
-                <div 
-                  className="absolute inset-0 rounded-full blur-2xl opacity-80"
-                  style={{
-                    background: "radial-gradient(circle, #4169E1 0%, #7B68EE 100%)",
-                    transform: "scale(1.3)"
-                  }}
-                />
-                <div className="relative bg-white/10 backdrop-blur-xl rounded-full p-6 border border-white/20">
-                  <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-20 h-20" />
-                </div>
-              </div>
-              
-              {/* Header and subtitle */}
-              <div className="flex flex-col gap-2">
+          <div className="ml-6 flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
                 <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                   <span className="text-white">Your hub. </span>
                   <span style={{ color: "#4169E1" }}>Your community.</span>
                 </h1>
-                <p className="text-lg text-white/60">
-                  Connect, collaborate, and grow with {communityName}
-                </p>
               </div>
+              <p className="text-lg text-white/60 ml-[60px]">
+                Connect, collaborate, and grow with {communityName}
+              </p>
             </div>
             
             {/* Toggle button for background */}

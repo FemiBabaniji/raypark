@@ -277,8 +277,8 @@ export default function EventsPage({
       
       {/* Content layer */}
       <div className="relative z-10">
-        <div className="px-8 md:px-12 lg:px-16 pt-6 pb-8">
-          <div className="ml-6 flex items-center justify-between">
+        <div className="pt-6 pb-8 px-8">
+          <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-12 h-12" />
@@ -292,7 +292,6 @@ export default function EventsPage({
               </p>
             </div>
             
-            {/* Toggle button for background */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setUseGradient(!useGradient)}
@@ -331,30 +330,14 @@ export default function EventsPage({
         <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
           backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
         }}>
-          <div className="px-8 md:px-12 lg:px-16">
-            <div className="ml-6">
-              <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-            </div>
+          <div className="px-8">
+            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
         </div>
 
-        <main className="w-full relative overflow-hidden mt-8">
-          <motion.div 
-            className="flex items-start gap-8"
-            animate={{
-              paddingLeft: showRightColumn ? "5rem" : "0",
-              paddingRight: showRightColumn ? "5rem" : "0",
-              justifyContent: showRightColumn ? "space-between" : "center",
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <motion.div
-              className="max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"
-              animate={{
-                width: "100%",
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
+        <main className="w-full relative mt-8 px-8">
+          <div className={`flex items-start gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
+            <div className={`w-full transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px] mx-auto'}`}>
               <EventsLeftColumn
                 onEventClick={handleEventClick}
                 selectedEvent={selectedEvent}
@@ -363,20 +346,14 @@ export default function EventsPage({
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
               />
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="w-64 flex-shrink-0 sticky top-24"
-              animate={{
-                x: showRightColumn ? 0 : "calc(100% + 5rem)",
-                opacity: showRightColumn ? 1 : 0,
-              }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              style={{ originX: 0 }}
+            <div 
+              className={`w-64 flex-shrink-0 sticky top-24 transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
             >
               <EventsRightColumn />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </main>
       </div>
     </div>

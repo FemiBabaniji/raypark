@@ -177,6 +177,7 @@ export default function EventsPage({
 }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("Home")
+  const [useGradient, setUseGradient] = useState(true)
 
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
@@ -228,63 +229,76 @@ export default function EventsPage({
 
   return (
     <div className="min-h-screen pt-12 relative overflow-hidden" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large blue gradient orb - top left */}
-        <div 
-          className="absolute -top-1/4 -left-1/4 w-[1000px] h-[1000px] rounded-full opacity-40 blur-[120px]"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, rgba(65, 105, 225, 0.6) 30%, transparent 70%)",
-            mixBlendMode: "screen",
-          }}
-        />
-        
-        {/* Purple gradient orb - top right */}
-        <div 
-          className="absolute -top-1/3 right-0 w-[800px] h-[800px] rounded-full opacity-35 blur-[120px]"
-          style={{
-            background: "radial-gradient(circle, #7B68EE 0%, rgba(123, 104, 238, 0.5) 30%, transparent 70%)",
-            mixBlendMode: "screen",
-          }}
-        />
-        
-        {/* Blue gradient orb - middle left */}
-        <div 
-          className="absolute top-1/2 -left-1/4 w-[900px] h-[900px] rounded-full opacity-30 blur-[120px]"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, rgba(65, 105, 225, 0.4) 30%, transparent 70%)",
-            mixBlendMode: "screen",
-          }}
-        />
-        
-        {/* Purple/Violet gradient orb - bottom right */}
-        <div 
-          className="absolute bottom-0 right-1/4 w-[1100px] h-[1100px] rounded-full opacity-35 blur-[120px]"
-          style={{
-            background: "radial-gradient(circle, #8B5CF6 0%, rgba(139, 92, 246, 0.5) 30%, transparent 70%)",
-            mixBlendMode: "screen",
-          }}
-        />
-        
-        {/* Smaller accent blue orb - bottom left */}
-        <div 
-          className="absolute bottom-1/4 left-1/3 w-[600px] h-[600px] rounded-full opacity-25 blur-[100px]"
-          style={{
-            background: "radial-gradient(circle, #0EA5E9 0%, rgba(14, 165, 233, 0.4) 30%, transparent 70%)",
-            mixBlendMode: "screen",
-          }}
-        />
-      </div>
+      {useGradient && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Large blue gradient orb - top left */}
+          <div 
+            className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+            style={{
+              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+            }}
+          />
+          
+          {/* Purple gradient orb - top right */}
+          <div 
+            className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
+            style={{
+              background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
+            }}
+          />
+          
+          {/* Blue gradient orb - middle left */}
+          <div 
+            className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
+            style={{
+              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+            }}
+          />
+          
+          {/* Purple/Violet gradient orb - bottom right */}
+          <div 
+            className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
+            style={{
+              background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
+            }}
+          />
+          
+          {/* Smaller accent blue orb - bottom left */}
+          <div 
+            className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
+            style={{
+              background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
+            }}
+          />
+        </div>
+      )}
       
       {/* Content layer */}
       <div className="relative z-10">
         <div className="px-8 md:px-12 lg:px-16 pt-6 pb-12">
-          <div className="ml-6 flex items-center gap-3">
-            <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
-            <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
+          <div className="ml-6 flex items-center gap-3 justify-between">
+            <div className="flex items-center gap-3">
+              <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
+              <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
+            </div>
+            
+            {/* Toggle button for background */}
+            <button
+              onClick={() => setUseGradient(!useGradient)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+              aria-label="Toggle background"
+            >
+              <div className="w-4 h-4 rounded-full" style={{
+                background: useGradient 
+                  ? "linear-gradient(135deg, #4169E1, #8B5CF6)" 
+                  : "#52525b"
+              }} />
+              <span className="text-sm text-white/70">{useGradient ? "Gradient" : "Grey"}</span>
+            </button>
           </div>
         </div>
         
-        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/10">
+        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ backgroundColor: "oklch(0.18 0 0 / 0.8)" }}>
           <div className="px-8 md:px-12 lg:px-16">
             <div className="ml-6">
               <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />

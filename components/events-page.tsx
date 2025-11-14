@@ -231,7 +231,7 @@ export default function EventsPage({
       <div className="px-8 md:px-12 lg:px-16 pt-4 pb-3">
         <div className="ml-6 flex items-center gap-3">
           <img src={logo || "/placeholder.svg"} alt="Community Logo" className="w-10 h-10" />
-          <h1 className="text-3xl font-bold text-white">Welcome to {communityName} hub</h1>
+          <h1 className="text-3xl font-bold text-white">Welcome to {communityName} Hub</h1>
         </div>
       </div>
       

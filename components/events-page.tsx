@@ -246,9 +246,9 @@ export default function EventsPage({
       <main className="w-full px-8 md:px-12 lg:px-16 relative overflow-hidden mt-8">
         <div className="flex gap-8 pl-6">
           <motion.div
-            className="w-[calc(100%-22rem)]"
+            className="w-[calc(100%-18rem)]"
             animate={{
-              width: "calc(100% - 22rem)",
+              width: "calc(100% - 18rem)",
             }}
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -263,7 +263,7 @@ export default function EventsPage({
           </motion.div>
 
           <motion.div
-            className="w-80 flex-shrink-0"
+            className="w-64 flex-shrink-0"
             animate={{
               x: "0%",
             }}

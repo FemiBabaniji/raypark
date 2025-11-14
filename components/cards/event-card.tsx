@@ -132,7 +132,7 @@ export function EventCard({ title, date, description, time, attending, location,
         shadow-lg
       `}
       style={{
-        minHeight: "260px",
+        minHeight: "220px",
         maxWidth: "208px",
       }}
     >

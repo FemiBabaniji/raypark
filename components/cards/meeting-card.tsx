@@ -14,13 +14,13 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
   const getBorderColor = (type: Meeting["type"]) => {
     switch (type) {
       case "1-on-1":
-        return "border-l-purple-500"
+        return "border-r-purple-500"
       case "team":
-        return "border-l-blue-500"
+        return "border-r-blue-500"
       case "all-hands":
-        return "border-l-cyan-500"
+        return "border-r-cyan-500"
       default:
-        return "border-l-zinc-500"
+        return "border-r-zinc-500"
     }
   }
 
@@ -34,23 +34,30 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
         relative overflow-hidden
         bg-zinc-900/80
         backdrop-blur-xl
-        border-l-4 border-y border-r border-white/10
+        border-r-4 border-y border-l border-white/10
         ${getBorderColor(meeting.type)}
         rounded-2xl 
         p-4
         transition-all duration-300 ease-out
-        ${isHovered ? "scale-[1.01] border-r-white/20 border-y-white/20" : ""}
+        ${isHovered ? "scale-[1.01] border-l-white/20 border-y-white/20" : ""}
         text-left text-white
         w-full
         shadow-lg
       `}
     >
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <h3 className="text-sm font-semibold text-white">
           {meeting.title}
         </h3>
-        <p className="text-xs text-white/50">{meeting.date}</p>
-        <p className="text-xs text-white/50">{meeting.time}</p>
+        <p className="text-xs text-white/60">{meeting.host}</p>
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-xs text-white/50">
+            {meeting.date} • {meeting.time}
+          </p>
+          <p className="text-xs text-white/50">
+            {meeting.attendees} attending
+          </p>
+        </div>
       </div>
     </button>
   )

@@ -282,46 +282,19 @@ export default function EventsPage({
           <EventsHeader communityName={communityName} />
         </div>
         
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20 pb-4">
-          <div className="flex justify-end items-center gap-3">
-            <button
-              onClick={() => setUseGradient(!useGradient)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-              aria-label="Toggle background"
-            >
-              <div className="w-4 h-4 rounded-full" style={{
-                background: useGradient 
-                  ? "linear-gradient(135deg, #4169E1, #8B5CF6)" 
-                  : "#52525b"
-              }} />
-              <span className="text-sm text-white/70">{useGradient ? "Gradient" : "Grey"}</span>
-            </button>
-            
-            <button
-              onClick={() => setShowRightColumn(!showRightColumn)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-              aria-label="Toggle sidebar"
-            >
-              {showRightColumn ? (
-                <>
-                  <ChevronRight className="w-4 h-4 text-white/70" />
-                  <span className="text-sm text-white/70">Hide</span>
-                </>
-              ) : (
-                <>
-                  <ChevronLeft className="w-4 h-4 text-white/70" />
-                  <span className="text-sm text-white/70">Show</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-        
         <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
           backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
         }}>
           <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
-            <FilterTabs tabs={FILTER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+            <FilterTabs 
+              tabs={FILTER_TABS} 
+              activeTab={activeTab} 
+              onTabChange={setActiveTab}
+              useGradient={useGradient}
+              showRightColumn={showRightColumn}
+              onToggleGradient={() => setUseGradient(!useGradient)}
+              onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
+            />
           </div>
         </div>
 

@@ -113,38 +113,30 @@ const PortfolioCard = ({
   const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
   
   const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+  
+  const statusText = "No Subscribers"
 
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white/5 hover:bg-white/8 rounded-2xl p-6 transition-all duration-200 text-left border border-white/10"
+      className="w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-6 transition-all duration-200 text-left border border-white/[0.08] group"
     >
-      <div className="flex items-start gap-4">
-        {/* Avatar */}
-        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
-          {portfolio.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-xl" />
-          ) : (
-            <span className="text-white font-semibold text-lg">{initials}</span>
-          )}
-        </div>
-        
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-white font-semibold truncate">{portfolio.name}</h3>
-            {portfolio.isLive && (
-              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0">
-                <div className="absolute w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-              </div>
-            )}
-          </div>
-          <p className="text-white/60 text-sm">
-            {portfolio.isLive ? "Live" : "Draft"}
-          </p>
-        </div>
+      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-5`}>
+        {portfolio.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
+        ) : (
+          <span className="text-white font-bold text-xl">{initials}</span>
+        )}
       </div>
+      
+      <h3 className="text-white font-semibold text-2xl mb-2 group-hover:text-white/90 transition-colors">
+        {portfolio.name}
+      </h3>
+      
+      <p className="text-white/40 text-base">
+        {statusText}
+      </p>
     </button>
   )
 }
@@ -366,14 +358,14 @@ export default function DashboardPage() {
       <DashboardHeader />
       
       <main className="pt-32 pb-16 px-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Page Title */}
           <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
 
           {/* My Portfolios Section */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-semibold text-white">My Portfolios</h2>
               <button
                 onClick={handleCreatePortfolio}
                 className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-white text-sm font-medium transition-colors"
@@ -384,7 +376,7 @@ export default function DashboardPage() {
             </div>
 
             {portfolios.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {portfolios.map((portfolio) => (
                   <PortfolioCard
                     key={portfolio.id}
@@ -400,7 +392,7 @@ export default function DashboardPage() {
 
           {/* Shared Portfolios Section (placeholder for future) */}
           <div>
-            <h2 className="text-xl font-semibold text-white mb-6">Shared With Me</h2>
+            <h2 className="text-2xl font-semibold text-white mb-8">Shared With Me</h2>
             <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
               <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
                 <div className="w-8 h-8 text-white/40">👥</div>

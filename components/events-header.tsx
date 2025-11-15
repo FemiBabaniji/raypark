@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, ChevronLeft, Search, Bell } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Search, Bell, User } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 
 interface EventsHeaderProps {
@@ -60,31 +60,31 @@ export default function EventsHeader({
           </h1>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
           {/* Search icon */}
           <button 
-            className="text-gray-400 hover:text-white transition-colors"
+            className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
             aria-label="Search"
           >
-            <Search className="w-6 h-6" strokeWidth={2} />
+            <Search className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
 
           {/* Notification bell */}
           <button 
-            className="text-gray-400 hover:text-white transition-colors"
+            className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
             aria-label="Notifications"
           >
-            <Bell className="w-6 h-6" strokeWidth={2} />
+            <Bell className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
 
-          {/* User avatar with dropdown */}
+          {/* User icon with dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-12 h-12 rounded-full bg-emerald-400 flex items-center justify-center hover:bg-emerald-500 transition-colors"
+              className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
               aria-label="User menu"
             >
-              <span className="text-2xl">😊</span>
+              <User className="w-5 h-5 text-white" strokeWidth={2} />
             </button>
 
             {/* Dropdown menu */}

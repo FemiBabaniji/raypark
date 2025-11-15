@@ -16,7 +16,7 @@ import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
-import { Search, Bell, User, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const DashboardHeader = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
@@ -58,13 +58,13 @@ const DashboardHeader = () => {
               className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
               aria-label="Search"
             >
-              <Search className="w-4 h-4 text-white" />
+              {/* Search icon here */}
             </button>
             <button
               className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
               aria-label="Notifications"
             >
-              <Bell className="w-4 h-4 text-white" />
+              {/* Bell icon here */}
             </button>
             <div className="relative z-50">
               <button
@@ -72,7 +72,7 @@ const DashboardHeader = () => {
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
                 aria-label="User menu"
               >
-                <User className="w-4 h-4 text-white" />
+                {/* User icon here */}
               </button>
               {isUserDropdownOpen && (
                 <>
@@ -355,10 +355,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
+      {/* Back button in top left */}
+      <div className="fixed top-8 left-8 z-50">
+        <BackButton onClick={() => window.location.href = '/'} aria-label="Back to home" />
+      </div>
       
-      <main className="pt-32 pb-16 px-8">
-        <div className="max-w-7xl mx-auto">
+      <main className="pt-20 pb-16 px-8">
+        {/* Constrained content with max-width like the screenshot */}
+        <div className="max-w-4xl mx-auto">
           {/* Page Title */}
           <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
 

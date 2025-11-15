@@ -3,6 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from "framer-motion"
 import MusicAppInterface from "@/components/music-app-interface"
 import BackButton from "@/components/ui/back-button"
@@ -16,7 +17,14 @@ import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
-import { Plus } from 'lucide-react'
+import { Plus, MoreVertical } from 'lucide-react'
+
+interface ExtendedPortfolio extends UnifiedPortfolio {
+  community?: {
+    id: string
+    name: string
+  }
+}
 
 const DashboardHeader = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
@@ -106,39 +114,106 @@ const DashboardHeader = () => {
 const PortfolioCard = ({
   portfolio,
   onClick,
+  onSyncCommunity,
 }: {
-  portfolio: UnifiedPortfolio
+  portfolio: ExtendedPortfolio
   onClick: () => void
+  onSyncCommunity: (portfolioId: string, communityId: string) => void
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
   
   const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
   
-  const statusText = portfolio.isLive ? "Live" : "Draft"
-  const statusColor = portfolio.isLive ? "text-emerald-400" : "text-white/40"
+  const communityText = portfolio.community?.name || "No Community"
+
+  // Sample communities - in production, fetch from database
+  const availableCommunities = [
+    { id: "design-collective", name: "Design Collective" },
+    { id: "tech-innovators", name: "Tech Innovators" },
+    { id: "creative-minds", name: "Creative Minds" },
+  ]
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-6 transition-all duration-200 text-left border border-white/[0.08] group"
-    >
-      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 mb-5`}>
-        {portfolio.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
-        ) : (
-          <span className="text-white font-bold text-xl">{initials}</span>
-        )}
-      </div>
-      
-      <h3 className="text-white font-semibold text-xl mb-2 group-hover:text-white/90 transition-colors">
-        {portfolio.name}
-      </h3>
-      
-      <p className={`text-sm ${statusColor}`}>
-        {statusText}
-      </p>
-    </button>
+    <div className="relative w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl transition-all duration-200 border border-white/[0.08] group">
+      <button
+        onClick={onClick}
+        className="w-full p-6 text-left"
+      >
+        <div className="flex items-start justify-between mb-5">
+          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+            {portfolio.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
+            ) : (
+              <span className="text-white font-bold text-xl">{initials}</span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className={`w-2.5 h-2.5 rounded-full ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+          </div>
+        </div>
+        
+        <h3 className="text-white font-semibold text-xl mb-2 group-hover:text-white/90 transition-colors">
+          {portfolio.name}
+        </h3>
+        
+        <p className="text-sm text-white/40">
+          {communityText}
+        </p>
+      </button>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsMenuOpen(!isMenuOpen)
+        }}
+        className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+        aria-label="Portfolio options"
+      >
+        <MoreVertical className="w-4 h-4 text-white/60" />
+      </button>
+
+      {isMenuOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMenuOpen(false)
+            }} 
+          />
+          <div className="absolute right-4 top-14 w-56 bg-neutral-900 rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+            <div className="p-2">
+              <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
+                Sync to Community
+              </div>
+              {availableCommunities.map((community) => (
+                <button
+                  key={community.id}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onSyncCommunity(portfolio.id, community.id)
+                    setIsMenuOpen(false)
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    portfolio.community?.id === community.id
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {community.name}
+                  {portfolio.community?.id === community.id && (
+                    <span className="ml-2 text-emerald-400">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
@@ -163,8 +238,9 @@ const EmptyState = ({ onCreatePortfolio }: { onCreatePortfolio: () => void }) =>
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const { user, loading: authLoading } = useAuth()
-  const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([])
+  const [portfolios, setPortfolios] = useState<ExtendedPortfolio[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "editor">("list")
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
@@ -181,7 +257,7 @@ export default function DashboardPage() {
           setPortfolios(userPortfolios)
         } else {
           const demoData = await getPublishedPortfolios()
-          const portfolioCards: UnifiedPortfolio[] = demoData.map((portfolio, index) => ({
+          const portfolioCards: ExtendedPortfolio[] = demoData.map((portfolio, index) => ({
             id: portfolio.slug,
             name: portfolio.title,
             title: "Portfolio",
@@ -194,6 +270,7 @@ export default function DashboardPage() {
             selectedColor: (index % 7) as ThemeIndex,
             isLive: false,
             isTemplate: portfolio.isTemplate || false,
+            community: undefined,
           }))
           setPortfolios(portfolioCards)
         }
@@ -209,7 +286,7 @@ export default function DashboardPage() {
 
   const handleCreatePortfolio = async () => {
     if (!user?.id) {
-      const newPortfolio: UnifiedPortfolio = {
+      const newPortfolio: ExtendedPortfolio = {
         id: safeUUID(),
         name: "New Portfolio",
         title: "Portfolio",
@@ -220,6 +297,7 @@ export default function DashboardPage() {
         selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: false,
         isTemplate: false,
+        community: undefined,
       }
       setPortfolios((prev) => [...prev, newPortfolio])
       setSelectedPortfolioId(newPortfolio.id)
@@ -235,7 +313,7 @@ export default function DashboardPage() {
         description: "A new portfolio",
       })
 
-      const newPortfolio: UnifiedPortfolio = {
+      const newPortfolio: ExtendedPortfolio = {
         id: portfolioData.id,
         name: portfolioData.name,
         title: "Portfolio",
@@ -246,6 +324,7 @@ export default function DashboardPage() {
         selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: portfolioData.is_public || false,
         isTemplate: false,
+        community: undefined,
       }
 
       setPortfolios((prev) => [...prev, newPortfolio])
@@ -265,6 +344,22 @@ export default function DashboardPage() {
     setViewMode("list")
     setSelectedPortfolioId(null)
     setIsPreviewMode(false)
+  }
+
+  const handleSyncCommunity = (portfolioId: string, communityId: string) => {
+    const communityMap: Record<string, string> = {
+      "design-collective": "Design Collective",
+      "tech-innovators": "Tech Innovators",
+      "creative-minds": "Creative Minds",
+    }
+
+    setPortfolios((prev) =>
+      prev.map((p) =>
+        p.id === portfolioId
+          ? { ...p, community: { id: communityId, name: communityMap[communityId] } }
+          : p
+      )
+    )
   }
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
@@ -356,7 +451,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={() => window.location.href = '/'} aria-label="Back to home" />
+        <BackButton onClick={() => router.back()} aria-label="Back" />
       </div>
       
       <main className="pt-20 pb-16 px-8">
@@ -382,6 +477,7 @@ export default function DashboardPage() {
                     key={portfolio.id}
                     portfolio={portfolio}
                     onClick={() => handlePortfolioClick(portfolio.id)}
+                    onSyncCommunity={handleSyncCommunity}
                   />
                 ))}
               </div>

@@ -12,152 +12,170 @@ import type { Portfolio } from "@/lib/portfolio-data"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
-import PortfolioGrid from "@/components/home/PortfolioGrid"
 import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
-import { Navigation } from "@/components/navigation"
+import { THEME_COLOR_OPTIONS } from "@/lib/theme"
+import { Search, Bell, User, Plus } from 'lucide-react'
 
-const NAV_H = 80
-const BASE_PADDING = 32 // 8 * 4 = p-8
-const SIDEBAR_WIDTH = 384 // w-96
-
-const TopBarActions = ({
-  onZoomOut,
-  onPreview,
-  isPreviewMode,
-}: {
-  onZoomOut: () => void
-  onPreview: () => void
-  isPreviewMode: boolean
-}) => {
-  if (isPreviewMode) {
-    return (
-      <div className="absolute top-6 left-6 z-50">
-        <BackButton onClick={() => onPreview()} />
-      </div>
-    )
-  }
-
-  return null
-}
-
-const ExpandedViewNavigation = ({
-  onZoomOut,
-  onPreview,
-  isPreviewMode,
-}: {
-  onZoomOut: () => void
-  onPreview: () => void
-  isPreviewMode: boolean
-}) => {
-  if (isPreviewMode) {
-    return (
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={() => onPreview()} />
-      </div>
-    )
-  }
+const DashboardHeader = () => {
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
 
   return (
-    <>
-      {/* Back button in top left corner */}
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={onZoomOut} aria-label="Back to Dashboard" />
-      </div>
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
+        {/* Left: Logo and Navigation */}
+        <div className="flex items-center gap-8">
+          <Link href="/" className="text-white font-bold text-xl">
+            Pathwai
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link href="/events" className="text-white/70 hover:text-white transition-colors text-sm font-medium">
+              Events
+            </Link>
+            <Link href="/dashboard" className="text-white text-sm font-medium">
+              Portfolios
+            </Link>
+            <Link href="/network" className="text-white/70 hover:text-white transition-colors text-sm font-medium">
+              Network
+            </Link>
+          </nav>
+        </div>
 
-      {/* Preview button in top right corner */}
-      <div className="fixed top-8 right-8 z-50">
-        <button
-          onClick={onPreview}
-          className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
-        >
-          Preview
-        </button>
+        {/* Right: Actions and Icons */}
+        <div className="flex items-center gap-4">
+          <div className="text-white/70 text-sm">
+            {new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              timeZoneName: "short",
+            })}
+          </div>
+
+          {/* Icon buttons matching the screenshot */}
+          <div className="flex items-center gap-2">
+            <button
+              className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4 text-white" />
+            </button>
+            <button
+              className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+              aria-label="Notifications"
+            >
+              <Bell className="w-4 h-4 text-white" />
+            </button>
+            <div className="relative z-50">
+              <button
+                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+                aria-label="User menu"
+              >
+                <User className="w-4 h-4 text-white" />
+              </button>
+              {isUserDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsUserDropdownOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-neutral-900 rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+                    <Link
+                      href="/dashboard"
+                      className="block px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="block px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </>
+    </header>
   )
 }
 
-const PortfolioCanvasWrapper = ({
-  isPreviewMode,
-  useStarterTemplate,
-  activeIdentity,
-  onActiveIdentityChange,
-  onSavePortfolio,
-  isLive,
-  onToggleLive,
+const PortfolioCard = ({
+  portfolio,
+  onClick,
 }: {
-  isPreviewMode: boolean
-  useStarterTemplate?: boolean
-  activeIdentity?: UnifiedPortfolio
-  onActiveIdentityChange?: (next: Partial<UnifiedPortfolio>) => void
-  onSavePortfolio?: (portfolioData: UnifiedPortfolio) => void
-  isLive?: boolean
-  onToggleLive?: (isLive: boolean) => void
+  portfolio: UnifiedPortfolio
+  onClick: () => void
 }) => {
-  return (
-    <PortfolioCanvas
-      isPreviewMode={isPreviewMode}
-      useStarterTemplate={useStarterTemplate}
-      activeIdentity={
-        activeIdentity
-          ? {
-              id: activeIdentity.id,
-              name: activeIdentity.name,
-              handle: activeIdentity.handle || "",
-              avatarUrl: activeIdentity.avatarUrl,
-              selectedColor: activeIdentity.selectedColor,
-              isLive: activeIdentity.isLive,
-            }
-          : undefined
-      }
-      onActiveIdentityChange={
-        onActiveIdentityChange
-          ? (next) => {
-              onActiveIdentityChange({
-                name: next.name,
-                handle: next.handle,
-                avatarUrl: next.avatarUrl,
-                selectedColor: next.selectedColor as ThemeIndex,
-              })
-            }
-          : undefined
-      }
-      onSavePortfolio={onSavePortfolio}
-      onToggleLive={onToggleLive}
-      isLive={isLive}
-    />
-  )
-}
+  const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
+  
+  const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 
-const SidePanel = ({ isVisible, isPreviewMode }: { isVisible: boolean; isPreviewMode: boolean }) => {
   return (
-    <motion.div
-      className="h-full"
-      style={{
-        paddingTop: isPreviewMode ? 0 : BASE_PADDING,
-        paddingRight: BASE_PADDING,
-        paddingLeft: BASE_PADDING,
-        paddingBottom: BASE_PADDING,
-      }}
-      animate={{ x: isVisible ? "0%" : "100%" }}
-      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+    <button
+      onClick={onClick}
+      className="w-full bg-white/5 hover:bg-white/8 rounded-2xl p-6 transition-all duration-200 text-left border border-white/10"
     >
-      <MusicAppInterface />
-    </motion.div>
+      <div className="flex items-start gap-4">
+        {/* Avatar */}
+        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+          {portfolio.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-xl" />
+          ) : (
+            <span className="text-white font-semibold text-lg">{initials}</span>
+          )}
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-white font-semibold truncate">{portfolio.name}</h3>
+            {portfolio.isLive && (
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0">
+                <div className="absolute w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+              </div>
+            )}
+          </div>
+          <p className="text-white/60 text-sm">
+            {portfolio.isLive ? "Live" : "Draft"}
+          </p>
+        </div>
+      </div>
+    </button>
   )
 }
 
-export default function Home() {
+const EmptyState = ({ onCreatePortfolio }: { onCreatePortfolio: () => void }) => {
+  return (
+    <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
+      <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-8 h-8 text-white/40">📁</div>
+      </div>
+      <h3 className="text-white font-semibold text-lg mb-2">No Portfolios</h3>
+      <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
+        You haven't created any portfolios yet. Get started by creating your first portfolio.
+      </p>
+      <button
+        onClick={onCreatePortfolio}
+        className="px-6 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-white text-sm font-medium transition-colors"
+      >
+        Create Portfolio
+      </button>
+    </div>
+  )
+}
+
+export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth()
-  const [isPreviewMode, setIsPreviewMode] = useState(false)
-  const [viewMode, setViewMode] = useState<"expanded" | "minimized">("minimized")
-  const [useStarterTemplate, setUseStarterTemplate] = useState(false)
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState("jenny-wilson")
   const [portfolios, setPortfolios] = useState<UnifiedPortfolio[]>([])
-  const [publishedPortfolios, setPublishedPortfolios] = useState<Portfolio[]>([])
   const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<"list" | "editor">("list")
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
+  const [isPreviewMode, setIsPreviewMode] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -165,44 +183,11 @@ export default function Home() {
     const fetchPortfolios = async () => {
       try {
         const userPortfolios = await loadUserPortfolios(user)
-        const demoData = await getPublishedPortfolios()
-        setPublishedPortfolios(demoData)
-
-        let allPortfolios: UnifiedPortfolio[] = []
-
+        
         if (userPortfolios.length > 0) {
-          allPortfolios = userPortfolios
+          setPortfolios(userPortfolios)
         } else {
-          allPortfolios = demoData.map((portfolio, index) => ({
-            id: portfolio.slug,
-            name: portfolio.title,
-            title: "Portfolio",
-            email: `${portfolio.slug}@example.com`,
-            location: "Location",
-            handle: `@${portfolio.slug}`,
-            initials: portfolio.title
-              ? portfolio.title
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()
-              : "??",
-            selectedColor: (index % 7) as ThemeIndex,
-            isLive: false,
-            isTemplate: portfolio.isTemplate || false,
-          }))
-        }
-
-        setPortfolios(allPortfolios)
-        if (allPortfolios.length > 0) {
-          setSelectedPortfolioId(allPortfolios[0].id)
-        }
-      } catch (error) {
-        console.error("Error fetching portfolios:", error)
-        try {
           const demoData = await getPublishedPortfolios()
-          setPublishedPortfolios(demoData)
           const portfolioCards: UnifiedPortfolio[] = demoData.map((portfolio, index) => ({
             id: portfolio.slug,
             name: portfolio.title,
@@ -211,24 +196,16 @@ export default function Home() {
             location: "Location",
             handle: `@${portfolio.slug}`,
             initials: portfolio.title
-              ? portfolio.title
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()
+              ? portfolio.title.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
               : "??",
             selectedColor: (index % 7) as ThemeIndex,
             isLive: false,
             isTemplate: portfolio.isTemplate || false,
           }))
           setPortfolios(portfolioCards)
-          if (portfolioCards.length > 0) {
-            setSelectedPortfolioId(portfolioCards[0].id)
-          }
-        } catch (fallbackError) {
-          console.error("Error loading fallback portfolios:", fallbackError)
         }
+      } catch (error) {
+        console.error("Error fetching portfolios:", error)
       } finally {
         setLoading(false)
       }
@@ -237,66 +214,8 @@ export default function Home() {
     fetchPortfolios()
   }, [authLoading, user])
 
-  const handleZoomOut = () => {
-    if (activePortfolio) {
-      savePortfolio(activePortfolio, user).catch(console.error)
-    }
-    setViewMode("minimized")
-    setIsPreviewMode(false)
-    setUseStarterTemplate(false)
-  }
-
-  const handlePortfolioSelect = (portfolioId: string) => {
-    setSelectedPortfolioId(portfolioId)
-    setViewMode("expanded")
-    const selectedPortfolio = portfolios.find((p) => p.id === portfolioId)
-    setUseStarterTemplate(selectedPortfolio?.isTemplate || false)
-  }
-
-  const handleStartStarter = async () => {
+  const handleCreatePortfolio = async () => {
     if (!user?.id) {
-      // For unauthenticated users, use template mode without database creation
-      setUseStarterTemplate(true)
-      setViewMode("expanded")
-      return
-    }
-
-    try {
-      const portfolioData = await createPortfolioOnce({
-        userId: user.id,
-        name: "New Template Portfolio",
-        theme_id: "template",
-        description: "A portfolio created from template",
-      })
-
-      const templatePortfolio: UnifiedPortfolio = {
-        id: portfolioData.id,
-        name: portfolioData.name,
-        title: "Portfolio",
-        email: `${portfolioData.slug}@example.com`,
-        location: "Location",
-        handle: `@${portfolioData.slug}`,
-        initials: portfolioData.name.slice(0, 2).toUpperCase(),
-        selectedColor: 0 as ThemeIndex,
-        isLive: portfolioData.is_public || false,
-        isTemplate: true,
-      }
-
-      setPortfolios((prev) => [...prev, templatePortfolio])
-      setSelectedPortfolioId(portfolioData.id)
-      setUseStarterTemplate(true)
-      setViewMode("expanded")
-    } catch (error) {
-      console.error("Error creating template portfolio:", error)
-      // Fallback to template mode without database creation
-      setUseStarterTemplate(true)
-      setViewMode("expanded")
-    }
-  }
-
-  const handleAddPortfolio = async () => {
-    if (!user?.id) {
-      // For unauthenticated users, create local portfolio
       const newPortfolio: UnifiedPortfolio = {
         id: safeUUID(),
         name: "New Portfolio",
@@ -311,7 +230,7 @@ export default function Home() {
       }
       setPortfolios((prev) => [...prev, newPortfolio])
       setSelectedPortfolioId(newPortfolio.id)
-      setViewMode("expanded")
+      setViewMode("editor")
       return
     }
 
@@ -337,80 +256,22 @@ export default function Home() {
       }
 
       setPortfolios((prev) => [...prev, newPortfolio])
-      setSelectedPortfolioId(portfolioData.id)
-      setViewMode("expanded")
+      setSelectedPortfolioId(newPortfolio.id)
+      setViewMode("editor")
     } catch (error) {
       console.error("Error creating portfolio:", error)
-      // Fallback to local portfolio creation
-      const newPortfolio: UnifiedPortfolio = {
-        id: safeUUID(),
-        name: "New Portfolio",
-        title: "Portfolio",
-        email: "new@example.com",
-        location: "Location",
-        handle: "@newuser",
-        initials: "NP",
-        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
-        isLive: false,
-        isTemplate: false,
-      }
-      setPortfolios((prev) => [...prev, newPortfolio])
-      setSelectedPortfolioId(newPortfolio.id)
-      setViewMode("expanded")
     }
   }
 
-  const handleDeletePortfolio = async (portfolioId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    try {
-      await deletePortfolio(portfolioId)
-
-      setPortfolios((prev) => {
-        if (prev.length <= 1) return prev
-        const next = prev.filter((p) => p.id !== portfolioId)
-        if (selectedPortfolioId === portfolioId && next.length > 0) {
-          setSelectedPortfolioId(next[0].id)
-        }
-        return next
-      })
-    } catch (error) {
-      console.error("Error deleting portfolio:", error)
-      setPortfolios((prev) => {
-        if (prev.length <= 1) return prev
-        const next = prev.filter((p) => p.id !== portfolioId)
-        if (selectedPortfolioId === portfolioId && next.length > 0) {
-          setSelectedPortfolioId(next[0].id)
-        }
-        return next
-      })
-    }
+  const handlePortfolioClick = (portfolioId: string) => {
+    setSelectedPortfolioId(portfolioId)
+    setViewMode("editor")
   }
 
-  const togglePreview = () => setIsPreviewMode(!isPreviewMode)
-  const hasSidebar = viewMode === "expanded" && !isPreviewMode
-
-  const handleChangeCardColor = (id: string, colorIndex: ThemeIndex) => {
-    setPortfolios((prev) => prev.map((p) => (p.id === id ? { ...p, selectedColor: colorIndex } : p)))
-  }
-
-  const handleChangeActivePortfolioColor = (colorIndex: ThemeIndex) => {
-    setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, selectedColor: colorIndex } : p)))
-  }
-
-  const handleToggleLive = async (isLive: boolean) => {
-    const updatedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
-    if (!updatedPortfolio) return
-
-    const newPortfolio = { ...updatedPortfolio, isLive }
-
-    try {
-      await savePortfolio(newPortfolio, user)
-      setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
-    } catch (error) {
-      console.error("Error updating portfolio live status:", error)
-      setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
-    }
+  const handleBackToList = () => {
+    setViewMode("list")
+    setSelectedPortfolioId(null)
+    setIsPreviewMode(false)
   }
 
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
@@ -418,140 +279,140 @@ export default function Home() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-white">Loading portfolios...</div>
+        <div className="text-white">Loading...</div>
       </div>
     )
   }
 
-  const shouldHideNav = isPreviewMode || viewMode === "expanded"
-
-  return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {!shouldHideNav && (
-        <Navigation
-          currentView="dashboard"
-          isLoggedIn={!!user}
-          isSearchExpanded={false}
-          isUserDropdownOpen={false}
-          setCurrentView={() => {}}
-          setIsSearchExpanded={() => {}}
-          setIsUserDropdownOpen={() => {}}
-          setIsLoggedIn={() => {}}
-        />
-      )}
-
-      {viewMode === "expanded" && (
-        <ExpandedViewNavigation onZoomOut={handleZoomOut} onPreview={togglePreview} isPreviewMode={isPreviewMode} />
-      )}
-
-      <div className="flex" style={{ paddingTop: shouldHideNav ? (viewMode === "expanded" ? 80 : 24) : 80 }}>
-        <div className="flex-1 max-w-5xl mx-auto" style={{ padding: viewMode === "expanded" ? 0 : BASE_PADDING }}>
-          <AnimatePresence mode="wait">
-            {viewMode === "minimized" ? (
-              <motion.div
-                key="minimized"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                className="min-h-screen flex items-start justify-center pt-16"
+  if (viewMode === "editor" && activePortfolio) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Navigation for editor mode */}
+        {!isPreviewMode && (
+          <>
+            <div className="fixed top-8 left-8 z-50">
+              <BackButton onClick={handleBackToList} aria-label="Back to Dashboard" />
+            </div>
+            <div className="fixed top-8 right-8 z-50">
+              <button
+                onClick={() => setIsPreviewMode(!isPreviewMode)}
+                className="px-4 py-2 bg-neutral-900/80 backdrop-blur-xl rounded-2xl text-white hover:bg-neutral-800/80 transition-colors text-sm font-medium"
               >
-                <PortfolioGrid
-                  portfolios={portfolios}
-                  onSelect={handlePortfolioSelect}
-                  onAdd={handleAddPortfolio}
-                  onDelete={handleDeletePortfolio}
-                  onChangeColor={handleChangeCardColor}
-                  onStartStarter={handleStartStarter}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="expanded"
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1 }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <PortfolioCanvasWrapper
-                  isPreviewMode={isPreviewMode}
-                  useStarterTemplate={useStarterTemplate}
-                  activeIdentity={activePortfolio}
-                  onActiveIdentityChange={(next) => {
-                    setPortfolios((prev) =>
-                      prev.map((p) => {
-                        if (p.id !== selectedPortfolioId) return p
-                        const updated = {
-                          ...p,
-                          name: next.name ?? p.name,
-                          handle: next.handle ?? p.handle,
-                          avatarUrl: next.avatarUrl ?? p.avatarUrl,
-                          selectedColor: (next.selectedColor ?? p.selectedColor) as ThemeIndex,
-                        }
-                        savePortfolio(updated, user).catch(console.error)
-                        return updated
-                      }),
-                    )
-                  }}
-                  onSavePortfolio={async (portfolioData) => {
-                    try {
-                      if (portfolioData.id && portfolioData.id !== selectedPortfolioId) {
-                        // This is a new portfolio from template completion
-                        await savePortfolio(portfolioData, user)
-                        setPortfolios((prev) => [...prev, portfolioData])
-                        setSelectedPortfolioId(portfolioData.id)
-                      } else {
-                        // This is updating an existing template portfolio
-                        await savePortfolio(portfolioData, user)
-                        setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? portfolioData : p)))
-                      }
-                    } catch (error) {
-                      console.error("Error saving portfolio:", error)
-                      // Fallback to local state update
-                      if (portfolioData.id && portfolioData.id !== selectedPortfolioId) {
-                        setPortfolios((prev) => [...prev, portfolioData])
-                        setSelectedPortfolioId(portfolioData.id)
-                      } else {
-                        setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? portfolioData : p)))
-                      }
-                    }
-                  }}
-                  isLive={activePortfolio?.isLive || false}
-                  onToggleLive={handleToggleLive}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {hasSidebar && (
-          <div className="w-96 h-screen" style={{ top: isPreviewMode ? 0 : NAV_H }}>
-            <SidePanel isVisible={hasSidebar} isPreviewMode={isPreviewMode} />
+                Preview
+              </button>
+            </div>
+          </>
+        )}
+        
+        {isPreviewMode && (
+          <div className="fixed top-8 left-8 z-50">
+            <BackButton onClick={() => setIsPreviewMode(false)} />
           </div>
         )}
-      </div>
 
-      {process.env.NODE_ENV === "development" && (
-        <>
-          <DebugPanel
-            data={{
-              portfoliosCount: portfolios.length,
-              publishedPortfoliosCount: publishedPortfolios.length,
-              selectedPortfolio: selectedPortfolioId,
-              loading,
+        <div className="pt-24">
+          <PortfolioCanvas
+            isPreviewMode={isPreviewMode}
+            activeIdentity={{
+              id: activePortfolio.id,
+              name: activePortfolio.name,
+              handle: activePortfolio.handle || "",
+              avatarUrl: activePortfolio.avatarUrl,
+              selectedColor: activePortfolio.selectedColor,
+              isLive: activePortfolio.isLive,
             }}
-            title="Portfolio Debug"
+            onActiveIdentityChange={(next) => {
+              setPortfolios((prev) =>
+                prev.map((p) => {
+                  if (p.id !== selectedPortfolioId) return p
+                  const updated = {
+                    ...p,
+                    name: next.name ?? p.name,
+                    handle: next.handle ?? p.handle,
+                    avatarUrl: next.avatarUrl ?? p.avatarUrl,
+                    selectedColor: (next.selectedColor ?? p.selectedColor) as ThemeIndex,
+                  }
+                  savePortfolio(updated, user).catch(console.error)
+                  return updated
+                }),
+              )
+            }}
+            onSavePortfolio={async (portfolioData) => {
+              try {
+                await savePortfolio(portfolioData, user)
+                setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? portfolioData : p)))
+              } catch (error) {
+                console.error("Error saving portfolio:", error)
+              }
+            }}
+            isLive={activePortfolio.isLive || false}
+            onToggleLive={async (isLive: boolean) => {
+              const updated = { ...activePortfolio, isLive }
+              try {
+                await savePortfolio(updated, user)
+                setPortfolios((prev) => prev.map((p) => (p.id === selectedPortfolioId ? { ...p, isLive } : p)))
+              } catch (error) {
+                console.error("Error updating portfolio live status:", error)
+              }
+            }}
           />
-          <div className="fixed bottom-4 left-4 z-50">
-            <Link
-              href="/test-db"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-            >
-              🧪 Test Database
-            </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <DashboardHeader />
+      
+      <main className="pt-32 pb-16 px-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Page Title */}
+          <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
+
+          {/* My Portfolios Section */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
+              <button
+                onClick={handleCreatePortfolio}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-white text-sm font-medium transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Create
+              </button>
+            </div>
+
+            {portfolios.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {portfolios.map((portfolio) => (
+                  <PortfolioCard
+                    key={portfolio.id}
+                    portfolio={portfolio}
+                    onClick={() => handlePortfolioClick(portfolio.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState onCreatePortfolio={handleCreatePortfolio} />
+            )}
           </div>
-        </>
-      )}
+
+          {/* Shared Portfolios Section (placeholder for future) */}
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-6">Shared With Me</h2>
+            <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
+              <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-8 h-8 text-white/40">👥</div>
+              </div>
+              <h3 className="text-white font-semibold text-lg mb-2">No Shared Portfolios</h3>
+              <p className="text-white/60 text-sm max-w-sm mx-auto">
+                Portfolios that others share with you will appear here.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

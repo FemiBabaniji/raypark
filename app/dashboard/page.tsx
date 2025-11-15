@@ -114,14 +114,15 @@ const PortfolioCard = ({
   
   const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
   
-  const statusText = "No Subscribers"
+  const statusText = portfolio.isLive ? "Live" : "Draft"
+  const statusColor = portfolio.isLive ? "text-emerald-400" : "text-white/40"
 
   return (
     <button
       onClick={onClick}
       className="w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl p-6 transition-all duration-200 text-left border border-white/[0.08] group"
     >
-      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-5`}>
+      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 mb-5`}>
         {portfolio.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
@@ -130,11 +131,11 @@ const PortfolioCard = ({
         )}
       </div>
       
-      <h3 className="text-white font-semibold text-2xl mb-2 group-hover:text-white/90 transition-colors">
+      <h3 className="text-white font-semibold text-xl mb-2 group-hover:text-white/90 transition-colors">
         {portfolio.name}
       </h3>
       
-      <p className="text-white/40 text-base">
+      <p className={`text-sm ${statusColor}`}>
         {statusText}
       </p>
     </button>
@@ -279,7 +280,6 @@ export default function DashboardPage() {
   if (viewMode === "editor" && activePortfolio) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Navigation for editor mode */}
         {!isPreviewMode && (
           <>
             <div className="fixed top-8 left-8 z-50">
@@ -355,18 +355,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Back button in top left */}
       <div className="fixed top-8 left-8 z-50">
         <BackButton onClick={() => window.location.href = '/'} aria-label="Back to home" />
       </div>
       
       <main className="pt-20 pb-16 px-8">
-        {/* Constrained content with max-width like the screenshot */}
-        <div className="max-w-4xl mx-auto">
-          {/* Page Title */}
+        <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
 
-          {/* My Portfolios Section */}
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold text-white">My Portfolios</h2>
@@ -380,7 +376,7 @@ export default function DashboardPage() {
             </div>
 
             {portfolios.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
                 {portfolios.map((portfolio) => (
                   <PortfolioCard
                     key={portfolio.id}
@@ -394,7 +390,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Shared Portfolios Section (placeholder for future) */}
           <div>
             <h2 className="text-2xl font-semibold text-white mb-8">Shared With Me</h2>
             <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">

@@ -1,6 +1,7 @@
 "use client"
 
-import { ChevronRight, ChevronLeft } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Search, Bell } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 
 interface EventsHeaderProps {
   communityName: string
@@ -17,6 +18,25 @@ export default function EventsHeader({
   onToggleGradient,
   onToggleRightColumn
 }: EventsHeaderProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
   return (
     <div className="pt-1 pb-4">
       <div className="flex items-center justify-between">
@@ -40,6 +60,59 @@ export default function EventsHeader({
           </h1>
         </div>
         
+        <div className="flex items-center gap-6">
+          {/* Search icon */}
+          <button 
+            className="text-gray-400 hover:text-white transition-colors"
+            aria-label="Search"
+          >
+            <Search className="w-6 h-6" strokeWidth={2} />
+          </button>
+
+          {/* Notification bell */}
+          <button 
+            className="text-gray-400 hover:text-white transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell className="w-6 h-6" strokeWidth={2} />
+          </button>
+
+          {/* User avatar with dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-12 h-12 rounded-full bg-emerald-400 flex items-center justify-center hover:bg-emerald-500 transition-colors"
+              aria-label="User menu"
+            >
+              <span className="text-2xl">😊</span>
+            </button>
+
+            {/* Dropdown menu */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border border-white/10 overflow-hidden"
+                   style={{ backgroundColor: "oklch(0.22 0 0)" }}>
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false)
+                    // Navigate to dashboard
+                  }}
+                  className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false)
+                    // Navigate to settings
+                  }}
+                  className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors border-t border-white/5"
+                >
+                  Settings
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

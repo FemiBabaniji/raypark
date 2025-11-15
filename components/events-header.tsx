@@ -2,6 +2,7 @@
 
 import { ChevronRight, ChevronLeft, Search, Bell, User } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 
 interface EventsHeaderProps {
   communityName: string
@@ -78,7 +79,7 @@ export default function EventsHeader({
           </button>
 
           {/* User icon with dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative z-50" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
@@ -91,15 +92,13 @@ export default function EventsHeader({
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border border-white/10 overflow-hidden"
                    style={{ backgroundColor: "oklch(0.22 0 0)" }}>
-                <button
-                  onClick={() => {
-                    setIsDropdownOpen(false)
-                    // Navigate to dashboard
-                  }}
-                  className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="block w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
                 >
                   Dashboard
-                </button>
+                </Link>
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false)

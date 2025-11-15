@@ -137,6 +137,17 @@ const PortfolioCard = ({
   return (
     <div className="relative w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl transition-all duration-200 border border-white/[0.08] group">
       <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsMenuOpen(!isMenuOpen)
+        }}
+        className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center z-10"
+        aria-label="Portfolio options"
+      >
+        <MoreVertical className="w-4 h-4 text-white/60" />
+      </button>
+
+      <button
         onClick={onClick}
         className="w-full p-6 text-left"
       >
@@ -150,8 +161,8 @@ const PortfolioCard = ({
             )}
           </div>
           
-          <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+          <div className="absolute top-[68px] left-[58px]">
+            <div className={`w-3 h-3 rounded-full border-2 border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
           </div>
         </div>
         
@@ -162,17 +173,6 @@ const PortfolioCard = ({
         <p className="text-sm text-white/40">
           {communityText}
         </p>
-      </button>
-
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          setIsMenuOpen(!isMenuOpen)
-        }}
-        className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
-        aria-label="Portfolio options"
-      >
-        <MoreVertical className="w-4 h-4 text-white/60" />
       </button>
 
       {isMenuOpen && (
@@ -455,7 +455,7 @@ export default function DashboardPage() {
       </div>
       
       <main className="pt-20 pb-16 px-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
 
           <div className="mb-16">

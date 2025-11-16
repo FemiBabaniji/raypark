@@ -225,18 +225,37 @@ export default function EventsRightColumn({
               />
             </div>
           ) : (
-            <div className="rounded-2xl p-5 bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 text-white backdrop-blur-xl border border-white/10 mb-4 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 grid place-items-center">
-                    <Plus className="w-6 h-6 text-white" />
-                  </div>
-                  <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse" />
+            <div 
+              onClick={handleCreateProfile}
+              className="mb-4 relative w-full aspect-square rounded-3xl overflow-hidden cursor-pointer focus:outline-none
+                         focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
+            >
+              {/* Card background with subtle gradient */}
+              <div className="h-full w-full bg-gradient-to-br from-neutral-700/30 to-neutral-800/50 backdrop-blur-xl p-6 flex flex-col border-2 border-dashed border-white/20">
+                
+                {/* Empty Avatar with Plus icon */}
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center mb-5 border-2 border-dashed border-white/30">
+                  <Plus className="w-8 h-8 text-white/50" />
                 </div>
-                <div className="text-lg font-semibold text-white mb-1">Create Community Portfolio</div>
-                <div className="text-sm text-white/80 leading-relaxed">
-                  Join this community by creating your personalized portfolio
+
+                {/* Empty Identity placeholders */}
+                <div className="flex flex-col mb-4">
+                  <div className="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
+                  <div className="h-4 w-1/2 bg-white/10 rounded"></div>
+                </div>
+
+                {/* Empty Contact placeholders */}
+                <div className="mt-auto space-y-2">
+                  <div className="h-4 w-2/3 bg-white/10 rounded"></div>
+                  <div className="h-4 w-1/2 bg-white/10 rounded"></div>
+                </div>
+
+                {/* Create indicator badge */}
+                <div className="mt-4">
+                  <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 border border-blue-400/30 px-3 py-1.5 rounded-full text-xs font-medium">
+                    <Sparkles className="w-3 h-3" />
+                    Create Portfolio
+                  </div>
                 </div>
               </div>
             </div>

@@ -106,36 +106,54 @@ export async function POST(request: NextRequest) {
       community_id || "none (personal)",
     )
 
-    const slug = name
+    const baseSlug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
 
-    const insertData: any = {
-      user_id: user.id,
-      name: name.trim(),
-      slug,
-      description: description || `${name}'s portfolio`,
-      is_public: false,
-      is_demo: false,
-    }
+    let portfolio = null
+    let lastError = null
 
-    if (theme_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(theme_id)) {
-      insertData.theme_id = theme_id
-    }
+    for (let i = 0; i < 10; i++) {
+      const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`
 
-    if (community_id) {
-      insertData.community_id = community_id
-    }
+      const insertData: any = {
+        user_id: user.id,
+        name: name.trim(),
+        slug,
+        description: description || `${name}'s portfolio`,
+        is_public: false,
+        is_demo: false,
+      }
 
-    const { data: portfolio, error } = await supabase
-      .from("portfolios")
-      .insert(insertData)
-      .select()
-      .single()
+      if (theme_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(theme_id)) {
+        insertData.theme_id = theme_id
+      }
 
-    if (error) {
-      if (error.code === "23505" && error.message.includes("idx_unique_user_community_portfolio")) {
+      if (community_id) {
+        insertData.community_id = community_id
+      }
+
+      const { data, error } = await supabase
+        .from("portfolios")
+        .insert(insertData)
+        .select()
+        .single()
+
+      if (!error && data) {
+        portfolio = data
+        console.log("[v0] Portfolio created successfully:", portfolio.id, "with slug:", portfolio.slug)
+        break
+      }
+
+      lastError = error
+
+      if (error?.code === "23505" && error.message.includes("portfolios_slug_idx")) {
+        console.log(`[v0] Slug '${slug}' already exists, trying variant ${i + 1}`)
+        continue
+      }
+
+      if (error?.code === "23505" && error.message.includes("idx_unique_user_community_portfolio")) {
         console.error("[v0] User already has a portfolio for this community:", error)
         return NextResponse.json(
           {
@@ -146,12 +164,16 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      console.error("[v0] Error creating portfolio:", error)
+      break
+    }
+
+    if (!portfolio) {
+      console.error("[v0] Failed to create portfolio after 10 attempts:", lastError)
       return NextResponse.json(
         {
           error: "Failed to create portfolio",
-          details: error.message,
-          code: error.code,
+          details: lastError?.message || "Could not generate unique slug after 10 attempts",
+          code: lastError?.code,
         },
         { status: 500 },
       )

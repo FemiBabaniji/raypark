@@ -89,6 +89,7 @@ export async function createPortfolioOnce(params: {
     }
   }
 
+  // For personal portfolios, reuse existing if found
   const { data: existingPortfolios, error: checkError } = await supabase
     .from("portfolios")
     .select("id, slug, name")
@@ -96,17 +97,15 @@ export async function createPortfolioOnce(params: {
     .order("updated_at", { ascending: false })
     .limit(1)
 
-  // Only reuse existing if it's a personal portfolio (no community_id)
   if (!params.community_id && !checkError && existingPortfolios && existingPortfolios.length > 0) {
     await ensureMainPage(supabase, existingPortfolios[0].id)
     return existingPortfolios[0]
   }
 
-  const slug = baseSlug
   let inserted: any = null
 
-  for (let i = 0; i < 5; i++) {
-    const trySlug = i === 0 ? slug : `${slug}-${i + 1}`
+  for (let i = 0; i < 10; i++) {
+    const trySlug = i === 0 ? baseSlug : `${baseSlug}-${i}`
 
     const insertData: any = {
       user_id: params.userId,
@@ -130,7 +129,7 @@ export async function createPortfolioOnce(params: {
 
     if (!error && data) {
       inserted = data
-      console.log("[v0] Portfolio created successfully:", inserted.id)
+      console.log("[v0] Portfolio created successfully:", inserted.id, "with slug:", inserted.slug)
       break
     }
 
@@ -139,9 +138,10 @@ export async function createPortfolioOnce(params: {
         console.log("[v0] Constraint violation: user already has portfolio for this community")
         throw new Error("You already have a portfolio for this community")
       }
-      // Slug collision, continue to next slug variant
-      console.log(`[v0] Slug collision on '${trySlug}', trying next variant`)
-      continue
+      if (error.message.includes("portfolios_slug_idx")) {
+        console.log(`[v0] Slug collision on '${trySlug}', trying next variant`)
+        continue
+      }
     }
 
     if (error) {
@@ -151,18 +151,7 @@ export async function createPortfolioOnce(params: {
   }
 
   if (!inserted) {
-    // Fallback: try to find any portfolio for this user
-    const { data } = await supabase
-      .from("portfolios")
-      .select("id, slug, name")
-      .eq("user_id", params.userId)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-
-    if (!data || !data.length) {
-      throw new Error("Could not create or find a portfolio")
-    }
-    inserted = data[0]
+    throw new Error("Could not create a unique slug after 10 attempts. Please try a different portfolio name.")
   }
 
   await ensureMainPage(supabase, inserted.id)

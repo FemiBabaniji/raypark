@@ -135,42 +135,41 @@ const PortfolioCard = ({
   ]
 
   return (
-    <div className="relative w-full bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl transition-all duration-200 border border-white/[0.08] group">
+    <div className="relative w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] group">
       <button
         onClick={(e) => {
           e.stopPropagation()
           setIsMenuOpen(!isMenuOpen)
         }}
-        className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center z-10"
+        className="absolute -top-2 -right-2 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-20"
         aria-label="Portfolio options"
       >
-        <MoreVertical className="w-4 h-4 text-white/60" />
+        <MoreVertical className="w-4 h-4 text-white/70" />
       </button>
 
       <button
         onClick={onClick}
         className="w-full p-6 text-left"
       >
-        <div className="flex items-start justify-between mb-5">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
-            {portfolio.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
-            ) : (
-              <span className="text-white font-bold text-xl">{initials}</span>
-            )}
-          </div>
-          
-          <div className="absolute top-[68px] left-[58px]">
-            <div className={`w-3 h-3 rounded-full border-2 border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+        <div className="flex items-start justify-between mb-4">
+          <div className="relative">
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+              {portfolio.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
+              ) : (
+                <span className="text-white font-bold text-lg">{initials}</span>
+              )}
+            </div>
+            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-[2.5px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
           </div>
         </div>
         
-        <h3 className="text-white font-semibold text-xl mb-2 group-hover:text-white/90 transition-colors">
+        <h3 className="text-white font-semibold text-lg mb-1.5 group-hover:text-white/90 transition-colors">
           {portfolio.name}
         </h3>
         
-        <p className="text-sm text-white/40">
+        <p className="text-xs text-white/40">
           {communityText}
         </p>
       </button>
@@ -184,7 +183,7 @@ const PortfolioCard = ({
               setIsMenuOpen(false)
             }} 
           />
-          <div className="absolute right-4 top-14 w-56 bg-neutral-900 rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+          <div className="absolute right-0 top-10 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
             <div className="p-2">
               <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
                 Sync to Community
@@ -219,7 +218,7 @@ const PortfolioCard = ({
 
 const EmptyState = ({ onCreatePortfolio }: { onCreatePortfolio: () => void }) => {
   return (
-    <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
+    <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl p-12 border border-white/10 text-center">
       <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
         <div className="w-8 h-8 text-white/40">📁</div>
       </div>
@@ -449,21 +448,21 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
       <div className="fixed top-8 left-8 z-50">
         <BackButton onClick={() => router.back()} aria-label="Back" />
       </div>
       
       <main className="pt-20 pb-16 px-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-12">Portfolios</h1>
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-12">Portfolios</h1>
 
           <div className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold text-white">My Portfolios</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
               <button
                 onClick={handleCreatePortfolio}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-white text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl text-white text-sm font-medium transition-colors border border-white/10"
               >
                 <Plus className="w-4 h-4" />
                 Create
@@ -487,8 +486,8 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold text-white mb-8">Shared With Me</h2>
-            <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
+            <h2 className="text-xl font-semibold text-white mb-6">Shared With Me</h2>
+            <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl p-12 border border-white/10 text-center">
               <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
                 <div className="w-8 h-8 text-white/40">👥</div>
               </div>

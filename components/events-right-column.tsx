@@ -198,7 +198,6 @@ export default function EventsRightColumn({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: "My Portfolio",
-          theme_id: "default",
           description: "My community portfolio",
           community_id: communityId,
         }),

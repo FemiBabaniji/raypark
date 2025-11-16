@@ -63,11 +63,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Portfolio name is required" }, { status: 400 })
     }
 
-    if (!theme_id) {
-      console.log("[v0] Missing theme_id:", theme_id)
-      return NextResponse.json({ error: "Theme ID is required" }, { status: 400 })
-    }
-
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -121,9 +116,12 @@ export async function POST(request: NextRequest) {
       name: name.trim(),
       slug,
       description: description || `${name}'s portfolio`,
-      theme_id,
       is_public: false,
       is_demo: false,
+    }
+
+    if (theme_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(theme_id)) {
+      insertData.theme_id = theme_id
     }
 
     if (community_id) {

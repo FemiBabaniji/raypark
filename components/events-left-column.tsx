@@ -134,6 +134,8 @@ export default function EventsLeftColumn({
   onBackClick,
   activeTab = "Home",
   onTabChange,
+  showRightColumn,
+  onToggleRightColumn,
 }: {
   onEventClick?: (eventId: string) => void
   selectedEvent?: string | null
@@ -141,6 +143,8 @@ export default function EventsLeftColumn({
   onBackClick?: () => void
   activeTab?: string
   onTabChange?: (tab: string) => void
+  showRightColumn?: boolean
+  onToggleRightColumn?: () => void
 }) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
@@ -280,6 +284,28 @@ export default function EventsLeftColumn({
   return (
     <div className="w-full flex justify-center">
       <div className="w-full max-w-[1200px]">
+        {onToggleRightColumn && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={onToggleRightColumn}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs"
+              aria-label="Toggle sidebar"
+            >
+              {showRightColumn ? (
+                <>
+                  <span className="text-white/70">Hide</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-white/70" />
+                </>
+              ) : (
+                <>
+                  <ChevronLeft className="w-3.5 h-3.5 text-white/70" />
+                  <span className="text-white/70">Show</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+        
         {activeTab === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
             <EventDetailView

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, ChevronLeft, Search, Bell, User } from 'lucide-react'
+import { Bell, User } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 
@@ -61,31 +61,37 @@ export default function EventsHeader({
           </h1>
         </div>
         
-        <div className="flex items-center gap-3">
-          {/* Search icon */}
-          <button 
-            className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
-            aria-label="Search"
+        <div className="flex items-center gap-2">
+          {/* Gradient toggle button */}
+          <button
+            onClick={onToggleGradient}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+            aria-label="Toggle background"
           >
-            <Search className="w-5 h-5 text-white" strokeWidth={2} />
+            <div className="w-3 h-3 rounded-full" style={{
+              background: useGradient 
+                ? "linear-gradient(135deg, #4169E1, #8B5CF6)" 
+                : "#52525b"
+            }} />
+            <span className="text-xs text-white/70">{useGradient ? "Gradient" : "Grey"}</span>
           </button>
 
           {/* Notification bell */}
           <button 
-            className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
             aria-label="Notifications"
           >
-            <Bell className="w-5 h-5 text-white" strokeWidth={2} />
+            <Bell className="w-4 h-4 text-white" strokeWidth={2} />
           </button>
 
           {/* User icon with dropdown */}
           <div className="relative z-50" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+              className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
               aria-label="User menu"
             >
-              <User className="w-5 h-5 text-white" strokeWidth={2} />
+              <User className="w-4 h-4 text-white" strokeWidth={2} />
             </button>
 
             {/* Dropdown menu */}

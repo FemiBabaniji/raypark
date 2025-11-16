@@ -279,7 +279,13 @@ export default function EventsPage({
       {/* Content layer */}
       <div className="relative z-10">
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
-          <EventsHeader communityName={communityName} />
+          <EventsHeader 
+            communityName={communityName} 
+            useGradient={useGradient}
+            showRightColumn={showRightColumn}
+            onToggleGradient={() => setUseGradient(!useGradient)}
+            onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
+          />
         </div>
         
         <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
@@ -290,10 +296,6 @@ export default function EventsPage({
               tabs={FILTER_TABS} 
               activeTab={activeTab} 
               onTabChange={setActiveTab}
-              useGradient={useGradient}
-              showRightColumn={showRightColumn}
-              onToggleGradient={() => setUseGradient(!useGradient)}
-              onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
             />
           </div>
         </div>
@@ -310,6 +312,8 @@ export default function EventsPage({
                   onBackClick={handleBackClick}
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
+                  showRightColumn={showRightColumn}
+                  onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
                 />
               </div>
 

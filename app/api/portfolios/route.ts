@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (community_id) {
+      console.log("[v0] Checking for existing community portfolio, user:", user.id, "community:", community_id)
+      
       const { data: existingPortfolio } = await supabase
         .from("portfolios")
         .select("id, name")
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
       "Theme:",
       theme_id,
       "Community:",
-      community_id,
+      community_id || "none (personal)",
     )
 
     const slug = name
@@ -114,18 +116,23 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
 
+    const insertData: any = {
+      user_id: user.id,
+      name: name.trim(),
+      slug,
+      description: description || `${name}'s portfolio`,
+      theme_id,
+      is_public: false,
+      is_demo: false,
+    }
+
+    if (community_id) {
+      insertData.community_id = community_id
+    }
+
     const { data: portfolio, error } = await supabase
       .from("portfolios")
-      .insert({
-        user_id: user.id,
-        name: name.trim(),
-        slug,
-        description: description || `${name}'s portfolio`,
-        theme_id,
-        is_public: false,
-        is_demo: false,
-        community_id: community_id || null,
-      })
+      .insert(insertData)
       .select()
       .single()
 
@@ -152,7 +159,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("[v0] Portfolio created successfully:", portfolio.id)
+    console.log("[v0] Portfolio created successfully:", portfolio.id, "Community:", portfolio.community_id || "none")
     return NextResponse.json({ portfolio })
   } catch (error) {
     console.error("[v0] API Error in portfolio POST:", error)

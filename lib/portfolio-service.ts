@@ -74,6 +74,8 @@ export async function createPortfolioOnce(params: {
   const baseSlug = toSlug(baseName)
 
   if (params.community_id) {
+    console.log("[v0] Checking for existing portfolio in community:", params.community_id)
+    
     const { data: existingCommunityPortfolio } = await supabase
       .from("portfolios")
       .select("id, slug, name")
@@ -83,8 +85,7 @@ export async function createPortfolioOnce(params: {
 
     if (existingCommunityPortfolio) {
       console.log("[v0] User already has a portfolio for this community:", existingCommunityPortfolio.id)
-      await ensureMainPage(supabase, existingCommunityPortfolio.id)
-      return existingCommunityPortfolio
+      throw new Error(`You already have a portfolio "${existingCommunityPortfolio.name}" for this community. Please sync an existing portfolio or delete the current one first.`)
     }
   }
 
@@ -95,7 +96,8 @@ export async function createPortfolioOnce(params: {
     .order("updated_at", { ascending: false })
     .limit(1)
 
-  if (!checkError && existingPortfolios && existingPortfolios.length > 0) {
+  // Only reuse existing if it's a personal portfolio (no community_id)
+  if (!params.community_id && !checkError && existingPortfolios && existingPortfolios.length > 0) {
     await ensureMainPage(supabase, existingPortfolios[0].id)
     return existingPortfolios[0]
   }
@@ -121,21 +123,24 @@ export async function createPortfolioOnce(params: {
 
     if (params.community_id) {
       insertData.community_id = params.community_id
+      console.log("[v0] Creating portfolio with community_id:", params.community_id)
     }
 
     const { data, error } = await supabase.from("portfolios").insert(insertData).select("id, slug, name").single()
 
     if (!error && data) {
       inserted = data
+      console.log("[v0] Portfolio created successfully:", inserted.id)
       break
     }
 
     if (error && error.code === "23505") {
       if (error.message.includes("idx_unique_user_community_portfolio")) {
-        console.log("[v0] User already has a portfolio for this community")
+        console.log("[v0] Constraint violation: user already has portfolio for this community")
         throw new Error("You already have a portfolio for this community")
       }
       // Slug collision, continue to next slug variant
+      console.log(`[v0] Slug collision on '${trySlug}', trying next variant`)
       continue
     }
 
@@ -146,6 +151,7 @@ export async function createPortfolioOnce(params: {
   }
 
   if (!inserted) {
+    // Fallback: try to find any portfolio for this user
     const { data } = await supabase
       .from("portfolios")
       .select("id, slug, name")

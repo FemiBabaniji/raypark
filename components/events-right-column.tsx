@@ -179,6 +179,48 @@ export default function EventsRightColumn({
     router.push("/onboarding/resume?mode=update")
   }
 
+  const handleCreateCommunityPortfolio = async () => {
+    if (!user) {
+      router.push("/login?redirect=/portfolio/builder")
+      return
+    }
+
+    if (!communityId) {
+      console.error("[v0] No community ID provided")
+      return
+    }
+
+    try {
+      console.log("[v0] Creating portfolio for community:", communityId)
+      
+      const response = await fetch("/api/portfolios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "My Portfolio",
+          theme_id: "default",
+          description: "My community portfolio",
+          community_id: communityId,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.details || error.error || "Failed to create portfolio")
+      }
+
+      const { portfolio } = await response.json()
+      console.log("[v0] Portfolio created:", portfolio.id)
+
+      // Trigger refresh and redirect to builder
+      window.dispatchEvent(new CustomEvent("portfolio-updated"))
+      router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
+    } catch (error) {
+      console.error("[v0] Failed to create community portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to create portfolio")
+    }
+  }
+
   return (
     <div className="w-full">
       {onToggleRightColumn && (
@@ -226,7 +268,7 @@ export default function EventsRightColumn({
             </div>
           ) : (
             <div 
-              onClick={handleCreateProfile}
+              onClick={communityId ? handleCreateCommunityPortfolio : handleCreateProfile}
               className="mb-4 relative w-full aspect-square rounded-3xl overflow-hidden cursor-pointer focus:outline-none
                          focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
             >
@@ -261,7 +303,7 @@ export default function EventsRightColumn({
           )}
 
           <button
-            onClick={!user ? () => router.push("/login") : portfolio ? handleEditProfile : handleCreateProfile}
+            onClick={!user ? () => router.push("/login") : portfolio ? handleEditProfile : communityId ? handleCreateCommunityPortfolio : handleCreateProfile}
             className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-700/60 bg-zinc-800/60 text-white"
           >
             {!user ? "Sign In" : portfolio ? "Edit Profile" : "Create New Portfolio"}

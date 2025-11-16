@@ -216,11 +216,15 @@ export default function DashboardPage() {
       }
 
       console.log("[v0] Created portfolio:", newPortfolio)
-      setPortfolios((prev) => [...prev, newPortfolio])
+      
+      const updatedPortfolios = await loadUserPortfolios(user)
+      setPortfolios(updatedPortfolios)
+      
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
     } catch (error) {
       console.error("Error creating portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to create portfolio")
     }
   }
 

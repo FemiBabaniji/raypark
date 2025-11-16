@@ -448,57 +448,103 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1f1f1f] to-[#252525]">
-      <div className="fixed top-8 left-8 z-50">
-        <BackButton onClick={() => router.back()} aria-label="Back" />
+    <div className="min-h-screen relative" style={{ backgroundColor: "oklch(0.18 0 0)" }}>
+      {/* Gradient background orbs matching events page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Large blue gradient orb - top left */}
+        <div 
+          className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Purple gradient orb - top right */}
+        <div 
+          className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Blue gradient orb - middle left */}
+        <div 
+          className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Purple/Violet gradient orb - bottom right */}
+        <div 
+          className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
+          }}
+        />
+        
+        {/* Smaller accent blue orb - bottom left */}
+        <div 
+          className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
+          }}
+        />
       </div>
-      
-      <main className="pt-20 pb-16 px-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-12">Portfolios</h1>
 
-          <div className="mb-16">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
-              <button
-                onClick={handleCreatePortfolio}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl text-white text-sm font-medium transition-colors border border-white/10"
-              >
-                <Plus className="w-4 h-4" />
-                Create
-              </button>
-            </div>
-
-            {portfolios.length > 0 ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-                {portfolios.map((portfolio) => (
-                  <PortfolioCard
-                    key={portfolio.id}
-                    portfolio={portfolio}
-                    onClick={() => handlePortfolioClick(portfolio.id)}
-                    onSyncCommunity={handleSyncCommunity}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState onCreatePortfolio={handleCreatePortfolio} />
-            )}
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-6">Shared With Me</h2>
-            <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl p-12 border border-white/10 text-center">
-              <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 text-white/40">👥</div>
-              </div>
-              <h3 className="text-white font-semibold text-lg mb-2">No Shared Portfolios</h3>
-              <p className="text-white/60 text-sm max-w-sm mx-auto">
-                Portfolios that others share with you will appear here.
-              </p>
-            </div>
-          </div>
+      {/* Content layer with relative z-index */}
+      <div className="relative z-10">
+        <div className="fixed top-8 left-8 z-50">
+          <BackButton onClick={() => router.back()} aria-label="Back" />
         </div>
-      </main>
+        
+        <main className="pt-20 pb-16 px-8">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-12">Portfolios</h1>
+
+            <div className="mb-16">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
+                <button
+                  onClick={handleCreatePortfolio}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl text-white text-sm font-medium transition-colors border border-white/10"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create
+                </button>
+              </div>
+
+              {portfolios.length > 0 ? (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+                  {portfolios.map((portfolio) => (
+                    <PortfolioCard
+                      key={portfolio.id}
+                      portfolio={portfolio}
+                      onClick={() => handlePortfolioClick(portfolio.id)}
+                      onSyncCommunity={handleSyncCommunity}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState onCreatePortfolio={handleCreatePortfolio} />
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-6">Shared With Me</h2>
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl p-12 border border-white/10 text-center">
+                <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-8 h-8 text-white/40">👥</div>
+                </div>
+                <h3 className="text-white font-semibold text-lg mb-2">No Shared Portfolios</h3>
+                <p className="text-white/60 text-sm max-w-sm mx-auto">
+                  Portfolios that others share with you will appear here.
+                </p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

@@ -1,20 +1,12 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 
 export default function NetworkPage() {
   const router = useRouter()
 
-  const handleCommunitySelect = (community: string) => {
-    if (community === "Black Entrepreneurship Alliance") {
-      router.push("/bea")
-    }
-    if (community === "DMZ Innovation Hub") {
-      router.push("/dmz")
-    }
-    if (community === "Black Founders Network") {
-      router.push("/network/bfn/members/marcus-johnson")
-    }
+  const handleCommunitySelect = (communityCode: string) => {
+    router.push(`/network/${communityCode}`)
   }
 
   const handleCardClick = (member: string) => {
@@ -33,7 +25,7 @@ export default function NetworkPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl w-full">
           <div
-            onClick={() => handleCommunitySelect("Black Entrepreneurship Alliance")}
+            onClick={() => handleCommunitySelect("bea-founders-connect")}
             className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl bg-gradient-to-br from-neutral-900/30 to-neutral-800/20 backdrop-blur-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -50,7 +42,7 @@ export default function NetworkPage() {
           </div>
 
           <div
-            onClick={() => handleCommunitySelect("Black Founders Network")}
+            onClick={() => handleCommunitySelect("bfn")}
             className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl bg-gradient-to-br from-neutral-900/30 to-neutral-800/20 backdrop-blur-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-teal-500/5 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -84,7 +76,7 @@ export default function NetworkPage() {
           </div>
 
           <div
-            onClick={() => handleCommunitySelect("DMZ Innovation Hub")}
+            onClick={() => handleCommunitySelect("dmz-innovation-hub")}
             className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl bg-gradient-to-br from-neutral-900/30 to-neutral-800/20 backdrop-blur-xl"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

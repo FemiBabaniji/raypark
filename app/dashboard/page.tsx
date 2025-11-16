@@ -17,7 +17,7 @@ import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce
 import { useAuth } from "@/lib/auth"
 import { safeUUID } from "@/lib/utils"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
-import { Plus, MoreVertical } from 'lucide-react'
+import { Plus, MoreVertical, Grid3x3, List } from 'lucide-react'
 
 interface ExtendedPortfolio extends UnifiedPortfolio {
   community?: {
@@ -244,6 +244,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"list" | "editor">("list")
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [displayView, setDisplayView] = useState<"grid" | "list">("grid")
 
   useEffect(() => {
     if (authLoading) return
@@ -462,26 +463,139 @@ export default function DashboardPage() {
             <div className="mb-16">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white">My Portfolios</h2>
-                <button
-                  onClick={handleCreatePortfolio}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl text-white text-sm font-medium transition-colors border border-white/10"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create
-                </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setDisplayView("grid")}
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
+                        displayView === "grid"
+                          ? "bg-white/10 text-white"
+                          : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+                      }`}
+                      aria-label="Grid view"
+                    >
+                      <Grid3x3 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setDisplayView("list")}
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
+                        displayView === "list"
+                          ? "bg-white/10 text-white"
+                          : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+                      }`}
+                      aria-label="List view"
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleCreatePortfolio}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl text-white text-sm font-medium transition-colors border border-white/10"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create
+                  </button>
+                </div>
               </div>
 
               {portfolios.length > 0 ? (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-                  {portfolios.map((portfolio) => (
-                    <PortfolioCard
-                      key={portfolio.id}
-                      portfolio={portfolio}
-                      onClick={() => handlePortfolioClick(portfolio.id)}
-                      onSyncCommunity={handleSyncCommunity}
-                    />
-                  ))}
-                </div>
+                displayView === "grid" ? (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+                    {portfolios.map((portfolio) => (
+                      <PortfolioCard
+                        key={portfolio.id}
+                        portfolio={portfolio}
+                        onClick={() => handlePortfolioClick(portfolio.id)}
+                        onSyncCommunity={handleSyncCommunity}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {portfolios.map((portfolio) => {
+                      const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
+                      const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+                      const communityText = portfolio.community?.name || "No Community"
+
+                      return (
+                        <div key={portfolio.id} className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const menu = document.getElementById(`menu-${portfolio.id}`)
+                              if (menu) {
+                                menu.classList.toggle('hidden')
+                              }
+                            }}
+                            className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-20"
+                            aria-label="Portfolio options"
+                          >
+                            <MoreVertical className="w-4 h-4 text-white/70" />
+                          </button>
+                          
+                          <button
+                            onClick={() => handlePortfolioClick(portfolio.id)}
+                            className="w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl p-4 transition-all duration-200 border border-white/[0.08] text-left flex items-center gap-4"
+                          >
+                            <div className="relative flex-shrink-0">
+                              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                                {portfolio.avatarUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-xl" />
+                                ) : (
+                                  <span className="text-white font-bold text-base">{initials}</span>
+                                )}
+                              </div>
+                              <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-white font-semibold text-base mb-0.5 truncate">
+                                {portfolio.name}
+                              </h3>
+                              <p className="text-xs text-white/40 truncate">
+                                {communityText}
+                              </p>
+                            </div>
+                          </button>
+
+                          <div id={`menu-${portfolio.id}`} className="hidden absolute right-0 top-16 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+                            <div className="p-2">
+                              <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
+                                Sync to Community
+                              </div>
+                              {[
+                                { id: "design-collective", name: "Design Collective" },
+                                { id: "tech-innovators", name: "Tech Innovators" },
+                                { id: "creative-minds", name: "Creative Minds" },
+                              ].map((community) => (
+                                <button
+                                  key={community.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleSyncCommunity(portfolio.id, community.id)
+                                    const menu = document.getElementById(`menu-${portfolio.id}`)
+                                    if (menu) menu.classList.add('hidden')
+                                  }}
+                                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                                    portfolio.community?.id === community.id
+                                      ? 'bg-white/10 text-white'
+                                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                  }`}
+                                >
+                                  {community.name}
+                                  {portfolio.community?.id === community.id && (
+                                    <span className="ml-2 text-emerald-400">✓</span>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
               ) : (
                 <EmptyState onCreatePortfolio={handleCreatePortfolio} />
               )}

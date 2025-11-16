@@ -73,6 +73,21 @@ export async function createPortfolioOnce(params: {
   const baseName = params.name?.trim() || "portfolio"
   const baseSlug = toSlug(baseName)
 
+  if (params.community_id) {
+    const { data: existingCommunityPortfolio } = await supabase
+      .from("portfolios")
+      .select("id, slug, name")
+      .eq("user_id", params.userId)
+      .eq("community_id", params.community_id)
+      .maybeSingle()
+
+    if (existingCommunityPortfolio) {
+      console.log("[v0] User already has a portfolio for this community:", existingCommunityPortfolio.id)
+      await ensureMainPage(supabase, existingCommunityPortfolio.id)
+      return existingCommunityPortfolio
+    }
+  }
+
   const { data: existingPortfolios, error: checkError } = await supabase
     .from("portfolios")
     .select("id, slug, name")
@@ -116,6 +131,11 @@ export async function createPortfolioOnce(params: {
     }
 
     if (error && error.code === "23505") {
+      if (error.message.includes("idx_unique_user_community_portfolio")) {
+        console.log("[v0] User already has a portfolio for this community")
+        throw new Error("You already have a portfolio for this community")
+      }
+      // Slug collision, continue to next slug variant
       continue
     }
 
@@ -142,31 +162,6 @@ export async function createPortfolioOnce(params: {
   await ensureMainPage(supabase, inserted.id)
 
   return inserted
-}
-
-export async function ensureUserPortfolio(): Promise<{
-  portfolio_id: string
-  page_id: string
-  is_new: boolean
-}> {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.rpc("ensure_user_portfolio").single()
-
-  if (error) {
-    console.error("[v0] Error calling ensure_user_portfolio:", error)
-    throw new Error(`Failed to ensure portfolio: ${error.message}`)
-  }
-
-  if (!data) {
-    throw new Error("No data returned from ensure_user_portfolio")
-  }
-
-  return {
-    portfolio_id: data.portfolio_id,
-    page_id: data.page_id,
-    is_new: data.is_new,
-  }
 }
 
 export async function updatePortfolioById(
@@ -203,7 +198,23 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
 
   const { data, error } = await supabase
     .from("portfolios")
-    .select("id, user_id, name, slug, is_public, is_demo, theme_id, community_id, created_at, updated_at")
+    .select(`
+      id, 
+      user_id, 
+      name, 
+      slug, 
+      is_public, 
+      is_demo, 
+      theme_id, 
+      community_id, 
+      created_at, 
+      updated_at,
+      communities:community_id (
+        id,
+        name,
+        code
+      )
+    `)
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
 
@@ -214,26 +225,45 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
 
   const seen = new Set<string>()
   const deduped = []
+  
+  console.log("[v0] Total portfolios fetched:", data?.length || 0)
+  
   for (const p of data ?? []) {
-    const key = p.slug || p.id
-    if (seen.has(key)) continue
-    seen.add(key)
+    // Use portfolio ID as the unique key (most reliable)
+    if (seen.has(p.id)) {
+      console.log("[v0] Skipping duplicate portfolio:", p.id, p.name)
+      continue
+    }
+    seen.add(p.id)
     deduped.push(p)
   }
 
+  console.log("[v0] Portfolios after deduplication:", deduped.length)
+
   return deduped.map(
-    (portfolio: any): UnifiedPortfolio => ({
-      id: portfolio.id,
-      name: portfolio.name,
-      title: "Portfolio",
-      email: `${portfolio.slug}@example.com`,
-      location: "Location",
-      handle: `@${portfolio.slug}`,
-      initials: portfolio.name.slice(0, 2).toUpperCase(),
-      selectedColor: 0 as any,
-      isLive: portfolio.is_public || false,
-      isTemplate: false,
-    }),
+    (portfolio: any): UnifiedPortfolio => {
+      const community = portfolio.communities
+        ? {
+            id: portfolio.communities.id,
+            name: portfolio.communities.name,
+            code: portfolio.communities.code,
+          }
+        : undefined
+
+      return {
+        id: portfolio.id,
+        name: portfolio.name,
+        title: "Portfolio",
+        email: `${portfolio.slug}@example.com`,
+        location: "Location",
+        handle: `@${portfolio.slug}`,
+        initials: portfolio.name.slice(0, 2).toUpperCase(),
+        selectedColor: 0 as any,
+        isLive: portfolio.is_public || false,
+        isTemplate: false,
+        community,
+      }
+    },
   )
 }
 
@@ -272,9 +302,15 @@ async function insertPortfolioWithRetry(
 
     if (!error && data) return data
 
-    if (error?.code === "23505" && /portfolios_slug_idx/.test(error.message)) {
-      console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
-      continue
+    if (error?.code === "23505") {
+      if (error.message.includes("idx_unique_user_community_portfolio")) {
+        throw new Error("You already have a portfolio for this community")
+      }
+      // Slug collision - try next candidate
+      if (/portfolios_slug_idx/.test(error.message)) {
+        console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
+        continue
+      }
     }
 
     if (error) throw error
@@ -760,16 +796,19 @@ export async function getPageLayout(portfolioId: string): Promise<{
 export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: string; props: any }>> {
   const supabase = createClient()
 
-  const { data: page } = await supabase
+  const { data: page, error: pageErr } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
     .maybeSingle()
 
-  if (!page?.id) return []
+  if (pageErr || !page?.id) {
+    console.error("[v0] Failed to load page:", pageErr)
+    return []
+  }
 
-  const { data: instances } = await supabase
+  const { data: instances, error: instancesError } = await supabase
     .from("widget_instances")
     .select(
       `

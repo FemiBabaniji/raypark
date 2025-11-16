@@ -77,6 +77,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    if (community_id) {
+      const { data: existingPortfolio } = await supabase
+        .from("portfolios")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .eq("community_id", community_id)
+        .maybeSingle()
+
+      if (existingPortfolio) {
+        console.log("[v0] User already has a portfolio for this community:", existingPortfolio.id)
+        return NextResponse.json(
+          {
+            error: "Portfolio already exists",
+            details: `You already have a portfolio "${existingPortfolio.name}" for this community. Each user can only have one portfolio per community.`,
+            existingPortfolio,
+          },
+          { status: 409 },
+        )
+      }
+    }
+
     console.log(
       "[v0] Creating portfolio for user:",
       user.id,
@@ -109,6 +130,17 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      if (error.code === "23505" && error.message.includes("idx_unique_user_community_portfolio")) {
+        console.error("[v0] User already has a portfolio for this community:", error)
+        return NextResponse.json(
+          {
+            error: "Portfolio already exists",
+            details: "You already have a portfolio for this community. Each user can only have one portfolio per community.",
+          },
+          { status: 409 },
+        )
+      }
+
       console.error("[v0] Error creating portfolio:", error)
       return NextResponse.json(
         {

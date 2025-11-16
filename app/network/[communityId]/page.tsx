@@ -3,7 +3,7 @@
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Spinner } from "@/components/ui/spinner"
+import { Loader2 } from 'lucide-react'
 import EventsPage from "@/components/events-page"
 
 export default function CommunityHubPage() {
@@ -67,7 +67,7 @@ export default function CommunityHubPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <Spinner className="w-8 h-8 text-blue-500" />
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     )
   }

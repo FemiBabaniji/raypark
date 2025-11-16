@@ -249,14 +249,6 @@ export default function EventsRightColumn({
                   <div className="h-4 w-2/3 bg-white/10 rounded"></div>
                   <div className="h-4 w-1/2 bg-white/10 rounded"></div>
                 </div>
-
-                {/* Create indicator badge */}
-                <div className="mt-4">
-                  <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 border border-blue-400/30 px-3 py-1.5 rounded-full text-xs font-medium">
-                    <Sparkles className="w-3 h-3" />
-                    Create Portfolio
-                  </div>
-                </div>
               </div>
             </div>
           )}

@@ -450,48 +450,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen relative bg-background">
-      {/* Apple-style layered gradient background with blue/purple orbs matching events page */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Base dark background layer */}
-        <div className="absolute inset-0 bg-[oklch(0.18_0_0)]" />
-        
-        {/* Elliptical blue gradient - top left, stretched horizontally */}
-        <div 
-          className="absolute -top-32 left-1/4 w-[700px] h-[400px] rounded-full opacity-15 blur-[120px]"
-          style={{
-            background: "radial-gradient(ellipse 100% 60% at 50% 50%, #4169E1 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Elliptical purple gradient - top right, stretched diagonally */}
-        <div 
-          className="absolute top-0 right-1/4 w-[600px] h-[350px] rounded-full opacity-12 blur-[120px]"
-          style={{
-            background: "radial-gradient(ellipse 110% 55% at 50% 50%, #7B68EE 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Elongated blue accent - middle, horizontal stretch */}
-        <div 
-          className="absolute top-1/3 left-1/3 w-[650px] h-[300px] rounded-full opacity-10 blur-[120px]"
-          style={{
-            background: "radial-gradient(ellipse 120% 50% at 50% 50%, #0EA5E9 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Elliptical violet gradient - bottom right, vertical stretch */}
-        <div 
-          className="absolute bottom-1/4 right-1/3 w-[500px] h-[600px] rounded-full opacity-14 blur-[120px]"
-          style={{
-            background: "radial-gradient(ellipse 80% 110% at 50% 50%, #8B5CF6 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Subtle vignette overlay for depth */}
         <div 
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, rgba(10, 10, 18, 0.3) 100%)",
+            background: "linear-gradient(135deg, #1e1e2e 0%, #0f0f1a 50%, #1a1a2e 100%)",
           }}
         />
       </div>

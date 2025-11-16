@@ -448,50 +448,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen relative" style={{ backgroundColor: "oklch(0.18 0 0)" }}>
-      {/* Gradient background orbs matching events page */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large blue gradient orb - top left */}
-        <div 
-          className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Purple gradient orb - top right */}
-        <div 
-          className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Blue gradient orb - middle left */}
-        <div 
-          className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Purple/Violet gradient orb - bottom right */}
-        <div 
-          className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Smaller accent blue orb - bottom left */}
-        <div 
-          className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
-          }}
-        />
-      </div>
-
+    <div className="min-h-screen relative bg-background">
       {/* Content layer with relative z-index */}
       <div className="relative z-10">
         <div className="fixed top-8 left-8 z-50">
@@ -500,7 +457,7 @@ export default function DashboardPage() {
         
         <main className="pt-20 pb-16 px-8">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-12">Portfolios</h1>
+            <h1 className="text-3xl font-bold text-white mb-12">Workspace</h1>
 
             <div className="mb-16">
               <div className="flex items-center justify-between mb-6">

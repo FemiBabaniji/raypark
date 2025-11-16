@@ -22,7 +22,7 @@ export default function CommunityHubPage() {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       
       if (!authUser) {
-        router.push(`/auth?redirect=/network/${communityId}`)
+        router.push(`/network/${communityId}?redirect=true`)
         return
       }
 
@@ -41,17 +41,23 @@ export default function CommunityHubPage() {
       }
 
       setCommunity(data)
+      console.log("[v0] Community loaded:", data.id, data.name)
+      console.log("[v0] Looking for portfolio with user_id:", authUser.id, "community_id:", data.id)
 
       const { data: portfolioData, error: portfolioError } = await supabase
         .from("portfolios")
-        .select("id, name, slug, is_public")
+        .select("id, name, slug, is_public, community_id, user_id")
         .eq("user_id", authUser.id)
         .eq("community_id", data.id)
         .maybeSingle()
 
+      console.log("[v0] Portfolio query result:", { portfolioData, portfolioError })
+
       if (!portfolioError && portfolioData) {
+        console.log("[v0] Found user portfolio for community:", portfolioData)
         setUserPortfolio(portfolioData)
       } else {
+        console.log("[v0] No portfolio found for this community")
         setUserPortfolio(null)
       }
 

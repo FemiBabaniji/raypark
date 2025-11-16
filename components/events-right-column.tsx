@@ -26,7 +26,14 @@ export default function EventsRightColumn({
 
   useEffect(() => {
     async function loadCommunityPortfolio() {
+      console.log("[v0] EventsRightColumn - Starting portfolio load")
+      console.log("[v0] - user?.id:", user?.id)
+      console.log("[v0] - communityId:", communityId)
+      console.log("[v0] - hasUserPortfolio:", hasUserPortfolio)
+      console.log("[v0] - userPortfolio:", userPortfolio)
+
       if (!user?.id || !communityId) {
+        console.log("[v0] Missing user or communityId, showing empty state")
         setPortfolioLoading(false)
         setPortfolio(null)
         return
@@ -39,20 +46,25 @@ export default function EventsRightColumn({
         try {
           const supabase = createClient()
 
+          console.log("[v0] Querying page for portfolio_id:", userPortfolio.id)
+
           // Get page ID
           const { data: page, error: pageError } = await supabase
             .from("pages")
             .select("id")
             .eq("portfolio_id", userPortfolio.id)
-            .eq("key", "main")
+            .eq("is_main", true)
             .maybeSingle()
 
+          console.log("[v0] Page query result:", { page, pageError })
+
           if (pageError || !page) {
+            console.log("[v0] No page found, using basic portfolio data")
             setPortfolio({
               id: userPortfolio.id,
               name: userPortfolio.name,
               title: "Portfolio",
-              email: user.email,
+              email: user.email || "",
               location: "Location",
               handle: `@${userPortfolio.slug}`,
               selectedColor: 3,
@@ -61,6 +73,8 @@ export default function EventsRightColumn({
             setPortfolioLoading(false)
             return
           }
+
+          console.log("[v0] Querying widget_types for identity")
 
           // Get identity widget type
           const { data: widgetType, error: widgetTypeError } = await supabase
@@ -69,12 +83,15 @@ export default function EventsRightColumn({
             .eq("key", "identity")
             .maybeSingle()
 
+          console.log("[v0] Widget type query result:", { widgetType, widgetTypeError })
+
           if (widgetTypeError || !widgetType) {
+            console.log("[v0] No widget type found, using basic portfolio data")
             setPortfolio({
               id: userPortfolio.id,
               name: userPortfolio.name,
               title: "Portfolio",
-              email: user.email,
+              email: user.email || "",
               location: "Location",
               handle: `@${userPortfolio.slug}`,
               selectedColor: 3,
@@ -83,6 +100,8 @@ export default function EventsRightColumn({
             setPortfolioLoading(false)
             return
           }
+
+          console.log("[v0] Querying widget_instances for page_id:", page.id, "widget_type_id:", widgetType.id)
 
           // Get identity widget instance
           const { data: widget, error: widgetError } = await supabase
@@ -92,12 +111,15 @@ export default function EventsRightColumn({
             .eq("widget_type_id", widgetType.id)
             .maybeSingle()
 
+          console.log("[v0] Widget instance query result:", { widget, widgetError })
+
           if (widgetError || !widget?.props) {
+            console.log("[v0] No widget found, using basic portfolio data")
             setPortfolio({
               id: userPortfolio.id,
               name: userPortfolio.name,
               title: "Portfolio",
-              email: user.email,
+              email: user.email || "",
               location: "Location",
               handle: `@${userPortfolio.slug}`,
               selectedColor: 3,
@@ -111,7 +133,7 @@ export default function EventsRightColumn({
             id: userPortfolio.id,
             name: widget.props.name || userPortfolio.name,
             title: widget.props.title || "Portfolio",
-            email: widget.props.email || user.email,
+            email: widget.props.email || user.email || "",
             location: widget.props.location || "Location",
             handle: widget.props.handle || `@${userPortfolio.slug}`,
             avatarUrl: widget.props.avatarUrl,
@@ -119,6 +141,7 @@ export default function EventsRightColumn({
             isLive: userPortfolio.is_public,
           }
 
+          console.log("[v0] Successfully loaded portfolio with widget data:", loadedPortfolio)
           setPortfolio(loadedPortfolio)
         } catch (error) {
           console.error("[v0] Failed to load portfolio:", error)
@@ -129,7 +152,7 @@ export default function EventsRightColumn({
         return
       }
 
-      console.log("[v0] No portfolio for this community")
+      console.log("[v0] No portfolio for this community, showing empty state")
       setPortfolio(null)
       setPortfolioLoading(false)
     }

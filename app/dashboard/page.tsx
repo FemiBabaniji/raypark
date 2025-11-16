@@ -449,12 +449,32 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen relative bg-background">
+    <div className="min-h-screen relative bg-background overflow-hidden">
+      {/* Modern gradient background with blur and noise texture */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Gradient base layer */}
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-80"
           style={{
             background: "linear-gradient(135deg, #0d0d15 0%, #12121d 15%, #0a0a12 30%, #15152a 45%, #0f0f1a 60%, #1a1a28 75%, #0e0e16 90%, #13132a 100%)",
+            filter: "blur(40px)",
+          }}
+        />
+        
+        {/* Noise texture overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
+          }}
+        />
+        
+        {/* Additional grain texture for depth */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%)",
           }}
         />
       </div>

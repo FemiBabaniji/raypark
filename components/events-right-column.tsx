@@ -5,160 +5,139 @@ import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
-import { Upload, ChevronRight } from 'lucide-react'
+import { Upload, ChevronRight, Plus, Sparkles } from 'lucide-react'
 
-export default function EventsRightColumn({ onToggleRightColumn }: { onToggleRightColumn?: () => void }) {
+export default function EventsRightColumn({ 
+  onToggleRightColumn,
+  communityId,
+  hasUserPortfolio = false,
+  userPortfolio = null
+}: { 
+  onToggleRightColumn?: () => void
+  communityId?: string
+  hasUserPortfolio?: boolean
+  userPortfolio?: any
+}) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const { user, loading } = useAuth()
   const [portfolio, setPortfolio] = useState<UnifiedPortfolio | null>(null)
   const [portfolioLoading, setPortfolioLoading] = useState(true)
-  const [hasPortfolio, setHasPortfolio] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    async function loadBEAPortfolio() {
-      if (!user?.id) {
+    async function loadCommunityPortfolio() {
+      if (!user?.id || !communityId) {
         setPortfolioLoading(false)
-        setHasPortfolio(false)
         setPortfolio(null)
         return
       }
 
-      setPortfolioLoading(true)
+      if (hasUserPortfolio && userPortfolio) {
+        console.log("[v0] Using portfolio from props:", userPortfolio)
+        setPortfolioLoading(true)
 
-      try {
-        const supabase = createClient()
+        try {
+          const supabase = createClient()
 
-        const { data: portfolios, error: portfoliosError } = await supabase
-          .from("portfolios")
-          .select("id, name, is_public, community_id, slug")
-          .eq("user_id", user.id)
-          .order("updated_at", { ascending: false })
+          // Get page ID
+          const { data: page, error: pageError } = await supabase
+            .from("pages")
+            .select("id")
+            .eq("portfolio_id", userPortfolio.id)
+            .eq("key", "main")
+            .maybeSingle()
 
-        if (portfoliosError) {
-          throw portfoliosError
-        }
+          if (pageError || !page) {
+            setPortfolio({
+              id: userPortfolio.id,
+              name: userPortfolio.name,
+              title: "Portfolio",
+              email: user.email,
+              location: "Location",
+              handle: `@${userPortfolio.slug}`,
+              selectedColor: 3,
+              isLive: userPortfolio.is_public,
+            })
+            setPortfolioLoading(false)
+            return
+          }
 
-        if (!portfolios || portfolios.length === 0) {
-          setHasPortfolio(false)
+          // Get identity widget type
+          const { data: widgetType, error: widgetTypeError } = await supabase
+            .from("widget_types")
+            .select("id")
+            .eq("key", "identity")
+            .maybeSingle()
+
+          if (widgetTypeError || !widgetType) {
+            setPortfolio({
+              id: userPortfolio.id,
+              name: userPortfolio.name,
+              title: "Portfolio",
+              email: user.email,
+              location: "Location",
+              handle: `@${userPortfolio.slug}`,
+              selectedColor: 3,
+              isLive: userPortfolio.is_public,
+            })
+            setPortfolioLoading(false)
+            return
+          }
+
+          // Get identity widget instance
+          const { data: widget, error: widgetError } = await supabase
+            .from("widget_instances")
+            .select("props")
+            .eq("page_id", page.id)
+            .eq("widget_type_id", widgetType.id)
+            .maybeSingle()
+
+          if (widgetError || !widget?.props) {
+            setPortfolio({
+              id: userPortfolio.id,
+              name: userPortfolio.name,
+              title: "Portfolio",
+              email: user.email,
+              location: "Location",
+              handle: `@${userPortfolio.slug}`,
+              selectedColor: 3,
+              isLive: userPortfolio.is_public,
+            })
+            setPortfolioLoading(false)
+            return
+          }
+
+          const loadedPortfolio: UnifiedPortfolio = {
+            id: userPortfolio.id,
+            name: widget.props.name || userPortfolio.name,
+            title: widget.props.title || "Portfolio",
+            email: widget.props.email || user.email,
+            location: widget.props.location || "Location",
+            handle: widget.props.handle || `@${userPortfolio.slug}`,
+            avatarUrl: widget.props.avatarUrl,
+            selectedColor: typeof widget.props.selectedColor === "number" ? widget.props.selectedColor : 3,
+            isLive: userPortfolio.is_public,
+          }
+
+          setPortfolio(loadedPortfolio)
+        } catch (error) {
+          console.error("[v0] Failed to load portfolio:", error)
           setPortfolio(null)
+        } finally {
           setPortfolioLoading(false)
-          return
         }
-
-        // Priority: BEA portfolio (has community_id) > Most recently updated
-        const beaPortfolio = portfolios.find((p) => p.community_id !== null && p.community_id !== undefined)
-        const targetPortfolio = beaPortfolio || portfolios[0]
-
-        console.log("[v0] Portfolio selection:", {
-          totalPortfolios: portfolios.length,
-          beaPortfolioFound: !!beaPortfolio,
-          selectedPortfolio: {
-            id: targetPortfolio.id,
-            name: targetPortfolio.name,
-            hasCommunityId: !!targetPortfolio.community_id,
-            communityId: targetPortfolio.community_id,
-          },
-        })
-
-        // Get page ID
-        const { data: page, error: pageError } = await supabase
-          .from("pages")
-          .select("id")
-          .eq("portfolio_id", targetPortfolio.id)
-          .eq("key", "main")
-          .maybeSingle()
-
-        if (pageError || !page) {
-          setHasPortfolio(true)
-          setPortfolio({
-            id: targetPortfolio.id,
-            name: targetPortfolio.name,
-            title: "Portfolio",
-            email: user.email,
-            location: "Location",
-            handle: `@${targetPortfolio.slug}`,
-            selectedColor: 3,
-            isLive: targetPortfolio.is_public,
-          })
-          setPortfolioLoading(false)
-          return
-        }
-
-        // Get identity widget type
-        const { data: widgetType, error: widgetTypeError } = await supabase
-          .from("widget_types")
-          .select("id")
-          .eq("key", "identity")
-          .maybeSingle()
-
-        if (widgetTypeError || !widgetType) {
-          setHasPortfolio(true)
-          setPortfolio({
-            id: targetPortfolio.id,
-            name: targetPortfolio.name,
-            title: "Portfolio",
-            email: user.email,
-            location: "Location",
-            handle: `@${targetPortfolio.slug}`,
-            selectedColor: 3,
-            isLive: targetPortfolio.is_public,
-          })
-          setPortfolioLoading(false)
-          return
-        }
-
-        // Get identity widget instance
-        const { data: widget, error: widgetError } = await supabase
-          .from("widget_instances")
-          .select("props")
-          .eq("page_id", page.id)
-          .eq("widget_type_id", widgetType.id)
-          .maybeSingle()
-
-        if (widgetError || !widget?.props) {
-          setHasPortfolio(true)
-          setPortfolio({
-            id: targetPortfolio.id,
-            name: targetPortfolio.name,
-            title: "Portfolio",
-            email: user.email,
-            location: "Location",
-            handle: `@${targetPortfolio.slug}`,
-            selectedColor: 3,
-            isLive: targetPortfolio.is_public,
-          })
-          setPortfolioLoading(false)
-          return
-        }
-
-        const loadedPortfolio: UnifiedPortfolio = {
-          id: targetPortfolio.id,
-          name: widget.props.name || targetPortfolio.name,
-          title: widget.props.title || "Portfolio",
-          email: widget.props.email || user.email,
-          location: widget.props.location || "Location",
-          handle: widget.props.handle || `@${targetPortfolio.slug}`,
-          avatarUrl: widget.props.avatarUrl,
-          selectedColor: typeof widget.props.selectedColor === "number" ? widget.props.selectedColor : 3,
-          isLive: targetPortfolio.is_public,
-        }
-
-        setHasPortfolio(true)
-        setPortfolio(loadedPortfolio)
-      } catch (error) {
-        console.error("[v0] Failed to load portfolio:", error)
-        setHasPortfolio(false)
-        setPortfolio(null)
-      } finally {
-        setPortfolioLoading(false)
+        return
       }
+
+      console.log("[v0] No portfolio for this community")
+      setPortfolio(null)
+      setPortfolioLoading(false)
     }
 
     if (!loading) {
-      loadBEAPortfolio()
+      loadCommunityPortfolio()
     }
-  }, [user?.id, loading, user?.email])
+  }, [user?.id, loading, user?.email, communityId, hasUserPortfolio, userPortfolio])
 
   useEffect(() => {
     if (!user?.id) return
@@ -246,26 +225,34 @@ export default function EventsRightColumn({ onToggleRightColumn }: { onToggleRig
               />
             </div>
           ) : (
-            <div className="rounded-2xl p-4 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 text-white backdrop-blur-xl border border-white/5 mb-4 aspect-square flex flex-col">
-              <div className="h-10 w-10 rounded-2xl bg-white/20 grid place-items-center font-bold text-white text-lg">?</div>
-              <div className="mt-auto">
-                <div className="text-lg font-semibold text-white">No Profile Yet</div>
-                <div className="text-sm text-white/90 mt-1">Create your portfolio</div>
+            <div className="rounded-2xl p-5 bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 text-white backdrop-blur-xl border border-white/10 mb-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 grid place-items-center">
+                    <Plus className="w-6 h-6 text-white" />
+                  </div>
+                  <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse" />
+                </div>
+                <div className="text-lg font-semibold text-white mb-1">Create Community Portfolio</div>
+                <div className="text-sm text-white/80 leading-relaxed">
+                  Join this community by creating your personalized portfolio
+                </div>
               </div>
             </div>
           )}
 
           <button
-            onClick={!user ? () => router.push("/login") : hasPortfolio ? handleEditProfile : handleCreateProfile}
+            onClick={!user ? () => router.push("/login") : portfolio ? handleEditProfile : handleCreateProfile}
             className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-700/60 bg-zinc-800/60 text-white"
           >
-            {!user ? "Sign In" : hasPortfolio ? "Edit Profile" : "Create New Profile"}
+            {!user ? "Sign In" : portfolio ? "Edit Profile" : "Create New Portfolio"}
           </button>
 
-          {hasPortfolio && user && (
+          {portfolio && user && (
             <button
               onClick={handleUpdateFromResume}
-              className="w-full mt-2 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-700/60 flex items-center justify-center gap-2 bg-zinc-800/60 text-white"
+              className="w-full mt-2 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-zinc-800/60 text-white hover:bg-zinc-700/60"
             >
               <Upload className="w-3.5 h-3.5" />
               Update from Resume

@@ -172,10 +172,16 @@ const eventData = {
 
 export default function EventsPage({ 
   logo = "/bea-logo.svg",
-  communityName = "BEA" 
+  communityName = "BEA",
+  communityId,
+  hasUserPortfolio = false,
+  userPortfolio = null
 }: { 
   logo?: string
-  communityName?: string 
+  communityName?: string
+  communityId?: string
+  hasUserPortfolio?: boolean
+  userPortfolio?: any
 }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("Home")
@@ -320,7 +326,12 @@ export default function EventsPage({
               <div 
                 className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
               >
-                <EventsRightColumn onToggleRightColumn={() => setShowRightColumn(!showRightColumn)} />
+                <EventsRightColumn 
+                  onToggleRightColumn={() => setShowRightColumn(!showRightColumn)} 
+                  communityId={communityId}
+                  hasUserPortfolio={hasUserPortfolio}
+                  userPortfolio={userPortfolio}
+                />
               </div>
             </div>
           </main>

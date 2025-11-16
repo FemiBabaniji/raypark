@@ -320,7 +320,7 @@ export default function EventsPage({
               <div 
                 className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
               >
-                <EventsRightColumn />
+                <EventsRightColumn onToggleRightColumn={() => setShowRightColumn(!showRightColumn)} />
               </div>
             </div>
           </main>

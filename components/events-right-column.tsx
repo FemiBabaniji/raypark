@@ -5,7 +5,7 @@ import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
-import { Upload, ChevronRight, Plus, Sparkles } from 'lucide-react'
+import { Upload, ChevronRight, Plus } from 'lucide-react'
 
 export default function EventsRightColumn({ 
   onToggleRightColumn,
@@ -230,24 +230,31 @@ export default function EventsRightColumn({
               className="mb-4 relative w-full aspect-square rounded-3xl overflow-hidden cursor-pointer focus:outline-none
                          focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
             >
-              {/* Card background with subtle gradient */}
-              <div className="h-full w-full bg-gradient-to-br from-neutral-700/30 to-neutral-800/50 backdrop-blur-xl p-6 flex flex-col border-2 border-dashed border-white/20">
+              {/* Card background with same gradient style as UnifiedPortfolioCard */}
+              <div className="h-full w-full bg-neutral-900 bg-gradient-to-br from-neutral-600/40 to-neutral-800/60 backdrop-blur-xl p-6 flex flex-col">
                 
-                {/* Empty Avatar with Plus icon */}
-                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center mb-5 border-2 border-dashed border-white/30">
-                  <Plus className="w-8 h-8 text-white/50" />
+                {/* Avatar with Plus icon - matching UnifiedPortfolioCard avatar style */}
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center mb-5">
+                  <Plus className="w-8 h-8 text-white/60" />
                 </div>
 
-                {/* Empty Identity placeholders */}
+                {/* Identity section - matching UnifiedPortfolioCard structure */}
                 <div className="flex flex-col mb-4">
-                  <div className="h-6 w-3/4 bg-white/10 rounded mb-2"></div>
-                  <div className="h-4 w-1/2 bg-white/10 rounded"></div>
+                  <div className="text-white/40 font-bold text-xl leading-tight">Your Name</div>
+                  <div className="text-white/30 text-sm leading-snug">Your Title</div>
                 </div>
 
-                {/* Empty Contact placeholders */}
-                <div className="mt-auto space-y-2">
-                  <div className="h-4 w-2/3 bg-white/10 rounded"></div>
-                  <div className="h-4 w-1/2 bg-white/10 rounded"></div>
+                {/* Contact section - matching UnifiedPortfolioCard contact area */}
+                <div className="mt-auto space-y-1.5">
+                  <div className="text-white/30 font-medium text-sm">your@email.com</div>
+                  <div className="text-white/25 text-sm">Your Location</div>
+                </div>
+
+                {/* Footer: handle - matching UnifiedPortfolioCard footer */}
+                <div className="mt-4">
+                  <div className="inline-block bg-white/15 text-white/40 border border-white/25 px-3 py-1.5 rounded-full text-xs font-medium">
+                    @yourhandle
+                  </div>
                 </div>
               </div>
             </div>

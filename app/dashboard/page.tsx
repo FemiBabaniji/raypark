@@ -450,6 +450,52 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen relative bg-background">
+      {/* Apple-style layered gradient background with blue/purple orbs matching events page */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Base dark background layer */}
+        <div className="absolute inset-0 bg-[oklch(0.18_0_0)]" />
+        
+        {/* Smaller, subtle blue gradient - top left */}
+        <div 
+          className="absolute -top-32 left-1/4 w-[500px] h-[500px] rounded-full opacity-20 blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, #4169E1 0%, transparent 65%)",
+          }}
+        />
+        
+        {/* Purple gradient - top right */}
+        <div 
+          className="absolute top-0 right-1/4 w-[450px] h-[450px] rounded-full opacity-15 blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, #7B68EE 0%, transparent 65%)",
+          }}
+        />
+        
+        {/* Blue accent - middle */}
+        <div 
+          className="absolute top-1/3 left-1/3 w-[400px] h-[400px] rounded-full opacity-12 blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, #0EA5E9 0%, transparent 65%)",
+          }}
+        />
+        
+        {/* Violet gradient - bottom right */}
+        <div 
+          className="absolute bottom-1/4 right-1/3 w-[550px] h-[550px] rounded-full opacity-18 blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, #8B5CF6 0%, transparent 65%)",
+          }}
+        />
+        
+        {/* Subtle vignette overlay for depth */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(circle at 50% 50%, transparent 0%, rgba(10, 10, 18, 0.4) 100%)",
+          }}
+        />
+      </div>
+
       {/* Content layer with relative z-index */}
       <div className="relative z-10">
         <div className="fixed top-8 left-8 z-50">
@@ -541,7 +587,7 @@ export default function DashboardPage() {
                               <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                                 {portfolio.avatarUrl ? (
                                   // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-xl" />
+                                  <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
                                 ) : (
                                   <span className="text-white font-bold text-base">{initials}</span>
                                 )}

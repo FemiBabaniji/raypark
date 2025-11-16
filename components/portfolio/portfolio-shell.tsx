@@ -59,73 +59,27 @@ export default function PortfolioShell({
   className,
 }: PortfolioShellProps & { logoHref?: string }) {
   return (
-    <div className={`min-h-screen relative text-white ${className ?? ""}`} style={{ backgroundColor: "oklch(0.18 0 0)" }}>
-      {/* Apple-style gradient orbs background layer */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large blue gradient orb - top left */}
-        <div 
-          className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Purple gradient orb - top right */}
-        <div 
-          className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Blue gradient orb - middle left */}
-        <div 
-          className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Purple/Violet gradient orb - bottom right */}
-        <div 
-          className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
-          }}
-        />
-        
-        {/* Smaller accent blue orb - bottom left */}
-        <div 
-          className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
-          }}
-        />
+    <div className={`min-h-screen bg-background text-white ${className ?? ""}`}>
+      {/* Top Nav (consistent across all portfolios) */}
+      <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
+        {/* Left: Title (or Back if supplied) */}
+        <div className="flex items-center gap-3">
+          {onBack ? <BackButton onClick={onBack} /> : null}
+          <h1 className="text-lg font-medium">{title}</h1>
+        </div>
+
+        {/* Center: Logo pill */}
+        <div className="flex-1 flex justify-center">
+          <LogoPill src={logoSrc} href={logoHref} />
+        </div>
+
+        {/* Right: configurable slot (e.g., + button). Hide when preview if you want */}
+        <div className="min-w-[40px] flex justify-end">{!isPreviewMode ? rightSlot : null}</div>
       </div>
 
-      {/* Content layer with relative positioning to appear above gradient */}
-      <div className="relative z-10">
-        {/* Top Nav (consistent across all portfolios) */}
-        <div className="flex justify-between items-center mb-6 lg:mb-8 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8 pt-6">
-          {/* Left: Title (or Back if supplied) */}
-          <div className="flex items-center gap-3">
-            {onBack ? <BackButton onClick={onBack} /> : null}
-            <h1 className="text-lg font-medium">{title}</h1>
-          </div>
-
-          {/* Center: Logo pill */}
-          <div className="flex-1 flex justify-center">
-            <LogoPill src={logoSrc} href={logoHref} />
-          </div>
-
-          {/* Right: configurable slot (e.g., + button). Hide when preview if you want */}
-          <div className="min-w-[40px] flex justify-end">{!isPreviewMode ? rightSlot : null}</div>
-        </div>
-
-        {/* Content area — two columns by default (matches your pages) */}
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-          {children}
-        </div>
+      {/* Content area — two columns by default (matches your pages) */}
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        {children}
       </div>
     </div>
   )

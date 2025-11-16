@@ -454,7 +454,7 @@ export default function DashboardPage() {
         <div 
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, #1e1e2e 0%, #0f0f1a 50%, #1a1a2e 100%)",
+            background: "linear-gradient(135deg, #0d0d15 0%, #12121d 15%, #0a0a12 30%, #15152a 45%, #0f0f1a 60%, #1a1a28 75%, #0e0e16 90%, #13132a 100%)",
           }}
         />
       </div>

@@ -13,6 +13,7 @@ export interface PortfolioData {
   community_id?: string // Optional community association
   created_at?: string
   updated_at?: string
+  template_id?: string // Optional template association
 }
 
 const isUUID = (v?: string) =>
@@ -71,6 +72,7 @@ export async function createPortfolioOnce(params: {
   theme_id: string
   description?: string
   community_id?: string
+  template_id?: string
 }) {
   const supabase = createClient()
   const baseName = params.name?.trim() || "portfolio"
@@ -115,6 +117,11 @@ export async function createPortfolioOnce(params: {
       console.log("[v0] Creating portfolio with community_id:", params.community_id)
     }
 
+    if (params.template_id && isUUID(params.template_id)) {
+      insertData.template_id = params.template_id
+      console.log("[v0] Creating portfolio with template_id:", params.template_id)
+    }
+
     const { data, error } = await supabase.from("portfolios").insert(insertData).select("id, slug, name").single()
 
     if (!error && data) {
@@ -157,6 +164,7 @@ export async function updatePortfolioById(
     theme_id?: string
     is_public?: boolean
     community_id?: string
+    template_id?: string
   },
 ) {
   if (!isUUID(portfolioId)) throw new Error("updatePortfolioById requires a real portfolioId (UUID)")
@@ -314,6 +322,10 @@ export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Pr
 
   if ((portfolio as any).community_id) {
     baseData.community_id = (portfolio as any).community_id
+  }
+
+  if ((portfolio as any).template_id) {
+    baseData.template_id = (portfolio as any).template_id
   }
 
   let savedPortfolio
@@ -823,6 +835,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
     right: Array<{ id: string; type: string }>
   }
   widgetContent: Record<string, any>
+  isFromTemplate: boolean
 } | null> {
   const supabase = createClient()
   console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
@@ -835,6 +848,12 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
     }
     console.log("[v0] ✅ Portfolio community verified")
   }
+
+  const { data: portfolio } = await supabase
+    .from("portfolios")
+    .select("template_id")
+    .eq("id", portfolioId)
+    .maybeSingle()
 
   const { data: page } = await supabase
     .from("pages")
@@ -849,6 +868,58 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   }
 
   console.log("[v0] ✅ Found page ID:", page.id)
+
+  // Check if there are any widget instances
+  const { data: instances } = await supabase
+    .from("widget_instances")
+    .select("id")
+    .eq("page_id", page.id)
+    .limit(1)
+
+  const hasWidgetInstances = (instances?.length || 0) > 0
+
+  // If portfolio has template_id and NO widget instances, load from template
+  if (portfolio?.template_id && !hasWidgetInstances) {
+    console.log("[v0] 📋 Portfolio is template-based, loading from template:", portfolio.template_id)
+    
+    const { data: template } = await supabase
+      .from("portfolio_templates")
+      .select("layout, widget_configs")
+      .eq("id", portfolio.template_id)
+      .maybeSingle()
+
+    if (template) {
+      console.log("[v0] ✅ Template found, loading widgets from template definition")
+      
+      const widgetContent: Record<string, any> = {}
+      
+      // Build widgetContent from template widget_configs
+      for (const config of template.widget_configs) {
+        widgetContent[config.id] = config.props
+      }
+
+      const leftWidgets = template.layout.left.widgets.map((id: string) => ({
+        id,
+        type: widgetContent[id]?.type || id
+      }))
+
+      const rightWidgets = template.layout.right.widgets.map((id: string) => ({
+        id,
+        type: widgetContent[id]?.type || id
+      }))
+
+      console.log("[v0] ✅ Loaded template with", Object.keys(widgetContent).length, "widgets")
+      
+      return {
+        layout: { left: leftWidgets, right: rightWidgets },
+        widgetContent,
+        isFromTemplate: true
+      }
+    }
+  }
+
+  // Otherwise, load from widget_instances (saved portfolio)
+  console.log("[v0] 📂 Loading from saved widget instances")
 
   const { data: layoutData } = await supabase
     .from("page_layouts")
@@ -865,45 +936,40 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
   const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
   const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
-  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
 
-  const { data: instances } = await supabase
+  const { data: allInstances } = await supabase
     .from("widget_instances")
     .select("id, widget_type_id, props")
     .eq("page_id", page.id)
 
-  console.log("[v0] Found", instances?.length || 0, "widget instances")
+  console.log("[v0] Found", allInstances?.length || 0, "widget instances")
 
   const instanceMap: Record<string, { type: string; props: any }> = {}
   const typeToPropsMap: Record<string, any> = {}
   const widgetContent: Record<string, any> = {}
 
-  for (const instance of instances || []) {
+  for (const instance of allInstances || []) {
     const widgetType = idToKey[instance.widget_type_id]
     if (!widgetType) continue
 
     const props = instance.props || {}
 
-    // Store by instance ID (for UUID-based widgets)
     instanceMap[instance.id] = {
       type: widgetType,
       props
     }
 
-    // Store by widget type (for type-based widgets)
     typeToPropsMap[widgetType] = props
 
     console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
   }
   
   const leftWidgets = leftWidgetKeys.map((key: string) => {
-    // Handle identity widget specially
     if (key === "identity") {
       widgetContent.identity = typeToPropsMap.identity || {}
       return { id: key, type: key }
     }
     
-    // Check if key is UUID-based (e.g., "description-uuid123")
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -913,7 +979,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       }
     }
     
-    // Handle plain type strings (e.g., "description", "projects")
     if (typeToPropsMap[key]) {
       widgetContent[key] = typeToPropsMap[key]
       console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
@@ -925,7 +990,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   })
 
   const rightWidgets = rightWidgetKeys.map((key: string) => {
-    // Check if key is UUID-based
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -935,7 +999,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       }
     }
     
-    // Handle plain type strings
     if (typeToPropsMap[key]) {
       widgetContent[key] = typeToPropsMap[key]
       console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
@@ -952,6 +1015,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   return {
     layout: { left: leftWidgets, right: rightWidgets },
     widgetContent,
+    isFromTemplate: false
   }
 }
 
@@ -994,9 +1058,10 @@ async function insertPortfolioWithRetry(
     is_demo?: boolean
     id?: string
     community_id?: string
+    template_id?: string
   },
 ) {
-  const { community_id, ...basePayload } = payload
+  const { community_id, template_id, ...basePayload } = payload
 
   const candidates = [payload.slug]
   for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
@@ -1011,6 +1076,10 @@ async function insertPortfolioWithRetry(
 
     if (community_id) {
       insertData.community_id = community_id
+    }
+
+    if (template_id) {
+      insertData.template_id = template_id
     }
 
     const { data, error } = await supabase.from("portfolios").insert(insertData).select().maybeSingle()
@@ -1097,4 +1166,97 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
   }
 
   return (wi?.props as IdentityProps) ?? null
+}
+
+export async function materializeTemplateWidgets(portfolioId: string): Promise<void> {
+  const supabase = createClient()
+  console.log("[v0] 🔧 Materializing template widgets for portfolio:", portfolioId)
+
+  const { data: portfolio } = await supabase
+    .from("portfolios")
+    .select("template_id")
+    .eq("id", portfolioId)
+    .maybeSingle()
+
+  if (!portfolio?.template_id) {
+    console.log("[v0] ℹ️ Portfolio has no template_id, skipping materialization")
+    return
+  }
+
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  if (!page?.id) {
+    throw new Error("No main page found for portfolio")
+  }
+
+  // Check if already materialized
+  const { data: existingInstances } = await supabase
+    .from("widget_instances")
+    .select("id")
+    .eq("page_id", page.id)
+    .limit(1)
+
+  if ((existingInstances?.length || 0) > 0) {
+    console.log("[v0] ℹ️ Widgets already materialized, skipping")
+    return
+  }
+
+  const { data: template } = await supabase
+    .from("portfolio_templates")
+    .select("layout, widget_configs")
+    .eq("id", portfolio.template_id)
+    .maybeSingle()
+
+  if (!template) {
+    throw new Error("Template not found")
+  }
+
+  console.log("[v0] 📋 Materializing", template.widget_configs.length, "widgets from template")
+
+  const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
+  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
+
+  // Create widget instances
+  for (const config of template.widget_configs) {
+    const widgetTypeId = keyToId[config.type]
+    
+    if (!widgetTypeId) {
+      console.warn("[v0] ⚠️ Widget type not found:", config.type)
+      continue
+    }
+
+    const { error } = await supabase
+      .from("widget_instances")
+      .insert({
+        page_id: page.id,
+        widget_type_id: widgetTypeId,
+        props: config.props,
+        enabled: true,
+      })
+
+    if (error) {
+      console.error("[v0] ❌ Failed to create widget:", config.type, error)
+    } else {
+      console.log("[v0] ✅ Materialized widget:", config.type)
+    }
+  }
+
+  // Create layout
+  const { error: layoutError } = await supabase
+    .from("page_layouts")
+    .insert({
+      page_id: page.id,
+      layout: template.layout,
+    })
+
+  if (layoutError) {
+    console.error("[v0] ❌ Failed to create layout:", layoutError)
+  } else {
+    console.log("[v0] ✅ Layout materialized successfully")
+  }
 }

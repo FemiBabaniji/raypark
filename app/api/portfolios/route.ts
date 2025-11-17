@@ -138,6 +138,12 @@ export async function POST(request: NextRequest) {
       insertData.community_id = community_id
     }
 
+    // Add template_id reference if template was selected
+    if (templateId) {
+      insertData.template_id = templateId
+      console.log("[v0] 📋 Linking portfolio to template:", templateId)
+    }
+
     const { data: portfolio, error: portfolioError } = await supabase
       .from("portfolios")
       .insert(insertData)
@@ -214,129 +220,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[v0] ✅ Main page created:", mainPage.id)
-
-    let layoutStructure: any
-    let widgetConfigs: any[] = []
-
-    if (templateId) {
-      console.log("[v0] 📋 Fetching template with ID:", templateId)
-      const template = await getTemplateById(templateId)
-      
-      if (template) {
-        console.log("[v0] ✅ Using database template:", template.name)
-        console.log("[v0] Template layout:", JSON.stringify(template.layout, null, 2))
-        console.log("[v0] Template widget_configs count:", template.widget_configs.length)
-        console.log("[v0] Template widget_configs:", JSON.stringify(template.widget_configs, null, 2))
-        
-        layoutStructure = template.layout
-        widgetConfigs = template.widget_configs
-      } else {
-        console.warn("[v0] ⚠️ Template not found, using blank template")
-        layoutStructure = {
-          left: { type: "vertical", widgets: ["identity"] },
-          right: { type: "vertical", widgets: [] },
-        }
-        widgetConfigs = [{ id: "identity", type: "identity", props: { selectedColor: 3 } }]
-      }
-    } else {
-      // Blank template
-      layoutStructure = {
-        left: { type: "vertical", widgets: ["identity"] },
-        right: { type: "vertical", widgets: [] },
-      }
-      widgetConfigs = [{ id: "identity", type: "identity", props: { selectedColor: 3 } }]
-    }
-
-    console.log("[v0] 📋 Processing", widgetConfigs.length, "widgets from template")
-
-    const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
-    const keyToId: Record<string, string> = {}
-    for (const wt of widgetTypes || []) {
-      keyToId[wt.key] = wt.id
-    }
-
-    const templateIdToActualId: Record<string, string> = {}
-
-    for (const widgetConfig of widgetConfigs) {
-      console.log("[v0] Creating widget:", widgetConfig.type, "with template ID:", widgetConfig.id)
-      
-      const widgetTypeId = keyToId[widgetConfig.type]
-      
-      if (!widgetTypeId) {
-        console.warn("[v0] ⚠️ Widget type not found:", widgetConfig.type)
-        continue
-      }
-
-      const props = { ...widgetConfig.props }
-      
-      if (widgetConfig.type === "identity") {
-        props.name = user.user_metadata?.full_name || name
-        props.email = user.email || ""
-        props.handle = `@${portfolio.slug}`
-      }
-
-      const { data: createdWidget, error: widgetError } = await supabase
-        .from("widget_instances")
-        .insert({
-          page_id: mainPage.id,
-          widget_type_id: widgetTypeId,
-          props,
-          enabled: true,
-        })
-        .select("id")
-        .single()
-
-      if (widgetError) {
-        console.error("[v0] ⚠️ Failed to create widget:", widgetConfig.type, widgetError)
-      } else if (createdWidget?.id) {
-        if (widgetConfig.type === "identity") {
-          templateIdToActualId[widgetConfig.id] = "identity"
-        } else {
-          templateIdToActualId[widgetConfig.id] = `${widgetConfig.type}-${createdWidget.id}`
-        }
-        console.log("[v0] ✅ Created widget:", widgetConfig.type, "->", templateIdToActualId[widgetConfig.id])
-      }
-    }
-
-    console.log("[v0] 📋 Widget ID mapping:", JSON.stringify(templateIdToActualId, null, 2))
-
-    const finalLayout = {
-      left: {
-        type: layoutStructure.left.type,
-        widgets: layoutStructure.left.widgets.map((id: string) => {
-          const mapped = templateIdToActualId[id] || id
-          console.log("[v0] Left widget mapping:", id, "->", mapped)
-          return mapped
-        }),
-      },
-      right: {
-        type: layoutStructure.right.type,
-        widgets: layoutStructure.right.widgets.map((id: string) => {
-          const mapped = templateIdToActualId[id] || id
-          console.log("[v0] Right widget mapping:", id, "->", mapped)
-          return mapped
-        }),
-      },
-    }
-
-    console.log("[v0] 📐 Final layout structure:", JSON.stringify(finalLayout, null, 2))
-
-    const { data: savedLayout, error: layoutError } = await supabase
-      .from("page_layouts")
-      .insert({
-        page_id: mainPage.id,
-        layout: finalLayout,
-      })
-      .select("*")
-      .single()
-
-    if (layoutError) {
-      console.error("[v0] ❌ Failed to create page layout:", layoutError)
-    } else {
-      console.log("[v0] ✅ Page layout saved successfully")
-    }
-
-    console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)
+    console.log("[v0] ✅ Portfolio fully initialized with template reference (widgets will be materialized on first edit)")
     
     return NextResponse.json({ 
       portfolio,

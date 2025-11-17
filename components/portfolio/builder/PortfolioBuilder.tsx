@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
-import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout, loadPortfolioData } from "@/lib/portfolio-service"
+import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout, loadPortfolioData, materializeTemplateWidgets } from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -80,6 +80,8 @@ export default function PortfolioBuilder({
   const [isLoadingData, setIsLoadingData] = useState(false)
   const hasLoadedDataRef = useRef<string | null>(null)
 
+  const [isFromTemplate, setIsFromTemplate] = useState(false)
+
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
@@ -145,21 +147,21 @@ export default function PortfolioBuilder({
         const data = await loadPortfolioData(idToLoad, communityId)
 
         if (data) {
-          console.log("[v0] ✅ Loaded data from database")
+          console.log("[v0] ✅ Loaded data from", data.isFromTemplate ? "template" : "database")
+          
+          setIsFromTemplate(data.isFromTemplate)
 
           if (data.widgetContent.identity) {
             console.log("[v0] 🎨 Loading identity with selectedColor:", data.widgetContent.identity.selectedColor)
-            console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.widgetContent.identity, null, 2))
-            
             parentOnIdentityChange(data.widgetContent.identity)
           }
 
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
-            console.log("[v0] Setting widgets from database")
+            console.log("[v0] Setting widgets from", data.isFromTemplate ? "template" : "database")
             setLeftWidgets(data.layout.left.length > 0 ? data.layout.left : [{ id: "identity", type: "identity" }])
             setRightWidgets(data.layout.right)
           } else {
-            console.log("[v0] No widgets in database, using default identity widget")
+            console.log("[v0] No widgets found, using default identity widget")
             setLeftWidgets([{ id: "identity", type: "identity" }])
             setRightWidgets([])
           }
@@ -167,21 +169,6 @@ export default function PortfolioBuilder({
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
             setWidgetContent(data.widgetContent)
-          }
-
-          if (data.projectColors && Object.keys(data.projectColors).length > 0) {
-            console.log("[v0] Setting project colors")
-            setProjectColors(data.projectColors)
-          }
-
-          if (data.widgetColors && Object.keys(data.widgetColors).length > 0) {
-            console.log("[v0] Setting widget colors")
-            setWidgetColors(data.widgetColors)
-          }
-
-          if (data.galleryGroups && Object.keys(data.galleryGroups).length > 0) {
-            console.log("[v0] Setting gallery groups")
-            setGalleryGroups(data.galleryGroups)
           }
 
           console.log("[v0] ✅ Data loaded and state updated successfully")
@@ -196,7 +183,6 @@ export default function PortfolioBuilder({
         
         setTimeout(() => {
           console.log("[v0] ✅ Enabling auto-save after data load")
-          console.log("[v0] 🎨 Current identity.selectedColor:", identity.selectedColor)
           setHasInitialized(true)
         }, 1500)
         
@@ -391,6 +377,12 @@ export default function PortfolioBuilder({
       console.log("[v0] 💾 Starting auto-save for portfolio:", currentPortfolioId)
       
       try {
+        if (isFromTemplate) {
+          console.log("[v0] 🔧 Portfolio is from template, materializing widgets...")
+          await materializeTemplateWidgets(currentPortfolioId)
+          setIsFromTemplate(false) // Mark as materialized
+        }
+
         await updatePortfolioById(currentPortfolioId, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -412,7 +404,7 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
+  }, [hasInitialized, user, state, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId, isFromTemplate])
 
   const prevLeftWidgetsRef = useRef<string>("")
   const prevRightWidgetsRef = useRef<string>("")

@@ -285,8 +285,8 @@ export default function PortfolioBuilder({
         }
 
         console.log("[v0] Saving widget layout and content...")
-        console.log("[v0] Left widgets:", leftWidgets.map(w => w.id))
-        console.log("[v0] Right widgets:", rightWidgets.map(w => w.id))
+        console.log("[v0] Left widgets:", leftWidgets.map(w => w.type))
+        console.log("[v0] Right widgets:", rightWidgets.map(w => w.type))
         console.log("[v0] Widget content keys:", Object.keys(contentToSave))
 
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
@@ -296,7 +296,7 @@ export default function PortfolioBuilder({
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
       }
-    }, 500)
+    }, 1000) // Increased from 500ms
 
     setSaveTimeout(timeout)
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
@@ -329,7 +329,7 @@ export default function PortfolioBuilder({
         console.log("[v0] ✅ Portfolio builder initialized, auto-save enabled")
         setHasInitialized(true)
       }
-    }, 300) // Reduced from 500ms
+    }, 1000) // Increased from 300ms
 
     return () => clearTimeout(timer)
   }, [isLoadingData])
@@ -398,8 +398,18 @@ export default function PortfolioBuilder({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
+    // Check if widget already exists
+    const existsInLeft = leftWidgets.some(w => w.type === type)
+    const existsInRight = rightWidgets.some(w => w.type === type)
+    
+    if (existsInLeft || existsInRight) {
+      console.warn("[v0] ⚠️ Widget type already exists:", type)
+      alert(`You already have a ${type} widget. Only one widget of each type is allowed.`)
+      return
+    }
+
     const newWidget: WidgetDef = {
-      id: `${type}-${Date.now()}`,
+      id: type,  // Use type as ID
       type: type,
     }
 
@@ -576,6 +586,29 @@ export default function PortfolioBuilder({
           </motion.div>
         )
 
+      case "meeting-scheduler":
+        return (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <MeetingSchedulerWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              onDelete={() => deleteWidget(w.id, column)}
+              selectedColor={widgetColors[w.type] ?? 5}
+              onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.type]: color }))}
+              content={widgetContent[w.type]}
+              onContentChange={(content: MeetingSchedulerContent) =>
+                setWidgetContent((prev) => ({ ...prev, [w.type]: content }))
+              }
+            />
+          </motion.div>
+        )
+
       case "startup":
         return (
           <motion.div
@@ -592,29 +625,6 @@ export default function PortfolioBuilder({
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-
-      case "meeting-scheduler":
-        return (
-          <motion.div
-            key={w.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <MeetingSchedulerWidget
-              widgetId={w.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              onDelete={() => deleteWidget(w.id, column)}
-              selectedColor={widgetColors[w.id] ?? 5}
-              onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.id]: color }))}
-              content={widgetContent[w.id]}
-              onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
-              }
             />
           </motion.div>
         )

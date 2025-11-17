@@ -715,38 +715,56 @@ export async function saveWidgetLayout(
   widgetContent: Record<string, any>,
 ) {
   const supabase = createClient()
+  console.log("[v0] 💾 saveWidgetLayout called for portfolio:", portfolioId)
 
   const pageId = await ensureMainPage(supabase, portfolioId)
+  console.log("[v0] ✅ Page ID confirmed:", pageId)
 
   const layout = {
-    left: { type: "vertical", widgets: leftWidgets.map((w) => w.id) },
-    right: { type: "vertical", widgets: rightWidgets.map((w) => w.id) },
+    left: { type: "vertical", widgets: leftWidgets.map((w) => w.type) },
+    right: { type: "vertical", widgets: rightWidgets.map((w) => w.type) },
   }
 
+  console.log("[v0] Saving layout:", layout)
+
   // Save layout
-  await supabase
+  const { error: layoutError } = await supabase
     .from("page_layouts")
     .upsert({ page_id: pageId, layout }, { onConflict: "page_id" })
+
+  if (layoutError) {
+    console.error("[v0] ❌ Failed to save layout:", layoutError)
+    throw layoutError
+  }
+
+  console.log("[v0] ✅ Layout saved successfully")
 
   // Get widget type mappings
   const { data: types } = await supabase.from("widget_types").select("id, key")
   const keyToId = Object.fromEntries((types ?? []).map((t) => [t.key, t.id]))
 
-  const allWidgetIds = [...leftWidgets.map(w => w.id), ...rightWidgets.map(w => w.id)]
+  console.log("[v0] Available widget types:", Object.keys(keyToId))
 
-  for (const widgetId of allWidgetIds) {
-    // Extract widget type from ID (e.g., "meeting-scheduler-1234" -> "meeting-scheduler")
-    const widgetType = widgetId.includes('-') && /\d{13,}$/.test(widgetId.split('-').pop() || '')
-      ? widgetId.substring(0, widgetId.lastIndexOf('-'))
-      : widgetId
+  const allWidgetTypes = new Set([
+    ...leftWidgets.map(w => w.type),
+    ...rightWidgets.map(w => w.type)
+  ])
 
+  console.log("[v0] Unique widget types to save:", Array.from(allWidgetTypes))
+
+  for (const widgetType of allWidgetTypes) {
     const widget_type_id = keyToId[widgetType]
-    if (!widget_type_id) continue
+    
+    if (!widget_type_id) {
+      console.warn("[v0] ⚠️ Widget type not found in database:", widgetType)
+      continue
+    }
 
-    const content = widgetContent[widgetId] || {}
+    const content = widgetContent[widgetType] || {}
 
-    // Upsert widget with content
-    await supabase
+    console.log("[v0] Saving widget:", widgetType, "with content keys:", Object.keys(content))
+
+    const { error: widgetError } = await supabase
       .from("widget_instances")
       .upsert(
         { 
@@ -757,9 +775,15 @@ export async function saveWidgetLayout(
         },
         { onConflict: "page_id,widget_type_id" }
       )
+
+    if (widgetError) {
+      console.error("[v0] ❌ Failed to save widget:", widgetType, widgetError)
+    } else {
+      console.log("[v0] ✅ Widget saved:", widgetType)
+    }
   }
 
-  console.log("[v0] ✅ Layout and widgets saved successfully")
+  console.log("[v0] ✅ All widgets saved successfully")
 }
 
 export async function getPageLayout(portfolioId: string): Promise<{
@@ -801,7 +825,7 @@ export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: 
     return []
   }
 
-  const { data: instances, error: instancesError } = await supabase
+  const { data: instances } = await supabase
     .from("widget_instances")
     .select(
       `
@@ -817,6 +841,97 @@ export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: 
       props: i.props || {},
     })) || []
   )
+}
+
+export async function loadPortfolioData(portfolioId: string): Promise<{
+  layout: {
+    left: Array<{ id: string; type: string }>
+    right: Array<{ id: string; type: string }>
+  }
+  widgetContent: Record<string, any>
+  identity: any
+  projectColors?: Record<string, string>
+  widgetColors?: Record<string, ThemeIndex>
+  galleryGroups?: Record<string, any[]>
+} | null> {
+  const supabase = createClient()
+  console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
+
+  // Get the main page
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  if (!page?.id) {
+    console.log("[v0] ℹ️ No main page found for portfolio")
+    return null
+  }
+
+  console.log("[v0] ✅ Found page ID:", page.id)
+
+  // Get page layout
+  const { data: layoutData } = await supabase
+    .from("page_layouts")
+    .select("layout")
+    .eq("page_id", page.id)
+    .maybeSingle()
+
+  const rawLayout = layoutData?.layout as any
+  const leftWidgetTypes = rawLayout?.left?.widgets || []
+  const rightWidgetTypes = rawLayout?.right?.widgets || []
+
+  console.log("[v0] Left widget types from DB:", leftWidgetTypes)
+  console.log("[v0] Right widget types from DB:", rightWidgetTypes)
+
+  // Get widget types
+  const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
+  const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
+
+  // Get all widget instances
+  const { data: instances } = await supabase
+    .from("widget_instances")
+    .select("widget_type_id, props")
+    .eq("page_id", page.id)
+
+  console.log("[v0] Found", instances?.length || 0, "widget instances")
+
+  const widgetContent: Record<string, any> = {}
+  let identity: any = {}
+
+  for (const instance of instances || []) {
+    const widgetKey = idToKey[instance.widget_type_id]
+    if (!widgetKey) continue
+
+    const props = instance.props || {}
+
+    if (widgetKey === "identity") {
+      identity = props
+      console.log("[v0] Loaded identity widget")
+    } else {
+      widgetContent[widgetKey] = props
+      console.log("[v0] Loaded widget:", widgetKey)
+    }
+  }
+
+  const leftWidgets = leftWidgetTypes.map((type: string) => ({ 
+    id: type,  // Use type as ID
+    type 
+  }))
+  const rightWidgets = rightWidgetTypes.map((type: string) => ({ 
+    id: type,  // Use type as ID
+    type 
+  }))
+
+  console.log("[v0] ✅ Returning loaded data with", leftWidgets.length, "left and", rightWidgets.length, "right widgets")
+
+  return {
+    layout: { left: leftWidgets, right: rightWidgets },
+    widgetContent,
+    identity,
+  }
 }
 
 const makeSuffix = () => Math.random().toString(36).slice(2, 7)
@@ -877,94 +992,3 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
 }
 
 export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")
-
-export async function loadPortfolioData(portfolioId: string): Promise<{
-  layout: {
-    left: Array<{ id: string; type: string }>
-    right: Array<{ id: string; type: string }>
-  }
-  widgetContent: Record<string, any>
-  identity: any
-  projectColors?: Record<string, string>
-  widgetColors?: Record<string, ThemeIndex>
-  galleryGroups?: Record<string, any[]>
-} | null> {
-  const supabase = createClient()
-
-  
-  // Get the main page
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (!page?.id) {
-    console.log("[v0] No main page found for portfolio")
-    return null
-  }
-
-  // Get page layout
-  const { data: layoutData } = await supabase
-    .from("page_layouts")
-    .select("layout")
-    .eq("page_id", page.id)
-    .maybeSingle()
-
-  const rawLayout = layoutData?.layout as any
-  const leftWidgetIds = rawLayout?.left?.widgets || []
-  const rightWidgetIds = rawLayout?.right?.widgets || []
-
-  // Get widget types
-  const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
-  const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
-
-  // Get all widget instances
-  const { data: instances } = await supabase
-    .from("widget_instances")
-    .select("widget_type_id, props")
-    .eq("page_id", page.id)
-
-  // Build widget content
-  const widgetContent: Record<string, any> = {}
-  let identity: any = {}
-
-  for (const instance of instances || []) {
-    const widgetKey = idToKey[instance.widget_type_id]
-    if (!widgetKey) continue
-
-    const props = instance.props || {}
-
-    if (widgetKey === "identity") {
-      identity = props
-    } else {
-      widgetContent[widgetKey] = props
-    }
-  }
-
-  // Extract widget type from ID
-  const extractWidgetType = (id: string): string => {
-    const lastDash = id.lastIndexOf("-")
-    if (lastDash > 0 && /^\d{13,}$/.test(id.substring(lastDash + 1))) {
-      return id.substring(0, lastDash)
-    }
-    return id
-  }
-
-  // Convert to WidgetDef format
-  const leftWidgets = leftWidgetIds.map((id: string) => ({ 
-    id, 
-    type: extractWidgetType(id) 
-  }))
-  const rightWidgets = rightWidgetIds.map((id: string) => ({ 
-    id, 
-    type: extractWidgetType(id) 
-  }))
-
-  return {
-    layout: { left: leftWidgets, right: rightWidgets },
-    widgetContent,
-    identity,
-  }
-}

@@ -182,17 +182,35 @@ export async function createPortfolio(
   name: string,
   communityId?: string | null
 ): Promise<{ id: string; slug: string; name: string }> {
+  console.log("[v0] createPortfolio called with:", { 
+    userId: user?.id, 
+    name, 
+    communityId,
+    userKeys: Object.keys(user || {})
+  })
+  
   if (!user?.id) {
+    console.error("[v0] User authentication failed - no user ID")
     throw new Error("User must be authenticated to create a portfolio")
   }
 
-  return createPortfolioOnce({
-    userId: user.id,
-    name: name,
-    theme_id: "default",
-    description: `${name}'s portfolio`,
-    community_id: communityId || undefined,
-  })
+  console.log("[v0] Calling createPortfolioOnce...")
+  
+  try {
+    const result = await createPortfolioOnce({
+      userId: user.id,
+      name: name,
+      theme_id: "default",
+      description: `${name}'s portfolio`,
+      community_id: communityId || undefined,
+    })
+    
+    console.log("[v0] createPortfolioOnce succeeded:", result)
+    return result
+  } catch (error) {
+    console.error("[v0] createPortfolioOnce failed:", error)
+    throw error
+  }
 }
 
 export async function updatePortfolioById(

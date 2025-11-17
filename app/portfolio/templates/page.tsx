@@ -24,7 +24,14 @@ export default function TemplateSelectionPage() {
   }, [user, loading, router])
 
   const handleTemplateSelect = async (templateId: string | null) => {
-    if (isCreating || !user) return
+    if (isCreating || !user) {
+      console.log("[v0] Cannot create portfolio - isCreating:", isCreating, "user:", !!user)
+      return
+    }
+    
+    console.log("[v0] Starting template selection:", templateId)
+    console.log("[v0] User object:", user)
+    console.log("[v0] Community ID:", communityId)
     
     setIsCreating(true)
     
@@ -32,9 +39,19 @@ export default function TemplateSelectionPage() {
       const template = templateId ? PORTFOLIO_TEMPLATES.find(t => t.id === templateId) : null
       
       const portfolioName = template ? `My ${template.name} Portfolio` : "My Portfolio"
-      const newPortfolio = await createPortfolio(user, portfolioName, communityId || null)
+      
+      console.log("[v0] Creating portfolio with name:", portfolioName)
+      
+      if (!user?.id) {
+        throw new Error("User authentication is required. Please log in and try again.")
+      }
+      
+      const newPortfolio = await createPortfolio(user, portfolioName, communityId || undefined)
+      
+      console.log("[v0] Portfolio created successfully:", newPortfolio)
       
       if (template) {
+        console.log("[v0] Storing template in localStorage:", template.id)
         localStorage.setItem('pending-template', JSON.stringify({
           portfolioId: newPortfolio.id,
           template: template,
@@ -48,9 +65,13 @@ export default function TemplateSelectionPage() {
         params.set('community', communityId)
       }
       
-      router.push(`/portfolio/builder?${params.toString()}`)
+      const redirectUrl = `/portfolio/builder?${params.toString()}`
+      console.log("[v0] Redirecting to:", redirectUrl)
+      
+      router.push(redirectUrl)
     } catch (error) {
       console.error("[v0] Failed to create portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to create portfolio. Please try again.")
       setIsCreating(false)
     }
   }

@@ -903,13 +903,9 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
           console.log("[v0] 🎨 Identity widget selectedColor:", widgetData.props.selectedColor)
         }
         return { id: key, type: widgetData.type }
-      } else {
-        console.warn("[v0] ⚠️ No instance found for", key)
-        return { id: key, type: widgetType }
       }
     }
     
-    // Fallback for simple keys without UUIDs (shouldn't happen with new system)
     return { id: key, type: key }
   }
 

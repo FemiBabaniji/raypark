@@ -22,6 +22,8 @@ import { DashboardPortfolioGrid, type ExtendedPortfolio } from "@/components/das
 import { loadUserCommunities, getPortfolioForCommunity, swapPortfolioToCommunity } from "@/lib/community-service"
 import { linkPortfolioToCommunity } from "@/lib/community-service"
 import type { Community } from "@/lib/community-service"
+import { TemplateLibraryModal } from "@/components/template-library-modal"
+import { PORTFOLIO_TEMPLATES, type PortfolioTemplate } from "@/lib/portfolio-templates"
 
 interface ExtendedPortfolio extends UnifiedPortfolio {
   community?: {
@@ -125,6 +127,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"list" | "editor">("list")
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -173,16 +176,20 @@ export default function DashboardPage() {
   }, [authLoading, user])
 
   const handleCreatePortfolio = async () => {
+    setIsTemplateModalOpen(true)
+  }
+
+  const handleSelectTemplate = async (template: PortfolioTemplate | null) => {
     if (!user?.id) {
       const newPortfolio: ExtendedPortfolio = {
         id: safeUUID(),
-        name: "New Portfolio",
-        title: "Portfolio",
+        name: template ? `${template.name} Portfolio` : "New Portfolio",
+        title: template?.presets.identity.title || "Portfolio",
         email: "new@example.com",
-        location: "Location",
+        location: template?.presets.identity.location || "Location",
         handle: "@newuser",
         initials: "NP",
-        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
+        selectedColor: template?.selectedColor || Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: false,
         isTemplate: false,
         community: undefined,
@@ -194,28 +201,38 @@ export default function DashboardPage() {
     }
 
     try {
+      const portfolioName = template ? `${template.name} Portfolio` : "New Portfolio"
       const portfolioData = await createPortfolioOnce({
         userId: user.id,
-        name: "New Portfolio",
+        name: portfolioName,
         theme_id: "default",
-        description: "A new portfolio",
+        description: template?.description || "A new portfolio",
       })
 
       const newPortfolio: ExtendedPortfolio = {
         id: portfolioData.id,
         name: portfolioData.name,
-        title: "Portfolio",
+        title: template?.presets.identity.title || "Portfolio",
         email: `${portfolioData.slug}@example.com`,
-        location: "Location",
+        location: template?.presets.identity.location || "Location",
         handle: `@${portfolioData.slug}`,
         initials: portfolioData.name.slice(0, 2).toUpperCase(),
-        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
+        selectedColor: template?.selectedColor || Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: portfolioData.is_public || false,
         isTemplate: false,
         community: undefined,
       }
 
-      console.log("[v0] Created portfolio:", newPortfolio)
+      console.log("[v0] Created portfolio from template:", template?.name || "blank", newPortfolio)
+      
+      // If template selected, apply the template configuration
+      if (template) {
+        // Store template data in localStorage for the builder to use
+        localStorage.setItem('pending_template', JSON.stringify({
+          portfolioId: newPortfolio.id,
+          template: template,
+        }))
+      }
       
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
@@ -423,6 +440,12 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      <TemplateLibraryModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectTemplate={handleSelectTemplate}
+      />
     </div>
   )
 }

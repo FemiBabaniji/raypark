@@ -78,7 +78,7 @@ export default function PortfolioBuilder({
   const prevUserRef = useRef(user)
   
   const [isLoadingData, setIsLoadingData] = useState(false)
-  const hasLoadedDataRef = useRef(false)
+  const hasLoadedDataRef = useRef<string | null>(null)
 
   useEffect(() => {
     portfolioIdRef.current = portfolioId
@@ -105,26 +105,17 @@ export default function PortfolioBuilder({
     async function loadData() {
       const idToLoad = identity.id || portfolioId
       
-      if (!idToLoad || hasLoadedDataRef.current || isLoadingData) {
-        console.log("[v0] Skipping load:", { idToLoad, hasLoaded: hasLoadedDataRef.current, isLoading: isLoadingData })
-        
-        if (!idToLoad && !hasLoadedDataRef.current) {
-          console.log("[v0] No portfolio ID - using default layout")
-          setLeftWidgets([{ id: "identity", type: "identity" }])
-          setRightWidgets([])
-          hasLoadedDataRef.current = true
-          setIsLoadingData(false)
-          setTimeout(() => {
-            console.log("[v0] ✅ Enabling auto-save for new portfolio")
-            setHasInitialized(true)
-          }, 1000)
-          return
-        }
+      if (!idToLoad || isLoadingData) {
+        console.log("[v0] Skipping load:", { idToLoad, isLoading: isLoadingData })
+        return
+      }
+
+      if (hasLoadedDataRef.current === idToLoad) {
+        console.log("[v0] Already loaded this portfolio:", idToLoad)
         return
       }
 
       setIsLoadingData(true)
-      hasLoadedDataRef.current = true
 
       try {
         console.log("[v0] 🔄 Loading portfolio data for ID:", idToLoad)
@@ -171,10 +162,13 @@ export default function PortfolioBuilder({
           }
 
           console.log("[v0] ✅ Data loaded and state updated successfully")
+          
+          hasLoadedDataRef.current = idToLoad
         } else {
           console.log("[v0] ℹ️ No saved data found, using default layout")
           setLeftWidgets([{ id: "identity", type: "identity" }])
           setRightWidgets([])
+          hasLoadedDataRef.current = idToLoad
         }
         
         setTimeout(() => {
@@ -436,7 +430,6 @@ export default function PortfolioBuilder({
     leftWidgets,
     rightWidgets,
     widgetContent,
-    debouncedSave
   ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {

@@ -259,6 +259,7 @@ export default function PortfolioBuilder({
         console.log("[v0] 💾 Starting auto-save...")
         const id = await ensurePortfolioId()
 
+        // Save portfolio metadata
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -266,6 +267,7 @@ export default function PortfolioBuilder({
           is_public: !!state.is_public,
         })
 
+        // Prepare content with identity
         const contentToSave = {
           ...widgetContent,
           identity: {
@@ -286,21 +288,40 @@ export default function PortfolioBuilder({
           },
         }
 
+        // Save widget layout and content
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
         setLastSaveTime(new Date())
+        setSaveError(null)
         console.log("[v0] ✅ Auto-save completed successfully")
+        
+        // Dispatch event for other components
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
-        setSaveError(error instanceof Error ? error.message : "Save failed")
+        const errorMessage = error instanceof Error ? error.message : "Save failed"
+        setSaveError(errorMessage)
       } finally {
         setIsSaving(false)
       }
     }, 1500)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
+  }, [
+    hasInitialized, 
+    user, 
+    state.name,
+    state.description,
+    state.theme_id,
+    state.is_public,
+    identity,
+    leftWidgets, 
+    rightWidgets, 
+    widgetContent, 
+    isLoadingData, 
+    saveTimeout,
+    ensurePortfolioId
+  ])
 
   useEffect(() => {
     if (hasInitialized) {

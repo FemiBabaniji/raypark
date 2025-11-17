@@ -80,8 +80,6 @@ export default function PortfolioBuilder({
   const [isLoadingData, setIsLoadingData] = useState(false)
   const hasLoadedDataRef = useRef<string | null>(null)
 
-  const prevSelectedColorRef = useRef<number | undefined>(identity.selectedColor)
-
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
@@ -103,22 +101,25 @@ export default function PortfolioBuilder({
 
   const [widgetContent, setWidgetContent] = useState<Record<string, any>>({})
 
+  const identityFromContent = widgetContent.identity || {}
+  const currentIdentity: Identity = {
+    ...identity,
+    ...identityFromContent
+  }
+
   const handleIdentityChange = useCallback(
     (updates: Partial<Identity>) => {
-      console.log("[v0] 🎨 PortfolioBuilder.handleIdentityChange called with:", updates)
-      
-      if (updates.selectedColor !== undefined) {
-        console.log("[v0] 🎨 COLOR CHANGE DETECTED in builder")
-        console.log("[v0] 🎨   Old color:", identity.selectedColor)
-        console.log("[v0] 🎨   New color:", updates.selectedColor)
-        console.log("[v0] 🎨   Type:", typeof updates.selectedColor)
-      }
+      setWidgetContent((prev) => ({
+        ...prev,
+        identity: {
+          ...prev.identity,
+          ...updates
+        }
+      }))
       
       parentOnIdentityChange(updates)
-      
-      console.log("[v0] ✅ parentOnIdentityChange called successfully")
     },
-    [identity.selectedColor, parentOnIdentityChange]
+    [parentOnIdentityChange]
   )
 
   useEffect(() => {
@@ -146,29 +147,11 @@ export default function PortfolioBuilder({
         if (data) {
           console.log("[v0] ✅ Loaded data from database")
 
-          if (data.identity) {
-            console.log("[v0] 🎨 Loading identity with selectedColor:", data.identity.selectedColor)
-            console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.identity, null, 2))
+          if (data.widgetContent.identity) {
+            console.log("[v0] 🎨 Loading identity with selectedColor:", data.widgetContent.identity.selectedColor)
+            console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.widgetContent.identity, null, 2))
             
-            const identityUpdate: Partial<Identity> = {
-              name: data.identity.name,
-              handle: data.identity.handle,
-              avatarUrl: data.identity.avatarUrl,
-              title: data.identity.title,
-              email: data.identity.email,
-              location: data.identity.location,
-              bio: data.identity.bio,
-              linkedin: data.identity.linkedin,
-              dribbble: data.identity.dribbble,
-              behance: data.identity.behance,
-              twitter: data.identity.twitter,
-              unsplash: data.identity.unsplash,
-              instagram: data.identity.instagram,
-              selectedColor: data.identity.selectedColor as ThemeIndex,
-              // ... other identity fields here ...
-            }
-            
-            parentOnIdentityChange(identityUpdate)
+            parentOnIdentityChange(data.widgetContent.identity)
           }
 
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
@@ -415,27 +398,7 @@ export default function PortfolioBuilder({
           is_public: !!state.is_public,
         })
 
-        const contentToSave = {
-          ...widgetContent,
-          identity: {
-            name: identity.name,
-            handle: identity.handle,
-            avatarUrl: identity.avatarUrl,
-            selectedColor: identity.selectedColor,
-            title: identity.title,
-            email: identity.email,
-            location: identity.location,
-            bio: identity.bio,
-            linkedin: identity.linkedin,
-            dribbble: identity.dribbble,
-            behance: identity.behance,
-            twitter: identity.twitter,
-            unsplash: identity.unsplash,
-            instagram: identity.instagram,
-          },
-        }
-
-        await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, contentToSave, communityId)
+        await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, widgetContent, communityId)
 
         setLastSaveTime(new Date())
         console.log("[v0] ✅ Auto-save completed successfully at", new Date().toLocaleTimeString())
@@ -449,12 +412,11 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
+  }, [hasInitialized, user, state, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
   const prevLeftWidgetsRef = useRef<string>("")
   const prevRightWidgetsRef = useRef<string>("")
   const prevWidgetContentRef = useRef<string>("")
-  const prevIdentityRef = useRef<string>("")
 
   useEffect(() => {
     if (!hasInitialized || !portfolioId || isLoadingData) {
@@ -464,30 +426,19 @@ export default function PortfolioBuilder({
     const leftSerialized = JSON.stringify(leftWidgets)
     const rightSerialized = JSON.stringify(rightWidgets)
     const contentSerialized = JSON.stringify(widgetContent)
-    const identitySerialized = JSON.stringify({
-      name: identity.name,
-      handle: identity.handle,
-      title: identity.title,
-      email: identity.email,
-      location: identity.location,
-      bio: identity.bio,
-      selectedColor: identity.selectedColor,
-    })
 
     const leftChanged = leftSerialized !== prevLeftWidgetsRef.current
     const rightChanged = rightSerialized !== prevRightWidgetsRef.current
     const contentChanged = contentSerialized !== prevWidgetContentRef.current
-    const identityChanged = identitySerialized !== prevIdentityRef.current
 
-    if (leftChanged || rightChanged || contentChanged || identityChanged) {
+    if (leftChanged || rightChanged || contentChanged) {
       prevLeftWidgetsRef.current = leftSerialized
       prevRightWidgetsRef.current = rightSerialized
       prevWidgetContentRef.current = contentSerialized
-      prevIdentityRef.current = identitySerialized
       
       debouncedSave()
     }
-  }, [leftWidgets, rightWidgets, widgetContent, identity, hasInitialized, portfolioId, isLoadingData, debouncedSave])
+  }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -601,7 +552,7 @@ export default function PortfolioBuilder({
 
   const exportPortfolioData = () => {
     const exportData: PortfolioExportData = {
-      identity,
+      identity: currentIdentity,
       leftWidgets,
       rightWidgets,
       metadata: {
@@ -618,7 +569,7 @@ export default function PortfolioBuilder({
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${identity.name || "portfolio"}-export.json`
+      a.download = `${currentIdentity.name || "portfolio"}-export.json`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -641,7 +592,7 @@ export default function PortfolioBuilder({
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
           >
             <IdentityWidget
-              identity={identity}
+              identity={currentIdentity}
               isPreviewMode={isPreviewMode}
               onChange={handleIdentityChange}
               editingField={editingField}
@@ -922,7 +873,7 @@ export default function PortfolioBuilder({
   return (
     <>
       <PortfolioShell
-        title={`${identity.name || "your name"}.`}
+        title={`${currentIdentity.name || "your name"}.`}
         isPreviewMode={isPreviewMode}
         rightSlot={rightSlot}
         logoHref="/network"

@@ -838,10 +838,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
     right: Array<{ id: string; type: string }>
   }
   widgetContent: Record<string, any>
-  identity: any
-  projectColors?: Record<string, string>
-  widgetColors?: Record<string, ThemeIndex>
-  galleryGroups?: Record<string, any[]>
 } | null> {
   const supabase = createClient()
   console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
@@ -884,6 +880,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
   const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
   const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
+  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
 
   const { data: instances } = await supabase
     .from("widget_instances")
@@ -893,7 +890,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   console.log("[v0] Found", instances?.length || 0, "widget instances")
 
   const instanceMap: Record<string, { type: string; props: any }> = {}
-  let identity: any = {}
+  const widgetContent: Record<string, any> = {}
 
   for (const instance of instances || []) {
     const widgetType = idToKey[instance.widget_type_id]
@@ -902,9 +899,10 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
     const props = instance.props || {}
 
     if (widgetType === "identity") {
-      identity = props
-      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor)
+      console.log("[v0] 🎨 Loading identity widget into widgetContent - selectedColor:", props.selectedColor)
+      widgetContent.identity = props
     } else {
+      // Check if this is a uniquely-ID'd widget (e.g., description-uuid)
       instanceMap[instance.id] = {
         type: widgetType,
         props
@@ -912,10 +910,11 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
     }
   }
-
-  const widgetContent: Record<string, any> = {}
   
   const leftWidgets = leftWidgetKeys.map((key: string) => {
+    if (key === "identity") {
+      return { id: key, type: key }
+    }
     // Check if key is like "description-{uuid}"
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
@@ -925,7 +924,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
         return { id: key, type: widgetData.type }
       }
     }
-    // Otherwise it's a simple type key
     return { id: key, type: key }
   })
 
@@ -947,7 +945,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   return {
     layout: { left: leftWidgets, right: rightWidgets },
     widgetContent,
-    identity,
   }
 }
 

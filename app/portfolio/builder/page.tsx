@@ -8,7 +8,7 @@ import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
-import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity } from "@/lib/portfolio-service"
+import { loadPortfolioData, normalizeHandle, verifyPortfolioCommunity } from "@/lib/portfolio-service"
 import { createClient } from "@/lib/supabase/client"
 
 export default function PortfolioBuilderPage() {
@@ -39,7 +39,6 @@ export default function PortfolioBuilderPage() {
     selectedColor: 3 as ThemeIndex,
   })
   const [isLive, setIsLive] = useState(false)
-  const lastFetchedUserIdRef = useRef<string | null>(null)
   const hasFetchedRef = useRef(false)
   const [communityId, setCommunityId] = useState<string | null>(null)
   const [securityError, setSecurityError] = useState<string | null>(null)
@@ -70,7 +69,8 @@ export default function PortfolioBuilderPage() {
             }
           }
           
-          const identity = await getIdentityProps(portfolioIdFromUrl)
+          const data = await loadPortfolioData(portfolioIdFromUrl, communityIdFromUrl)
+          const identity = data?.widgetContent.identity
 
           const loadedIdentity = {
             id: portfolioIdFromUrl,
@@ -99,7 +99,7 @@ export default function PortfolioBuilderPage() {
           return
         }
 
-        const portfolios = await loadUserPortfolios(user)
+        const portfolios = await loadPortfolioData(user.id) // Updated function call to loadPortfolioData
 
         if (portfolios.length > 0) {
           const beaPortfolio = portfolios.find((p: any) => p.community_id)
@@ -109,7 +109,7 @@ export default function PortfolioBuilderPage() {
             setCommunityId((portfolio as any).community_id)
           }
 
-          const identity = await getIdentityProps(portfolio.id)
+          const identity = await loadPortfolioData(portfolio.id) // Updated function call to loadPortfolioData
 
           const loadedIdentity = {
             id: portfolio.id,

@@ -177,6 +177,24 @@ export async function createPortfolioOnce(params: {
   return inserted
 }
 
+export async function createPortfolio(
+  user: any,
+  name: string,
+  communityId?: string | null
+): Promise<{ id: string; slug: string; name: string }> {
+  if (!user?.id) {
+    throw new Error("User must be authenticated to create a portfolio")
+  }
+
+  return createPortfolioOnce({
+    userId: user.id,
+    name: name,
+    theme_id: "default",
+    description: `${name}'s portfolio`,
+    community_id: communityId || undefined,
+  })
+}
+
 export async function updatePortfolioById(
   portfolioId: string,
   patch: {
@@ -916,7 +934,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
     if (widgetKey === "identity") {
       identity = props
-      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor, "full content:", JSON.stringify(props, null, 2))
+      console.log("[v0] 🎨 getIdentityProps returning selectedColor:", props.selectedColor, "type:", typeof props.selectedColor)
     } else {
       widgetContent[widgetKey] = props
       console.log("[v0] Loaded widget:", widgetKey)

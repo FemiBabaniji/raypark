@@ -237,6 +237,9 @@ export default function PortfolioBuilder({
 
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+  const [saveError, setError] = useState<string | null>(null)
 
   const debouncedSave = useCallback(async () => {
     if (!user?.id || !hasInitialized || isLoadingData) {
@@ -244,19 +247,18 @@ export default function PortfolioBuilder({
       return
     }
 
-    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout)
     }
 
     const timeout = setTimeout(async () => {
+      setIsSaving(true)
+      setSaveError(null)
+      
       try {
         console.log("[v0] 💾 Starting auto-save...")
         const id = await ensurePortfolioId()
-        console.log("[v0] Portfolio ID:", id)
 
-        // Save portfolio metadata
-        console.log("[v0] Saving portfolio metadata...")
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -284,19 +286,18 @@ export default function PortfolioBuilder({
           },
         }
 
-        console.log("[v0] Saving widget layout and content...")
-        console.log("[v0] Left widgets:", leftWidgets.map(w => w.type))
-        console.log("[v0] Right widgets:", rightWidgets.map(w => w.type))
-        console.log("[v0] Widget content keys:", Object.keys(contentToSave))
-
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
+        setLastSaveTime(new Date())
         console.log("[v0] ✅ Auto-save completed successfully")
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
+        setSaveError(error instanceof Error ? error.message : "Save failed")
+      } finally {
+        setIsSaving(false)
       }
-    }, 1000) // Increased from 500ms
+    }, 1500)
 
     setSaveTimeout(timeout)
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
@@ -329,7 +330,7 @@ export default function PortfolioBuilder({
         console.log("[v0] ✅ Portfolio builder initialized, auto-save enabled")
         setHasInitialized(true)
       }
-    }, 1000) // Increased from 300ms
+    }, 1500) // Increased from 1000ms
 
     return () => clearTimeout(timer)
   }, [isLoadingData])
@@ -656,7 +657,19 @@ export default function PortfolioBuilder({
   }
 
   const rightSlot = !isPreviewMode ? (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
+      {isSaving && (
+        <span className="text-white/50 text-xs">Saving...</span>
+      )}
+      {lastSaveTime && !isSaving && (
+        <span className="text-white/50 text-xs">
+          Saved {new Date(lastSaveTime).toLocaleTimeString()}
+        </span>
+      )}
+      {saveError && (
+        <span className="text-red-400 text-xs">Save failed</span>
+      )}
+      
       <div className="flex items-center gap-2">
         <span className="text-white/70 text-sm">Live</span>
         <button
@@ -672,6 +685,7 @@ export default function PortfolioBuilder({
           />
         </button>
       </div>
+      
       <div className="relative">
         <AddButton
           onClick={() => setShowAddDropdown(!showAddDropdown)}

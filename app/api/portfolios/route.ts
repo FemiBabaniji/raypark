@@ -86,8 +86,9 @@ export async function POST(request: NextRequest) {
         console.log("[v0] User already has a portfolio for this community:", existingPortfolio.id)
         return NextResponse.json(
           {
-            error: "Portfolio already exists",
-            details: `You already have a portfolio "${existingPortfolio.name}" for this community. Each user can only have one portfolio per community.`,
+            error: "Duplicate community portfolio",
+            message: `You already have a portfolio "${existingPortfolio.name}" for this community.`,
+            details: "Each user can only have one portfolio per community. Please sync an existing portfolio instead.",
             existingPortfolio,
           },
           { status: 409 },
@@ -142,44 +143,47 @@ export async function POST(request: NextRequest) {
 
       if (!error && data) {
         portfolio = data
-        console.log("[v0] Portfolio created successfully:", portfolio.id, "with slug:", portfolio.slug)
+        console.log("[v0] ✅ Portfolio created successfully:", portfolio.id, "with slug:", portfolio.slug)
         break
       }
 
       lastError = error
 
-      if (error?.code === "23505" && error.message.includes("portfolios_slug_idx")) {
-        console.log(`[v0] Slug '${slug}' already exists, trying variant ${i + 1}`)
-        continue
-      }
-
-      if (error?.code === "23505" && error.message.includes("idx_unique_user_community_portfolio")) {
-        console.error("[v0] User already has a portfolio for this community:", error)
-        return NextResponse.json(
-          {
-            error: "Portfolio already exists",
-            details: "You already have a portfolio for this community. Each user can only have one portfolio per community.",
-          },
-          { status: 409 },
-        )
+      if (error?.code === "23505") {
+        if (error.message.includes("portfolios_slug_idx")) {
+          console.log(`[v0] Slug '${slug}' already exists, trying variant ${i + 1}`)
+          continue
+        }
+        if (error.message.includes("idx_unique_user_community_portfolio")) {
+          console.error("[v0] User already has a portfolio for this community:", error)
+          return NextResponse.json(
+            {
+              error: "Duplicate community portfolio",
+              message: "You already have a portfolio for this community.",
+              details: "Each user can only have one portfolio per community.",
+            },
+            { status: 409 },
+          )
+        }
       }
 
       break
     }
 
     if (!portfolio) {
-      console.error("[v0] Failed to create portfolio after 10 attempts:", lastError)
+      console.error("[v0] ❌ Failed to create portfolio after 10 attempts:", lastError)
       return NextResponse.json(
         {
-          error: "Failed to create portfolio",
-          details: lastError?.message || "Could not generate unique slug after 10 attempts",
+          error: "Portfolio creation failed",
+          message: "Could not generate a unique identifier for your portfolio.",
+          details: lastError?.message || "Please try a different name.",
           code: lastError?.code,
         },
         { status: 500 },
       )
     }
 
-    console.log("[v0] Creating default main page for portfolio:", portfolio.id)
+    console.log("[v0] Creating default page structure for portfolio:", portfolio.id)
 
     const { data: mainPage, error: pageError } = await supabase
       .from("pages")
@@ -194,19 +198,21 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (pageError) {
-      console.error("[v0] Failed to create main page:", pageError)
-      // Don't fail the request, but log the issue
+      console.error("[v0] ❌ Failed to create main page:", pageError)
+      
+      await supabase.from("portfolios").delete().eq("id", portfolio.id)
+      
       return NextResponse.json(
         {
-          error: "Portfolio created but page setup failed",
+          error: "Page creation failed",
+          message: "Failed to initialize portfolio structure.",
           details: pageError.message,
-          portfolio,
         },
         { status: 500 },
       )
     }
 
-    console.log("[v0] Main page created:", mainPage.id)
+    console.log("[v0] ✅ Main page created:", mainPage.id)
 
     const defaultLayout = {
       left: { type: "vertical", widgets: ["identity"] },
@@ -221,16 +227,52 @@ export async function POST(request: NextRequest) {
       })
 
     if (layoutError) {
-      console.error("[v0] Failed to create page layout:", layoutError)
-      // Don't fail the request
+      console.error("[v0] ❌ Failed to create page layout:", layoutError)
+      // Continue - layout can be created later
     } else {
-      console.log("[v0] Page layout created successfully")
+      console.log("[v0] ✅ Page layout created successfully")
     }
 
-    console.log("[v0] Portfolio created successfully:", portfolio.id, "Community:", portfolio.community_id || "none")
-    return NextResponse.json({ portfolio })
+    const { data: identityType } = await supabase
+      .from("widget_types")
+      .select("id")
+      .eq("key", "identity")
+      .maybeSingle()
+
+    if (identityType?.id) {
+      const { error: widgetError } = await supabase
+        .from("widget_instances")
+        .insert({
+          page_id: mainPage.id,
+          widget_type_id: identityType.id,
+          props: {
+            name: user.user_metadata?.full_name || name,
+            email: user.email || "",
+            handle: `@${portfolio.slug}`,
+          },
+          enabled: true,
+        })
+
+      if (widgetError) {
+        console.error("[v0] ⚠️ Failed to create identity widget:", widgetError)
+        // Continue - widget can be added later
+      } else {
+        console.log("[v0] ✅ Identity widget created")
+      }
+    }
+
+    console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)
+    
+    return NextResponse.json({ 
+      portfolio,
+      message: "Portfolio created successfully"
+    })
   } catch (error) {
-    console.error("[v0] API Error in portfolio POST:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[v0] ❌ API Error in portfolio POST:", error)
+    return NextResponse.json({ 
+      error: "Internal server error",
+      message: "An unexpected error occurred. Please try again.",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 })
   }
 }

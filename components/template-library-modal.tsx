@@ -9,21 +9,30 @@ import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  onSelectTemplate: (template: PortfolioTemplate) => void
+  onSelectTemplate: (template: PortfolioTemplate | null) => void
 }
 
 export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: Props) {
-  const [selectedTemplate, setSelectedTemplate] = useState<PortfolioTemplate | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const handleSelectTemplate = (template: PortfolioTemplate) => {
-    setSelectedTemplate(template)
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedId(templateId)
+  }
+
+  const handleSelectBlank = () => {
+    setSelectedId("blank")
   }
 
   const handleUseTemplate = () => {
-    if (selectedTemplate) {
-      onSelectTemplate(selectedTemplate)
-      onClose()
+    if (selectedId === "blank") {
+      onSelectTemplate(null)
+    } else if (selectedId) {
+      const template = PORTFOLIO_TEMPLATES.find(t => t.id === selectedId)
+      if (template) {
+        onSelectTemplate(template)
+      }
     }
+    onClose()
   }
 
   return (
@@ -71,12 +80,12 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: Prop
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   {PORTFOLIO_TEMPLATES.map((template) => {
                     const gradient = THEME_COLOR_OPTIONS[template.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
-                    const isSelected = selectedTemplate?.id === template.id
+                    const isSelected = selectedId === template.id
 
                     return (
                       <button
                         key={template.id}
-                        onClick={() => handleSelectTemplate(template)}
+                        onClick={() => handleSelectTemplate(template.id)}
                         className={`
                           relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-200
                           ${isSelected ? 'ring-2 ring-white scale-[1.02]' : 'hover:scale-[1.01]'}
@@ -112,10 +121,10 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: Prop
 
                 {/* Blank Option */}
                 <button
-                  onClick={() => setSelectedTemplate(null)}
+                  onClick={handleSelectBlank}
                   className={`
                     w-full rounded-2xl p-6 border-2 border-dashed transition-all duration-200
-                    ${!selectedTemplate ? 'border-white bg-white/5' : 'border-white/20 hover:border-white/40 hover:bg-white/5'}
+                    ${selectedId === "blank" ? 'border-white bg-white/5 ring-2 ring-white' : 'border-white/20 hover:border-white/40 hover:bg-white/5'}
                   `}
                 >
                   <div className="text-center">
@@ -138,10 +147,10 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: Prop
                 </button>
                 <button
                   onClick={handleUseTemplate}
-                  disabled={!selectedTemplate && selectedTemplate !== null}
+                  disabled={!selectedId}
                   className="px-8 py-3 rounded-xl bg-white text-black font-medium hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {selectedTemplate ? 'Use This Template' : 'Create Blank Portfolio'}
+                  {selectedId === "blank" ? 'Create Blank Portfolio' : selectedId ? 'Use This Template' : 'Select an Option'}
                 </button>
               </div>
             </div>

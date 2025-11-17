@@ -180,6 +180,8 @@ export default function DashboardPage() {
   }
 
   const handleSelectTemplate = async (template: PortfolioTemplate | null) => {
+    console.log("[v0] Template selected:", template?.name || "blank")
+    
     if (!user?.id) {
       const newPortfolio: ExtendedPortfolio = {
         id: safeUUID(),
@@ -197,6 +199,7 @@ export default function DashboardPage() {
       setPortfolios((prev) => [...prev, newPortfolio])
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
+      setIsTemplateModalOpen(false)
       return
     }
 
@@ -232,6 +235,7 @@ export default function DashboardPage() {
           portfolioId: newPortfolio.id,
           template: template,
         }))
+        console.log("[v0] Stored pending template in localStorage for portfolio:", newPortfolio.id)
       }
       
       const updatedPortfolios = await loadUserPortfolios(user)
@@ -239,6 +243,7 @@ export default function DashboardPage() {
       
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
+      setIsTemplateModalOpen(false)
     } catch (error) {
       console.error("Error creating portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")
@@ -291,6 +296,26 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("[v0] Error checking existing portfolio:", error)
       return null
+    }
+  }
+
+  const handleDeletePortfolio = async (portfolioId: string) => {
+    if (!user?.id) {
+      console.log("[v0] User not authenticated, cannot delete portfolio")
+      return
+    }
+
+    try {
+      console.log("[v0] Deleting portfolio:", portfolioId)
+      await deletePortfolio(portfolioId)
+      
+      // Remove from local state
+      setPortfolios((prev) => prev.filter((p) => p.id !== portfolioId))
+      
+      console.log("[v0] Portfolio deleted successfully")
+    } catch (error) {
+      console.error("[v0] Error deleting portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete portfolio")
     }
   }
 
@@ -421,6 +446,7 @@ export default function DashboardPage() {
               onPortfolioClick={handlePortfolioClick}
               onCreatePortfolio={handleCreatePortfolio}
               onSyncCommunity={handleSyncCommunity}
+              onDeletePortfolio={handleDeletePortfolio}
               userCommunities={userCommunities}
               onCheckExistingPortfolio={handleCheckExistingPortfolio}
             />

@@ -214,16 +214,25 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] ✅ Main page created:", mainPage.id)
 
-    const defaultLayout = {
-      left: { type: "vertical", widgets: ["identity"] },
-      right: { type: "vertical", widgets: [] },
+    let layoutStructure = {
+      left: { type: "vertical", widgets: ["identity"] as string[] },
+      right: { type: "vertical", widgets: [] as string[] },
+    }
+
+    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
+      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
+      // Add description widget keys for each template widget
+      for (let i = 0; i < templateConfig.widgets.length; i++) {
+        layoutStructure.left.widgets.push("description")
+      }
+      console.log("[v0] 📋 Template layout will include", templateConfig.widgets.length, "additional widgets")
     }
 
     const { error: layoutError } = await supabase
       .from("page_layouts")
       .insert({
         page_id: mainPage.id,
-        layout: defaultLayout,
+        layout: layoutStructure,
       })
 
     if (layoutError) {
@@ -239,16 +248,30 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (identityType?.id) {
+      const identityProps: any = {
+        name: user.user_metadata?.full_name || name,
+        email: user.email || "",
+        handle: `@${portfolio.slug}`,
+      }
+
+      if (template === "designer") {
+        identityProps.selectedColor = 4 // Purple for designers
+      } else if (template === "developer") {
+        identityProps.selectedColor = 2 // Blue for developers
+      } else if (template === "marketing") {
+        identityProps.selectedColor = 1 // Orange/red for marketing
+      } else if (template === "founder") {
+        identityProps.selectedColor = 0 // Navy/professional for founders
+      } else {
+        identityProps.selectedColor = 3 // Default color
+      }
+
       const { error: widgetError } = await supabase
         .from("widget_instances")
         .insert({
           page_id: mainPage.id,
           widget_type_id: identityType.id,
-          props: {
-            name: user.user_metadata?.full_name || name,
-            email: user.email || "",
-            handle: `@${portfolio.slug}`,
-          },
+          props: identityProps,
           enabled: true,
         })
 
@@ -259,12 +282,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template]) {
+    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
       console.log("[v0] 📋 Creating template widgets for:", template)
       
-      const templateConfig = PORTFOLIO_TEMPLATES[template]
+      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
       
-      // Get description widget type
       const { data: descriptionType } = await supabase
         .from("widget_types")
         .select("id")
@@ -274,24 +296,22 @@ export async function POST(request: NextRequest) {
       if (descriptionType?.id && templateConfig.widgets.length > 0) {
         console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
         
-        for (const widget of templateConfig.widgets) {
-          const { error: widgetError } = await supabase
-            .from("widget_instances")
-            .insert({
-              page_id: mainPage.id,
-              widget_type_id: descriptionType.id,
-              props: widget.props || {},
-              enabled: true,
-            })
+        const widgetInserts = templateConfig.widgets.map(widget => ({
+          page_id: mainPage.id,
+          widget_type_id: descriptionType.id,
+          props: widget.props || {},
+          enabled: true,
+        }))
 
-          if (widgetError) {
-            console.error(`[v0] ⚠️ Failed to create template widget:`, widgetError)
-          } else {
-            console.log(`[v0] ✅ Created template widget with title:`, widget.props?.title || "bio")
-          }
+        const { error: batchError } = await supabase
+          .from("widget_instances")
+          .insert(widgetInserts)
+
+        if (batchError) {
+          console.error("[v0] ⚠️ Failed to create template widgets:", batchError)
+        } else {
+          console.log("[v0] ✅ All", widgetInserts.length, "template widgets created for:", template)
         }
-        
-        console.log("[v0] ✅ All template widgets created for:", template)
       } else {
         console.error("[v0] ⚠️ Description widget type not found or no widgets in template")
       }

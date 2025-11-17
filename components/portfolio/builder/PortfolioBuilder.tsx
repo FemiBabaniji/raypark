@@ -126,6 +126,23 @@ export default function PortfolioBuilder({
         if (data) {
           console.log("[v0] ✅ Loaded data from database")
 
+          if (data.identity) {
+            console.log("[v0] 🎨 Loading identity with selectedColor:", data.identity.selectedColor)
+            console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.identity, null, 2))
+            
+            // Ensure selectedColor is a number, default to 0 if missing
+            const selectedColor = typeof data.identity.selectedColor === "number" 
+              ? data.identity.selectedColor 
+              : 0
+            
+            parentOnIdentityChange({
+              ...data.identity,
+              selectedColor, // Explicitly set selectedColor
+            })
+            
+            console.log("[v0] ✅ Identity updated with selectedColor:", selectedColor)
+          }
+
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
             console.log("[v0] Setting widgets from database")
             setLeftWidgets(data.layout.left.length > 0 ? data.layout.left : [{ id: "identity", type: "identity" }])
@@ -139,11 +156,6 @@ export default function PortfolioBuilder({
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
             setWidgetContent(data.widgetContent)
-          }
-
-          if (data.identity && data.identity.name) {
-            console.log("[v0] Setting identity from database:", data.identity.name)
-            parentOnIdentityChange(data.identity)
           }
 
           if (data.projectColors && Object.keys(data.projectColors).length > 0) {
@@ -173,14 +185,15 @@ export default function PortfolioBuilder({
         
         setTimeout(() => {
           console.log("[v0] ✅ Enabling auto-save after data load")
+          console.log("[v0] 🎨 Current identity.selectedColor:", identity.selectedColor)
           setHasInitialized(true)
-        }, 1000)
+        }, 1500)
         
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
         setLeftWidgets([{ id: "identity", type: "identity" }])
         setRightWidgets([])
-        setTimeout(() => setHasInitialized(true), 1000)
+        setTimeout(() => setHasInitialized(true), 1500)
       } finally {
         setIsLoadingData(false)
       }

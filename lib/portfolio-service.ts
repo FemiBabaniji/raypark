@@ -26,61 +26,90 @@ const toSlug = (name: string) =>
     .slice(0, 64)
 
 export async function ensureMainPage(supabase: ReturnType<typeof createClient>, portfolioId: string): Promise<string> {
-  const { data: existing } = await supabase
+  console.log("[v0] 🔍 Checking for existing main page for portfolio:", portfolioId)
+  
+  const { data: existing, error: checkError } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
     .maybeSingle()
 
-  let pageId = existing?.id
+  if (checkError) {
+    console.error("[v0] ❌ Error checking for existing page:", checkError)
+  }
 
-  if (!pageId) {
-    const { data, error } = await supabase
-      .from("pages")
-      .insert({ portfolio_id: portfolioId, key: "main", title: "Main", route: "/", is_demo: false })
-      .select("id")
-      .single()
+  if (existing?.id) {
+    console.log("[v0] ✅ Page already exists:", existing.id)
+    // Ensure layout exists for this page
+    await ensurePageLayout(supabase, existing.id)
+    return existing.id
+  }
 
-    if (error) {
-      if (error.code === '23505') {
-        console.log("[v0] ℹ️ Page already exists (race condition), fetching existing page")
-        // Add small delay to allow other transaction to complete
-        await new Promise(resolve => setTimeout(resolve, 100))
+  console.log("[v0] 📝 Creating new main page for portfolio:", portfolioId)
+  const { data, error } = await supabase
+    .from("pages")
+    .insert({ 
+      portfolio_id: portfolioId, 
+      key: "main", 
+      title: "Main", 
+      route: "/", 
+      is_demo: false 
+    })
+    .select("id")
+    .single()
+
+  if (error) {
+    if (error.code === '23505') {
+      console.log("[v0] ℹ️ Page already exists (race condition), retrying fetch...")
+      
+      // Try up to 3 times with increasing delays
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const delay = attempt * 200 // 200ms, 400ms, 600ms
+        console.log(`[v0] 🔄 Retry attempt ${attempt}/3 after ${delay}ms delay`)
+        await new Promise(resolve => setTimeout(resolve, delay))
         
-        const { data: existingPage, error: fetchError } = await supabase
+        const { data: retryPage, error: retryError } = await supabase
           .from("pages")
           .select("id")
           .eq("portfolio_id", portfolioId)
           .eq("key", "main")
           .maybeSingle()
         
-        if (fetchError) {
-          console.error("[v0] ❌ Error fetching existing page:", fetchError)
-          throw new Error(`Failed to fetch existing page: ${fetchError.message}`)
+        if (retryError) {
+          console.error(`[v0] ❌ Retry ${attempt} fetch error:`, retryError)
+          continue
         }
         
-        if (existingPage?.id) {
-          pageId = existingPage.id
-          console.log("[v0] ✅ Found existing page:", pageId)
-        } else {
-          console.error("[v0] ❌ Page should exist but wasn't found")
-          throw new Error("Failed to create or find main page")
+        if (retryPage?.id) {
+          console.log(`[v0] ✅ Found existing page on retry ${attempt}:`, retryPage.id)
+          await ensurePageLayout(supabase, retryPage.id)
+          return retryPage.id
         }
-      } else {
-        console.error("[v0] ❌ Error creating page:", error)
-        throw error
       }
+      
+      console.error("[v0] ❌ Page should exist but wasn't found after 3 retries")
+      throw new Error("Failed to create or find main page after multiple attempts. Please try refreshing the page.")
     } else {
-      pageId = data.id
-      console.log("[v0] ✅ Created new page:", pageId)
+      console.error("[v0] ❌ Error creating page:", error)
+      throw error
     }
-  } else {
-    console.log("[v0] ℹ️ Page already exists:", pageId)
   }
 
-  // Ensure page_layouts row exists (idempotent)
-  const { data: pl } = await supabase.from("page_layouts").select("id").eq("page_id", pageId).maybeSingle()
+  const pageId = data.id
+  console.log("[v0] ✅ Created new page:", pageId)
+  
+  await ensurePageLayout(supabase, pageId)
+  
+  return pageId
+}
+
+async function ensurePageLayout(supabase: ReturnType<typeof createClient>, pageId: string): Promise<void> {
+  const { data: pl } = await supabase
+    .from("page_layouts")
+    .select("id")
+    .eq("page_id", pageId)
+    .maybeSingle()
 
   if (!pl?.id) {
     const defaultLayout = {
@@ -103,8 +132,6 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
   } else {
     console.log("[v0] ℹ️ Layout already exists for page:", pageId)
   }
-
-  return pageId
 }
 
 export async function createPortfolioOnce(params: {

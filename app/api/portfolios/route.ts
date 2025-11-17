@@ -262,42 +262,44 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
-      console.log("[v0] Creating template widgets for:", template)
+    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template]) {
+      console.log("[v0] 📋 Creating template widgets for:", template)
       
-      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
-      const { data: widgetTypes } = await supabase
+      const templateConfig = PORTFOLIO_TEMPLATES[template]
+      
+      // Get description widget type
+      const { data: descriptionType } = await supabase
         .from("widget_types")
-        .select("id, key")
+        .select("id")
+        .eq("key", "description")
+        .maybeSingle()
 
-      const widgetTypeMap = new Map(widgetTypes?.map(wt => [wt.key, wt.id]) || [])
-
-      for (const widget of templateConfig.widgets) {
-        const widgetTypeId = widgetTypeMap.get(widget.type)
+      if (descriptionType?.id && templateConfig.widgets.length > 0) {
+        console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
         
-        if (widgetTypeId) {
+        for (const widget of templateConfig.widgets) {
           const { error: widgetError } = await supabase
             .from("widget_instances")
             .insert({
               page_id: mainPage.id,
-              widget_type_id: widgetTypeId,
+              widget_type_id: descriptionType.id,
               props: widget.props || {},
-              config: {
-                position: widget.position,
-                size: widget.size,
-              },
               enabled: true,
             })
 
           if (widgetError) {
-            console.error(`[v0] ⚠️ Failed to create ${widget.type} widget:`, widgetError)
+            console.error(`[v0] ⚠️ Failed to create template widget:`, widgetError)
           } else {
-            console.log(`[v0] ✅ Created ${widget.type} widget`)
+            console.log(`[v0] ✅ Created template widget with title:`, widget.props?.title || "bio")
           }
-        } else {
-          console.log(`[v0] ⚠️ Widget type not found: ${widget.type}`)
         }
+        
+        console.log("[v0] ✅ All template widgets created for:", template)
+      } else {
+        console.error("[v0] ⚠️ Description widget type not found or no widgets in template")
       }
+    } else {
+      console.log("[v0] No template selected or blank template, skipping template widgets")
     }
 
     console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)

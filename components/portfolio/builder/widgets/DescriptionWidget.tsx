@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { GripVertical, X } from "lucide-react"
+import { GripVertical, X } from 'lucide-react'
 
 type DescriptionContent = {
   title: string
@@ -14,7 +14,7 @@ type Props = {
   widgetId: string
   column: "left" | "right"
   isPreviewMode: boolean
-  content: DescriptionContent
+  content: DescriptionContent | null | undefined
   onContentChange: (content: DescriptionContent) => void
   onDelete: () => void
   onMove: () => void
@@ -47,12 +47,12 @@ export default function DescriptionWidget({
     { name: "Orange", value: "bg-gradient-to-br from-orange-900/40 to-red-900/40" },
   ]
 
-  const title = content.title || "About me"
+  const title = content?.title || "About me"
   const description =
-    content.description ||
+    content?.description ||
     "I'm a passionate digital designer with over 8 years of experience creating user-centered designs that solve real problems."
   const subdescription =
-    content.subdescription ||
+    content?.subdescription ||
     "When I'm not designing, you can find me exploring new coffee shops, hiking local trails, or experimenting with new design tools."
 
   return (

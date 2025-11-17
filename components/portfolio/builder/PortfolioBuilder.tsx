@@ -510,7 +510,8 @@ export default function PortfolioBuilder({
       },
       description: {
         title: "About Me",
-        description: "Tell your story here..."
+        description: "Tell your story here...",
+        subdescription: "Add more details about yourself..."
       },
       services: {
         title: "Services",
@@ -531,13 +532,17 @@ export default function PortfolioBuilder({
       }
     }
 
-    // Set default content for this widget type if it doesn't exist
-    if (!widgetContent[type] && defaultContent[type]) {
+    if (defaultContent[type]) {
       console.log("[v0] 📝 Initializing default content for widget:", type)
+      const newContent = defaultContent[type]
       setWidgetContent(prev => ({
         ...prev,
-        [type]: defaultContent[type]
+        [type]: newContent
       }))
+      
+      setTimeout(() => {
+        console.log("[v0] ✅ Widget content initialized for:", type)
+      }, 0)
     }
 
     if (column === "left") {

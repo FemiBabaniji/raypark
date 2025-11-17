@@ -875,6 +875,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   console.log("[v0] Found", instances?.length || 0, "widget instances")
 
   const instanceMap: Record<string, { type: string; props: any }> = {}
+  const typeToPropsMap: Record<string, any> = {}
   const widgetContent: Record<string, any> = {}
 
   for (const instance of instances || []) {
@@ -883,24 +884,26 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
     const props = instance.props || {}
 
-    if (widgetType === "identity") {
-      console.log("[v0] 🎨 Loading identity widget into widgetContent - selectedColor:", props.selectedColor)
-      widgetContent.identity = props
-    } else {
-      // Check if this is a uniquely-ID'd widget (e.g., description-uuid)
-      instanceMap[instance.id] = {
-        type: widgetType,
-        props
-      }
-      console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
+    // Store by instance ID (for UUID-based widgets)
+    instanceMap[instance.id] = {
+      type: widgetType,
+      props
     }
+
+    // Store by widget type (for type-based widgets)
+    typeToPropsMap[widgetType] = props
+
+    console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
   }
   
   const leftWidgets = leftWidgetKeys.map((key: string) => {
+    // Handle identity widget specially
     if (key === "identity") {
+      widgetContent.identity = typeToPropsMap.identity || {}
       return { id: key, type: key }
     }
-    // Check if key is like "description-{uuid}"
+    
+    // Check if key is UUID-based (e.g., "description-uuid123")
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -909,10 +912,20 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
         return { id: key, type: widgetData.type }
       }
     }
+    
+    // Handle plain type strings (e.g., "description", "projects")
+    if (typeToPropsMap[key]) {
+      widgetContent[key] = typeToPropsMap[key]
+      console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
+    } else {
+      console.log(`[v0] ⚠️ No content found for widget '${key}'`)
+    }
+    
     return { id: key, type: key }
   })
 
   const rightWidgets = rightWidgetKeys.map((key: string) => {
+    // Check if key is UUID-based
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -921,6 +934,15 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
         return { id: key, type: widgetData.type }
       }
     }
+    
+    // Handle plain type strings
+    if (typeToPropsMap[key]) {
+      widgetContent[key] = typeToPropsMap[key]
+      console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
+    } else {
+      console.log(`[v0] ⚠️ No content found for widget '${key}'`)
+    }
+    
     return { id: key, type: key }
   })
 

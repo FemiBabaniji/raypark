@@ -73,37 +73,22 @@ export default function PortfolioBuilder({
     is_public: isLive,
   })
 
-  const [portfolioId, setPortfolioId] = useState<string | null>(initialPortfolio?.id ?? null)
-  const portfolioIdRef = useRef<string | null>(initialPortfolio?.id ?? null)
+  const [portfolioId, setPortfolioId] = useState<string | null>(identity.id ?? initialPortfolio?.id ?? null)
+  const portfolioIdRef = useRef<string | null>(identity.id ?? initialPortfolio?.id ?? null)
   const createInFlight = useRef<Promise<string> | null>(null)
   const prevUserRef = useRef(user)
-
-  const [isLoadingData, setIsLoadingData] = useState(false)
-  const hasLoadedDataRef = useRef(false)
 
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
 
-  async function ensurePortfolioId(): Promise<string> {
-    if (portfolioIdRef.current) return portfolioIdRef.current
-    if (!user?.id) throw new Error("Must be signed in to create a portfolio")
-
-    if (!createInFlight.current) {
-      createInFlight.current = (async () => {
-        const created = await createPortfolioOnce({
-          userId: user.id,
-          name: state.name || "Untitled Portfolio",
-          theme_id: state.theme_id || "default-theme",
-          description: state.description,
-        })
-        setPortfolioId(created.id)
-        portfolioIdRef.current = created.id
-        return created.id
-      })()
+  useEffect(() => {
+    if (identity.id && identity.id !== portfolioId) {
+      console.log("[v0] 🔄 Updating portfolioId to match identity.id:", identity.id)
+      setPortfolioId(identity.id)
+      portfolioIdRef.current = identity.id
     }
-    return createInFlight.current
-  }
+  }, [identity.id, portfolioId])
 
   const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([
     { id: "identity", type: "identity" },
@@ -160,7 +145,9 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     async function loadData() {
-      if (!portfolioId || hasLoadedDataRef.current || isLoadingData) {
+      const idToLoad = identity.id || portfolioId
+      
+      if (!idToLoad || hasLoadedDataRef.current || isLoadingData) {
         return
       }
 
@@ -168,9 +155,10 @@ export default function PortfolioBuilder({
       hasLoadedDataRef.current = true
 
       try {
-        console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
+        console.log("[v0] 🔄 Loading portfolio data for ID:", idToLoad)
+        console.log("[v0] 🔍 Community context:", communityId)
         
-        const data = await loadPortfolioData(portfolioId, communityId)
+        const data = await loadPortfolioData(idToLoad, communityId)
 
         if (data) {
           console.log("[v0] ✅ Loaded data from database:", data)
@@ -227,7 +215,7 @@ export default function PortfolioBuilder({
     }
 
     loadData()
-  }, [portfolioId, onIdentityChange, communityId]) // Add communityId to dependencies
+  }, [identity.id, portfolioId, onIdentityChange, communityId]) // Add identity.id to dependencies
 
   useEffect(() => {
     setState((prev) => ({
@@ -259,7 +247,9 @@ export default function PortfolioBuilder({
       
       try {
         console.log("[v0] 💾 Starting auto-save...")
-        const id = await ensurePortfolioId()
+        const id = identity.id || (await ensurePortfolioId())
+        console.log("[v0] 💾 Saving to portfolio ID:", id)
+        console.log("[v0] 💾 With community context:", communityId)
 
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
@@ -302,7 +292,7 @@ export default function PortfolioBuilder({
     }, 1500)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId]) // Add communityId to dependencies
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
   useEffect(() => {
     if (hasInitialized) {
@@ -979,4 +969,31 @@ export default function PortfolioBuilder({
       <GroupDetailView />
     </>
   )
+}
+
+async function ensurePortfolioId(): Promise<string> {
+  if (portfolioIdRef.current) {
+    console.log("[v0] ✅ Using existing portfolio ID:", portfolioIdRef.current)
+    return portfolioIdRef.current
+  }
+  
+  if (!user?.id) throw new Error("Must be signed in to create a portfolio")
+
+  // Only create if no portfolio exists
+  if (!createInFlight.current) {
+    console.log("[v0] ⚠️ No portfolio ID found, creating new portfolio")
+    createInFlight.current = (async () => {
+      const created = await createPortfolioOnce({
+        userId: user.id,
+        name: state.name || "Untitled Portfolio",
+        theme_id: state.theme_id || "default-theme",
+        description: state.description,
+      })
+      console.log("[v0] ✅ Created new portfolio:", created.id)
+      setPortfolioId(created.id)
+      portfolioIdRef.current = created.id
+      return created.id
+    })()
+  }
+  return createInFlight.current
 }

@@ -39,122 +39,139 @@ export default function EventsRightColumn({
         return
       }
 
-      if (hasUserPortfolio && userPortfolio) {
-        console.log("[v0] Using portfolio from props:", userPortfolio)
-        setPortfolioLoading(true)
+      // Don't trust props - query database to ensure correct community portfolio
+      setPortfolioLoading(true)
 
-        try {
-          const supabase = createClient()
+      try {
+        const supabase = createClient()
 
-          console.log("[v0] Querying page for portfolio_id:", userPortfolio.id)
+        // Fetch portfolio that belongs to THIS specific community
+        console.log("[v0] Fetching portfolio for user:", user.id, "community:", communityId)
+        const { data: communityPortfolio, error: portfolioError } = await supabase
+          .from("portfolios")
+          .select("id, name, slug, is_public")
+          .eq("user_id", user.id)
+          .eq("community_id", communityId)
+          .maybeSingle()
 
-          // Get page ID
-          const { data: page, error: pageError } = await supabase
-            .from("pages")
-            .select("id")
-            .eq("portfolio_id", userPortfolio.id)
-            .eq("is_main", true)
-            .maybeSingle()
-
-          console.log("[v0] Page query result:", { page, pageError })
-
-          if (pageError || !page) {
-            console.log("[v0] No page found, using basic portfolio data")
-            setPortfolio({
-              id: userPortfolio.id,
-              name: userPortfolio.name,
-              title: "Portfolio",
-              email: user.email || "",
-              location: "Location",
-              handle: `@${userPortfolio.slug}`,
-              selectedColor: 3,
-              isLive: userPortfolio.is_public,
-            })
-            setPortfolioLoading(false)
-            return
-          }
-
-          console.log("[v0] Querying widget_types for identity")
-
-          // Get identity widget type
-          const { data: widgetType, error: widgetTypeError } = await supabase
-            .from("widget_types")
-            .select("id")
-            .eq("key", "identity")
-            .maybeSingle()
-
-          console.log("[v0] Widget type query result:", { widgetType, widgetTypeError })
-
-          if (widgetTypeError || !widgetType) {
-            console.log("[v0] No widget type found, using basic portfolio data")
-            setPortfolio({
-              id: userPortfolio.id,
-              name: userPortfolio.name,
-              title: "Portfolio",
-              email: user.email || "",
-              location: "Location",
-              handle: `@${userPortfolio.slug}`,
-              selectedColor: 3,
-              isLive: userPortfolio.is_public,
-            })
-            setPortfolioLoading(false)
-            return
-          }
-
-          console.log("[v0] Querying widget_instances for page_id:", page.id, "widget_type_id:", widgetType.id)
-
-          // Get identity widget instance
-          const { data: widget, error: widgetError } = await supabase
-            .from("widget_instances")
-            .select("props")
-            .eq("page_id", page.id)
-            .eq("widget_type_id", widgetType.id)
-            .maybeSingle()
-
-          console.log("[v0] Widget instance query result:", { widget, widgetError })
-
-          if (widgetError || !widget?.props) {
-            console.log("[v0] No widget found, using basic portfolio data")
-            setPortfolio({
-              id: userPortfolio.id,
-              name: userPortfolio.name,
-              title: "Portfolio",
-              email: user.email || "",
-              location: "Location",
-              handle: `@${userPortfolio.slug}`,
-              selectedColor: 3,
-              isLive: userPortfolio.is_public,
-            })
-            setPortfolioLoading(false)
-            return
-          }
-
-          const loadedPortfolio: UnifiedPortfolio = {
-            id: userPortfolio.id,
-            name: widget.props.name || userPortfolio.name,
-            title: widget.props.title || "Portfolio",
-            email: widget.props.email || user.email || "",
-            location: widget.props.location || "Location",
-            handle: widget.props.handle || `@${userPortfolio.slug}`,
-            avatarUrl: widget.props.avatarUrl,
-            selectedColor: typeof widget.props.selectedColor === "number" ? widget.props.selectedColor : 3,
-            isLive: userPortfolio.is_public,
-          }
-
-          console.log("[v0] Successfully loaded portfolio with widget data:", loadedPortfolio)
-          setPortfolio(loadedPortfolio)
-        } catch (error) {
-          console.error("[v0] Failed to load portfolio:", error)
+        if (portfolioError) {
+          console.error("[v0] Error fetching community portfolio:", portfolioError)
           setPortfolio(null)
-        } finally {
           setPortfolioLoading(false)
+          return
         }
-        return
-      }
 
-      console.log("[v0] No portfolio for this community, showing empty state")
-      setPortfolio(null)
-      setPortfolioLoading(false)
+        if (!communityPortfolio) {
+          console.log("[v0] No portfolio found for this community")
+          setPortfolio(null)
+          setPortfolioLoading(false)
+          return
+        }
+
+        console.log("[v0] Found community portfolio:", communityPortfolio.id)
+
+        // Get page ID
+        const { data: page, error: pageError } = await supabase
+          .from("pages")
+          .select("id")
+          .eq("portfolio_id", communityPortfolio.id)
+          .eq("is_main", true)
+          .maybeSingle()
+
+        console.log("[v0] Page query result:", { page, pageError })
+
+        if (pageError || !page) {
+          console.log("[v0] No page found, using basic portfolio data")
+          setPortfolio({
+            id: communityPortfolio.id,
+            name: communityPortfolio.name,
+            title: "Portfolio",
+            email: user.email || "",
+            location: "Location",
+            handle: `@${communityPortfolio.slug}`,
+            selectedColor: 3,
+            isLive: communityPortfolio.is_public,
+          })
+          setPortfolioLoading(false)
+          return
+        }
+
+        console.log("[v0] Querying widget_types for identity")
+
+        // Get identity widget type
+        const { data: widgetType, error: widgetTypeError } = await supabase
+          .from("widget_types")
+          .select("id")
+          .eq("key", "identity")
+          .maybeSingle()
+
+        console.log("[v0] Widget type query result:", { widgetType, widgetTypeError })
+
+        if (widgetTypeError || !widgetType) {
+          console.log("[v0] No widget type found, using basic portfolio data")
+          setPortfolio({
+            id: communityPortfolio.id,
+            name: communityPortfolio.name,
+            title: "Portfolio",
+            email: user.email || "",
+            location: "Location",
+            handle: `@${communityPortfolio.slug}`,
+            selectedColor: 3,
+            isLive: communityPortfolio.is_public,
+          })
+          setPortfolioLoading(false)
+          return
+        }
+
+        console.log("[v0] Querying widget_instances for page_id:", page.id, "widget_type_id:", widgetType.id)
+
+        // Get identity widget instance
+        const { data: widget, error: widgetError } = await supabase
+          .from("widget_instances")
+          .select("props")
+          .eq("page_id", page.id)
+          .eq("widget_type_id", widgetType.id)
+          .maybeSingle()
+
+        console.log("[v0] Widget instance query result:", { widget, widgetError })
+
+        if (widgetError || !widget?.props) {
+          console.log("[v0] No widget found, using basic portfolio data")
+          setPortfolio({
+            id: communityPortfolio.id,
+            name: communityPortfolio.name,
+            title: "Portfolio",
+            email: user.email || "",
+            location: "Location",
+            handle: `@${communityPortfolio.slug}`,
+            selectedColor: 3,
+            isLive: communityPortfolio.is_public,
+          })
+          setPortfolioLoading(false)
+          return
+        }
+
+        const loadedPortfolio: UnifiedPortfolio = {
+          id: communityPortfolio.id,
+          name: widget.props.name || communityPortfolio.name,
+          title: widget.props.title || "Portfolio",
+          email: widget.props.email || user.email || "",
+          location: widget.props.location || "Location",
+          handle: widget.props.handle || `@${communityPortfolio.slug}`,
+          avatarUrl: widget.props.avatarUrl,
+          selectedColor: typeof widget.props.selectedColor === "number" ? widget.props.selectedColor : 3,
+          isLive: communityPortfolio.is_public,
+        }
+
+        console.log("[v0] Successfully loaded portfolio with widget data:", loadedPortfolio)
+        setPortfolio(loadedPortfolio)
+      } catch (error) {
+        console.error("[v0] Failed to load portfolio:", error)
+        setPortfolio(null)
+      } finally {
+        setPortfolioLoading(false)
+      }
+      return
     }
 
     if (!loading) {

@@ -916,7 +916,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
     if (widgetKey === "identity") {
       identity = props
-      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor, "full content:", JSON.stringify(props, null, 2))
+      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor, "type:", typeof props.selectedColor)
     } else {
       widgetContent[widgetKey] = props
       console.log("[v0] Loaded widget:", widgetKey)
@@ -962,6 +962,8 @@ export type IdentityProps = {
 
 export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
   const supabase = createClient()
+  
+  console.log("[v0] 🎨 getIdentityProps called for portfolio:", portfolioId)
 
   const { data: page, error: pageErr } = await supabase
     .from("pages")
@@ -971,9 +973,11 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .maybeSingle()
 
   if (pageErr || !page?.id) {
-    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId)
+    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId, "error:", pageErr)
     return null
   }
+
+  console.log("[v0] getIdentityProps: Found page ID:", page.id)
 
   const { data: wt, error: wtErr } = await supabase
     .from("widget_types")
@@ -982,9 +986,11 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .maybeSingle()
 
   if (wtErr || !wt?.id) {
-    console.log("[v0] getIdentityProps: Identity widget type not found")
+    console.log("[v0] getIdentityProps: Identity widget type not found, error:", wtErr)
     return null
   }
+
+  console.log("[v0] getIdentityProps: Found identity widget type ID:", wt.id)
 
   const { data: wi, error: wiErr } = await supabase
     .from("widget_instances")
@@ -998,13 +1004,7 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     return null
   }
 
-  const props = (wi?.props as IdentityProps) ?? null
-  
-  if (props) {
-    console.log("[v0] 🎨 getIdentityProps returning selectedColor:", props.selectedColor, "type:", typeof props.selectedColor)
-  }
-  
-  return props
+  return (wi?.props as IdentityProps) ?? null
 }
 
 export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")

@@ -8,7 +8,8 @@ import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
-import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity, saveWidgetLayout } from "@/lib/portfolio-service"
+import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity } from "@/lib/portfolio-service"
+import { createClient } from "@/lib/supabase/client"
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
@@ -49,63 +50,43 @@ export default function PortfolioBuilderPage() {
     hasFetchedRef.current = true
 
     async function loadPortfolio() {
-      console.log("[v0] ========== LOADING PORTFOLIO FOR BUILDER ==========")
-      console.log("[v0] Authenticated user:", user.email)
-      console.log("[v0] Portfolio ID from URL:", portfolioIdFromUrl)
-      console.log("[v0] Community ID from URL:", communityIdFromUrl)
-
       try {
         if (portfolioIdFromUrl) {
-          console.log("[v0] Loading specific portfolio from URL:", portfolioIdFromUrl)
-          
           if (communityIdFromUrl) {
             const isValid = await verifyPortfolioCommunity(portfolioIdFromUrl, communityIdFromUrl)
             if (!isValid) {
-              console.error("[v0] ❌ SECURITY: Portfolio does not belong to this community")
               setSecurityError("This portfolio does not belong to the selected community. Please go back and select the correct portfolio.")
               return
             }
-            console.log("[v0] ✅ Portfolio-community ownership verified")
           }
           
           const identity = await getIdentityProps(portfolioIdFromUrl)
-          console.log("[v0] Identity props from database:", identity)
 
           const loadedIdentity = {
             id: portfolioIdFromUrl,
             name: identity?.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
             handle: normalizeHandle(identity?.handle || user.email?.split("@")[0] || ""),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (identity?.selectedColor !== undefined && identity?.selectedColor !== null
-              ? identity.selectedColor 
-              : 0) as ThemeIndex, // Default to 0 (first color) if no color saved
+            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
           }
 
-          console.log("[v0] ✅ Setting identity with portfolio ID from URL:", loadedIdentity.id)
-          console.log("[v0] 🎨 FINAL Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           
           if (communityIdFromUrl) {
             setCommunityId(communityIdFromUrl)
-            console.log("[v0] ✅ Community context preserved - ID:", communityIdFromUrl)
           }
           
           return
         }
 
-        console.log("[v0] No portfolio ID in URL, fetching user portfolios...")
         const portfolios = await loadUserPortfolios(user)
-        console.log("[v0] Found", portfolios.length, "portfolios")
 
         if (portfolios.length > 0) {
           const beaPortfolio = portfolios.find((p: any) => p.community_id)
           const portfolio = beaPortfolio || portfolios[0]
 
-          console.log("[v0] Selected portfolio:", portfolio.id)
-
           if ((portfolio as any).community_id) {
             setCommunityId((portfolio as any).community_id)
-            console.log("[v0] ✅ Community ID loaded from portfolio:", (portfolio as any).community_id)
           }
 
           const identity = await getIdentityProps(portfolio.id)
@@ -115,31 +96,23 @@ export default function PortfolioBuilderPage() {
             name: identity?.name || portfolio.name || "",
             handle: normalizeHandle(identity?.handle),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (identity?.selectedColor !== undefined && identity?.selectedColor !== null
-              ? identity.selectedColor 
-              : 0) as ThemeIndex, // Default to 0 if no color saved
+            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
           }
 
-          console.log("[v0] ✅ Loading identity from first portfolio:", loadedIdentity.id)
-          console.log("[v0] 🎨 FINAL Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           setIsLive(Boolean((portfolio as any).is_public))
           return
         }
 
-        console.log("[v0] No portfolios found. User needs to create one first.")
         setActiveIdentity({
           id: null,
           name: user.user_metadata?.name || user.email?.split("@")[0] || "",
           handle: user.email?.split("@")[0] || "",
-          selectedColor: 0 as ThemeIndex, // Start with first color for new portfolios
+          selectedColor: 3 as ThemeIndex,
         })
       } catch (error) {
-        console.error("[v0] ❌ Database load failed:", error)
         setSecurityError("Failed to load portfolio. Please try again.")
       }
-
-      console.log("[v0] ========== PORTFOLIO LOADING COMPLETE ==========")
     }
 
     loadPortfolio()
@@ -178,27 +151,49 @@ export default function PortfolioBuilderPage() {
         console.error("[v0] localStorage save failed:", error)
       }
 
-      if (merged.id && typeof merged.selectedColor === "number") {
-        console.log("[v0] 💾 Persisting identity to database - portfolioId:", merged.id, "color:", merged.selectedColor)
+      if (merged.id) {
+        // Call the database save function directly
+        const supabase = createClient()
         
-        saveWidgetLayout(
-          merged.id!,
-          [], // We're not changing layout structure
-          [], // Just updating widget content
-          {
-            identity: {
-              name: merged.name,
-              handle: merged.handle,
-              avatarUrl: merged.avatarUrl,
-              selectedColor: merged.selectedColor,
-            }
-          },
-          communityId
-        ).then(() => {
-          console.log("[v0] ✅ Identity saved to database successfully")
-        }).catch((err) => {
-          console.error("[v0] ❌ Failed to save identity to database:", err)
-        })
+        supabase
+          .from("pages")
+          .select("id")
+          .eq("portfolio_id", merged.id)
+          .eq("key", "main")
+          .maybeSingle()
+          .then(({ data: page }) => {
+            if (!page?.id) return
+            
+            return supabase
+              .from("widget_types")
+              .select("id")
+              .eq("key", "identity")
+              .maybeSingle()
+              .then(({ data: widgetType }) => {
+                if (!widgetType?.id) return
+                
+                // Upsert the identity widget props directly
+                return supabase
+                  .from("widget_instances")
+                  .upsert(
+                    {
+                      page_id: page.id,
+                      widget_type_id: widgetType.id,
+                      props: {
+                        name: merged.name,
+                        handle: merged.handle,
+                        avatarUrl: merged.avatarUrl,
+                        selectedColor: merged.selectedColor,
+                      },
+                      enabled: true,
+                    },
+                    { onConflict: "page_id,widget_type_id" }
+                  )
+              })
+          })
+          .catch((err) => {
+            console.error("[v0] Failed to save identity:", err)
+          })
       }
 
       return merged

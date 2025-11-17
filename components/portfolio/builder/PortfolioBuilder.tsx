@@ -151,16 +151,28 @@ export default function PortfolioBuilder({
             console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.identity, null, 2))
             
             // Ensure selectedColor is a number, default to 0 if missing
-            const selectedColor = typeof data.identity.selectedColor === "number" 
-              ? data.identity.selectedColor 
-              : 0
+            const identityUpdate: Partial<Identity> = {
+              name: data.identity.name,
+              handle: data.identity.handle,
+              avatarUrl: data.identity.avatarUrl,
+              title: data.identity.title,
+              email: data.identity.email,
+              location: data.identity.location,
+              bio: data.identity.bio,
+              linkedin: data.identity.linkedin,
+              dribbble: data.identity.dribbble,
+              behance: data.identity.behance,
+              twitter: data.identity.twitter,
+              unsplash: data.identity.unsplash,
+              instagram: data.identity.instagram,
+            }
             
-            parentOnIdentityChange({
-              ...data.identity,
-              selectedColor, // Explicitly set selectedColor
-            })
+            // Only set selectedColor if it exists in the database
+            if (typeof data.identity.selectedColor === "number") {
+              identityUpdate.selectedColor = data.identity.selectedColor as ThemeIndex
+            }
             
-            console.log("[v0] ✅ Identity updated with selectedColor:", selectedColor)
+            parentOnIdentityChange(identityUpdate)
           }
 
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
@@ -412,7 +424,7 @@ export default function PortfolioBuilder({
           identity: {
             name: identity.name,
             handle: identity.handle,
-            avatarUrl: identity.avatar,
+            avatarUrl: identity.avatarUrl,
             selectedColor: identity.selectedColor,
             title: identity.title,
             email: identity.email,

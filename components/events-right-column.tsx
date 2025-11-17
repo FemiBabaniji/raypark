@@ -24,8 +24,6 @@ export default function EventsRightColumn({
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const router = useRouter()
 
-  const [reloadTrigger, setReloadTrigger] = useState(0)
-
   useEffect(() => {
     async function loadCommunityPortfolio() {
       console.log("[v0] EventsRightColumn - Starting portfolio load")
@@ -180,7 +178,29 @@ export default function EventsRightColumn({
     if (!loading) {
       loadCommunityPortfolio()
     }
-  }, [user?.id, loading, user?.email, communityId, hasUserPortfolio, userPortfolio, reloadTrigger]) // Added reloadTrigger to deps
+  }, [user?.id, loading, user?.email, communityId, hasUserPortfolio, userPortfolio]) // Removed reloadTrigger
+
+  useEffect(() => {
+    const handleColorUpdate = (event: CustomEvent) => {
+      const { portfolioId: updatedPortfolioId, selectedColor } = event.detail
+      
+      console.log("[v0] Right column received color update:", updatedPortfolioId, "color:", selectedColor)
+      
+      setPortfolio(prev => {
+        if (prev && prev.id === updatedPortfolioId) {
+          console.log("[v0] Updating right column portfolio color from", prev.selectedColor, "to", selectedColor)
+          return { ...prev, selectedColor }
+        }
+        return prev
+      })
+    }
+
+    window.addEventListener("portfolio-color-updated" as any, handleColorUpdate)
+
+    return () => {
+      window.removeEventListener("portfolio-color-updated" as any, handleColorUpdate)
+    }
+  }, [])
 
   useEffect(() => {
     if (!user?.id) return
@@ -197,29 +217,6 @@ export default function EventsRightColumn({
       window.removeEventListener("focus", handlePortfolioUpdate)
     }
   }, [user?.id])
-
-  useEffect(() => {
-    if (!portfolio) return
-
-    const handleColorUpdate = (event: CustomEvent) => {
-      const { portfolioId: updatedPortfolioId, selectedColor } = event.detail
-      
-      if (updatedPortfolioId === portfolio.id) {
-        console.log("[v0] Updating portfolio color to:", selectedColor)
-        setPortfolio(prev => prev ? { ...prev, selectedColor } : null)
-        
-        setTimeout(() => {
-          setReloadTrigger(prev => prev + 1)
-        }, 500)
-      }
-    }
-
-    window.addEventListener("portfolio-color-updated" as any, handleColorUpdate)
-
-    return () => {
-      window.removeEventListener("portfolio-color-updated" as any, handleColorUpdate)
-    }
-  }, [portfolio?.id])
 
   const handleEditProfile = () => {
     if (!user) {

@@ -865,7 +865,6 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
   const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
   const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
-  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
 
   const { data: instances } = await supabase
     .from("widget_instances")
@@ -874,55 +873,48 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
   console.log("[v0] Found", instances?.length || 0, "widget instances")
 
-  const instanceMap: Record<string, { type: string; props: any }> = {}
-  const widgetContent: Record<string, any> = {}
-
+  const instanceById: Record<string, { type: string; props: any }> = {}
+  
   for (const instance of instances || []) {
     const widgetType = idToKey[instance.widget_type_id]
-    if (!widgetType) continue
-
-    const props = instance.props || {}
-
-    if (widgetType === "identity") {
-      console.log("[v0] 🎨 Loading identity widget into widgetContent - selectedColor:", props.selectedColor)
-      widgetContent.identity = props
-    } else {
-      // Check if this is a uniquely-ID'd widget (e.g., description-uuid)
-      instanceMap[instance.id] = {
+    if (widgetType) {
+      instanceById[instance.id] = {
         type: widgetType,
-        props
+        props: instance.props || {}
       }
-      console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
+      console.log("[v0] Mapped instance", instance.id, "to type", widgetType)
     }
   }
-  
-  const leftWidgets = leftWidgetKeys.map((key: string) => {
-    if (key === "identity") {
-      return { id: key, type: key }
-    }
-    // Check if key is like "description-{uuid}"
-    if (key.includes("-") && key.length > 20) {
-      const instanceId = key.split("-").slice(1).join("-")
-      const widgetData = instanceMap[instanceId]
-      if (widgetData) {
-        widgetContent[key] = widgetData.props
-        return { id: key, type: widgetData.type }
-      }
-    }
-    return { id: key, type: key }
-  })
 
-  const rightWidgets = rightWidgetKeys.map((key: string) => {
-    if (key.includes("-") && key.length > 20) {
-      const instanceId = key.split("-").slice(1).join("-")
-      const widgetData = instanceMap[instanceId]
+  const widgetContent: Record<string, any> = {}
+
+  const processWidgetKey = (key: string) => {
+    // Keys are in format: "type-uuid" (e.g., "identity-abc123", "description-def456")
+    if (key.includes("-")) {
+      const parts = key.split("-")
+      const widgetType = parts[0]
+      const instanceId = parts.slice(1).join("-")
+      
+      const widgetData = instanceById[instanceId]
       if (widgetData) {
         widgetContent[key] = widgetData.props
+        console.log("[v0] Loaded widget", key, "with", Object.keys(widgetData.props).length, "props")
+        if (widgetType === "identity") {
+          console.log("[v0] 🎨 Identity widget selectedColor:", widgetData.props.selectedColor)
+        }
         return { id: key, type: widgetData.type }
+      } else {
+        console.warn("[v0] ⚠️ No instance found for", key)
+        return { id: key, type: widgetType }
       }
     }
+    
+    // Fallback for simple keys without UUIDs (shouldn't happen with new system)
     return { id: key, type: key }
-  })
+  }
+
+  const leftWidgets = leftWidgetKeys.map(processWidgetKey)
+  const rightWidgets = rightWidgetKeys.map(processWidgetKey)
 
   console.log("[v0] ✅ Returning loaded data with", leftWidgets.length, "left and", rightWidgets.length, "right widgets")
   console.log("[v0] Widget content keys:", Object.keys(widgetContent))

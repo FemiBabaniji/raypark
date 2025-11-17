@@ -233,6 +233,8 @@ export async function POST(request: NextRequest) {
     const descriptionTypeId = keyToId["description"]
 
     // Create identity widget with template-specific data
+    let identityWidgetId: string | null = null
+    
     if (identityTypeId) {
       const identityProps: any = {
         name: user.user_metadata?.full_name || name,
@@ -261,9 +263,7 @@ export async function POST(request: NextRequest) {
         identityProps.selectedColor = 3 // Default red
       }
 
-      console.log("[v0] Creating identity widget with color:", identityProps.selectedColor)
-
-      const { error: identityError } = await supabase
+      const { data: identityWidget, error: identityError } = await supabase
         .from("widget_instances")
         .insert({
           page_id: mainPage.id,
@@ -271,30 +271,27 @@ export async function POST(request: NextRequest) {
           props: identityProps,
           enabled: true,
         })
+        .select("id")
+        .single()
 
       if (identityError) {
         console.error("[v0] ⚠️ Failed to create identity widget:", identityError)
-      } else {
-        layoutStructure.left.widgets.push("identity")
-        console.log("[v0] ✅ Identity widget created")
+      } else if (identityWidget?.id) {
+        identityWidgetId = identityWidget.id
+        layoutStructure.left.widgets.push(`identity-${identityWidget.id}`)
+        console.log("[v0] ✅ Identity widget created with ID:", identityWidget.id)
       }
     }
 
     // Create template-specific description widgets
     if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType] && descriptionTypeId) {
-      console.log("[v0] 📋 Creating template widgets for:", template)
-      console.log("[v0] Template exists:", !!PORTFOLIO_TEMPLATES[template as PortfolioTemplateType])
-      console.log("[v0] Description type ID:", descriptionTypeId)
-      
       const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
-      console.log("[v0] Template config:", JSON.stringify(templateConfig))
       
       if (templateConfig.widgets.length > 0) {
-        console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
+        console.log("[v0] Creating", templateConfig.widgets.length, "template widgets")
         
         for (let i = 0; i < templateConfig.widgets.length; i++) {
           const widget = templateConfig.widgets[i]
-          console.log("[v0] Creating widget", i, "with props:", JSON.stringify(widget.props))
           
           const { data: createdWidget, error: widgetError } = await supabase
             .from("widget_instances")
@@ -309,25 +306,16 @@ export async function POST(request: NextRequest) {
 
           if (widgetError) {
             console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
-            console.error("[v0] Widget error details:", JSON.stringify(widgetError))
           } else if (createdWidget?.id) {
             layoutStructure.left.widgets.push(`description-${createdWidget.id}`)
             console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id)
-          } else {
-            console.error("[v0] ⚠️ No widget ID returned for widget", i)
           }
         }
-        
-        console.log("[v0] Final layout structure:", JSON.stringify(layoutStructure))
-      } else {
-        console.log("[v0] ⚠️ Template has no widgets configured")
       }
-    } else {
-      console.log("[v0] ⚠️ Template widget creation skipped - template:", template, "exists:", !!PORTFOLIO_TEMPLATES[template as any], "descriptionTypeId:", descriptionTypeId)
     }
 
     // Create layout with structure
-    console.log("[v0] Creating layout with structure:", JSON.stringify(layoutStructure))
+    console.log("[v0] 📐 Saving layout with", layoutStructure.left.widgets.length, "widgets:", layoutStructure.left.widgets)
     
     const { error: layoutError } = await supabase
       .from("page_layouts")
@@ -339,7 +327,7 @@ export async function POST(request: NextRequest) {
     if (layoutError) {
       console.error("[v0] ❌ Failed to create page layout:", layoutError)
     } else {
-      console.log("[v0] ✅ Page layout created with", layoutStructure.left.widgets.length, "left widgets")
+      console.log("[v0] ✅ Page layout saved successfully")
     }
 
     console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)

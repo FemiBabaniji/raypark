@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
 import { Upload, ChevronRight, Plus } from 'lucide-react'
+import { TemplateLibraryModal } from "@/components/template-library-modal"
+import type { PortfolioTemplate } from "@/lib/portfolio-templates"
 
 export default function EventsRightColumn({ 
   onToggleRightColumn,
@@ -22,6 +24,7 @@ export default function EventsRightColumn({
   const { user, loading } = useAuth()
   const [portfolio, setPortfolio] = useState<UnifiedPortfolio | null>(null)
   const [portfolioLoading, setPortfolioLoading] = useState(true)
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -248,7 +251,7 @@ export default function EventsRightColumn({
 
   const handleCreateCommunityPortfolio = () => {
     if (!user) {
-      router.push("/login?redirect=/portfolio/templates")
+      router.push("/login?redirect=/portfolio/builder")
       return
     }
 
@@ -257,8 +260,53 @@ export default function EventsRightColumn({
       return
     }
 
-    // Navigate to template selection page with community context
-    router.push(`/portfolio/templates?community=${communityId}`)
+    // Show template library modal
+    setShowTemplateLibrary(true)
+  }
+
+  const handleTemplateSelect = async (template: PortfolioTemplate | null) => {
+    if (!user || !communityId) return
+
+    try {
+      console.log("[v0] Creating portfolio for community:", communityId, "with template:", template?.id || "blank")
+      
+      const response = await fetch("/api/portfolios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "My Portfolio",
+          description: "My community portfolio",
+          community_id: communityId,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.details || error.error || "Failed to create portfolio")
+      }
+
+      const { portfolio } = await response.json()
+      console.log("[v0] Portfolio created:", portfolio.id)
+
+      // If template selected, store it for the builder to apply
+      if (template) {
+        localStorage.setItem(
+          "pendingTemplate",
+          JSON.stringify({
+            template,
+            portfolioId: portfolio.id,
+          })
+        )
+      }
+
+      window.dispatchEvent(new CustomEvent("portfolio-updated"))
+      router.push(`/portfolio/builder?portfolio=${portfolio.id}&community=${communityId}`)
+    } catch (error) {
+      console.error("[v0] Failed to create community portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to create portfolio")
+    } finally {
+      setShowTemplateLibrary(false)
+    }
   }
 
   return (
@@ -274,6 +322,12 @@ export default function EventsRightColumn({
           </button>
         </div>
       )}
+      
+      <TemplateLibraryModal
+        isOpen={showTemplateLibrary}
+        onClose={() => setShowTemplateLibrary(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
       
       <div className="space-y-5">
         {/* Profile editing card */}

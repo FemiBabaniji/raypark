@@ -54,7 +54,7 @@ type EditorState = {
 export default function PortfolioBuilder({
   isPreviewMode = false,
   identity,
-  onIdentityChange,
+  onIdentityChange: parentOnIdentityChange,
   onExportData,
   onSavePortfolio,
   isLive = false,
@@ -143,7 +143,7 @@ export default function PortfolioBuilder({
 
           if (data.identity && data.identity.name) {
             console.log("[v0] Setting identity from database:", data.identity.name)
-            onIdentityChange(data.identity)
+            parentOnIdentityChange(data.identity)
           }
 
           if (data.projectColors && Object.keys(data.projectColors).length > 0) {
@@ -187,7 +187,7 @@ export default function PortfolioBuilder({
     }
 
     loadData()
-  }, [identity.id, portfolioId, onIdentityChange, communityId])
+  }, [identity.id, portfolioId, parentOnIdentityChange, communityId])
 
   const [projectColors, setProjectColors] = useState<Record<string, string>>({
     aiml: "purple",
@@ -586,7 +586,7 @@ export default function PortfolioBuilder({
             <IdentityWidget
               identity={identity}
               isPreviewMode={isPreviewMode}
-              onChange={onIdentityChange}
+              onChange={parentOnIdentityChange}
               editingField={editingField}
               setEditingField={setEditingField}
             />

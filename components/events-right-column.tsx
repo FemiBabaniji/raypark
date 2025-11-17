@@ -196,6 +196,25 @@ export default function EventsRightColumn({
     }
   }, [user?.id])
 
+  useEffect(() => {
+    if (!portfolio) return
+
+    const handleColorUpdate = (event: CustomEvent) => {
+      const { portfolioId: updatedPortfolioId, selectedColor } = event.detail
+      
+      if (updatedPortfolioId === portfolio.id) {
+        console.log("[v0] Updating portfolio color to:", selectedColor)
+        setPortfolio(prev => prev ? { ...prev, selectedColor } : null)
+      }
+    }
+
+    window.addEventListener("portfolio-color-updated" as any, handleColorUpdate)
+
+    return () => {
+      window.removeEventListener("portfolio-color-updated" as any, handleColorUpdate)
+    }
+  }, [portfolio?.id])
+
   const handleEditProfile = () => {
     if (!user) {
       router.push("/login?redirect=/portfolio/builder")

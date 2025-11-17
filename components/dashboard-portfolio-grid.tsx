@@ -295,6 +295,31 @@ export function DashboardPortfolioGrid({
   onCheckExistingPortfolio,
 }: DashboardPortfolioGridProps) {
   const [displayView, setDisplayView] = useState<"grid" | "list">("grid")
+  const [localPortfolios, setLocalPortfolios] = useState(portfolios)
+
+  useEffect(() => {
+    setLocalPortfolios(portfolios)
+  }, [portfolios])
+
+  useEffect(() => {
+    const handleColorUpdate = (event: CustomEvent) => {
+      const { portfolioId: updatedPortfolioId, selectedColor } = event.detail
+      
+      console.log("[v0] Dashboard received color update for:", updatedPortfolioId, "color:", selectedColor)
+      
+      setLocalPortfolios(prev => 
+        prev.map(p => 
+          p.id === updatedPortfolioId ? { ...p, selectedColor } : p
+        )
+      )
+    }
+
+    window.addEventListener("portfolio-color-updated" as any, handleColorUpdate)
+
+    return () => {
+      window.removeEventListener("portfolio-color-updated" as any, handleColorUpdate)
+    }
+  }, [])
 
   return (
     <div className="mb-16">
@@ -335,10 +360,10 @@ export function DashboardPortfolioGrid({
         </div>
       </div>
 
-      {portfolios.length > 0 ? (
+      {localPortfolios.length > 0 ? (
         displayView === "grid" ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-            {portfolios.map((portfolio) => (
+            {localPortfolios.map((portfolio) => (
               <PortfolioCard
                 key={portfolio.id}
                 portfolio={portfolio}
@@ -351,7 +376,7 @@ export function DashboardPortfolioGrid({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {portfolios.map((portfolio) => {
+            {localPortfolios.map((portfolio) => {
               const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
               const initials = portfolio.initials || portfolio.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
               const communityText = portfolio.community?.name || "No Community"

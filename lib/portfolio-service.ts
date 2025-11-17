@@ -725,6 +725,8 @@ export async function saveWidgetLayout(
     let successCount = 0
     let failCount = 0
 
+    let savedIdentityColor: number | undefined = undefined
+
     // Save each widget's content
     for (const widgetType of allWidgetTypes) {
       const widget_type_id = keyToId[widgetType]
@@ -739,6 +741,7 @@ export async function saveWidgetLayout(
 
       if (widgetType === "identity") {
         console.log(`[v0] 🎨 SAVING IDENTITY WIDGET - selectedColor:`, content.selectedColor, "full content:", JSON.stringify(content, null, 2))
+        savedIdentityColor = content.selectedColor
       }
 
       console.log(`[v0] Saving widget '${widgetType}' with ${Object.keys(content).length} properties`)
@@ -768,6 +771,15 @@ export async function saveWidgetLayout(
     
     if (failCount > 0) {
       throw new Error(`Some widgets failed to save (${failCount}/${allWidgetTypes.size})`)
+    }
+
+    if (typeof savedIdentityColor === "number" && typeof window !== "undefined") {
+      console.log("[v0] 📡 Broadcasting color update event - portfolioId:", portfolioId, "color:", savedIdentityColor)
+      window.dispatchEvent(
+        new CustomEvent("portfolio-color-updated", {
+          detail: { portfolioId, selectedColor: savedIdentityColor }
+        })
+      )
     }
     
   } catch (error) {

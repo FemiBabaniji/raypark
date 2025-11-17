@@ -150,7 +150,6 @@ export default function PortfolioBuilder({
             console.log("[v0] 🎨 Loading identity with selectedColor:", data.identity.selectedColor)
             console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.identity, null, 2))
             
-            // Ensure selectedColor is a number, default to 0 if missing
             const identityUpdate: Partial<Identity> = {
               name: data.identity.name,
               handle: data.identity.handle,
@@ -165,11 +164,8 @@ export default function PortfolioBuilder({
               twitter: data.identity.twitter,
               unsplash: data.identity.unsplash,
               instagram: data.identity.instagram,
-            }
-            
-            // Only set selectedColor if it exists in the database
-            if (typeof data.identity.selectedColor === "number") {
-              identityUpdate.selectedColor = data.identity.selectedColor as ThemeIndex
+              selectedColor: data.identity.selectedColor as ThemeIndex,
+              // ... other identity fields here ...
             }
             
             parentOnIdentityChange(identityUpdate)

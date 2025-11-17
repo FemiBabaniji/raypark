@@ -22,8 +22,18 @@ export default function PortfolioBuilderPage() {
     handle: string
     avatarUrl?: string
     selectedColor: ThemeIndex
+    title?: string
+    email?: string
+    location?: string
+    bio?: string
+    linkedin?: string
+    dribbble?: string
+    behance?: string
+    twitter?: string
+    unsplash?: string
+    instagram?: string
   }>({
-    id: null,  // Start with null, will be set from URL or database
+    id: null,
     name: "",
     handle: "",
     selectedColor: 3 as ThemeIndex,
@@ -68,6 +78,16 @@ export default function PortfolioBuilderPage() {
             handle: normalizeHandle(identity?.handle || user.email?.split("@")[0] || ""),
             avatarUrl: identity?.avatarUrl,
             selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
+            title: identity?.title,
+            email: identity?.email,
+            location: identity?.location,
+            bio: identity?.bio,
+            linkedin: identity?.linkedin,
+            dribbble: identity?.dribbble,
+            behance: identity?.behance,
+            twitter: identity?.twitter,
+            unsplash: identity?.unsplash,
+            instagram: identity?.instagram,
           }
 
           setActiveIdentity(loadedIdentity)
@@ -97,6 +117,16 @@ export default function PortfolioBuilderPage() {
             handle: normalizeHandle(identity?.handle),
             avatarUrl: identity?.avatarUrl,
             selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
+            title: identity?.title,
+            email: identity?.email,
+            location: identity?.location,
+            bio: identity?.bio,
+            linkedin: identity?.linkedin,
+            dribbble: identity?.dribbble,
+            behance: identity?.behance,
+            twitter: identity?.twitter,
+            unsplash: identity?.unsplash,
+            instagram: identity?.instagram,
           }
 
           setActiveIdentity(loadedIdentity)
@@ -124,6 +154,16 @@ export default function PortfolioBuilderPage() {
       handle: string
       avatarUrl?: string
       selectedColor: ThemeIndex
+      title?: string
+      email?: string
+      location?: string
+      bio?: string
+      linkedin?: string
+      dribbble?: string
+      behance?: string
+      twitter?: string
+      unsplash?: string
+      instagram?: string
     }>,
   ) => {
     console.log("[v0] handleIdentityChange called with:", next)
@@ -141,7 +181,6 @@ export default function PortfolioBuilderPage() {
         const base = existing ? JSON.parse(existing) : {}
         const updated = { ...base, ...merged, _timestamp: Date.now() }
         localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
-        console.log("[v0] Saved to localStorage with selectedColor:", merged.selectedColor)
 
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("portfolio-updated"))
@@ -152,7 +191,6 @@ export default function PortfolioBuilderPage() {
       }
 
       if (merged.id) {
-        // Call the database save function directly
         const supabase = createClient()
         
         supabase
@@ -172,7 +210,6 @@ export default function PortfolioBuilderPage() {
               .then(({ data: widgetType }) => {
                 if (!widgetType?.id) return
                 
-                // Upsert the identity widget props directly
                 return supabase
                   .from("widget_instances")
                   .upsert(
@@ -184,6 +221,16 @@ export default function PortfolioBuilderPage() {
                         handle: merged.handle,
                         avatarUrl: merged.avatarUrl,
                         selectedColor: merged.selectedColor,
+                        title: merged.title,
+                        email: merged.email,
+                        location: merged.location,
+                        bio: merged.bio,
+                        linkedin: merged.linkedin,
+                        dribbble: merged.dribbble,
+                        behance: merged.behance,
+                        twitter: merged.twitter,
+                        unsplash: merged.unsplash,
+                        instagram: merged.instagram,
                       },
                       enabled: true,
                     },
@@ -306,6 +353,16 @@ export default function PortfolioBuilderPage() {
                   handle: activeIdentity.handle,
                   avatarUrl: activeIdentity.avatarUrl,
                   selectedColor: activeIdentity.selectedColor,
+                  title: activeIdentity.title,
+                  email: activeIdentity.email,
+                  location: activeIdentity.location,
+                  bio: activeIdentity.bio,
+                  linkedin: activeIdentity.linkedin,
+                  dribbble: activeIdentity.dribbble,
+                  behance: activeIdentity.behance,
+                  twitter: activeIdentity.twitter,
+                  unsplash: activeIdentity.unsplash,
+                  instagram: activeIdentity.instagram,
                 }}
                 onIdentityChange={handleIdentityChange}
               />

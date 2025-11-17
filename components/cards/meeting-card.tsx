@@ -8,8 +8,16 @@ interface MeetingCardProps {
   onClick?: (meetingId: string) => void
 }
 
+const MEETING_ACCENT_COLORS = {
+  team: "#3b82f6", // blue
+  "1-on-1": "#10b981", // green
+  "all-hands": "#8b5cf6", // purple
+}
+
 export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  
+  const accentColor = MEETING_ACCENT_COLORS[meeting.type as keyof typeof MEETING_ACCENT_COLORS] || "#3b82f6"
 
   return (
     <button
@@ -19,7 +27,7 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className={`
         relative overflow-hidden
-        bg-gradient-to-br from-zinc-800 to-zinc-900
+        bg-zinc-900/50
         rounded-2xl 
         p-4
         transition-all duration-300 ease-out
@@ -27,7 +35,11 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
         text-left text-white
         w-full
         shadow-lg
+        border border-white/5
       `}
+      style={{
+        borderLeft: `3px solid ${accentColor}`
+      }}
     >
       <div className="space-y-1.5">
         <h3 className="text-sm font-semibold text-white">

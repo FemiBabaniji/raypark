@@ -120,18 +120,15 @@ const PortfolioCard = ({
 
   const handleCommunitySelect = async (communityId: string | null) => {
     if (communityId === null) {
-      // Unlinking is always safe
       onSyncCommunity(portfolio.id, null)
       setIsMenuOpen(false)
       return
     }
 
-    // Check if there's already a portfolio for this community
     if (onCheckExistingPortfolio) {
       const existing = await onCheckExistingPortfolio(communityId)
       
       if (existing && existing.id !== portfolio.id) {
-        // Show confirmation modal
         const community = userCommunities.find(c => c.id === communityId)
         setConfirmModal({
           isOpen: true,
@@ -144,62 +141,63 @@ const PortfolioCard = ({
       }
     }
 
-    // No existing portfolio or same portfolio, proceed normally
     onSyncCommunity(portfolio.id, communityId)
     setIsMenuOpen(false)
   }
 
   return (
     <>
-      <div className={`relative w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] group ${isMenuOpen ? 'z-50' : 'z-0'}`}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsMenuOpen(!isMenuOpen)
-          }}
-          className="absolute -top-2 -right-2 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-20"
-          aria-label="Portfolio options"
-        >
-          <MoreVertical className="w-4 h-4 text-white/70" />
-        </button>
+      <div className="relative w-full">
+        <div className={`bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] group ${isMenuOpen ? 'ring-2 ring-white/20' : ''}`}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMenuOpen(!isMenuOpen)
+            }}
+            className="absolute -top-2 -right-2 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-10"
+            aria-label="Portfolio options"
+          >
+            <MoreVertical className="w-4 h-4 text-white/70" />
+          </button>
 
-        <button
-          onClick={onClick}
-          className="w-full p-6 text-left"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="relative">
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
-                {portfolio.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
-                ) : (
-                  <span className="text-white font-bold text-lg">{initials}</span>
-                )}
+          <button
+            onClick={onClick}
+            className="w-full p-6 text-left"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="relative">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+                  {portfolio.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
+                  ) : (
+                    <span className="text-white font-bold text-lg">{initials}</span>
+                  )}
+                </div>
+                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-[2.5px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
               </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-[2.5px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
             </div>
-          </div>
-          
-          <h3 className="text-white font-semibold text-lg mb-1.5 group-hover:text-white/90 transition-colors">
-            {portfolio.name}
-          </h3>
-          
-          <p className="text-xs text-white/40">
-            {communityText}
-          </p>
-        </button>
+            
+            <h3 className="text-white font-semibold text-lg mb-1.5 group-hover:text-white/90 transition-colors">
+              {portfolio.name}
+            </h3>
+            
+            <p className="text-xs text-white/40">
+              {communityText}
+            </p>
+          </button>
+        </div>
 
         {isMenuOpen && (
           <>
             <div 
-              className="fixed inset-0 z-40" 
+              className="fixed inset-0 z-[90]" 
               onClick={(e) => {
                 e.stopPropagation()
                 setIsMenuOpen(false)
               }} 
             />
-            <div className="absolute right-0 top-10 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-[60]">
+            <div className="absolute right-0 top-12 w-56 bg-neutral-900 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 overflow-hidden z-[100]">
               <div className="p-2">
                 <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
                   Sync to Community
@@ -210,16 +208,13 @@ const PortfolioCard = ({
                     e.stopPropagation()
                     handleCommunitySelect(null)
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors relative ${
                     !portfolio.community
-                      ? 'bg-white/10 text-white'
+                      ? 'bg-white/10 text-white border-l-2 border-blue-500 pl-2'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   None (Personal)
-                  {!portfolio.community && (
-                    <span className="ml-2 text-emerald-400">✓</span>
-                  )}
                 </button>
 
                 {userCommunities.length > 0 ? (
@@ -230,16 +225,13 @@ const PortfolioCard = ({
                         e.stopPropagation()
                         handleCommunitySelect(community.id)
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors relative ${
                         portfolio.community?.id === community.id
-                          ? 'bg-white/10 text-white'
+                          ? 'bg-white/10 text-white border-l-2 border-emerald-500 pl-2'
                           : 'text-white/70 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       {community.name}
-                      {portfolio.community?.id === community.id && (
-                        <span className="ml-2 text-emerald-400">✓</span>
-                      )}
                     </button>
                   ))
                 ) : (
@@ -440,54 +432,56 @@ export function DashboardPortfolioGrid({
               }
 
               return (
-                <div key={portfolio.id} className={`relative ${isMenuOpen ? 'z-50' : 'z-0'}`}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setIsMenuOpen(!isMenuOpen)
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-20"
-                    aria-label="Portfolio options"
-                  >
-                    <MoreVertical className="w-4 h-4 text-white/70" />
-                  </button>
-                  
-                  <button
-                    onClick={() => onPortfolioClick(portfolio.id)}
-                    className="w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl p-4 transition-all duration-200 border border-white/[0.08] text-left flex items-center gap-4"
-                  >
-                    <div className="relative flex-shrink-0">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                        {portfolio.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
-                        ) : (
-                          <span className="text-white font-bold text-base">{initials}</span>
-                        )}
-                      </div>
-                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                    </div>
+                <div key={portfolio.id} className="relative">
+                  <div className={`bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] ${isMenuOpen ? 'ring-2 ring-white/20' : ''}`}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsMenuOpen(!isMenuOpen)
+                      }}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-neutral-900/90 backdrop-blur-sm hover:bg-neutral-800/90 border border-white/10 transition-colors flex items-center justify-center z-10"
+                      aria-label="Portfolio options"
+                    >
+                      <MoreVertical className="w-4 h-4 text-white/70" />
+                    </button>
                     
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-base mb-0.5 truncate">
-                        {portfolio.name}
-                      </h3>
-                      <p className="text-xs text-white/40 truncate">
-                        {communityText}
-                      </p>
-                    </div>
-                  </button>
+                    <button
+                      onClick={() => onPortfolioClick(portfolio.id)}
+                      className="w-full p-4 text-left flex items-center gap-4"
+                    >
+                      <div className="relative flex-shrink-0">
+                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                          {portfolio.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={portfolio.avatarUrl || "/placeholder.svg"} alt={portfolio.name} className="w-full h-full object-cover rounded-2xl" />
+                          ) : (
+                            <span className="text-white font-bold text-base">{initials}</span>
+                          )}
+                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[2px] border-[#1a1a1a] ${portfolio.isLive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-semibold text-base mb-0.5 truncate">
+                          {portfolio.name}
+                        </h3>
+                        <p className="text-xs text-white/40 truncate">
+                          {communityText}
+                        </p>
+                      </div>
+                    </button>
+                  </div>
 
                   {isMenuOpen && (
                     <>
                       <div 
-                        className="fixed inset-0 z-40" 
+                        className="fixed inset-0 z-[90]" 
                         onClick={(e) => {
                           e.stopPropagation()
                           setIsMenuOpen(false)
                         }} 
                       />
-                      <div className="absolute right-0 top-16 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-[60]">
+                      <div className="absolute right-0 top-16 w-56 bg-neutral-900 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 overflow-hidden z-[100]">
                         <div className="p-2">
                           <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
                             Sync to Community
@@ -498,16 +492,13 @@ export function DashboardPortfolioGrid({
                               e.stopPropagation()
                               handleCommunitySelect(null)
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors relative ${
                               !portfolio.community
-                                ? 'bg-white/10 text-white'
+                                ? 'bg-white/10 text-white border-l-2 border-blue-500 pl-2'
                                 : 'text-white/70 hover:bg-white/5 hover:text-white'
                             }`}
                           >
                             None (Personal)
-                            {!portfolio.community && (
-                              <span className="ml-2 text-emerald-400">✓</span>
-                            )}
                           </button>
 
                           {userCommunities.length > 0 ? (
@@ -518,16 +509,13 @@ export function DashboardPortfolioGrid({
                                   e.stopPropagation()
                                   handleCommunitySelect(community.id)
                                 }}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors relative ${
                                   portfolio.community?.id === community.id
-                                    ? 'bg-white/10 text-white'
+                                    ? 'bg-white/10 text-white border-l-2 border-emerald-500 pl-2'
                                     : 'text-white/70 hover:bg-white/5 hover:text-white'
                                 }`}
                               >
                                 {community.name}
-                                {portfolio.community?.id === community.id && (
-                                  <span className="ml-2 text-emerald-400">✓</span>
-                                )}
                               </button>
                             ))
                           ) : (

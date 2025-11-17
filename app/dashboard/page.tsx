@@ -136,8 +136,9 @@ export default function DashboardPage() {
           loadUserCommunities(user?.id)
         ])
         
-        console.log("[v0] Fetched portfolios:", userPortfolios.length)
-        console.log("[v0] Fetched communities:", communities.length)
+        console.log("[v0] 📊 Fetched portfolios:", userPortfolios.length)
+        console.log("[v0] 🏘️ Fetched communities:", communities.length)
+        console.log("[v0] 🏘️ Community details:", communities)
         
         if (userPortfolios.length > 0) {
           setPortfolios(userPortfolios)

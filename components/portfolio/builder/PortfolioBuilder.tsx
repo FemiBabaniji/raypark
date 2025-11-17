@@ -109,8 +109,8 @@ export default function PortfolioBuilder({
         console.log("[v0] Skipping load:", { idToLoad, hasLoaded: hasLoadedDataRef.current, isLoading: isLoadingData })
         
         if (!idToLoad && !hasLoadedDataRef.current) {
-          console.log("[v0] No portfolio ID - starting with empty layout (no defaults)")
-          setLeftWidgets([])
+          console.log("[v0] No portfolio ID - using default layout")
+          setLeftWidgets([{ id: "identity", type: "identity" }])
           setRightWidgets([])
           hasLoadedDataRef.current = true
           setIsLoadingData(false)
@@ -136,15 +136,12 @@ export default function PortfolioBuilder({
           console.log("[v0] ✅ Loaded data from database")
 
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
-            console.log("[v0] Setting widgets from database:", {
-              left: data.layout.left.length,
-              right: data.layout.right.length
-            })
-            setLeftWidgets(data.layout.left)
+            console.log("[v0] Setting widgets from database")
+            setLeftWidgets(data.layout.left.length > 0 ? data.layout.left : [{ id: "identity", type: "identity" }])
             setRightWidgets(data.layout.right)
           } else {
-            console.log("[v0] Database has empty layout - setting empty widgets")
-            setLeftWidgets([])
+            console.log("[v0] No widgets in database, using default identity widget")
+            setLeftWidgets([{ id: "identity", type: "identity" }])
             setRightWidgets([])
           }
 
@@ -175,8 +172,8 @@ export default function PortfolioBuilder({
 
           console.log("[v0] ✅ Data loaded and state updated successfully")
         } else {
-          console.log("[v0] ℹ️ No saved data found, starting with empty layout")
-          setLeftWidgets([])
+          console.log("[v0] ℹ️ No saved data found, using default layout")
+          setLeftWidgets([{ id: "identity", type: "identity" }])
           setRightWidgets([])
         }
         
@@ -187,7 +184,7 @@ export default function PortfolioBuilder({
         
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
-        setLeftWidgets([])
+        setLeftWidgets([{ id: "identity", type: "identity" }])
         setRightWidgets([])
         setTimeout(() => setHasInitialized(true), 1000)
       } finally {

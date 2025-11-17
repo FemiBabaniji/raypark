@@ -36,12 +36,12 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
     .maybeSingle()
 
   if (error) {
-    console.error("[v0] ❌ Error fetching page:", error)
+    console.error("Error fetching page:", error)
     throw new Error(`Database error: ${error.message}`)
   }
 
   if (!existingPage?.id) {
-    console.error("[v0] ❌ No main page found for portfolio:", portfolioId)
+    console.error("No main page found for portfolio:", portfolioId)
     throw new Error("Portfolio structure is incomplete. Please try creating a new portfolio.")
   }
 
@@ -68,7 +68,7 @@ async function ensurePageLayout(supabase: ReturnType<typeof createClient>, pageI
       .insert({ page_id: pageId, layout: defaultLayout })
 
     if (layoutError && layoutError.code !== '23505') {
-      console.error("[v0] ❌ Error creating layout:", layoutError)
+      console.error("Error creating layout:", layoutError)
       throw layoutError
     } else if (layoutError?.code === '23505') {
       console.log("[v0] ℹ️ Layout already exists for page:", pageId)
@@ -278,7 +278,7 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
         email: identityProps?.email || `${portfolio.slug}@example.com`,
         location: identityProps?.location || "Location",
         handle: identityProps?.handle || `@${portfolio.slug}`,
-        avatarUrl: identityProps?.avatarUrl,
+        avatarUrl: portfolio.avatarUrl,
         initials: portfolio.name.slice(0, 2).toUpperCase(),
         selectedColor: selectedColor as ThemeIndex,
         isLive: portfolio.is_public || false,

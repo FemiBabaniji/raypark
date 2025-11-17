@@ -19,17 +19,17 @@ export interface CommunityMembership {
 }
 
 /**
- * Load all communities that a user is a member of
+ * Load all communities that a user is a member of OR has portfolios in
  */
 export async function loadUserCommunities(userId?: string): Promise<Community[]> {
   if (!userId) {
-    console.log("[v0] No user ID provided, returning empty communities list")
     return []
   }
 
   const supabase = createClient()
 
   try {
+    
     // Get all community memberships for this user
     const { data: memberships, error: memberError } = await supabase
       .from("community_members")
@@ -37,33 +37,44 @@ export async function loadUserCommunities(userId?: string): Promise<Community[]>
       .eq("user_id", userId)
 
     if (memberError) {
-      console.error("[v0] Error loading community memberships:", memberError)
-      throw new Error(`Failed to load community memberships: ${memberError.message}`)
+      console.error("Error loading community memberships:", memberError)
     }
 
-    if (!memberships || memberships.length === 0) {
-      console.log("[v0] User is not a member of any communities")
+    // Get all communities where user has portfolios
+    const { data: portfolioCommunities, error: portfolioError } = await supabase
+      .from("portfolios")
+      .select("community_id")
+      .eq("user_id", userId)
+      .not("community_id", "is", null)
+
+    if (portfolioError) {
+      console.error("Error loading portfolio communities:", portfolioError)
+    }
+
+    // Combine and deduplicate community IDs
+    const membershipIds = memberships?.map((m) => m.community_id) || []
+    const portfolioIds = portfolioCommunities?.map((p) => p.community_id).filter(Boolean) || []
+    const allCommunityIds = Array.from(new Set([...membershipIds, ...portfolioIds]))
+
+    if (allCommunityIds.length === 0) {
       return []
     }
-
-    const communityIds = memberships.map((m) => m.community_id)
 
     // Get full community details
     const { data: communities, error: commError } = await supabase
       .from("communities")
       .select("*")
-      .in("id", communityIds)
+      .in("id", allCommunityIds)
       .order("name", { ascending: true })
 
     if (commError) {
-      console.error("[v0] Error loading communities:", commError)
+      console.error("Error loading communities:", commError)
       throw new Error(`Failed to load communities: ${commError.message}`)
     }
 
-    console.log(`[v0] Loaded ${communities?.length || 0} communities for user`)
     return communities || []
   } catch (error) {
-    console.error("[v0] Failed to load user communities:", error)
+    console.error("Failed to load user communities:", error)
     return []
   }
 }
@@ -81,7 +92,7 @@ export async function getCommunityById(communityId: string): Promise<Community |
     .maybeSingle()
 
   if (error) {
-    console.error("[v0] Error loading community:", error)
+    console.error("Error loading community:", error)
     return null
   }
 
@@ -105,7 +116,7 @@ export async function getPortfolioForCommunity(
     .maybeSingle()
 
   if (error) {
-    console.error("[v0] Error checking for existing portfolio:", error)
+    console.error("Error checking for existing portfolio:", error)
     return null
   }
 
@@ -145,11 +156,11 @@ export async function linkPortfolioToCommunity(
     .eq("user_id", userId)
 
   if (updateError) {
-    console.error("[v0] Error linking portfolio to community:", updateError)
+    console.error("Error linking portfolio to community:", updateError)
     throw new Error(`Failed to link portfolio: ${updateError.message}`)
   }
 
-  console.log(`[v0] Portfolio ${portfolioId} linked to community ${communityId}`)
+  console.log(`Portfolio ${portfolioId} linked to community ${communityId}`)
 }
 
 /**
@@ -170,12 +181,12 @@ export async function swapPortfolioToCommunity(
     .eq("community_id", communityId)
 
   if (unlinkError) {
-    console.error("[v0] Error unlinking old portfolio:", unlinkError)
+    console.error("Error unlinking old portfolio:", unlinkError)
     throw new Error(`Failed to unlink old portfolio: ${unlinkError.message}`)
   }
 
   // Then link the new portfolio
   await linkPortfolioToCommunity(newPortfolioId, communityId, userId)
   
-  console.log(`[v0] Swapped portfolio ${newPortfolioId} to community ${communityId}`)
+  console.log(`Swapped portfolio ${newPortfolioId} to community ${communityId}`)
 }

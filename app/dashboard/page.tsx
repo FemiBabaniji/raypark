@@ -136,10 +136,6 @@ export default function DashboardPage() {
           loadUserCommunities(user?.id)
         ])
         
-        console.log("[v0] 📊 Fetched portfolios:", userPortfolios.length)
-        console.log("[v0] 🏘️ Fetched communities:", communities.length)
-        console.log("[v0] 🏘️ Community details:", communities)
-        
         if (userPortfolios.length > 0) {
           setPortfolios(userPortfolios)
         } else {
@@ -216,15 +212,13 @@ export default function DashboardPage() {
         community: undefined,
       }
 
-      console.log("[v0] Created portfolio:", newPortfolio)
-      
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
       
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
     } catch (error) {
-      console.error("Error creating portfolio:", error)
+      console.error("[v0] Error creating portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")
     }
   }
@@ -242,24 +236,18 @@ export default function DashboardPage() {
 
   const handleSyncCommunity = async (portfolioId: string, communityId: string | null) => {
     if (!user?.id) {
-      console.log("[v0] User not authenticated, cannot sync portfolio")
       return
     }
 
     try {
       if (communityId === null) {
-        // Unlinking - use regular link function
         await linkPortfolioToCommunity(portfolioId, null, user.id)
       } else {
-        // Linking to a community - use swap to unlink any existing
         await swapPortfolioToCommunity(portfolioId, communityId, user.id)
       }
       
-      // Refresh portfolios from database
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
-      
-      console.log(`[v0] Portfolio ${portfolioId} synced to community ${communityId}`)
     } catch (error) {
       console.error("[v0] Error syncing portfolio to community:", error)
       alert(error instanceof Error ? error.message : "Failed to sync portfolio")
@@ -280,18 +268,14 @@ export default function DashboardPage() {
 
   const handleDeletePortfolio = async (portfolioId: string) => {
     if (!user?.id) {
-      console.log("[v0] User not authenticated, cannot delete portfolio")
       return
     }
 
     try {
       await deletePortfolio(portfolioId)
       
-      // Refresh portfolios list
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
-      
-      console.log(`[v0] Portfolio ${portfolioId} deleted successfully`)
     } catch (error) {
       console.error("[v0] Error deleting portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to delete portfolio")

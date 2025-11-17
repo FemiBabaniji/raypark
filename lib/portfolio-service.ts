@@ -58,23 +58,8 @@ async function ensurePageLayout(supabase: ReturnType<typeof createClient>, pageI
     .maybeSingle()
 
   if (!pl?.id) {
-    const defaultLayout = {
-      left: { type: "vertical", widgets: ["identity"] },
-      right: { type: "vertical", widgets: [] },
-    }
-    
-    const { error: layoutError } = await supabase
-      .from("page_layouts")
-      .insert({ page_id: pageId, layout: defaultLayout })
-
-    if (layoutError && layoutError.code !== '23505') {
-      console.error("Error creating layout:", layoutError)
-      throw layoutError
-    } else if (layoutError?.code === '23505') {
-      console.log("[v0] ℹ️ Layout already exists for page:", pageId)
-    } else {
-      console.log("[v0] ✅ Created layout for page:", pageId)
-    }
+    console.log("[v0] ⚠️ No layout found for page:", pageId, "- this should have been created during portfolio creation")
+    // Don't create a default layout here - it would override template layouts
   } else {
     console.log("[v0] ℹ️ Layout already exists for page:", pageId)
   }

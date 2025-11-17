@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
     console.log("[v0] ✅ Main page created:", mainPage.id)
 
     let layoutStructure = {
-      left: { type: "vertical", widgets: ["identity"] as string[] },
+      left: { type: "vertical", widgets: [] as string[] },
       right: { type: "vertical", widgets: [] as string[] },
     }
 
@@ -275,6 +275,7 @@ export async function POST(request: NextRequest) {
       if (identityError) {
         console.error("[v0] ⚠️ Failed to create identity widget:", identityError)
       } else {
+        layoutStructure.left.widgets.push("identity")
         console.log("[v0] ✅ Identity widget created")
       }
     }

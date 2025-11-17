@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { PORTFOLIO_TEMPLATES, type PortfolioTemplateType } from "@/lib/portfolio-templates"
+import { getTemplateById } from "@/lib/template-service"
 
 export async function GET() {
   try {
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
     }
 
-    const { name, theme_id, description, community_id, template } = body
+    const { name, theme_id, description, community_id, templateId } = body
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       console.log("[v0] Missing or invalid portfolio name:", name)
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
       "Community:",
       community_id || "none (personal)",
       "Template:",
-      template || "blank"
+      templateId || "blank"
     )
 
     const timestamp = Date.now()
@@ -214,119 +215,98 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] ✅ Main page created:", mainPage.id)
 
-    let layoutWidgetIds: string[] = []
+    let layoutStructure: any
+    let widgetConfigs: any[] = []
 
-    // Fetch widget type IDs
-    const { data: widgetTypes } = await supabase
-      .from("widget_types")
-      .select("id, key")
-    
+    if (templateId) {
+      const template = await getTemplateById(templateId)
+      
+      if (template) {
+        console.log("[v0] 📋 Using database template:", template.name)
+        layoutStructure = template.layout
+        widgetConfigs = template.widget_configs
+      } else {
+        console.warn("[v0] ⚠️ Template not found, using blank template")
+        layoutStructure = {
+          left: { type: "vertical", widgets: ["identity"] },
+          right: { type: "vertical", widgets: [] },
+        }
+        widgetConfigs = [{ id: "identity", type: "identity", props: { selectedColor: 3 } }]
+      }
+    } else {
+      // Blank template
+      layoutStructure = {
+        left: { type: "vertical", widgets: ["identity"] },
+        right: { type: "vertical", widgets: [] },
+      }
+      widgetConfigs = [{ id: "identity", type: "identity", props: { selectedColor: 3 } }]
+    }
+
+    const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
     const keyToId: Record<string, string> = {}
     for (const wt of widgetTypes || []) {
       keyToId[wt.key] = wt.id
     }
 
-    const identityTypeId = keyToId["identity"]
-    const descriptionTypeId = keyToId["description"]
+    const templateIdToActualId: Record<string, string> = {}
 
-    // Create identity widget with template-specific data
-    if (identityTypeId) {
-      const identityProps: any = {
-        name: user.user_metadata?.full_name || name,
-        email: user.email || "",
-        handle: `@${portfolio.slug}`,
+    for (const widgetConfig of widgetConfigs) {
+      const widgetTypeId = keyToId[widgetConfig.type]
+      
+      if (!widgetTypeId) {
+        console.warn("[v0] ⚠️ Widget type not found:", widgetConfig.type)
+        continue
       }
 
-      // Apply template-specific identity customizations
-      if (template === "designer") {
-        identityProps.selectedColor = 4 // Purple
-        identityProps.title = "UI/UX Designer"
-        identityProps.bio = "I create intuitive digital experiences that delight users."
-      } else if (template === "developer") {
-        identityProps.selectedColor = 2 // Green
-        identityProps.title = "Full Stack Developer"
-        identityProps.bio = "Building scalable web applications with modern technologies."
-      } else if (template === "marketing") {
-        identityProps.selectedColor = 1 // Orange/Red
-        identityProps.title = "Growth Marketing Manager"
-        identityProps.bio = "Data-driven marketer scaling startups through strategic campaigns."
-      } else if (template === "founder") {
-        identityProps.selectedColor = 0 // Blue
-        identityProps.title = "Founder & CEO"
-        identityProps.bio = "Building the future. Previously exited startup."
-      } else {
-        identityProps.selectedColor = 3 // Default red
+      const props = { ...widgetConfig.props }
+      
+      if (widgetConfig.type === "identity") {
+        props.name = user.user_metadata?.full_name || name
+        props.email = user.email || ""
+        props.handle = `@${portfolio.slug}`
       }
 
-      console.log("[v0] Creating identity widget with color:", identityProps.selectedColor)
-
-      const { data: identityWidget, error: identityError } = await supabase
+      const { data: createdWidget, error: widgetError } = await supabase
         .from("widget_instances")
         .insert({
           page_id: mainPage.id,
-          widget_type_id: identityTypeId,
-          props: identityProps,
+          widget_type_id: widgetTypeId,
+          props,
           enabled: true,
         })
         .select("id")
         .single()
 
-      if (identityError) {
-        console.error("[v0] ⚠️ Failed to create identity widget:", identityError)
-      } else if (identityWidget?.id) {
-        layoutWidgetIds.push("identity")
-        console.log("[v0] ✅ Identity widget created with ID:", identityWidget.id)
-      }
-    }
-
-    // Create template-specific description widgets
-    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType] && descriptionTypeId) {
-      console.log("[v0] 📋 Creating template widgets for:", template)
-      
-      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
-      
-      if (templateConfig.widgets.length > 0) {
-        console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
-        
-        for (let i = 0; i < templateConfig.widgets.length; i++) {
-          const widget = templateConfig.widgets[i]
-          console.log("[v0] Creating widget", i, "with props:", JSON.stringify(widget.props))
-          
-          const { data: createdWidget, error: widgetError } = await supabase
-            .from("widget_instances")
-            .insert({
-              page_id: mainPage.id,
-              widget_type_id: descriptionTypeId,
-              props: widget.props || {},
-              enabled: true,
-            })
-            .select("id")
-            .single()
-
-          if (widgetError) {
-            console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
-          } else if (createdWidget?.id) {
-            const widgetKey = `description-${createdWidget.id}`
-            layoutWidgetIds.push(widgetKey)
-            console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id, "-> layout key:", widgetKey)
-          }
+      if (widgetError) {
+        console.error("[v0] ⚠️ Failed to create widget:", widgetConfig.type, widgetError)
+      } else if (createdWidget?.id) {
+        if (widgetConfig.type === "identity") {
+          templateIdToActualId[widgetConfig.id] = "identity"
+        } else {
+          templateIdToActualId[widgetConfig.id] = `${widgetConfig.type}-${createdWidget.id}`
         }
+        console.log("[v0] ✅ Created widget:", widgetConfig.type, "->", templateIdToActualId[widgetConfig.id])
       }
     }
 
-    const layoutStructure = {
-      left: { type: "vertical", widgets: layoutWidgetIds },
-      right: { type: "vertical", widgets: [] as string[] },
+    const finalLayout = {
+      left: {
+        type: layoutStructure.left.type,
+        widgets: layoutStructure.left.widgets.map((id: string) => templateIdToActualId[id] || id),
+      },
+      right: {
+        type: layoutStructure.right.type,
+        widgets: layoutStructure.right.widgets.map((id: string) => templateIdToActualId[id] || id),
+      },
     }
 
-    console.log("[v0] 📐 Final layout structure before save:", JSON.stringify(layoutStructure, null, 2))
-    console.log("[v0] 📐 Layout has", layoutStructure.left.widgets.length, "left widgets")
-    
+    console.log("[v0] 📐 Final layout structure:", JSON.stringify(finalLayout, null, 2))
+
     const { data: savedLayout, error: layoutError } = await supabase
       .from("page_layouts")
       .insert({
         page_id: mainPage.id,
-        layout: layoutStructure,
+        layout: finalLayout,
       })
       .select("*")
       .single()
@@ -335,7 +315,6 @@ export async function POST(request: NextRequest) {
       console.error("[v0] ❌ Failed to create page layout:", layoutError)
     } else {
       console.log("[v0] ✅ Page layout saved successfully")
-      console.log("[v0] ✅ Saved layout data:", JSON.stringify(savedLayout, null, 2))
     }
 
     console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)

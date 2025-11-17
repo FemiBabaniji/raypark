@@ -180,7 +180,7 @@ export default function DashboardPage() {
     setIsTemplateModalOpen(true)
   }
 
-  const handleTemplateSelect = async (template: PortfolioTemplateType) => {
+  const handleTemplateSelect = async (templateId: string) => {
     if (!user?.id) return
 
     try {
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           name: "New Portfolio",
           description: "A new portfolio",
-          template,
+          templateId,
         }),
       })
 

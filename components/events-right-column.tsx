@@ -70,12 +70,11 @@ export default function EventsRightColumn({
 
         console.log("[v0] Found community portfolio:", communityPortfolio.id)
 
-        // Get page ID
         const { data: page, error: pageError } = await supabase
           .from("pages")
           .select("id")
           .eq("portfolio_id", communityPortfolio.id)
-          .eq("is_main", true)
+          .eq("route", "/")
           .maybeSingle()
 
         console.log("[v0] Page query result:", { page, pageError })

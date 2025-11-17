@@ -239,7 +239,7 @@ export default function PortfolioBuilder({
   const [hasInitialized, setHasInitialized] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
-  const [saveError, setError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const debouncedSave = useCallback(async () => {
     if (!user?.id || !hasInitialized || isLoadingData) {

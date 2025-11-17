@@ -971,6 +971,7 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .maybeSingle()
 
   if (pageErr || !page?.id) {
+    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId)
     return null
   }
 
@@ -981,6 +982,7 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .maybeSingle()
 
   if (wtErr || !wt?.id) {
+    console.log("[v0] getIdentityProps: Identity widget type not found")
     return null
   }
 
@@ -992,10 +994,17 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
     .maybeSingle()
 
   if (wiErr) {
+    console.log("[v0] getIdentityProps: Error fetching widget instance:", wiErr)
     return null
   }
 
-  return (wi?.props as IdentityProps) ?? null
+  const props = (wi?.props as IdentityProps) ?? null
+  
+  if (props) {
+    console.log("[v0] 🎨 getIdentityProps returning selectedColor:", props.selectedColor, "type:", typeof props.selectedColor)
+  }
+  
+  return props
 }
 
 export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")

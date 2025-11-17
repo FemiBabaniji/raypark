@@ -76,10 +76,13 @@ export default function PortfolioBuilderPage() {
             name: identity?.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
             handle: normalizeHandle(identity?.handle || user.email?.split("@")[0] || ""),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
+            selectedColor: (typeof identity?.selectedColor === "number" 
+              ? identity.selectedColor 
+              : 3) as ThemeIndex,
           }
 
           console.log("[v0] ✅ Setting identity with portfolio ID from URL:", loadedIdentity.id)
+          console.log("[v0] 🎨 Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           
           if (communityIdFromUrl) {
@@ -112,10 +115,13 @@ export default function PortfolioBuilderPage() {
             name: identity?.name || portfolio.name || "",
             handle: normalizeHandle(identity?.handle),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
+            selectedColor: (typeof identity?.selectedColor === "number"
+              ? identity.selectedColor 
+              : 3) as ThemeIndex,
           }
 
           console.log("[v0] ✅ Loading identity from first portfolio:", loadedIdentity.id)
+          console.log("[v0] 🎨 Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           setIsLive(Boolean((portfolio as any).is_public))
           return
@@ -147,17 +153,22 @@ export default function PortfolioBuilderPage() {
       selectedColor: ThemeIndex
     }>,
   ) => {
-    console.log("[v0] Identity change:", next)
+    console.log("[v0] handleIdentityChange called with:", next)
+    if (next.selectedColor !== undefined) {
+      console.log("[v0] 🎨 Color change detected:", next.selectedColor)
+    }
 
     setActiveIdentity((prev) => {
       const merged = { ...prev, ...next }
+      
+      console.log("[v0] 🎨 Merged identity state - selectedColor:", merged.selectedColor)
 
       try {
         const existing = localStorage.getItem("bea_portfolio_data")
         const base = existing ? JSON.parse(existing) : {}
         const updated = { ...base, ...merged, _timestamp: Date.now() }
         localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
-        console.log("[v0] Saved to localStorage")
+        console.log("[v0] Saved to localStorage with selectedColor:", merged.selectedColor)
 
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("portfolio-updated"))

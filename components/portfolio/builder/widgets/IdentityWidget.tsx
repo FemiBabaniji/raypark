@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { GripVertical, Palette, LinkIcon } from "lucide-react"
+import { GripVertical, Palette, LinkIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { Identity, ThemeIndex } from "../types"
@@ -34,8 +34,14 @@ export default function IdentityWidget({
   })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  useEffect(() => {
+    console.log("[v0] IdentityWidget received identity prop - selectedColor:", identity.selectedColor, "type:", typeof identity.selectedColor)
+  }, [identity.selectedColor])
+
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
   const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
+  
+  console.log("[v0] IdentityWidget rendering with selectedColor:", identity.selectedColor, "gradient:", gradient)
 
   const defaultBio = `${identity.name || "jenny wilson"} ${identity.title || "is a digital product designer"} ${identity.subtitle || "currently designing at acme."}`
   const displayBio = identity.bio || defaultBio
@@ -71,6 +77,7 @@ export default function IdentityWidget({
                         } hover:ring-2 hover:ring-white/50 transition-all`}
                         onClick={() => {
                           const i = idx as ThemeIndex
+                          console.log("[v0] 🎨 User clicked color button - changing from", identity.selectedColor, "to", i)
                           onChange({ selectedColor: i })
                           setShowColorPicker(false)
                         }}

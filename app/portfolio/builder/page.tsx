@@ -76,7 +76,7 @@ export default function PortfolioBuilderPage() {
             
             if (communityIdFromUrl) {
               setCommunityId(communityIdFromUrl)
-              console.log("[v0] Community ID stored:", communityIdFromUrl)
+              console.log("[v0] ✅ Community context preserved - ID:", communityIdFromUrl)
             }
             
             return
@@ -92,6 +92,7 @@ export default function PortfolioBuilderPage() {
             
             if (communityIdFromUrl) {
               setCommunityId(communityIdFromUrl)
+              console.log("[v0] ✅ Community context preserved for new portfolio - ID:", communityIdFromUrl)
             }
             
             return
@@ -110,7 +111,7 @@ export default function PortfolioBuilderPage() {
 
           if ((portfolio as any).community_id) {
             setCommunityId((portfolio as any).community_id)
-            console.log("[v0] Community ID stored:", (portfolio as any).community_id)
+            console.log("[v0] ✅ Community ID loaded from portfolio:", (portfolio as any).community_id)
           }
 
           const identity = await getIdentityProps(portfolio.id)

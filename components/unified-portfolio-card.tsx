@@ -21,13 +21,14 @@ export interface UnifiedPortfolio {
 
 type Props = {
   portfolio: UnifiedPortfolio
+  communityId?: string // Added communityId prop to preserve community context when editing
   onClick?: (id: string) => void
   onShare?: (id: string) => void
   onMore?: (id: string) => void
   onChangeColor?: (id: string, colorIndex: ThemeIndex) => void
 }
 
-export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onChangeColor }: Props) {
+export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare, onMore, onChangeColor }: Props) {
   const gradient = THEME_COLOR_OPTIONS[portfolio.selectedColor]?.gradient ?? "from-neutral-600/40 to-neutral-800/60"
 
   const initials = useMemo(() => {
@@ -37,12 +38,25 @@ export function UnifiedPortfolioCard({ portfolio, onClick, onShare, onMore, onCh
     return parts.map((p) => p[0]?.toUpperCase()).join("") || "•"
   }, [portfolio.initials, portfolio.name])
 
+  const handleClick = () => {
+    if (!onClick) return
+    
+    console.log("[v0] Portfolio card clicked - ID:", portfolio.id, "Community:", communityId)
+    
+    // If we have a communityId, navigate with full context
+    if (communityId && typeof window !== 'undefined') {
+      window.location.href = `/portfolio/builder?portfolio=${portfolio.id}&community=${communityId}`
+    } else {
+      onClick(portfolio.id)
+    }
+  }
+
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => onClick?.(portfolio.id)}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick?.(portfolio.id)}
+      onClick={handleClick}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleClick()}
       className="relative w-full aspect-square rounded-3xl overflow-hidden cursor-pointer focus:outline-none
                  focus-visible:ring-2 focus-visible:ring-white/70 transition-transform duration-200 hover:scale-[1.01]"
     >

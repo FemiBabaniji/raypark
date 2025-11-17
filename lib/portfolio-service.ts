@@ -43,27 +43,40 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
       .single()
 
     if (error) {
-      // If duplicate key error (23505), query for the existing page instead of throwing
       if (error.code === '23505') {
-        console.log("[v0] ℹ️ Page already exists, fetching existing page")
-        const { data: existingPage } = await supabase
+        console.log("[v0] ℹ️ Page already exists (race condition), fetching existing page")
+        // Add small delay to allow other transaction to complete
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        const { data: existingPage, error: fetchError } = await supabase
           .from("pages")
           .select("id")
           .eq("portfolio_id", portfolioId)
           .eq("key", "main")
-          .single()
+          .maybeSingle()
+        
+        if (fetchError) {
+          console.error("[v0] ❌ Error fetching existing page:", fetchError)
+          throw new Error(`Failed to fetch existing page: ${fetchError.message}`)
+        }
         
         if (existingPage?.id) {
           pageId = existingPage.id
+          console.log("[v0] ✅ Found existing page:", pageId)
         } else {
+          console.error("[v0] ❌ Page should exist but wasn't found")
           throw new Error("Failed to create or find main page")
         }
       } else {
+        console.error("[v0] ❌ Error creating page:", error)
         throw error
       }
     } else {
       pageId = data.id
+      console.log("[v0] ✅ Created new page:", pageId)
     }
+  } else {
+    console.log("[v0] ℹ️ Page already exists:", pageId)
   }
 
   // Ensure page_layouts row exists (idempotent)
@@ -80,9 +93,15 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
       .insert({ page_id: pageId, layout: defaultLayout })
 
     if (layoutError && layoutError.code !== '23505') {
-      // Ignore duplicate errors, throw others
+      console.error("[v0] ❌ Error creating layout:", layoutError)
       throw layoutError
+    } else if (layoutError?.code === '23505') {
+      console.log("[v0] ℹ️ Layout already exists for page:", pageId)
+    } else {
+      console.log("[v0] ✅ Created layout for page:", pageId)
     }
+  } else {
+    console.log("[v0] ℹ️ Layout already exists for page:", pageId)
   }
 
   return pageId

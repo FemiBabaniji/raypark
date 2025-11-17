@@ -282,6 +282,7 @@ export default function EventsRightColumn({
             <div className="mb-4">
               <UnifiedPortfolioCard
                 portfolio={portfolio}
+                communityId={communityId}
                 onClick={(id) => handleEditProfile()}
                 onShare={(id) => console.log("Share profile:", id)}
                 onMore={(id) => console.log("More options:", id)}

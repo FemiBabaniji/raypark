@@ -200,7 +200,12 @@ export default function EventsRightColumn({
       router.push("/login?redirect=/portfolio/builder")
       return
     }
-    router.push("/portfolio/builder")
+    if (portfolio && communityId) {
+      console.log("[v0] Navigating to builder with portfolio:", portfolio.id, "community:", communityId)
+      router.push(`/portfolio/builder?portfolio=${portfolio.id}&community=${communityId}`)
+    } else {
+      router.push("/portfolio/builder")
+    }
   }
 
   const handleCreateProfile = () => {

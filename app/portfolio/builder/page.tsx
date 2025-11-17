@@ -72,17 +72,17 @@ export default function PortfolioBuilderPage() {
           console.log("[v0] Identity props from database:", identity)
 
           const loadedIdentity = {
-            id: portfolioIdFromUrl,  // Use the actual UUID from URL
+            id: portfolioIdFromUrl,
             name: identity?.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
             handle: normalizeHandle(identity?.handle || user.email?.split("@")[0] || ""),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (typeof identity?.selectedColor === "number" 
+            selectedColor: (identity?.selectedColor !== undefined && identity?.selectedColor !== null
               ? identity.selectedColor 
-              : 3) as ThemeIndex,
+              : 0) as ThemeIndex, // Default to 0 (first color) if no color saved
           }
 
           console.log("[v0] ✅ Setting identity with portfolio ID from URL:", loadedIdentity.id)
-          console.log("[v0] 🎨 Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
+          console.log("[v0] 🎨 FINAL Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           
           if (communityIdFromUrl) {
@@ -90,7 +90,7 @@ export default function PortfolioBuilderPage() {
             console.log("[v0] ✅ Community context preserved - ID:", communityIdFromUrl)
           }
           
-          return  // Stop here - we have the portfolio from URL
+          return
         }
 
         console.log("[v0] No portfolio ID in URL, fetching user portfolios...")
@@ -111,17 +111,17 @@ export default function PortfolioBuilderPage() {
           const identity = await getIdentityProps(portfolio.id)
 
           const loadedIdentity = {
-            id: portfolio.id,  // Use real portfolio ID
+            id: portfolio.id,
             name: identity?.name || portfolio.name || "",
             handle: normalizeHandle(identity?.handle),
             avatarUrl: identity?.avatarUrl,
-            selectedColor: (typeof identity?.selectedColor === "number"
+            selectedColor: (identity?.selectedColor !== undefined && identity?.selectedColor !== null
               ? identity.selectedColor 
-              : 3) as ThemeIndex,
+              : 0) as ThemeIndex, // Default to 0 if no color saved
           }
 
           console.log("[v0] ✅ Loading identity from first portfolio:", loadedIdentity.id)
-          console.log("[v0] 🎨 Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
+          console.log("[v0] 🎨 FINAL Identity selectedColor value:", loadedIdentity.selectedColor, "type:", typeof loadedIdentity.selectedColor, "from DB:", identity?.selectedColor)
           setActiveIdentity(loadedIdentity)
           setIsLive(Boolean((portfolio as any).is_public))
           return
@@ -129,10 +129,10 @@ export default function PortfolioBuilderPage() {
 
         console.log("[v0] No portfolios found. User needs to create one first.")
         setActiveIdentity({
-          id: null,  // No portfolio exists
+          id: null,
           name: user.user_metadata?.name || user.email?.split("@")[0] || "",
           handle: user.email?.split("@")[0] || "",
-          selectedColor: 3 as ThemeIndex,
+          selectedColor: 0 as ThemeIndex, // Start with first color for new portfolios
         })
       } catch (error) {
         console.error("[v0] ❌ Database load failed:", error)

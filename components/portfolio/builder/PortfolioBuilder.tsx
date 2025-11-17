@@ -101,6 +101,24 @@ export default function PortfolioBuilder({
 
   const [widgetContent, setWidgetContent] = useState<Record<string, any>>({})
 
+  const handleIdentityChange = useCallback(
+    (updates: Partial<Identity>) => {
+      console.log("[v0] 🎨 PortfolioBuilder.handleIdentityChange called with:", updates)
+      
+      if (updates.selectedColor !== undefined) {
+        console.log("[v0] 🎨 COLOR CHANGE DETECTED in builder")
+        console.log("[v0] 🎨   Old color:", identity.selectedColor)
+        console.log("[v0] 🎨   New color:", updates.selectedColor)
+        console.log("[v0] 🎨   Type:", typeof updates.selectedColor)
+      }
+      
+      parentOnIdentityChange(updates)
+      
+      console.log("[v0] 🎨 parentOnIdentityChange called successfully")
+    },
+    [identity.selectedColor, parentOnIdentityChange]
+  )
+
   useEffect(() => {
     async function loadData() {
       const idToLoad = identity.id || portfolioId
@@ -599,7 +617,7 @@ export default function PortfolioBuilder({
             <IdentityWidget
               identity={identity}
               isPreviewMode={isPreviewMode}
-              onChange={parentOnIdentityChange}
+              onChange={handleIdentityChange}
               editingField={editingField}
               setEditingField={setEditingField}
             />

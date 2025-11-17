@@ -77,8 +77,12 @@ export default function IdentityWidget({
                         } hover:ring-2 hover:ring-white/50 transition-all`}
                         onClick={() => {
                           const i = idx as ThemeIndex
-                          console.log("[v0] 🎨 User clicked color button - changing from", identity.selectedColor, "to", i)
+                          console.log("[v0] 🎨 COLOR PICKER CLICKED")
+                          console.log("[v0] 🎨 Current color:", identity.selectedColor, "type:", typeof identity.selectedColor)
+                          console.log("[v0] 🎨 New color:", i, "type:", typeof i)
+                          console.log("[v0] 🎨 Calling onChange with:", { selectedColor: i })
                           onChange({ selectedColor: i })
+                          console.log("[v0] 🎨 onChange called successfully")
                           setShowColorPicker(false)
                         }}
                       />
@@ -90,7 +94,10 @@ export default function IdentityWidget({
                 size="sm"
                 variant="ghost"
                 className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/30 text-white p-2"
-                onClick={() => setShowColorPicker(!showColorPicker)}
+                onClick={() => {
+                  console.log("[v0] 🎨 Color picker button clicked, current state:", showColorPicker)
+                  setShowColorPicker(!showColorPicker)
+                }}
               >
                 <Palette className="w-4 h-4" />
               </Button>

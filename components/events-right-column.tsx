@@ -24,6 +24,8 @@ export default function EventsRightColumn({
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const router = useRouter()
 
+  const [reloadTrigger, setReloadTrigger] = useState(0)
+
   useEffect(() => {
     async function loadCommunityPortfolio() {
       console.log("[v0] EventsRightColumn - Starting portfolio load")
@@ -178,7 +180,7 @@ export default function EventsRightColumn({
     if (!loading) {
       loadCommunityPortfolio()
     }
-  }, [user?.id, loading, user?.email, communityId, hasUserPortfolio, userPortfolio])
+  }, [user?.id, loading, user?.email, communityId, hasUserPortfolio, userPortfolio, reloadTrigger]) // Added reloadTrigger to deps
 
   useEffect(() => {
     if (!user?.id) return
@@ -205,6 +207,10 @@ export default function EventsRightColumn({
       if (updatedPortfolioId === portfolio.id) {
         console.log("[v0] Updating portfolio color to:", selectedColor)
         setPortfolio(prev => prev ? { ...prev, selectedColor } : null)
+        
+        setTimeout(() => {
+          setReloadTrigger(prev => prev + 1)
+        }, 500)
       }
     }
 

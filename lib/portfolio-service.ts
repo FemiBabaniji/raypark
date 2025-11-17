@@ -644,12 +644,13 @@ export async function saveWidgetLayout(
   leftWidgets: Array<{ id: string; type: string }>,
   rightWidgets: Array<{ id: string; type: string }>,
   widgetContent: Record<string, any>,
-  communityId?: string | null, // Add community context parameter
+  communityId?: string | null,
 ) {
   const supabase = createClient()
   console.log("[v0] 💾 Starting saveWidgetLayout for portfolio:", portfolioId)
   console.log("[v0] Left widgets:", leftWidgets.map(w => w.type))
   console.log("[v0] Right widgets:", rightWidgets.map(w => w.type))
+  console.log("[v0] 🎨 Widget content being saved:", JSON.stringify(widgetContent, null, 2))
   
   if (communityId !== undefined) {
     const isValid = await verifyPortfolioCommunity(portfolioId, communityId)
@@ -735,6 +736,10 @@ export async function saveWidgetLayout(
       }
 
       const content = widgetContent[widgetType] || {}
+
+      if (widgetType === "identity") {
+        console.log(`[v0] 🎨 SAVING IDENTITY WIDGET - selectedColor:`, content.selectedColor, "full content:", JSON.stringify(content, null, 2))
+      }
 
       console.log(`[v0] Saving widget '${widgetType}' with ${Object.keys(content).length} properties`)
 
@@ -899,7 +904,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
 
     if (widgetKey === "identity") {
       identity = props
-      console.log("[v0] Loaded identity widget")
+      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor, "full content:", JSON.stringify(props, null, 2))
     } else {
       widgetContent[widgetKey] = props
       console.log("[v0] Loaded widget:", widgetKey)

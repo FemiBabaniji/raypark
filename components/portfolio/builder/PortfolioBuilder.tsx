@@ -75,7 +75,6 @@ export default function PortfolioBuilder({
 
   const [portfolioId, setPortfolioId] = useState<string | null>(identity.id ?? initialPortfolio?.id ?? null)
   const portfolioIdRef = useRef<string | null>(identity.id ?? initialPortfolio?.id ?? null)
-  const createInFlight = useRef<Promise<string> | null>(null)
   const prevUserRef = useRef(user)
   
   const [isLoadingData, setIsLoadingData] = useState(false)
@@ -87,7 +86,7 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     if (identity.id && identity.id !== portfolioId) {
-      console.log("[v0] 🔄 Updating portfolioId to match identity.id:", identity.id)
+      console.log("[v0] 🔄 Syncing portfolioId to match identity.id:", identity.id)
       setPortfolioId(identity.id)
       portfolioIdRef.current = identity.id
     }
@@ -234,36 +233,16 @@ export default function PortfolioBuilder({
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  const ensurePortfolioId = useCallback(async (): Promise<string> => {
-    if (portfolioIdRef.current) {
-      console.log("[v0] ✅ Using existing portfolio ID:", portfolioIdRef.current)
-      return portfolioIdRef.current
-    }
-    
-    if (!user?.id) throw new Error("Must be signed in to create a portfolio")
-
-    // Only create if no portfolio exists
-    if (!createInFlight.current) {
-      console.log("[v0] ⚠️ No portfolio ID found, creating new portfolio")
-      createInFlight.current = (async () => {
-        const created = await createPortfolioOnce({
-          userId: user.id,
-          name: state.name || "Untitled Portfolio",
-          theme_id: state.theme_id || "default-theme",
-          description: state.description,
-        })
-        console.log("[v0] ✅ Created new portfolio:", created.id)
-        setPortfolioId(created.id)
-        portfolioIdRef.current = created.id
-        return created.id
-      })()
-    }
-    return createInFlight.current
-  }, [user, state.name, state.theme_id, state.description])
-
   const debouncedSave = useCallback(async () => {
+    const currentPortfolioId = portfolioIdRef.current
+    
     if (!user?.id || !hasInitialized || isLoadingData) {
       console.log("[v0] ⏸️ Skipping save - not ready:", { hasUser: !!user?.id, hasInitialized, isLoadingData })
+      return
+    }
+
+    if (!currentPortfolioId) {
+      console.log("[v0] ⏸️ Skipping save - no portfolio ID (user needs to create portfolio first)")
       return
     }
 
@@ -276,12 +255,10 @@ export default function PortfolioBuilder({
       setSaveError(null)
       
       try {
-        console.log("[v0] 💾 Starting auto-save...")
-        const id = identity.id || (await ensurePortfolioId())
-        console.log("[v0] 💾 Saving to portfolio ID:", id)
+        console.log("[v0] 💾 Starting auto-save for portfolio:", currentPortfolioId)
         console.log("[v0] 💾 With community context:", communityId)
 
-        await updatePortfolioById(id, {
+        await updatePortfolioById(currentPortfolioId, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
           theme_id: state.theme_id,
@@ -308,7 +285,7 @@ export default function PortfolioBuilder({
           },
         }
 
-        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave, communityId)
+        await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, contentToSave, communityId)
 
         setLastSaveTime(new Date())
         console.log("[v0] ✅ Auto-save completed successfully")
@@ -322,15 +299,7 @@ export default function PortfolioBuilder({
     }, 1500)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId, ensurePortfolioId])
-
-  useEffect(() => {
-    if (user?.id && !portfolioIdRef.current && !createInFlight.current) {
-      ensurePortfolioId().catch((err) => {
-        console.error("[v0] Failed to initialize portfolio:", err)
-      })
-    }
-  }, [user, ensurePortfolioId])
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
   useEffect(() => {
     const wasUnauthenticated = !prevUserRef.current?.id

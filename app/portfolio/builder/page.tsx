@@ -16,13 +16,13 @@ export default function PortfolioBuilderPage() {
   const { user, loading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [activeIdentity, setActiveIdentity] = useState<{
-    id: string
+    id: string | null
     name: string
     handle: string
     avatarUrl?: string
     selectedColor: ThemeIndex
   }>({
-    id: "bea-portfolio",
+    id: null,  // Start with null, will be set from URL or database
     name: "",
     handle: "",
     selectedColor: 3 as ThemeIndex,
@@ -56,7 +56,7 @@ export default function PortfolioBuilderPage() {
 
       try {
         if (portfolioIdFromUrl) {
-          console.log("[v0] Loading specific portfolio:", portfolioIdFromUrl)
+          console.log("[v0] Loading specific portfolio from URL:", portfolioIdFromUrl)
           
           if (communityIdFromUrl) {
             const isValid = await verifyPortfolioCommunity(portfolioIdFromUrl, communityIdFromUrl)
@@ -69,47 +69,28 @@ export default function PortfolioBuilderPage() {
           }
           
           const identity = await getIdentityProps(portfolioIdFromUrl)
-          console.log("[v0] Identity props:", identity)
+          console.log("[v0] Identity props from database:", identity)
 
-          if (identity) {
-            const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
-            
-            const loadedIdentity = {
-              id: portfolioIdFromUrl,
-              name: identity.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
-              handle: normalizeHandle(identity.handle),
-              avatarUrl: identity.avatarUrl,
-              selectedColor: colorValue as ThemeIndex,
-            }
-
-            console.log("[v0] Loading identity from database")
-            setActiveIdentity(loadedIdentity)
-            
-            if (communityIdFromUrl) {
-              setCommunityId(communityIdFromUrl)
-              console.log("[v0] ✅ Community context preserved - ID:", communityIdFromUrl)
-            }
-            
-            return
-          } else {
-            console.log("[v0] New portfolio, initializing with user data")
-            setActiveIdentity({
-              id: portfolioIdFromUrl,
-              name: user.user_metadata?.name || user.email?.split("@")[0] || "",
-              handle: user.email?.split("@")[0] || "",
-              selectedColor: 3 as ThemeIndex,
-            })
-            
-            if (communityIdFromUrl) {
-              setCommunityId(communityIdFromUrl)
-              console.log("[v0] ✅ Community context preserved for new portfolio - ID:", communityIdFromUrl)
-            }
-            
-            return
+          const loadedIdentity = {
+            id: portfolioIdFromUrl,  // Use the actual UUID from URL
+            name: identity?.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
+            handle: normalizeHandle(identity?.handle || user.email?.split("@")[0] || ""),
+            avatarUrl: identity?.avatarUrl,
+            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
           }
+
+          console.log("[v0] ✅ Setting identity with portfolio ID from URL:", loadedIdentity.id)
+          setActiveIdentity(loadedIdentity)
+          
+          if (communityIdFromUrl) {
+            setCommunityId(communityIdFromUrl)
+            console.log("[v0] ✅ Community context preserved - ID:", communityIdFromUrl)
+          }
+          
+          return  // Stop here - we have the portfolio from URL
         }
 
-        console.log("[v0] Fetching from database...")
+        console.log("[v0] No portfolio ID in URL, fetching user portfolios...")
         const portfolios = await loadUserPortfolios(user)
         console.log("[v0] Found", portfolios.length, "portfolios")
 
@@ -117,7 +98,7 @@ export default function PortfolioBuilderPage() {
           const beaPortfolio = portfolios.find((p: any) => p.community_id)
           const portfolio = beaPortfolio || portfolios[0]
 
-          console.log("[v0] Selected portfolio:", portfolio.id, "| BEA:", !!beaPortfolio)
+          console.log("[v0] Selected portfolio:", portfolio.id)
 
           if ((portfolio as any).community_id) {
             setCommunityId((portfolio as any).community_id)
@@ -125,52 +106,31 @@ export default function PortfolioBuilderPage() {
           }
 
           const identity = await getIdentityProps(portfolio.id)
-          console.log("[v0] Identity props:", identity)
 
-          if (identity) {
-            const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
-            console.log("[v0] Color from DB:", identity.selectedColor, "→", colorValue)
-
-            const loadedIdentity = {
-              id: portfolio.id,
-              name: identity.name || portfolio.name || "",
-              handle: normalizeHandle(identity.handle),
-              avatarUrl: identity.avatarUrl,
-              selectedColor: colorValue as ThemeIndex,
-            }
-
-            console.log("[v0] Loading identity from database")
-            setActiveIdentity(loadedIdentity)
-            setIsLive(Boolean((portfolio as any).is_public))
-
-            localStorage.setItem(
-              "bea_portfolio_data",
-              JSON.stringify({
-                ...loadedIdentity,
-                isLive: (portfolio as any).is_public,
-                _source: "database",
-              }),
-            )
-            console.log("[v0] Synced to localStorage")
-            return
+          const loadedIdentity = {
+            id: portfolio.id,  // Use real portfolio ID
+            name: identity?.name || portfolio.name || "",
+            handle: normalizeHandle(identity?.handle),
+            avatarUrl: identity?.avatarUrl,
+            selectedColor: (typeof identity?.selectedColor === "number" ? identity.selectedColor : 3) as ThemeIndex,
           }
+
+          console.log("[v0] ✅ Loading identity from first portfolio:", loadedIdentity.id)
+          setActiveIdentity(loadedIdentity)
+          setIsLive(Boolean((portfolio as any).is_public))
+          return
         }
 
-        console.log("[v0] No portfolio found, using user data as default")
+        console.log("[v0] No portfolios found. User needs to create one first.")
         setActiveIdentity({
-          id: "bea-portfolio",
+          id: null,  // No portfolio exists
           name: user.user_metadata?.name || user.email?.split("@")[0] || "",
           handle: user.email?.split("@")[0] || "",
           selectedColor: 3 as ThemeIndex,
         })
       } catch (error) {
-        console.error("[v0] Database load failed:", error)
-        setActiveIdentity({
-          id: "bea-portfolio",
-          name: user.user_metadata?.name || user.email?.split("@")[0] || "",
-          handle: user.email?.split("@")[0] || "",
-          selectedColor: 3 as ThemeIndex,
-        })
+        console.error("[v0] ❌ Database load failed:", error)
+        setSecurityError("Failed to load portfolio. Please try again.")
       }
 
       console.log("[v0] ========== PORTFOLIO LOADING COMPLETE ==========")

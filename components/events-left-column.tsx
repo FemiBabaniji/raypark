@@ -323,7 +323,7 @@ export default function EventsLeftColumn({
           <>
             <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
               <div className="w-full xl:w-[70%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} h-[520px] flex flex-col overflow-hidden`}>
+                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <div className="mb-4 flex items-start justify-between flex-shrink-0">
                     <div>
                       <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
@@ -399,7 +399,7 @@ export default function EventsLeftColumn({
               </div>
 
               <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} h-[520px] flex flex-col overflow-hidden`}>
+                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
               </div>
@@ -635,7 +635,7 @@ export default function EventsLeftColumn({
         )}
 
         {activeTab === "Meetings" && (
-          <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px]`}>
+          <div className={`mt-6 ${CONTAINER_STYLES.replace("p-5", "p-6")} min-h-[480px] flex flex-col overflow-hidden`}>
             <div className="mb-5">
               <h1 className="text-3xl font-bold text-white mb-1.5">Meetings</h1>
               <p className="text-zinc-400 text-base">Manage your upcoming meetings and schedule</p>

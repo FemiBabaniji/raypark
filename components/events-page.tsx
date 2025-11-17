@@ -1,11 +1,12 @@
 "use client"
 import { useState } from "react"
+import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventsHeader from "@/components/events-header"
 import type { EventDetailData } from "@/components/event-detail"
 import { FilterTabs, FILTER_TABS } from "@/components/event-nav"
-import { colors } from "@/lib/design-system"
+import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 const eventData = {
   "ai-ml-workshop": {
@@ -236,47 +237,46 @@ export default function EventsPage({
     : null
 
   return (
-    <div 
-      className="min-h-screen relative pt-6" 
-      style={{ 
-        backgroundColor: colors.background.primary,
-        color: colors.foreground.primary 
-      }}
-    >
+    <div className="min-h-screen relative pt-6" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
       {useGradient && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Large blue gradient orb - top left */}
           <div 
             className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
             style={{
-              background: `radial-gradient(circle, ${colors.accent.blue} 0%, transparent 70%)`,
+              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
             }}
           />
           
+          {/* Purple gradient orb - top right */}
           <div 
             className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
             style={{
-              background: `radial-gradient(circle, ${colors.accent.purple} 0%, transparent 70%)`,
+              background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
             }}
           />
           
+          {/* Blue gradient orb - middle left */}
           <div 
             className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
             style={{
-              background: `radial-gradient(circle, ${colors.accent.blue} 0%, transparent 70%)`,
+              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
             }}
           />
           
+          {/* Purple/Violet gradient orb - bottom right */}
           <div 
             className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
             style={{
-              background: `radial-gradient(circle, ${colors.accent.purple} 0%, transparent 70%)`,
+              background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
             }}
           />
           
+          {/* Smaller accent blue orb - bottom left */}
           <div 
             className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
             style={{
-              background: `radial-gradient(circle, ${colors.accent.blue} 0%, transparent 70%)`,
+              background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
             }}
           />
         </div>
@@ -294,13 +294,9 @@ export default function EventsPage({
           />
         </div>
         
-        <div 
-          className="sticky top-0 z-20 backdrop-blur-xl border-b" 
-          style={{ 
-            backgroundColor: useGradient ? "transparent" : `${colors.background.primary}cc`,
-            borderColor: `${colors.foreground.primary}0d`
-          }}
-        >
+        <div className="sticky top-0 z-20 backdrop-blur-xl border-b border-white/5" style={{ 
+          backgroundColor: useGradient ? "transparent" : "oklch(0.18 0 0 / 0.8)" 
+        }}>
           <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
             <FilterTabs 
               tabs={FILTER_TABS} 

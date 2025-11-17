@@ -39,15 +39,6 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
       attendees: 45,
       type: "all-hands",
     },
-    {
-      id: "4",
-      title: "Project Review",
-      date: "Sept 6",
-      time: "3:00 PM",
-      host: "Elena R.",
-      attendees: 12,
-      type: "team",
-    },
   ]
 
   return (

@@ -108,17 +108,12 @@ export default function PortfolioBuilder({
       console.log("[v0] 🎨 PortfolioBuilder.handleIdentityChange called with:", updates)
       
       if (updates.selectedColor !== undefined) {
-        console.log("[v0] 🎨 COLOR CHANGE DETECTED in builder")
-        console.log("[v0] 🎨   Old color:", identity.selectedColor)
-        console.log("[v0] 🎨   New color:", updates.selectedColor)
-        console.log("[v0] 🎨   Type:", typeof updates.selectedColor)
+        console.log("[v0] 🎨 Color change detected:", updates.selectedColor, "type:", typeof updates.selectedColor)
       }
       
       parentOnIdentityChange(updates)
-      
-      console.log("[v0] ✅ parentOnIdentityChange called successfully")
     },
-    [identity.selectedColor, parentOnIdentityChange]
+    [parentOnIdentityChange]
   )
 
   useEffect(() => {
@@ -480,7 +475,8 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     if (hasInitialized && portfolioId && !isLoadingData) {
-      console.log("[v0] 🔄 Identity/metadata changed, triggering auto-save")
+      console.log("[v0] 🔄 Identity changed, triggering save")
+      console.log("[v0] 🎨 Current selectedColor:", identity.selectedColor, "type:", typeof identity.selectedColor)
       debouncedSave()
     }
   }, [
@@ -496,7 +492,7 @@ export default function PortfolioBuilder({
     identity.email,
     identity.location,
     identity.bio,
-    identity.selectedColor, // Added selectedColor to dependency array so color changes trigger auto-save
+    identity.selectedColor, // This triggers save when color changes
   ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {

@@ -740,11 +740,16 @@ export async function saveWidgetLayout(
       const content = widgetContent[widgetType] || {}
 
       if (widgetType === "identity") {
-        console.log(`[v0] 🎨 SAVING IDENTITY WIDGET - selectedColor:`, content.selectedColor, "full content:", JSON.stringify(content, null, 2))
-        savedIdentityColor = content.selectedColor
+        console.log(`[v0] 🎨 Saving identity widget with selectedColor:`, content.selectedColor)
+        
+        // Ensure selectedColor is a valid number
+        if (typeof content.selectedColor !== "number") {
+          console.warn("[v0] ⚠️ selectedColor is not a number, defaulting to 0")
+          content.selectedColor = 0
+        }
       }
 
-      console.log(`[v0] Saving widget '${widgetType}' with ${Object.keys(content).length} properties`)
+      console.log(`[v0] Upserting widget '${widgetType}' to database`)
 
       const { error: widgetError } = await supabase
         .from("widget_instances")
@@ -762,7 +767,22 @@ export async function saveWidgetLayout(
         console.error(`[v0] ❌ Failed to save widget '${widgetType}':`, widgetError)
         failCount++
       } else {
-        console.log(`[v0] ✅ Widget '${widgetType}' saved`)
+        if (widgetType === "identity") {
+          console.log(`[v0] ✅ Identity widget saved, verifying...`)
+          
+          // Read back what was saved
+          const { data: savedWidget } = await supabase
+            .from("widget_instances")
+            .select("props")
+            .eq("page_id", pageId)
+            .eq("widget_type_id", widget_type_id)
+            .single()
+          
+          if (savedWidget) {
+            console.log("[v0] 🎨 Verified saved selectedColor:", savedWidget.props.selectedColor)
+          }
+        }
+        
         successCount++
       }
     }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { MoreVertical, Grid3x3, List, Plus } from 'lucide-react'
+import { MoreVertical, Grid3x3, List, Plus, Trash2 } from 'lucide-react'
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
 
@@ -29,6 +29,7 @@ interface DashboardPortfolioGridProps {
   onPortfolioClick: (portfolioId: string) => void
   onCreatePortfolio: () => void
   onSyncCommunity: (portfolioId: string, communityId: string | null) => void
+  onDeletePortfolio: (portfolioId: string) => void
   userCommunities: Array<{ id: string; name: string; code: string }>
   onCheckExistingPortfolio?: (communityId: string) => Promise<{ id: string; name: string } | null>
 }
@@ -87,12 +88,14 @@ const PortfolioCard = ({
   portfolio,
   onClick,
   onSyncCommunity,
+  onDeletePortfolio,
   userCommunities,
   onCheckExistingPortfolio,
 }: {
   portfolio: ExtendedPortfolio
   onClick: () => void
   onSyncCommunity: (portfolioId: string, communityId: string | null) => void
+  onDeletePortfolio: (portfolioId: string) => void
   userCommunities: Array<{ id: string; name: string; code: string }>
   onCheckExistingPortfolio?: (communityId: string) => Promise<{ id: string; name: string } | null>
 }) => {
@@ -244,6 +247,22 @@ const PortfolioCard = ({
                     No communities available
                   </div>
                 )}
+                
+                <div className="border-t border-white/10 mt-2 pt-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (confirm(`Are you sure you want to delete "${portfolio.name}"? This action cannot be undone.`)) {
+                        onDeletePortfolio(portfolio.id)
+                      }
+                      setIsMenuOpen(false)
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Portfolio
+                  </button>
+                </div>
               </div>
             </div>
           </>
@@ -291,6 +310,7 @@ export function DashboardPortfolioGrid({
   onPortfolioClick,
   onCreatePortfolio,
   onSyncCommunity,
+  onDeletePortfolio,
   userCommunities,
   onCheckExistingPortfolio,
 }: DashboardPortfolioGridProps) {
@@ -369,6 +389,7 @@ export function DashboardPortfolioGrid({
                 portfolio={portfolio}
                 onClick={() => onPortfolioClick(portfolio.id)}
                 onSyncCommunity={onSyncCommunity}
+                onDeletePortfolio={onDeletePortfolio}
                 userCommunities={userCommunities}
                 onCheckExistingPortfolio={onCheckExistingPortfolio}
               />
@@ -516,6 +537,22 @@ export function DashboardPortfolioGrid({
                               No communities available
                             </div>
                           )}
+                          
+                          <div className="border-t border-white/10 mt-2 pt-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (confirm(`Are you sure you want to delete "${portfolio.name}"? This action cannot be undone.`)) {
+                                  onDeletePortfolio(portfolio.id)
+                                }
+                                setIsMenuOpen(false)
+                              }}
+                              className="w-full text-left px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete Portfolio
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </>

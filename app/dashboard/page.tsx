@@ -277,6 +277,26 @@ export default function DashboardPage() {
     }
   }
 
+  const handleDeletePortfolio = async (portfolioId: string) => {
+    if (!user?.id) {
+      console.log("[v0] User not authenticated, cannot delete portfolio")
+      return
+    }
+
+    try {
+      await deletePortfolio(portfolioId)
+      
+      // Refresh portfolios list
+      const updatedPortfolios = await loadUserPortfolios(user)
+      setPortfolios(updatedPortfolios)
+      
+      console.log(`[v0] Portfolio ${portfolioId} deleted successfully`)
+    } catch (error) {
+      console.error("[v0] Error deleting portfolio:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete portfolio")
+    }
+  }
+
   const activePortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
 
   if (authLoading || loading) {
@@ -404,6 +424,7 @@ export default function DashboardPage() {
               onPortfolioClick={handlePortfolioClick}
               onCreatePortfolio={handleCreatePortfolio}
               onSyncCommunity={handleSyncCommunity}
+              onDeletePortfolio={handleDeletePortfolio}
               userCommunities={userCommunities}
               onCheckExistingPortfolio={handleCheckExistingPortfolio}
             />

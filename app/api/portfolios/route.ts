@@ -110,81 +110,78 @@ export async function POST(request: NextRequest) {
       template || "blank"
     )
 
+    const timestamp = Date.now()
     const baseSlug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
+    
+    const slug = `${baseSlug}-${timestamp}`
 
-    let portfolio = null
-    let lastError = null
+    console.log("[v0] Generated unique slug:", slug)
 
-    for (let i = 0; i < 10; i++) {
-      const slug = i === 0 ? baseSlug : `${baseSlug}-${i}`
-
-      const insertData: any = {
-        user_id: user.id,
-        name: name.trim(),
-        slug,
-        description: description || `${name}'s portfolio`,
-        is_public: false,
-        is_demo: false,
-      }
-
-      if (theme_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(theme_id)) {
-        insertData.theme_id = theme_id
-      }
-
-      if (community_id) {
-        insertData.community_id = community_id
-      }
-
-      const { data, error } = await supabase
-        .from("portfolios")
-        .insert(insertData)
-        .select()
-        .single()
-
-      if (!error && data) {
-        portfolio = data
-        console.log("[v0] ✅ Portfolio created successfully:", portfolio.id, "with slug:", portfolio.slug)
-        break
-      }
-
-      lastError = error
-
-      if (error?.code === "23505") {
-        if (error.message.includes("portfolios_slug_idx")) {
-          console.log(`[v0] Slug '${slug}' already exists, trying variant ${i + 1}`)
-          continue
-        }
-        if (error.message.includes("idx_unique_user_community_portfolio")) {
-          console.error("[v0] User already has a portfolio for this community:", error)
-          return NextResponse.json(
-            {
-              error: "Duplicate community portfolio",
-              message: "You already have a portfolio for this community.",
-              details: "Each user can only have one portfolio per community.",
-            },
-            { status: 409 },
-          )
-        }
-      }
-
-      break
+    const insertData: any = {
+      user_id: user.id,
+      name: name.trim(),
+      slug,
+      description: description || `${name}'s portfolio`,
+      is_public: false,
+      is_demo: false,
     }
 
-    if (!portfolio) {
-      console.error("[v0] ❌ Failed to create portfolio after 10 attempts:", lastError)
+    if (theme_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(theme_id)) {
+      insertData.theme_id = theme_id
+    }
+
+    if (community_id) {
+      insertData.community_id = community_id
+    }
+
+    const { data: portfolio, error: portfolioError } = await supabase
+      .from("portfolios")
+      .insert(insertData)
+      .select()
+      .single()
+
+    if (portfolioError) {
+      console.error("[v0] ❌ Failed to create portfolio:", portfolioError)
+      
+      if (portfolioError.code === "23505" && portfolioError.message.includes("idx_unique_user_community_portfolio")) {
+        console.error("[v0] User already has a portfolio for this community:", portfolioError)
+        return NextResponse.json(
+          {
+            error: "Duplicate community portfolio",
+            message: "You already have a portfolio for this community.",
+            details: "Each user can only have one portfolio per community.",
+          },
+          { status: 409 },
+        )
+      }
+
       return NextResponse.json(
         {
           error: "Portfolio creation failed",
-          message: "Could not generate a unique identifier for your portfolio.",
-          details: lastError?.message || "Please try a different name.",
-          code: lastError?.code,
+          message: "Could not create your portfolio.",
+          details: portfolioError.message || "Please try again.",
+          code: portfolioError.code,
         },
         { status: 500 },
       )
     }
+
+    if (!portfolio) {
+      console.error("[v0] ❌ Portfolio creation returned no data")
+      return NextResponse.json(
+        {
+          error: "Portfolio creation failed",
+          message: "Could not create your portfolio.",
+          details: "No data returned from database.",
+        },
+        { status: 500 },
+      )
+    }
+
+    console.log("[v0] ✅ Portfolio created successfully:", portfolio.id, "with slug:", portfolio.slug)
 
     console.log("[v0] Creating default page structure for portfolio:", portfolio.id)
 

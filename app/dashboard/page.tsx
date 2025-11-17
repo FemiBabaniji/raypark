@@ -201,9 +201,10 @@ export default function DashboardPage() {
 
       const { portfolio } = await response.json()
       
+      setIsTemplateModalOpen(false)
+      
       window.dispatchEvent(new CustomEvent("portfolio-updated"))
       
-      setIsTemplateModalOpen(false)
       router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
     } catch (error) {
       console.error("Error creating portfolio:", error)

@@ -31,6 +31,7 @@ type Props = {
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
   initialPortfolio?: { id?: string; name?: string; description?: string; theme_id?: string }
+  communityId?: string | null // Add communityId prop for community context
 }
 
 export type PortfolioExportData = {
@@ -59,6 +60,7 @@ export default function PortfolioBuilder({
   isLive = false,
   onToggleLive,
   initialPortfolio,
+  communityId, // Receive communityId from parent
 }: Props) {
   const { user } = useAuth()
   const [isDragging, setIsDragging] = useState(false)
@@ -167,8 +169,8 @@ export default function PortfolioBuilder({
 
       try {
         console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
-
-        const data = await loadPortfolioData(portfolioId)
+        
+        const data = await loadPortfolioData(portfolioId, communityId)
 
         if (data) {
           console.log("[v0] ✅ Loaded data from database:", data)
@@ -225,7 +227,7 @@ export default function PortfolioBuilder({
     }
 
     loadData()
-  }, [portfolioId, onIdentityChange])
+  }, [portfolioId, onIdentityChange, communityId]) // Add communityId to dependencies
 
   useEffect(() => {
     setState((prev) => ({
@@ -286,7 +288,7 @@ export default function PortfolioBuilder({
           },
         }
 
-        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
+        await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave, communityId)
 
         setLastSaveTime(new Date())
         console.log("[v0] ✅ Auto-save completed successfully")
@@ -300,7 +302,7 @@ export default function PortfolioBuilder({
     }, 1500)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId]) // Add communityId to dependencies
 
   useEffect(() => {
     if (hasInitialized) {

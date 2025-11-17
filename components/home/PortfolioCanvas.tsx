@@ -13,7 +13,8 @@ export default function PortfolioCanvas({
   onSavePortfolio,
   isLive = false,
   onToggleLive,
-  onBack, // Added onBack prop for navigation
+  onBack,
+  communityId, // Add communityId prop
 }: {
   isPreviewMode: boolean
   useStarterTemplate?: boolean
@@ -35,7 +36,8 @@ export default function PortfolioCanvas({
   onSavePortfolio?: (portfolioData: any) => void
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
-  onBack?: () => void // Added onBack prop type
+  onBack?: () => void
+  communityId?: string | null // Add communityId type
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
@@ -66,6 +68,7 @@ export default function PortfolioCanvas({
             onSavePortfolio={onSavePortfolio}
             isLive={isLive}
             onToggleLive={onToggleLive}
+            communityId={communityId} // Pass communityId to PortfolioBuilder
           />
         )
       )}

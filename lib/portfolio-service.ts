@@ -684,11 +684,21 @@ export async function saveWidgetLayout(
   leftWidgets: Array<{ id: string; type: string }>,
   rightWidgets: Array<{ id: string; type: string }>,
   widgetContent: Record<string, any>,
+  communityId?: string | null, // Add community context parameter
 ) {
   const supabase = createClient()
   console.log("[v0] 💾 Starting saveWidgetLayout for portfolio:", portfolioId)
   console.log("[v0] Left widgets:", leftWidgets.map(w => w.type))
   console.log("[v0] Right widgets:", rightWidgets.map(w => w.type))
+  
+  if (communityId !== undefined) {
+    const isValid = await verifyPortfolioCommunity(portfolioId, communityId)
+    if (!isValid) {
+      console.error("[v0] ❌ Cannot save: Portfolio does not belong to this community")
+      throw new Error("Cannot save: Portfolio does not belong to this community")
+    }
+    console.log("[v0] ✅ Community ownership verified for save")
+  }
 
   try {
     const { data: page, error: pageError } = await supabase
@@ -858,7 +868,7 @@ export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: 
   )
 }
 
-export async function loadPortfolioData(portfolioId: string): Promise<{
+export async function loadPortfolioData(portfolioId: string, communityId?: string | null): Promise<{
   layout: {
     left: Array<{ id: string; type: string }>
     right: Array<{ id: string; type: string }>
@@ -871,6 +881,15 @@ export async function loadPortfolioData(portfolioId: string): Promise<{
 } | null> {
   const supabase = createClient()
   console.log("[v0] 🔄 Loading portfolio data for ID:", portfolioId)
+  
+  if (communityId !== undefined) {
+    const isValid = await verifyPortfolioCommunity(portfolioId, communityId)
+    if (!isValid) {
+      console.error("[v0] ❌ Portfolio does not belong to the specified community")
+      throw new Error("Portfolio does not belong to this community")
+    }
+    console.log("[v0] ✅ Portfolio community verified")
+  }
 
   const { data: page } = await supabase
     .from("pages")
@@ -1003,3 +1022,28 @@ export async function getIdentityProps(portfolioId: string): Promise<IdentityPro
 }
 
 export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")
+
+export async function verifyPortfolioCommunity(
+  portfolioId: string,
+  expectedCommunityId: string | null
+): Promise<boolean> {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase
+    .from("portfolios")
+    .select("community_id")
+    .eq("id", portfolioId)
+    .maybeSingle()
+  
+  if (error || !data) {
+    console.error("[v0] Failed to verify portfolio community:", error)
+    return false
+  }
+  
+  // Both null (personal portfolio) or both match (same community)
+  if (expectedCommunityId === null && data.community_id === null) {
+    return true
+  }
+  
+  return data.community_id === expectedCommunityId
+}

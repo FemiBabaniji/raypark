@@ -8,7 +8,7 @@ import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
-import { loadUserPortfolios, getIdentityProps, normalizeHandle } from "@/lib/portfolio-service"
+import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity } from "@/lib/portfolio-service"
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
@@ -31,6 +31,7 @@ export default function PortfolioBuilderPage() {
   const lastFetchedUserIdRef = useRef<string | null>(null)
   const hasFetchedRef = useRef(false)
   const [communityId, setCommunityId] = useState<string | null>(null)
+  const [securityError, setSecurityError] = useState<string | null>(null)
 
   const portfolioIdFromUrl = searchParams?.get('portfolio')
   const communityIdFromUrl = searchParams?.get('community')
@@ -44,7 +45,7 @@ export default function PortfolioBuilderPage() {
 
   useEffect(() => {
     if (hasFetchedRef.current) return
-    if (loading || !user) return // Wait for auth to complete
+    if (loading || !user) return
     hasFetchedRef.current = true
 
     async function loadPortfolio() {
@@ -56,6 +57,16 @@ export default function PortfolioBuilderPage() {
       try {
         if (portfolioIdFromUrl) {
           console.log("[v0] Loading specific portfolio:", portfolioIdFromUrl)
+          
+          if (communityIdFromUrl) {
+            const isValid = await verifyPortfolioCommunity(portfolioIdFromUrl, communityIdFromUrl)
+            if (!isValid) {
+              console.error("[v0] ❌ SECURITY: Portfolio does not belong to this community")
+              setSecurityError("This portfolio does not belong to the selected community. Please go back and select the correct portfolio.")
+              return
+            }
+            console.log("[v0] ✅ Portfolio-community ownership verified")
+          }
           
           const identity = await getIdentityProps(portfolioIdFromUrl)
           console.log("[v0] Identity props:", identity)
@@ -81,7 +92,6 @@ export default function PortfolioBuilderPage() {
             
             return
           } else {
-            // New portfolio, use user data as default
             console.log("[v0] New portfolio, initializing with user data")
             setActiveIdentity({
               id: portfolioIdFromUrl,
@@ -133,7 +143,6 @@ export default function PortfolioBuilderPage() {
             setActiveIdentity(loadedIdentity)
             setIsLive(Boolean((portfolio as any).is_public))
 
-            // Sync to localStorage for offline access
             localStorage.setItem(
               "bea_portfolio_data",
               JSON.stringify({
@@ -168,7 +177,7 @@ export default function PortfolioBuilderPage() {
     }
 
     loadPortfolio()
-  }, [user, loading, portfolioIdFromUrl, communityIdFromUrl])
+  }, [user, loading, portfolioIdFromUrl, communityIdFromUrl, router])
 
   const handleIdentityChange = (
     next: Partial<{
@@ -183,7 +192,6 @@ export default function PortfolioBuilderPage() {
     setActiveIdentity((prev) => {
       const merged = { ...prev, ...next }
 
-      // Save to localStorage for immediate persistence
       try {
         const existing = localStorage.getItem("bea_portfolio_data")
         const base = existing ? JSON.parse(existing) : {}
@@ -191,7 +199,6 @@ export default function PortfolioBuilderPage() {
         localStorage.setItem("bea_portfolio_data", JSON.stringify(updated))
         console.log("[v0] Saved to localStorage")
 
-        // Notify other components
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("portfolio-updated"))
           window.dispatchEvent(new Event("storage"))
@@ -227,7 +234,7 @@ export default function PortfolioBuilderPage() {
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push("/dmz") // Fallback to DMZ if no history
+      router.push("/dmz")
     }
   }
 
@@ -245,6 +252,23 @@ export default function PortfolioBuilderPage() {
 
   if (!user) {
     return null
+  }
+
+  if (securityError) {
+    return (
+      <div className="min-h-screen bg-[oklch(0.18_0_0)] flex items-center justify-center">
+        <div className="max-w-md p-8 bg-red-900/20 border border-red-500/50 rounded-xl">
+          <h2 className="text-xl font-semibold text-red-400 mb-4">Access Denied</h2>
+          <p className="text-white/80 mb-6">{securityError}</p>
+          <Button
+            onClick={() => router.back()}
+            className="w-full bg-red-600 hover:bg-red-700"
+          >
+            Go Back
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -280,6 +304,7 @@ export default function PortfolioBuilderPage() {
             isLive={isLive}
             onToggleLive={handleToggleLive}
             onBack={handleBack}
+            communityId={communityId} // Pass communityId to PortfolioCanvas
           />
         </div>
 

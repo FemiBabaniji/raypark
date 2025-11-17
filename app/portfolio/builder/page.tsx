@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import MusicAppInterface from "@/components/music-app-interface"
@@ -12,6 +12,7 @@ import { loadUserPortfolios, getIdentityProps, normalizeHandle } from "@/lib/por
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [activeIdentity, setActiveIdentity] = useState<{
@@ -31,6 +32,9 @@ export default function PortfolioBuilderPage() {
   const hasFetchedRef = useRef(false)
   const [communityId, setCommunityId] = useState<string | null>(null)
 
+  const portfolioIdFromUrl = searchParams?.get('portfolio')
+  const communityIdFromUrl = searchParams?.get('community')
+
   useEffect(() => {
     if (!loading && !user) {
       console.log("[v0] No authenticated user, redirecting to /auth")
@@ -46,8 +50,54 @@ export default function PortfolioBuilderPage() {
     async function loadPortfolio() {
       console.log("[v0] ========== LOADING PORTFOLIO FOR BUILDER ==========")
       console.log("[v0] Authenticated user:", user.email)
+      console.log("[v0] Portfolio ID from URL:", portfolioIdFromUrl)
+      console.log("[v0] Community ID from URL:", communityIdFromUrl)
 
       try {
+        if (portfolioIdFromUrl) {
+          console.log("[v0] Loading specific portfolio:", portfolioIdFromUrl)
+          
+          const identity = await getIdentityProps(portfolioIdFromUrl)
+          console.log("[v0] Identity props:", identity)
+
+          if (identity) {
+            const colorValue = typeof identity.selectedColor === "number" ? identity.selectedColor : 3
+            
+            const loadedIdentity = {
+              id: portfolioIdFromUrl,
+              name: identity.name || user.user_metadata?.name || user.email?.split("@")[0] || "",
+              handle: normalizeHandle(identity.handle),
+              avatarUrl: identity.avatarUrl,
+              selectedColor: colorValue as ThemeIndex,
+            }
+
+            console.log("[v0] Loading identity from database")
+            setActiveIdentity(loadedIdentity)
+            
+            if (communityIdFromUrl) {
+              setCommunityId(communityIdFromUrl)
+              console.log("[v0] Community ID stored:", communityIdFromUrl)
+            }
+            
+            return
+          } else {
+            // New portfolio, use user data as default
+            console.log("[v0] New portfolio, initializing with user data")
+            setActiveIdentity({
+              id: portfolioIdFromUrl,
+              name: user.user_metadata?.name || user.email?.split("@")[0] || "",
+              handle: user.email?.split("@")[0] || "",
+              selectedColor: 3 as ThemeIndex,
+            })
+            
+            if (communityIdFromUrl) {
+              setCommunityId(communityIdFromUrl)
+            }
+            
+            return
+          }
+        }
+
         console.log("[v0] Fetching from database...")
         const portfolios = await loadUserPortfolios(user)
         console.log("[v0] Found", portfolios.length, "portfolios")
@@ -117,7 +167,7 @@ export default function PortfolioBuilderPage() {
     }
 
     loadPortfolio()
-  }, [user, loading])
+  }, [user, loading, portfolioIdFromUrl, communityIdFromUrl])
 
   const handleIdentityChange = (
     next: Partial<{

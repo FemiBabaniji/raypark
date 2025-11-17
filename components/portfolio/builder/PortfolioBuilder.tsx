@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { Reorder, motion } from "framer-motion"
-import { X, ArrowLeft } from "lucide-react"
+import { X, ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
@@ -175,34 +175,41 @@ export default function PortfolioBuilder({
 
           // Update layout
           if (data.layout.left.length > 0) {
+            console.log("[v0] Setting left widgets:", data.layout.left)
             setLeftWidgets(data.layout.left)
           }
           if (data.layout.right.length > 0) {
+            console.log("[v0] Setting right widgets:", data.layout.right)
             setRightWidgets(data.layout.right)
           }
 
           // Update widget content
           if (Object.keys(data.widgetContent).length > 0) {
+            console.log("[v0] Setting widget content:", Object.keys(data.widgetContent))
             setWidgetContent(data.widgetContent)
           }
 
           // Update identity if it has data
           if (data.identity && data.identity.name) {
+            console.log("[v0] Setting identity from database:", data.identity.name)
             onIdentityChange(data.identity)
           }
 
           // Update project colors
           if (data.projectColors && Object.keys(data.projectColors).length > 0) {
+            console.log("[v0] Setting project colors")
             setProjectColors(data.projectColors)
           }
 
           // Update widget colors
           if (data.widgetColors && Object.keys(data.widgetColors).length > 0) {
+            console.log("[v0] Setting widget colors")
             setWidgetColors(data.widgetColors)
           }
 
           // Update gallery groups
           if (data.galleryGroups && Object.keys(data.galleryGroups).length > 0) {
+            console.log("[v0] Setting gallery groups")
             setGalleryGroups(data.galleryGroups)
           }
 
@@ -233,6 +240,7 @@ export default function PortfolioBuilder({
 
   const debouncedSave = useCallback(async () => {
     if (!user?.id || !hasInitialized || isLoadingData) {
+      console.log("[v0] ⏸️ Skipping save - not ready:", { hasUser: !!user?.id, hasInitialized, isLoadingData })
       return
     }
 
@@ -243,9 +251,12 @@ export default function PortfolioBuilder({
 
     const timeout = setTimeout(async () => {
       try {
+        console.log("[v0] 💾 Starting auto-save...")
         const id = await ensurePortfolioId()
+        console.log("[v0] Portfolio ID:", id)
 
         // Save portfolio metadata
+        console.log("[v0] Saving portfolio metadata...")
         await updatePortfolioById(id, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -271,11 +282,16 @@ export default function PortfolioBuilder({
             unsplash: identity.unsplash,
             instagram: identity.instagram,
           },
-          startup: widgetContent.startup || {},
         }
+
+        console.log("[v0] Saving widget layout and content...")
+        console.log("[v0] Left widgets:", leftWidgets.map(w => w.id))
+        console.log("[v0] Right widgets:", rightWidgets.map(w => w.id))
+        console.log("[v0] Widget content keys:", Object.keys(contentToSave))
 
         await saveWidgetLayout(id, leftWidgets, rightWidgets, contentToSave)
 
+        console.log("[v0] ✅ Auto-save completed successfully")
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
@@ -283,7 +299,7 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData])
+  }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
 
   useEffect(() => {
     if (hasInitialized) {
@@ -310,9 +326,10 @@ export default function PortfolioBuilder({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!isLoadingData) {
+        console.log("[v0] ✅ Portfolio builder initialized, auto-save enabled")
         setHasInitialized(true)
       }
-    }, 1500) // Wait 1.5 seconds after loading completes
+    }, 500) // Reduced from 1500ms
 
     return () => clearTimeout(timer)
   }, [isLoadingData])

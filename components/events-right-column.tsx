@@ -234,9 +234,8 @@ export default function EventsRightColumn({
       const { portfolio } = await response.json()
       console.log("[v0] Portfolio created:", portfolio.id)
 
-      // Trigger refresh and redirect to builder
       window.dispatchEvent(new CustomEvent("portfolio-updated"))
-      router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
+      router.push(`/portfolio/builder?portfolio=${portfolio.id}&community=${communityId}`)
     } catch (error) {
       console.error("[v0] Failed to create community portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")

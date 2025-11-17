@@ -171,52 +171,30 @@ export default function DashboardPage() {
 
   const handleCreatePortfolio = async () => {
     if (!user?.id) {
-      const newPortfolio: ExtendedPortfolio = {
-        id: safeUUID(),
-        name: "New Portfolio",
-        title: "Portfolio",
-        email: "new@example.com",
-        location: "Location",
-        handle: "@newuser",
-        initials: "NP",
-        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
-        isLive: false,
-        isTemplate: false,
-        community: undefined,
-      }
-      setPortfolios((prev) => [...prev, newPortfolio])
-      setSelectedPortfolioId(newPortfolio.id)
-      setViewMode("editor")
+      router.push("/login?redirect=/dashboard")
       return
     }
 
     try {
-      const portfolioData = await createPortfolioOnce({
-        userId: user.id,
-        name: "New Portfolio",
-        theme_id: "default",
-        description: "A new portfolio",
+      const response = await fetch("/api/portfolios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "New Portfolio",
+          description: "A new portfolio",
+        }),
       })
 
-      const newPortfolio: ExtendedPortfolio = {
-        id: portfolioData.id,
-        name: portfolioData.name,
-        title: "Portfolio",
-        email: `${portfolioData.slug}@example.com`,
-        location: "Location",
-        handle: `@${portfolioData.slug}`,
-        initials: portfolioData.name.slice(0, 2).toUpperCase(),
-        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
-        isLive: portfolioData.is_public || false,
-        isTemplate: false,
-        community: undefined,
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.details || error.error || "Failed to create portfolio")
       }
 
-      const updatedPortfolios = await loadUserPortfolios(user)
-      setPortfolios(updatedPortfolios)
+      const { portfolio } = await response.json()
       
-      setSelectedPortfolioId(newPortfolio.id)
-      setViewMode("editor")
+      window.dispatchEvent(new CustomEvent("portfolio-updated"))
+      
+      router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
     } catch (error) {
       console.error("[v0] Error creating portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")

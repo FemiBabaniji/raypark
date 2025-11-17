@@ -8,7 +8,7 @@ import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
 import type { ThemeIndex } from "@/lib/theme"
 import { useAuth } from "@/lib/auth"
-import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity } from "@/lib/portfolio-service"
+import { loadUserPortfolios, getIdentityProps, normalizeHandle, verifyPortfolioCommunity, saveWidgetLayout } from "@/lib/portfolio-service"
 
 export default function PortfolioBuilderPage() {
   const router = useRouter()
@@ -176,6 +176,29 @@ export default function PortfolioBuilderPage() {
         }
       } catch (error) {
         console.error("[v0] localStorage save failed:", error)
+      }
+
+      if (merged.id && typeof merged.selectedColor === "number") {
+        console.log("[v0] 💾 Persisting identity to database - portfolioId:", merged.id, "color:", merged.selectedColor)
+        
+        saveWidgetLayout(
+          merged.id!,
+          [], // We're not changing layout structure
+          [], // Just updating widget content
+          {
+            identity: {
+              name: merged.name,
+              handle: merged.handle,
+              avatarUrl: merged.avatarUrl,
+              selectedColor: merged.selectedColor,
+            }
+          },
+          communityId
+        ).then(() => {
+          console.log("[v0] ✅ Identity saved to database successfully")
+        }).catch((err) => {
+          console.error("[v0] ❌ Failed to save identity to database:", err)
+        })
       }
 
       return merged

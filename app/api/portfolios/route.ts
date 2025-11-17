@@ -179,6 +179,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log("[v0] Creating default main page for portfolio:", portfolio.id)
+
+    const { data: mainPage, error: pageError } = await supabase
+      .from("pages")
+      .insert({
+        portfolio_id: portfolio.id,
+        key: "main",
+        title: "Main",
+        route: "/",
+        is_demo: false,
+      })
+      .select("id")
+      .single()
+
+    if (pageError) {
+      console.error("[v0] Failed to create main page:", pageError)
+      // Don't fail the request, but log the issue
+      return NextResponse.json(
+        {
+          error: "Portfolio created but page setup failed",
+          details: pageError.message,
+          portfolio,
+        },
+        { status: 500 },
+      )
+    }
+
+    console.log("[v0] Main page created:", mainPage.id)
+
+    const defaultLayout = {
+      left: { type: "vertical", widgets: ["identity"] },
+      right: { type: "vertical", widgets: [] },
+    }
+
+    const { error: layoutError } = await supabase
+      .from("page_layouts")
+      .insert({
+        page_id: mainPage.id,
+        layout: defaultLayout,
+      })
+
+    if (layoutError) {
+      console.error("[v0] Failed to create page layout:", layoutError)
+      // Don't fail the request
+    } else {
+      console.log("[v0] Page layout created successfully")
+    }
+
     console.log("[v0] Portfolio created successfully:", portfolio.id, "Community:", portfolio.community_id || "none")
     return NextResponse.json({ portfolio })
   } catch (error) {

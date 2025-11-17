@@ -107,19 +107,6 @@ export async function createPortfolioOnce(params: {
     }
   }
 
-  // For personal portfolios, reuse existing if found
-  const { data: existingPortfolios, error: checkError } = await supabase
-    .from("portfolios")
-    .select("id, slug, name")
-    .eq("user_id", params.userId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-
-  if (!params.community_id && !checkError && existingPortfolios && existingPortfolios.length > 0) {
-    await ensureMainPage(supabase, existingPortfolios[0].id)
-    return existingPortfolios[0]
-  }
-
   let inserted: any = null
 
   for (let i = 0; i < 10; i++) {

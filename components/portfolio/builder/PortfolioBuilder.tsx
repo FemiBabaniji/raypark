@@ -610,8 +610,8 @@ export default function PortfolioBuilder({
               widgetId={w.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.education}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, education: content }))}
+              content={widgetContent[w.id] || widgetContent.education}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -632,8 +632,8 @@ export default function PortfolioBuilder({
               widgetId={w.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.projects}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, projects: content }))}
+              content={widgetContent[w.id] || widgetContent.projects}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               projectColors={projectColors}
@@ -657,7 +657,7 @@ export default function PortfolioBuilder({
               widgetId={w.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[w.id]}
+              content={widgetContent[w.id] || widgetContent.description}
               onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
@@ -679,8 +679,8 @@ export default function PortfolioBuilder({
               widgetId={w.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.services}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, services: content }))}
+              content={widgetContent[w.id] || widgetContent.services}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -725,9 +725,9 @@ export default function PortfolioBuilder({
               onDelete={() => deleteWidget(w.id, column)}
               selectedColor={widgetColors[w.type] ?? 5}
               onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.type]: color }))}
-              content={widgetContent[w.type]}
+              content={widgetContent[w.id] || widgetContent[w.type]}
               onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, [w.type]: content }))
+                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
               }
             />
           </motion.div>

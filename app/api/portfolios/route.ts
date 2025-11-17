@@ -283,14 +283,18 @@ export async function POST(request: NextRequest) {
     // Create template-specific description widgets
     if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType] && descriptionTypeId) {
       console.log("[v0] 📋 Creating template widgets for:", template)
+      console.log("[v0] Template exists:", !!PORTFOLIO_TEMPLATES[template as PortfolioTemplateType])
+      console.log("[v0] Description type ID:", descriptionTypeId)
       
       const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
+      console.log("[v0] Template config:", JSON.stringify(templateConfig))
       
       if (templateConfig.widgets.length > 0) {
         console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
         
         for (let i = 0; i < templateConfig.widgets.length; i++) {
           const widget = templateConfig.widgets[i]
+          console.log("[v0] Creating widget", i, "with props:", JSON.stringify(widget.props))
           
           const { data: createdWidget, error: widgetError } = await supabase
             .from("widget_instances")
@@ -305,14 +309,26 @@ export async function POST(request: NextRequest) {
 
           if (widgetError) {
             console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
+            console.error("[v0] Widget error details:", JSON.stringify(widgetError))
           } else if (createdWidget?.id) {
             layoutStructure.left.widgets.push(`description-${createdWidget.id}`)
             console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id)
+          } else {
+            console.error("[v0] ⚠️ No widget ID returned for widget", i)
           }
         }
+        
+        console.log("[v0] Final layout structure:", JSON.stringify(layoutStructure))
+      } else {
+        console.log("[v0] ⚠️ Template has no widgets configured")
       }
+    } else {
+      console.log("[v0] ⚠️ Template widget creation skipped - template:", template, "exists:", !!PORTFOLIO_TEMPLATES[template as any], "descriptionTypeId:", descriptionTypeId)
     }
 
+    // Create layout with structure
+    console.log("[v0] Creating layout with structure:", JSON.stringify(layoutStructure))
+    
     const { error: layoutError } = await supabase
       .from("page_layouts")
       .insert({

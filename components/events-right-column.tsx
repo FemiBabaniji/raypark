@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
 import { Upload, ChevronRight, Plus } from 'lucide-react'
+import { PortfolioTemplateModal } from "@/components/portfolio-template-modal"
 
 export default function EventsRightColumn({ 
   onToggleRightColumn,
@@ -23,6 +24,7 @@ export default function EventsRightColumn({
   const [portfolio, setPortfolio] = useState<UnifiedPortfolio | null>(null)
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const router = useRouter()
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   useEffect(() => {
     async function loadCommunityPortfolio() {
@@ -257,8 +259,14 @@ export default function EventsRightColumn({
       return
     }
 
+    setIsTemplateModalOpen(true)
+  }
+
+  const handleTemplateSelect = async (templateId: string) => {
+    if (!user || !communityId) return
+
     try {
-      console.log("[v0] Creating portfolio for community:", communityId)
+      console.log("[v0] Creating portfolio for community:", communityId, "with template:", templateId)
       
       const response = await fetch("/api/portfolios", {
         method: "POST",
@@ -267,6 +275,7 @@ export default function EventsRightColumn({
           name: "My Portfolio",
           description: "My community portfolio",
           community_id: communityId,
+          templateId,
         }),
       })
 
@@ -278,6 +287,7 @@ export default function EventsRightColumn({
       const { portfolio } = await response.json()
       console.log("[v0] Portfolio created:", portfolio.id)
 
+      setIsTemplateModalOpen(false)
       window.dispatchEvent(new CustomEvent("portfolio-updated"))
       router.push(`/portfolio/builder?portfolio=${portfolio.id}&community=${communityId}`)
     } catch (error) {
@@ -431,6 +441,12 @@ export default function EventsRightColumn({
           )}
         </div>
       </div>
+      <PortfolioTemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectTemplate={handleTemplateSelect}
+        communityId={communityId}
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { PORTFOLIO_TEMPLATES, type PortfolioTemplateType } from "@/lib/portfolio-templates"
 
 export async function GET() {
   try {
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
     }
 
-    const { name, theme_id, description, community_id } = body
+    const { name, theme_id, description, community_id, template } = body
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       console.log("[v0] Missing or invalid portfolio name:", name)
@@ -105,6 +106,8 @@ export async function POST(request: NextRequest) {
       theme_id,
       "Community:",
       community_id || "none (personal)",
+      "Template:",
+      template || "blank"
     )
 
     const baseSlug = name
@@ -228,7 +231,6 @@ export async function POST(request: NextRequest) {
 
     if (layoutError) {
       console.error("[v0] ❌ Failed to create page layout:", layoutError)
-      // Continue - layout can be created later
     } else {
       console.log("[v0] ✅ Page layout created successfully")
     }
@@ -255,9 +257,46 @@ export async function POST(request: NextRequest) {
 
       if (widgetError) {
         console.error("[v0] ⚠️ Failed to create identity widget:", widgetError)
-        // Continue - widget can be added later
       } else {
         console.log("[v0] ✅ Identity widget created")
+      }
+    }
+
+    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
+      console.log("[v0] Creating template widgets for:", template)
+      
+      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
+      const { data: widgetTypes } = await supabase
+        .from("widget_types")
+        .select("id, key")
+
+      const widgetTypeMap = new Map(widgetTypes?.map(wt => [wt.key, wt.id]) || [])
+
+      for (const widget of templateConfig.widgets) {
+        const widgetTypeId = widgetTypeMap.get(widget.type)
+        
+        if (widgetTypeId) {
+          const { error: widgetError } = await supabase
+            .from("widget_instances")
+            .insert({
+              page_id: mainPage.id,
+              widget_type_id: widgetTypeId,
+              props: widget.props || {},
+              config: {
+                position: widget.position,
+                size: widget.size,
+              },
+              enabled: true,
+            })
+
+          if (widgetError) {
+            console.error(`[v0] ⚠️ Failed to create ${widget.type} widget:`, widgetError)
+          } else {
+            console.log(`[v0] ✅ Created ${widget.type} widget`)
+          }
+        } else {
+          console.log(`[v0] ⚠️ Widget type not found: ${widget.type}`)
+        }
       }
     }
 

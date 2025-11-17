@@ -22,6 +22,7 @@ import { DashboardPortfolioGrid, type ExtendedPortfolio } from "@/components/das
 import { loadUserCommunities, getPortfolioForCommunity, swapPortfolioToCommunity } from "@/lib/community-service"
 import { linkPortfolioToCommunity } from "@/lib/community-service"
 import type { Community } from "@/lib/community-service"
+import { PortfolioTemplateModal, type PortfolioTemplateType } from "@/components/portfolio-template-modal"
 
 interface ExtendedPortfolio extends UnifiedPortfolio {
   community?: {
@@ -125,6 +126,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"list" | "editor">("list")
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -169,11 +171,17 @@ export default function DashboardPage() {
     fetchPortfolios()
   }, [authLoading, user])
 
-  const handleCreatePortfolio = async () => {
+  const handleCreatePortfolio = () => {
     if (!user?.id) {
       router.push("/login?redirect=/dashboard")
       return
     }
+
+    setIsTemplateModalOpen(true)
+  }
+
+  const handleTemplateSelect = async (template: PortfolioTemplateType) => {
+    if (!user?.id) return
 
     try {
       const response = await fetch("/api/portfolios", {
@@ -182,6 +190,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           name: "New Portfolio",
           description: "A new portfolio",
+          template,
         }),
       })
 
@@ -194,9 +203,10 @@ export default function DashboardPage() {
       
       window.dispatchEvent(new CustomEvent("portfolio-updated"))
       
+      setIsTemplateModalOpen(false)
       router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
     } catch (error) {
-      console.error("[v0] Error creating portfolio:", error)
+      console.error("Error creating portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")
     }
   }
@@ -407,6 +417,12 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      <PortfolioTemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
     </div>
   )
 }

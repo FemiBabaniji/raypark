@@ -219,28 +219,6 @@ export async function POST(request: NextRequest) {
       right: { type: "vertical", widgets: [] as string[] },
     }
 
-    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
-      const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
-      // Add description widget keys for each template widget
-      for (let i = 0; i < templateConfig.widgets.length; i++) {
-        layoutStructure.left.widgets.push("description")
-      }
-      console.log("[v0] 📋 Template layout will include", templateConfig.widgets.length, "additional widgets")
-    }
-
-    const { error: layoutError } = await supabase
-      .from("page_layouts")
-      .insert({
-        page_id: mainPage.id,
-        layout: layoutStructure,
-      })
-
-    if (layoutError) {
-      console.error("[v0] ❌ Failed to create page layout:", layoutError)
-    } else {
-      console.log("[v0] ✅ Page layout created successfully")
-    }
-
     const { data: identityType } = await supabase
       .from("widget_types")
       .select("id")
@@ -255,15 +233,23 @@ export async function POST(request: NextRequest) {
       }
 
       if (template === "designer") {
-        identityProps.selectedColor = 4 // Purple for designers
+        identityProps.selectedColor = 4
+        identityProps.title = "UI/UX Designer"
+        identityProps.bio = "I create intuitive digital experiences that delight users."
       } else if (template === "developer") {
-        identityProps.selectedColor = 2 // Blue for developers
+        identityProps.selectedColor = 2
+        identityProps.title = "Full Stack Developer"
+        identityProps.bio = "Building scalable web applications with modern technologies."
       } else if (template === "marketing") {
-        identityProps.selectedColor = 1 // Orange/red for marketing
+        identityProps.selectedColor = 1
+        identityProps.title = "Growth Marketing Manager"
+        identityProps.bio = "Data-driven marketer scaling startups through strategic campaigns."
       } else if (template === "founder") {
-        identityProps.selectedColor = 0 // Navy/professional for founders
+        identityProps.selectedColor = 0
+        identityProps.title = "Founder & CEO"
+        identityProps.bio = "Building the future. Previously exited startup."
       } else {
-        identityProps.selectedColor = 3 // Default color
+        identityProps.selectedColor = 3
       }
 
       const { error: widgetError } = await supabase
@@ -296,27 +282,43 @@ export async function POST(request: NextRequest) {
       if (descriptionType?.id && templateConfig.widgets.length > 0) {
         console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
         
-        const widgetInserts = templateConfig.widgets.map(widget => ({
-          page_id: mainPage.id,
-          widget_type_id: descriptionType.id,
-          props: widget.props || {},
-          enabled: true,
-        }))
+        for (let i = 0; i < templateConfig.widgets.length; i++) {
+          const widget = templateConfig.widgets[i]
+          
+          const { data: createdWidget, error: widgetError } = await supabase
+            .from("widget_instances")
+            .insert({
+              page_id: mainPage.id,
+              widget_type_id: descriptionType.id,
+              props: widget.props || {},
+              enabled: true,
+            })
+            .select("id")
+            .single()
 
-        const { error: batchError } = await supabase
-          .from("widget_instances")
-          .insert(widgetInserts)
-
-        if (batchError) {
-          console.error("[v0] ⚠️ Failed to create template widgets:", batchError)
-        } else {
-          console.log("[v0] ✅ All", widgetInserts.length, "template widgets created for:", template)
+          if (widgetError) {
+            console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
+          } else {
+            layoutStructure.left.widgets.push(`description-${createdWidget.id}`)
+            console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id)
+          }
         }
       } else {
         console.error("[v0] ⚠️ Description widget type not found or no widgets in template")
       }
+    }
+
+    const { error: layoutError } = await supabase
+      .from("page_layouts")
+      .insert({
+        page_id: mainPage.id,
+        layout: layoutStructure,
+      })
+
+    if (layoutError) {
+      console.error("[v0] ❌ Failed to create page layout:", layoutError)
     } else {
-      console.log("[v0] No template selected or blank template, skipping template widgets")
+      console.log("[v0] ✅ Page layout created with", layoutStructure.left.widgets.length, "left widgets")
     }
 
     console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)

@@ -876,122 +876,79 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
     .maybeSingle()
 
   const rawLayout = layoutData?.layout as any
-  const leftWidgetTypes = rawLayout?.left?.widgets || []
-  const rightWidgetTypes = rawLayout?.right?.widgets || []
+  const leftWidgetKeys = rawLayout?.left?.widgets || []
+  const rightWidgetKeys = rawLayout?.right?.widgets || []
 
-  console.log("[v0] Left widget types from DB:", leftWidgetTypes)
-  console.log("[v0] Right widget types from DB:", rightWidgetTypes)
+  console.log("[v0] Left widget keys from layout:", leftWidgetKeys)
+  console.log("[v0] Right widget keys from layout:", rightWidgetKeys)
 
   const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
   const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
 
   const { data: instances } = await supabase
     .from("widget_instances")
-    .select("widget_type_id, props")
+    .select("id, widget_type_id, props")
     .eq("page_id", page.id)
 
   console.log("[v0] Found", instances?.length || 0, "widget instances")
 
-  const widgetContent: Record<string, any> = {}
+  const instanceMap: Record<string, { type: string; props: any }> = {}
   let identity: any = {}
 
   for (const instance of instances || []) {
-    const widgetKey = idToKey[instance.widget_type_id]
-    if (!widgetKey) continue
+    const widgetType = idToKey[instance.widget_type_id]
+    if (!widgetType) continue
 
     const props = instance.props || {}
 
-    if (widgetKey === "identity") {
+    if (widgetType === "identity") {
       identity = props
-      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor, "type:", typeof props.selectedColor)
+      console.log("[v0] 🎨 LOADED IDENTITY WIDGET - selectedColor:", props.selectedColor)
     } else {
-      widgetContent[widgetKey] = props
-      console.log("[v0] Loaded widget:", widgetKey)
+      instanceMap[instance.id] = {
+        type: widgetType,
+        props
+      }
+      console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
     }
   }
 
-  const leftWidgets = leftWidgetTypes.map((type: string) => ({ 
-    id: type,
-    type 
-  }))
-  const rightWidgets = rightWidgetTypes.map((type: string) => ({ 
-    id: type,
-    type 
-  }))
+  const widgetContent: Record<string, any> = {}
+  
+  const leftWidgets = leftWidgetKeys.map((key: string) => {
+    // Check if key is like "description-{uuid}"
+    if (key.includes("-") && key.length > 20) {
+      const instanceId = key.split("-").slice(1).join("-")
+      const widgetData = instanceMap[instanceId]
+      if (widgetData) {
+        widgetContent[key] = widgetData.props
+        return { id: key, type: widgetData.type }
+      }
+    }
+    // Otherwise it's a simple type key
+    return { id: key, type: key }
+  })
+
+  const rightWidgets = rightWidgetKeys.map((key: string) => {
+    if (key.includes("-") && key.length > 20) {
+      const instanceId = key.split("-").slice(1).join("-")
+      const widgetData = instanceMap[instanceId]
+      if (widgetData) {
+        widgetContent[key] = widgetData.props
+        return { id: key, type: widgetData.type }
+      }
+    }
+    return { id: key, type: key }
+  })
 
   console.log("[v0] ✅ Returning loaded data with", leftWidgets.length, "left and", rightWidgets.length, "right widgets")
+  console.log("[v0] Widget content keys:", Object.keys(widgetContent))
 
   return {
     layout: { left: leftWidgets, right: rightWidgets },
     widgetContent,
     identity,
   }
-}
-
-const makeSuffix = () => Math.random().toString(36).slice(2, 7)
-
-export type IdentityProps = {
-  name?: string
-  handle?: string
-  avatarUrl?: string
-  selectedColor?: number
-  title?: string
-  email?: string
-  location?: string
-  bio?: string
-  linkedin?: string
-  dribbble?: string
-  behance?: string
-  twitter?: string
-  unsplash?: string
-  instagram?: string
-}
-
-export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
-  const supabase = createClient()
-  
-  console.log("[v0] 🎨 getIdentityProps called for portfolio:", portfolioId)
-
-  const { data: page, error: pageErr } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (pageErr || !page?.id) {
-    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId, "error:", pageErr)
-    return null
-  }
-
-  console.log("[v0] getIdentityProps: Found page ID:", page.id)
-
-  const { data: wt, error: wtErr } = await supabase
-    .from("widget_types")
-    .select("id")
-    .eq("key", "identity")
-    .maybeSingle()
-
-  if (wtErr || !wt?.id) {
-    console.log("[v0] getIdentityProps: Identity widget type not found, error:", wtErr)
-    return null
-  }
-
-  console.log("[v0] getIdentityProps: Found identity widget type ID:", wt.id)
-
-  const { data: wi, error: wiErr } = await supabase
-    .from("widget_instances")
-    .select("props")
-    .eq("page_id", page.id)
-    .eq("widget_type_id", wt.id)
-    .maybeSingle()
-
-  if (wiErr) {
-    console.log("[v0] getIdentityProps: Error fetching widget instance:", wiErr)
-    return null
-  }
-
-  return (wi?.props as IdentityProps) ?? null
 }
 
 export const normalizeHandle = (h?: string) => (h || "").replace(/^@/, "")
@@ -1070,4 +1027,70 @@ async function insertPortfolioWithRetry(
     if (error) throw error
   }
   throw new Error("Could not create a unique slug after several attempts")
+}
+
+const makeSuffix = () => Math.random().toString(36).slice(2, 7)
+
+export type IdentityProps = {
+  name?: string
+  handle?: string
+  avatarUrl?: string
+  selectedColor?: number
+  title?: string
+  email?: string
+  location?: string
+  bio?: string
+  linkedin?: string
+  dribbble?: string
+  behance?: string
+  twitter?: string
+  unsplash?: string
+  instagram?: string
+}
+
+export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
+  const supabase = createClient()
+  
+  console.log("[v0] 🎨 getIdentityProps called for portfolio:", portfolioId)
+
+  const { data: page, error: pageErr } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("portfolio_id", portfolioId)
+    .eq("key", "main")
+    .maybeSingle()
+
+  if (pageErr || !page?.id) {
+    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId, "error:", pageErr)
+    return null
+  }
+
+  console.log("[v0] getIdentityProps: Found page ID:", page.id)
+
+  const { data: wt, error: wtErr } = await supabase
+    .from("widget_types")
+    .select("id")
+    .eq("key", "identity")
+    .maybeSingle()
+
+  if (wtErr || !wt?.id) {
+    console.log("[v0] getIdentityProps: Identity widget type not found, error:", wtErr)
+    return null
+  }
+
+  console.log("[v0] getIdentityProps: Found identity widget type ID:", wt.id)
+
+  const { data: wi, error: wiErr } = await supabase
+    .from("widget_instances")
+    .select("props")
+    .eq("page_id", page.id)
+    .eq("widget_type_id", wt.id)
+    .maybeSingle()
+
+  if (wiErr) {
+    console.log("[v0] getIdentityProps: Error fetching widget instance:", wiErr)
+    return null
+  }
+
+  return (wi?.props as IdentityProps) ?? null
 }

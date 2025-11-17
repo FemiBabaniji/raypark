@@ -709,8 +709,8 @@ export default function PortfolioBuilder({
               widgetId={w.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.description}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, description: content }))}
+              content={widgetContent[w.id]}
+              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
               onDelete={() => deleteWidget(w.id, column)}
               onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               editingField={editingField}

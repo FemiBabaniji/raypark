@@ -26,28 +26,22 @@ const toSlug = (name: string) =>
     .slice(0, 64)
 
 export async function ensureMainPage(supabase: ReturnType<typeof createClient>, portfolioId: string): Promise<string> {
-  console.log("[v0] 🔍 Checking for existing main page for portfolio:", portfolioId)
   
-  const { data: existing, error: checkError } = await supabase
+  // First, try to find existing page
+  const { data: existingPage } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
     .maybeSingle()
 
-  if (checkError) {
-    console.error("[v0] ❌ Error checking for existing page:", checkError)
+  if (existingPage?.id) {
+    await ensurePageLayout(supabase, existingPage.id)
+    return existingPage.id
   }
 
-  if (existing?.id) {
-    console.log("[v0] ✅ Page already exists:", existing.id)
-    // Ensure layout exists for this page
-    await ensurePageLayout(supabase, existing.id)
-    return existing.id
-  }
-
-  console.log("[v0] 📝 Creating new main page for portfolio:", portfolioId)
-  const { data, error } = await supabase
+  // Try to create page
+  const { data: newPage, error } = await supabase
     .from("pages")
     .insert({ 
       portfolio_id: portfolioId, 
@@ -59,49 +53,30 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
     .select("id")
     .single()
 
-  if (error) {
-    if (error.code === '23505') {
-      console.log("[v0] ℹ️ Page already exists (race condition), retrying fetch...")
-      
-      // Try up to 3 times with increasing delays
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        const delay = attempt * 200 // 200ms, 400ms, 600ms
-        console.log(`[v0] 🔄 Retry attempt ${attempt}/3 after ${delay}ms delay`)
-        await new Promise(resolve => setTimeout(resolve, delay))
-        
-        const { data: retryPage, error: retryError } = await supabase
-          .from("pages")
-          .select("id")
-          .eq("portfolio_id", portfolioId)
-          .eq("key", "main")
-          .maybeSingle()
-        
-        if (retryError) {
-          console.error(`[v0] ❌ Retry ${attempt} fetch error:`, retryError)
-          continue
-        }
-        
-        if (retryPage?.id) {
-          console.log(`[v0] ✅ Found existing page on retry ${attempt}:`, retryPage.id)
-          await ensurePageLayout(supabase, retryPage.id)
-          return retryPage.id
-        }
-      }
-      
-      console.error("[v0] ❌ Page should exist but wasn't found after 3 retries")
-      throw new Error("Failed to create or find main page after multiple attempts. Please try refreshing the page.")
-    } else {
-      console.error("[v0] ❌ Error creating page:", error)
-      throw error
+  // If created successfully, return it
+  if (newPage?.id) {
+    await ensurePageLayout(supabase, newPage.id)
+    return newPage.id
+  }
+
+  // If duplicate, fetch the existing one (someone else created it)
+  if (error?.code === '23505') {
+    const { data: racePage } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("portfolio_id", portfolioId)
+      .eq("key", "main")
+      .single()
+    
+    if (racePage?.id) {
+      await ensurePageLayout(supabase, racePage.id)
+      return racePage.id
     }
   }
 
-  const pageId = data.id
-  console.log("[v0] ✅ Created new page:", pageId)
-  
-  await ensurePageLayout(supabase, pageId)
-  
-  return pageId
+  // Something went wrong
+  console.error("[v0] Failed to create or find page:", error)
+  throw new Error("Could not create or find main page. Please try refreshing.")
 }
 
 async function ensurePageLayout(supabase: ReturnType<typeof createClient>, pageId: string): Promise<void> {
@@ -744,100 +719,47 @@ export async function saveWidgetLayout(
   const pageId = await ensureMainPage(supabase, portfolioId)
 
   const layout = {
-    left: { type: "vertical", widgets: leftWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
-    right: { type: "vertical", widgets: rightWidgets.map((w) => (typeof w === "string" ? w : w.id)) },
+    left: { type: "vertical", widgets: leftWidgets.map((w) => w.id) },
+    right: { type: "vertical", widgets: rightWidgets.map((w) => w.id) },
   }
 
-  const { error: upsertLayoutErr } = await supabase
+  // Save layout
+  await supabase
     .from("page_layouts")
     .upsert({ page_id: pageId, layout }, { onConflict: "page_id" })
 
-  if (upsertLayoutErr) {
-    console.error("[v0] ❌ Failed to upsert layout:", upsertLayoutErr)
-    throw upsertLayoutErr
-  }
-
-  const { data: types, error: typesError } = await supabase.from("widget_types").select("id, key")
-
-  if (typesError) {
-    console.error("[v0] ❌ Failed to fetch widget types:", typesError)
-    throw typesError
-  }
-
+  // Get widget type mappings
+  const { data: types } = await supabase.from("widget_types").select("id, key")
   const keyToId = Object.fromEntries((types ?? []).map((t) => [t.key, t.id]))
 
-  const allKeys = [...layout.left.widgets, ...layout.right.widgets]
+  const allWidgetIds = [...leftWidgets.map(w => w.id), ...rightWidgets.map(w => w.id)]
 
-  const meetingSchedulerIds = allKeys.filter(
-    (id: string) => typeof id === "string" && id.startsWith("meeting-scheduler"),
-  )
-  const otherKeys = allKeys.filter((id: string) => typeof id === "string" && !id.startsWith("meeting-scheduler"))
+  for (const widgetId of allWidgetIds) {
+    // Extract widget type from ID (e.g., "meeting-scheduler-1234" -> "meeting-scheduler")
+    const widgetType = widgetId.includes('-') && /\d{13,}$/.test(widgetId.split('-').pop() || '')
+      ? widgetId.substring(0, widgetId.lastIndexOf('-'))
+      : widgetId
 
-  // Save meeting scheduler widgets as a single database row with all instances
-  if (meetingSchedulerIds.length > 0) {
-    const widget_type_id = keyToId["meeting-scheduler"]
-    if (widget_type_id) {
-      const { data: existing } = await supabase
-        .from("widget_instances")
-        .select("props")
-        .eq("page_id", pageId)
-        .eq("widget_type_id", widget_type_id)
-        .maybeSingle()
+    const widget_type_id = keyToId[widgetType]
+    if (!widget_type_id) continue
 
-      // Merge all meeting scheduler content into one props object keyed by widget ID
-      const meetingSchedulerProps = { ...(existing?.props ?? {}) }
-      for (const widgetId of meetingSchedulerIds) {
-        if (widgetContent[widgetId]) {
-          meetingSchedulerProps[widgetId] = widgetContent[widgetId]
-        }
-      }
+    const content = widgetContent[widgetId] || {}
 
-      const { error: upsertErr } = await supabase
-        .from("widget_instances")
-        .upsert(
-          { page_id: pageId, widget_type_id, props: meetingSchedulerProps, enabled: true },
-          { onConflict: "page_id,widget_type_id" },
-        )
-
-      if (upsertErr) {
-        console.error("[v0] ❌ Failed to upsert meeting-scheduler widget:", upsertErr)
-        throw upsertErr
-      }
-    }
-  }
-
-  // Save other widgets normally
-  for (const key of otherKeys) {
-    const widget_type_id = keyToId[key]
-    if (!widget_type_id) {
-      continue
-    }
-
-    const incomingProps = widgetContent?.[key] ?? {}
-
-    const { data: existing } = await supabase
-      .from("widget_instances")
-      .select("props")
-      .eq("page_id", pageId)
-      .eq("widget_type_id", widget_type_id)
-      .maybeSingle()
-
-    const mergedProps = { ...(existing?.props ?? {}), ...incomingProps }
-
-    const { error: upsertErr } = await supabase
+    // Upsert widget with content
+    await supabase
       .from("widget_instances")
       .upsert(
-        { page_id: pageId, widget_type_id, props: mergedProps, enabled: true },
-        { onConflict: "page_id,widget_type_id" },
+        { 
+          page_id: pageId, 
+          widget_type_id, 
+          props: content, 
+          enabled: true 
+        },
+        { onConflict: "page_id,widget_type_id" }
       )
-
-    if (upsertErr) {
-      console.error("[v0] ❌ Failed to upsert widget:", key, upsertErr)
-      throw upsertErr
-    }
   }
 
-  console.log("[v0] ✅ All widgets saved successfully")
+  console.log("[v0] ✅ Layout and widgets saved successfully")
 }
 
 export async function getPageLayout(portfolioId: string): Promise<{
@@ -855,9 +777,13 @@ export async function getPageLayout(portfolioId: string): Promise<{
 
   if (!page?.id) return null
 
-  const { data: layout } = await supabase.from("page_layouts").select("layout").eq("page_id", page.id).maybeSingle()
+  const { data: layoutData } = await supabase
+    .from("page_layouts")
+    .select("layout")
+    .eq("page_id", page.id)
+    .maybeSingle()
 
-  return layout?.layout as any
+  return layoutData?.layout as any
 }
 
 export async function getPageWidgets(portfolioId: string): Promise<Array<{ key: string; props: any }>> {
@@ -965,147 +891,80 @@ export async function loadPortfolioData(portfolioId: string): Promise<{
 } | null> {
   const supabase = createClient()
 
+  
   // Get the main page
-  const { data: page, error: pageError } = await supabase
+  const { data: page } = await supabase
     .from("pages")
     .select("id")
     .eq("portfolio_id", portfolioId)
     .eq("key", "main")
     .maybeSingle()
 
-  if (pageError || !page?.id) {
-    console.error("[v0] Failed to load page:", pageError)
+  if (!page?.id) {
+    console.log("[v0] No main page found for portfolio")
     return null
   }
 
   // Get page layout
-  const { data: layoutData, error: layoutError } = await supabase
+  const { data: layoutData } = await supabase
     .from("page_layouts")
     .select("layout")
     .eq("page_id", page.id)
     .maybeSingle()
 
-  if (layoutError) {
-    console.error("[v0] Failed to load layout:", layoutError)
-    return null
-  }
-
   const rawLayout = layoutData?.layout as any
-  const leftWidgetKeys = rawLayout?.left?.widgets || []
-  const rightWidgetKeys = rawLayout?.right?.widgets || []
+  const leftWidgetIds = rawLayout?.left?.widgets || []
+  const rightWidgetIds = rawLayout?.right?.widgets || []
 
-  // Get widget_types lookup
-  const { data: widgetTypes, error: typesError } = await supabase.from("widget_types").select("id, key")
-
-  if (typesError) {
-    console.error("[v0] Failed to load widget types:", typesError)
-    return null
-  }
-
-  const keyToId = Object.fromEntries((widgetTypes || []).map((t) => [t.key, t.id]))
+  // Get widget types
+  const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
   const idToKey = Object.fromEntries((widgetTypes || []).map((t) => [t.id, t.key]))
 
-  // Get all widget instances for this page
-  const { data: instances, error: instancesError } = await supabase
+  // Get all widget instances
+  const { data: instances } = await supabase
     .from("widget_instances")
     .select("widget_type_id, props")
     .eq("page_id", page.id)
 
-  if (instancesError) {
-    console.error("[v0] Failed to load widget instances:", instancesError)
-    return null
-  }
-
-  // Build widgetContent map from database props
+  // Build widget content
   const widgetContent: Record<string, any> = {}
   let identity: any = {}
-  let projectColors: Record<string, string> = {}
-  const widgetColors: Record<string, ThemeIndex> = {}
-  const galleryGroups: Record<string, any[]> = {}
 
   for (const instance of instances || []) {
-    const key = idToKey[instance.widget_type_id]
-    if (!key) continue
+    const widgetKey = idToKey[instance.widget_type_id]
+    if (!widgetKey) continue
 
     const props = instance.props || {}
 
-    if (key === "identity") {
-      // Identity widget maps directly to identity state
-      identity = {
-        name: props.name || "",
-        handle: props.handle || "",
-        avatar: props.avatarUrl || "",
-        selectedColor: typeof props.selectedColor === "number" ? props.selectedColor : 0,
-        title: props.title || "",
-        email: props.email || "",
-        location: props.location || "",
-        bio: props.bio || "",
-        linkedin: props.linkedin || "",
-        dribbble: props.dribbble || "",
-        behance: props.behance || "",
-        twitter: props.twitter || "",
-        unsplash: props.unsplash || "",
-        instagram: props.instagram || "",
-      }
-    } else if (key === "projects" && props.projectColors) {
-      // Extract project colors if they exist
-      projectColors = props.projectColors
-    } else if (key === "gallery" && props.galleryGroups) {
-      // Extract gallery groups if they exist
-      const widgetId = leftWidgetKeys.includes(key) || rightWidgetKeys.includes(key) ? key : `${key}-${Date.now()}`
-      galleryGroups[widgetId] = props.galleryGroups
-    } else if (key === "meeting-scheduler") {
-      const allWidgetIds = [...leftWidgetKeys, ...rightWidgetKeys]
-      const meetingSchedulerIds = allWidgetIds.filter((id: string) => id.startsWith("meeting-scheduler"))
-
-      // For each meeting scheduler widget in the layout, load its content
-      for (const widgetId of meetingSchedulerIds) {
-        // Check if this specific instance has saved content
-        const instanceContent = props[widgetId]
-        if (instanceContent) {
-          widgetContent[widgetId] = instanceContent
-
-          // Also extract widget color if present
-          if (typeof instanceContent.selectedColor === "number") {
-            widgetColors[widgetId] = instanceContent.selectedColor
-          }
-        }
-      }
-      continue // Skip the default widgetContent storage below
+    if (widgetKey === "identity") {
+      identity = props
+    } else {
+      widgetContent[widgetKey] = props
     }
-
-    // Store all props in widgetContent using the widget type key
-    widgetContent[key] = props
   }
 
-  // Extract widget type from ID: for "meeting-scheduler-1763018464890", type should be "meeting-scheduler"
-  const extractWidgetType = (widgetId: string): string => {
-    // Check if it's a timestamped widget (ends with a large number)
-    const lastDashIndex = widgetId.lastIndexOf("-")
-    if (lastDashIndex > 0) {
-      const afterLastDash = widgetId.substring(lastDashIndex + 1)
-      // If it's a timestamp (all digits and long), remove it
-      if (/^\d{13,}$/.test(afterLastDash)) {
-        return widgetId.substring(0, lastDashIndex)
-      }
+  // Extract widget type from ID
+  const extractWidgetType = (id: string): string => {
+    const lastDash = id.lastIndexOf("-")
+    if (lastDash > 0 && /^\d{13,}$/.test(id.substring(lastDash + 1))) {
+      return id.substring(0, lastDash)
     }
-    // Otherwise, the whole ID is the type
-    return widgetId
+    return id
   }
 
-  // Convert widget keys to WidgetDef format
-  const leftWidgets = leftWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
-  const rightWidgets = rightWidgetKeys.map((key: string) => ({ id: key, type: extractWidgetType(key) }))
+  // Convert to WidgetDef format
+  const leftWidgets = leftWidgetIds.map((id: string) => ({ 
+    id, 
+    type: extractWidgetType(id) 
+  }))
+  const rightWidgets = rightWidgetIds.map((id: string) => ({ 
+    id, 
+    type: extractWidgetType(id) 
+  }))
 
   return {
-    layout: {
-      left: leftWidgets,
-      right: rightWidgets,
-    },
+    layout: { left: leftWidgets, right: rightWidgets },
     widgetContent,
     identity,
-    projectColors,
-    widgetColors,
-    galleryGroups,
   }
 }

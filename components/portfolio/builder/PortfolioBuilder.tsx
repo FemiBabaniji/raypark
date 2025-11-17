@@ -296,7 +296,7 @@ export default function PortfolioBuilder({
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
       }
-    }, 800)
+    }, 500)
 
     setSaveTimeout(timeout)
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout])
@@ -329,7 +329,7 @@ export default function PortfolioBuilder({
         console.log("[v0] ✅ Portfolio builder initialized, auto-save enabled")
         setHasInitialized(true)
       }
-    }, 500) // Reduced from 1500ms
+    }, 300) // Reduced from 500ms
 
     return () => clearTimeout(timer)
   }, [isLoadingData])

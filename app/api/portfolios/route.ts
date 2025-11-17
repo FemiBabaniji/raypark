@@ -219,10 +219,15 @@ export async function POST(request: NextRequest) {
     let widgetConfigs: any[] = []
 
     if (templateId) {
+      console.log("[v0] 📋 Fetching template with ID:", templateId)
       const template = await getTemplateById(templateId)
       
       if (template) {
-        console.log("[v0] 📋 Using database template:", template.name)
+        console.log("[v0] ✅ Using database template:", template.name)
+        console.log("[v0] Template layout:", JSON.stringify(template.layout, null, 2))
+        console.log("[v0] Template widget_configs count:", template.widget_configs.length)
+        console.log("[v0] Template widget_configs:", JSON.stringify(template.widget_configs, null, 2))
+        
         layoutStructure = template.layout
         widgetConfigs = template.widget_configs
       } else {
@@ -242,6 +247,8 @@ export async function POST(request: NextRequest) {
       widgetConfigs = [{ id: "identity", type: "identity", props: { selectedColor: 3 } }]
     }
 
+    console.log("[v0] 📋 Processing", widgetConfigs.length, "widgets from template")
+
     const { data: widgetTypes } = await supabase.from("widget_types").select("id, key")
     const keyToId: Record<string, string> = {}
     for (const wt of widgetTypes || []) {
@@ -251,6 +258,8 @@ export async function POST(request: NextRequest) {
     const templateIdToActualId: Record<string, string> = {}
 
     for (const widgetConfig of widgetConfigs) {
+      console.log("[v0] Creating widget:", widgetConfig.type, "with template ID:", widgetConfig.id)
+      
       const widgetTypeId = keyToId[widgetConfig.type]
       
       if (!widgetTypeId) {
@@ -289,14 +298,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log("[v0] 📋 Widget ID mapping:", JSON.stringify(templateIdToActualId, null, 2))
+
     const finalLayout = {
       left: {
         type: layoutStructure.left.type,
-        widgets: layoutStructure.left.widgets.map((id: string) => templateIdToActualId[id] || id),
+        widgets: layoutStructure.left.widgets.map((id: string) => {
+          const mapped = templateIdToActualId[id] || id
+          console.log("[v0] Left widget mapping:", id, "->", mapped)
+          return mapped
+        }),
       },
       right: {
         type: layoutStructure.right.type,
-        widgets: layoutStructure.right.widgets.map((id: string) => templateIdToActualId[id] || id),
+        widgets: layoutStructure.right.widgets.map((id: string) => {
+          const mapped = templateIdToActualId[id] || id
+          console.log("[v0] Right widget mapping:", id, "->", mapped)
+          return mapped
+        }),
       },
     }
 

@@ -312,10 +312,13 @@ export async function POST(request: NextRequest) {
 
     const { data: savedLayout, error: layoutError } = await supabase
       .from("page_layouts")
-      .insert({
-        page_id: mainPage.id,
-        layout: layoutStructure,
-      })
+      .upsert(
+        {
+          page_id: mainPage.id,
+          layout: layoutStructure,
+        },
+        { onConflict: "page_id" }
+      )
       .select("layout")
       .single()
 

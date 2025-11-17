@@ -150,6 +150,14 @@ export default function PortfolioBuilder({
       const idToLoad = identity.id || portfolioId
       
       if (!idToLoad || hasLoadedDataRef.current || isLoadingData) {
+        console.log("[v0] Skipping load:", { idToLoad, hasLoaded: hasLoadedDataRef.current, isLoading: isLoadingData })
+        
+        if (!idToLoad && !hasLoadedDataRef.current) {
+          console.log("[v0] No portfolio ID - user needs to create portfolio first")
+          hasLoadedDataRef.current = true
+          setIsLoadingData(false)
+          return
+        }
         return
       }
 
@@ -163,9 +171,8 @@ export default function PortfolioBuilder({
         const data = await loadPortfolioData(idToLoad, communityId)
 
         if (data) {
-          console.log("[v0] ✅ Loaded data from database:", data)
+          console.log("[v0] ✅ Loaded data from database")
 
-          // Update layout
           if (data.layout.left.length > 0) {
             console.log("[v0] Setting left widgets:", data.layout.left)
             setLeftWidgets(data.layout.left)
@@ -175,31 +182,26 @@ export default function PortfolioBuilder({
             setRightWidgets(data.layout.right)
           }
 
-          // Update widget content
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content:", Object.keys(data.widgetContent))
             setWidgetContent(data.widgetContent)
           }
 
-          // Update identity if it has data
           if (data.identity && data.identity.name) {
             console.log("[v0] Setting identity from database:", data.identity.name)
             onIdentityChange(data.identity)
           }
 
-          // Update project colors
           if (data.projectColors && Object.keys(data.projectColors).length > 0) {
             console.log("[v0] Setting project colors")
             setProjectColors(data.projectColors)
           }
 
-          // Update widget colors
           if (data.widgetColors && Object.keys(data.widgetColors).length > 0) {
             console.log("[v0] Setting widget colors")
             setWidgetColors(data.widgetColors)
           }
 
-          // Update gallery groups
           if (data.galleryGroups && Object.keys(data.galleryGroups).length > 0) {
             console.log("[v0] Setting gallery groups")
             setGalleryGroups(data.galleryGroups)
@@ -209,6 +211,12 @@ export default function PortfolioBuilder({
         } else {
           console.log("[v0] ℹ️ No saved data found, using defaults")
         }
+        
+        setTimeout(() => {
+          console.log("[v0] ✅ Enabling auto-save after data load")
+          setHasInitialized(true)
+        }, 1000)
+        
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
       } finally {
@@ -217,7 +225,7 @@ export default function PortfolioBuilder({
     }
 
     loadData()
-  }, [identity.id, portfolioId, onIdentityChange, communityId]) // Add identity.id to dependencies
+  }, [identity.id, portfolioId, onIdentityChange, communityId])
 
   useEffect(() => {
     setState((prev) => ({
@@ -236,13 +244,24 @@ export default function PortfolioBuilder({
   const debouncedSave = useCallback(async () => {
     const currentPortfolioId = portfolioIdRef.current
     
-    if (!user?.id || !hasInitialized || isLoadingData) {
-      console.log("[v0] ⏸️ Skipping save - not ready:", { hasUser: !!user?.id, hasInitialized, isLoadingData })
+    if (!user?.id) {
+      console.log("[v0] ⏸️ Skipping save - no authenticated user")
+      return
+    }
+    
+    if (!hasInitialized) {
+      console.log("[v0] ⏸️ Skipping save - not initialized yet")
+      return
+    }
+    
+    if (isLoadingData) {
+      console.log("[v0] ⏸️ Skipping save - still loading data")
       return
     }
 
     if (!currentPortfolioId) {
       console.log("[v0] ⏸️ Skipping save - no portfolio ID (user needs to create portfolio first)")
+      setSaveError("Please create a portfolio before editing")
       return
     }
 
@@ -253,9 +272,10 @@ export default function PortfolioBuilder({
     const timeout = setTimeout(async () => {
       setIsSaving(true)
       setSaveError(null)
+      console.log("[v0] 💾 Starting auto-save...")
       
       try {
-        console.log("[v0] 💾 Starting auto-save for portfolio:", currentPortfolioId)
+        console.log("[v0] 💾 Saving to portfolio:", currentPortfolioId)
         console.log("[v0] 💾 With community context:", communityId)
 
         await updatePortfolioById(currentPortfolioId, {
@@ -302,15 +322,26 @@ export default function PortfolioBuilder({
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
   useEffect(() => {
-    const wasUnauthenticated = !prevUserRef.current?.id
-    const isNowAuthenticated = !!user?.id
-
-    if (wasUnauthenticated && isNowAuthenticated && hasInitialized) {
+    if (hasInitialized && portfolioId) {
+      console.log("[v0] 🔄 State changed, triggering auto-save debounce")
       debouncedSave()
     }
-
-    prevUserRef.current = user
-  }, [user, hasInitialized, debouncedSave])
+  }, [
+    hasInitialized,
+    portfolioId,
+    state.name,
+    state.description,
+    identity.name,
+    identity.handle,
+    identity.title,
+    identity.email,
+    identity.location,
+    identity.bio,
+    leftWidgets,
+    rightWidgets,
+    widgetContent,
+    debouncedSave
+  ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -601,15 +632,15 @@ export default function PortfolioBuilder({
   const rightSlot = !isPreviewMode ? (
     <div className="flex gap-2 items-center">
       {isSaving && (
-        <span className="text-white/50 text-xs">Saving...</span>
+        <span className="text-white/60 text-xs animate-pulse">Saving...</span>
       )}
-      {lastSaveTime && !isSaving && (
-        <span className="text-white/50 text-xs">
+      {lastSaveTime && !isSaving && !saveError && (
+        <span className="text-green-400/60 text-xs">
           Saved {new Date(lastSaveTime).toLocaleTimeString()}
         </span>
       )}
       {saveError && (
-        <span className="text-red-400 text-xs">Save failed</span>
+        <span className="text-red-400 text-xs">{saveError}</span>
       )}
       
       <div className="flex items-center gap-2">

@@ -496,6 +496,7 @@ export default function PortfolioBuilder({
     identity.email,
     identity.location,
     identity.bio,
+    identity.selectedColor, // Added selectedColor to dependency array so color changes trigger auto-save
   ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {

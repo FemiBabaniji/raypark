@@ -116,7 +116,7 @@ export default function PortfolioBuilder({
       
       parentOnIdentityChange(updates)
       
-      console.log("[v0] 🎨 parentOnIdentityChange called successfully")
+      console.log("[v0] ✅ parentOnIdentityChange called successfully")
     },
     [identity.selectedColor, parentOnIdentityChange]
   )
@@ -443,22 +443,44 @@ export default function PortfolioBuilder({
     setSaveTimeout(timeout)
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
+  const prevLeftWidgetsRef = useRef<string>("")
+  const prevRightWidgetsRef = useRef<string>("")
+  const prevWidgetContentRef = useRef<string>("")
+
   useEffect(() => {
-    if (hasInitialized && portfolioId && !isLoadingData) {
-      const currentColor = identity.selectedColor
-      const prevColor = prevSelectedColorRef.current
-      
-      if (currentColor !== prevColor) {
-        console.log("[v0] 🎨 Color changed from", prevColor, "to", currentColor, "- triggering save")
-        prevSelectedColorRef.current = currentColor
-        debouncedSave()
-      }
+    if (!hasInitialized || !portfolioId || isLoadingData) {
+      return
     }
-  }, [identity.selectedColor, hasInitialized, portfolioId, isLoadingData, debouncedSave])
+
+    // Serialize current state for comparison
+    const leftSerialized = JSON.stringify(leftWidgets)
+    const rightSerialized = JSON.stringify(rightWidgets)
+    const contentSerialized = JSON.stringify(widgetContent)
+
+    // Check if anything actually changed
+    const leftChanged = leftSerialized !== prevLeftWidgetsRef.current
+    const rightChanged = rightSerialized !== prevRightWidgetsRef.current
+    const contentChanged = contentSerialized !== prevWidgetContentRef.current
+
+    if (leftChanged || rightChanged || contentChanged) {
+      console.log("[v0] 📝 Widget state changed:")
+      if (leftChanged) console.log("[v0]   - Left widgets changed")
+      if (rightChanged) console.log("[v0]   - Right widgets changed")  
+      if (contentChanged) console.log("[v0]   - Widget content changed")
+      
+      // Update refs
+      prevLeftWidgetsRef.current = leftSerialized
+      prevRightWidgetsRef.current = rightSerialized
+      prevWidgetContentRef.current = contentSerialized
+      
+      // Trigger save
+      debouncedSave()
+    }
+  }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
     if (hasInitialized && portfolioId && !isLoadingData) {
-      console.log("[v0] 🔄 State changed, triggering auto-save")
+      console.log("[v0] 🔄 Identity/metadata changed, triggering auto-save")
       debouncedSave()
     }
   }, [
@@ -474,10 +496,6 @@ export default function PortfolioBuilder({
     identity.email,
     identity.location,
     identity.bio,
-    // Removed identity.selectedColor - now tracked separately above
-    leftWidgets,
-    rightWidgets,
-    widgetContent,
   ])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {

@@ -164,6 +164,7 @@ export default function EventsRightColumn({
         }
 
         console.log("[v0] Successfully loaded portfolio with widget data:", loadedPortfolio)
+        console.log("[v0] Portfolio selectedColor:", loadedPortfolio.selectedColor, "Type:", typeof loadedPortfolio.selectedColor)
         setPortfolio(loadedPortfolio)
       } catch (error) {
         console.error("[v0] Failed to load portfolio:", error)
@@ -294,7 +295,7 @@ export default function EventsRightColumn({
             </div>
           ) : !user ? (
             <div className="rounded-2xl p-4 bg-gradient-to-br from-blue-600/40 to-cyan-600/40 text-white backdrop-blur-xl border border-white/5 mb-4 aspect-square flex flex-col">
-              <div className="h-10 w-10 rounded-2xl bg-white/20 grid place-items-center font-bold text-white text-lg">→</div>
+              <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center font-bold text-white text-lg">→</div>
               <div className="mt-auto">
                 <div className="text-lg font-semibold text-white">Sign In Required</div>
                 <div className="text-sm text-white/90 mt-1">Create your portfolio</div>

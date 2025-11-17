@@ -253,8 +253,8 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
 
   console.log("[v0] Portfolios after deduplication:", deduped.length)
 
-  return deduped.map(
-    (portfolio: any): UnifiedPortfolio => {
+  const portfoliosWithColors = await Promise.all(
+    deduped.map(async (portfolio: any) => {
       const community = portfolio.communities
         ? {
             id: portfolio.communities.id,
@@ -263,72 +263,32 @@ export async function loadUserPortfolios(user?: any): Promise<UnifiedPortfolio[]
           }
         : undefined
 
+      // Try to load identity widget for this portfolio
+      const identityProps = await getIdentityProps(portfolio.id)
+      const selectedColor = typeof identityProps?.selectedColor === "number" 
+        ? identityProps.selectedColor 
+        : 3 // Default color if not found
+
+      console.log(`[v0] Portfolio "${portfolio.name}" (${portfolio.id}) selectedColor:`, selectedColor)
+
       return {
         id: portfolio.id,
         name: portfolio.name,
-        title: "Portfolio",
-        email: `${portfolio.slug}@example.com`,
-        location: "Location",
-        handle: `@${portfolio.slug}`,
+        title: identityProps?.title || "Portfolio",
+        email: identityProps?.email || `${portfolio.slug}@example.com`,
+        location: identityProps?.location || "Location",
+        handle: identityProps?.handle || `@${portfolio.slug}`,
+        avatarUrl: identityProps?.avatarUrl,
         initials: portfolio.name.slice(0, 2).toUpperCase(),
-        selectedColor: 0 as any,
+        selectedColor: selectedColor as ThemeIndex,
         isLive: portfolio.is_public || false,
         isTemplate: false,
         community,
       }
-    },
+    })
   )
-}
 
-async function insertPortfolioWithRetry(
-  supabase: any,
-  payload: {
-    user_id: string
-    name: string
-    slug: string
-    description?: string
-    theme_id?: string
-    is_public?: boolean
-    is_demo?: boolean
-    id?: string
-    community_id?: string
-  },
-) {
-  const { community_id, ...basePayload } = payload
-
-  const candidates = [payload.slug]
-  for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
-  candidates.push(`${payload.slug}-${makeSuffix()}`)
-
-  for (const slug of candidates) {
-    const insertData = { ...basePayload, slug }
-
-    if (payload.theme_id && isUUID(payload.theme_id)) {
-      insertData.theme_id = payload.theme_id
-    }
-
-    if (community_id) {
-      insertData.community_id = community_id
-    }
-
-    const { data, error } = await supabase.from("portfolios").insert(insertData).select().maybeSingle()
-
-    if (!error && data) return data
-
-    if (error?.code === "23505") {
-      if (error.message.includes("idx_unique_user_community_portfolio")) {
-        throw new Error("You already have a portfolio for this community")
-      }
-      // Slug collision - try next candidate
-      if (/portfolios_slug_idx/.test(error.message)) {
-        console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
-        continue
-      }
-    }
-
-    if (error) throw error
-  }
-  throw new Error("Could not create a unique slug after several attempts")
+  return portfoliosWithColors
 }
 
 export async function savePortfolio(portfolio: UnifiedPortfolio, user?: any): Promise<void> {
@@ -1046,4 +1006,55 @@ export async function verifyPortfolioCommunity(
   }
   
   return data.community_id === expectedCommunityId
+}
+
+async function insertPortfolioWithRetry(
+  supabase: any,
+  payload: {
+    user_id: string
+    name: string
+    slug: string
+    description?: string
+    theme_id?: string
+    is_public?: boolean
+    is_demo?: boolean
+    id?: string
+    community_id?: string
+  },
+) {
+  const { community_id, ...basePayload } = payload
+
+  const candidates = [payload.slug]
+  for (let i = 1; i <= 5; i++) candidates.push(`${payload.slug}-${i}`)
+  candidates.push(`${payload.slug}-${makeSuffix()}`)
+
+  for (const slug of candidates) {
+    const insertData = { ...basePayload, slug }
+
+    if (payload.theme_id && isUUID(payload.theme_id)) {
+      insertData.theme_id = payload.theme_id
+    }
+
+    if (community_id) {
+      insertData.community_id = community_id
+    }
+
+    const { data, error } = await supabase.from("portfolios").insert(insertData).select().maybeSingle()
+
+    if (!error && data) return data
+
+    if (error?.code === "23505") {
+      if (error.message.includes("idx_unique_user_community_portfolio")) {
+        throw new Error("You already have a portfolio for this community")
+      }
+      // Slug collision - try next candidate
+      if (/portfolios_slug_idx/.test(error.message)) {
+        console.log(`[v0] Slug '${slug}' already exists, trying next candidate`)
+        continue
+      }
+    }
+
+    if (error) throw error
+  }
+  throw new Error("Could not create a unique slug after several attempts")
 }

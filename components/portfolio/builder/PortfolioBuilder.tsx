@@ -92,58 +92,14 @@ export default function PortfolioBuilder({
     }
   }, [identity.id, portfolioId])
 
-  const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([
-    { id: "identity", type: "identity" },
-    { id: "education", type: "education" },
-  ])
-  const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([
-    { id: "startup", type: "startup" },
-    { id: "description", type: "description" },
-    { id: "projects", type: "projects" },
-    { id: "services", type: "services" },
-  ])
+  const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([])
+  const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([])
 
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
 
-  const [widgetContent, setWidgetContent] = useState<Record<string, any>>({
-    education: {
-      title: "Education",
-      items: [
-        {
-          degree: "Bachelor of Design",
-          school: "University of Arts",
-          year: "2018-2022",
-          description: "Focused on digital product design and user experience",
-        },
-      ],
-    },
-    projects: {
-      title: "Featured Projects",
-      items: [
-        {
-          name: "E-commerce Platform",
-          description: "Complete redesign of shopping experience",
-          year: "2023",
-          tags: ["UI/UX", "Mobile", "Web"],
-        },
-      ],
-    },
-    services: {
-      title: "Services",
-      items: ["Product Design", "User Research", "Prototyping", "Design Systems"],
-    },
-    description: {
-      title: "About Me",
-      content:
-        "I'm a passionate designer focused on creating meaningful digital experiences that solve real problems for users.",
-    },
-    "meeting-scheduler": {
-      mode: "custom",
-      calendlyUrl: "https://calendly.com/your-username/30min",
-    },
-  })
+  const [widgetContent, setWidgetContent] = useState<Record<string, any>>({})
 
   useEffect(() => {
     async function loadData() {
@@ -153,9 +109,15 @@ export default function PortfolioBuilder({
         console.log("[v0] Skipping load:", { idToLoad, hasLoaded: hasLoadedDataRef.current, isLoading: isLoadingData })
         
         if (!idToLoad && !hasLoadedDataRef.current) {
-          console.log("[v0] No portfolio ID - user needs to create portfolio first")
+          console.log("[v0] No portfolio ID - starting with empty layout (no defaults)")
+          setLeftWidgets([])
+          setRightWidgets([])
           hasLoadedDataRef.current = true
           setIsLoadingData(false)
+          setTimeout(() => {
+            console.log("[v0] ✅ Enabling auto-save for new portfolio")
+            setHasInitialized(true)
+          }, 1000)
           return
         }
         return
@@ -173,17 +135,21 @@ export default function PortfolioBuilder({
         if (data) {
           console.log("[v0] ✅ Loaded data from database")
 
-          if (data.layout.left.length > 0) {
-            console.log("[v0] Setting left widgets:", data.layout.left)
+          if (data.layout.left.length > 0 || data.layout.right.length > 0) {
+            console.log("[v0] Setting widgets from database:", {
+              left: data.layout.left.length,
+              right: data.layout.right.length
+            })
             setLeftWidgets(data.layout.left)
-          }
-          if (data.layout.right.length > 0) {
-            console.log("[v0] Setting right widgets:", data.layout.right)
             setRightWidgets(data.layout.right)
+          } else {
+            console.log("[v0] Database has empty layout - setting empty widgets")
+            setLeftWidgets([])
+            setRightWidgets([])
           }
 
           if (Object.keys(data.widgetContent).length > 0) {
-            console.log("[v0] Setting widget content:", Object.keys(data.widgetContent))
+            console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
             setWidgetContent(data.widgetContent)
           }
 
@@ -209,7 +175,9 @@ export default function PortfolioBuilder({
 
           console.log("[v0] ✅ Data loaded and state updated successfully")
         } else {
-          console.log("[v0] ℹ️ No saved data found, using defaults")
+          console.log("[v0] ℹ️ No saved data found, starting with empty layout")
+          setLeftWidgets([])
+          setRightWidgets([])
         }
         
         setTimeout(() => {
@@ -219,6 +187,9 @@ export default function PortfolioBuilder({
         
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
+        setLeftWidgets([])
+        setRightWidgets([])
+        setTimeout(() => setHasInitialized(true), 1000)
       } finally {
         setIsLoadingData(false)
       }
@@ -227,13 +198,143 @@ export default function PortfolioBuilder({
     loadData()
   }, [identity.id, portfolioId, onIdentityChange, communityId])
 
-  useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      name: identity.name || "Untitled Portfolio",
-      is_public: isLive,
-    }))
-  }, [identity.name, isLive])
+  const [projectColors, setProjectColors] = useState<Record<string, string>>({
+    aiml: "purple",
+    mobile: "purple",
+  })
+  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
+    aiml: false,
+    mobile: false,
+  })
+
+  const [widgetColors, setWidgetColors] = useState<Record<string, ThemeIndex>>({})
+
+  const [galleryGroups, setGalleryGroups] = useState<{
+    [key: string]: Array<{
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }>
+  }>({})
+
+  const [selectedGroup, setSelectedGroup] = useState<{
+    widgetId: string
+    groupId: string
+    group: {
+      id: string
+      name: string
+      description?: string
+      images: string[]
+      isVideo?: boolean
+    }
+  } | null>(null)
+
+  const projectColorOptions = [
+    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
+    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
+    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
+    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
+    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
+    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
+    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
+  ]
+
+  const GroupDetailView = () => {
+    if (!selectedGroup) return null
+
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+        <div className="p-6 flex justify-between items-center">
+          <Button
+            onClick={() => setSelectedGroup(null)}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
+          {!isPreviewMode && (
+            <AddButton
+              onClick={() => {
+                const input = document.createElement("input")
+                input.type = "file"
+                input.accept = "image/*"
+                input.multiple = true
+
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files
+                  if (files) {
+                    Array.from(files).forEach((file) => {
+                      const reader = new FileReader()
+                      reader.onload = (e) => {
+                        const imageUrl = e.target?.result as string
+                        setGalleryGroups((prev) => ({
+                          ...prev,
+                          [selectedGroup.widgetId]:
+                            prev[selectedGroup.widgetId]?.map((group) =>
+                              group.id === selectedGroup.groupId
+                                ? { ...group, images: [...group.images, imageUrl] }
+                                : group,
+                            ) || [],
+                        }))
+
+                        setSelectedGroup((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                group: {
+                                  ...prev.group,
+                                  images: [...prev.group.images, imageUrl],
+                                },
+                              }
+                            : null,
+                        )
+                      }
+                      reader.readAsDataURL(file)
+                    })
+                  }
+                }
+
+                input.click()
+              }}
+              variant="compact"
+              size="sm"
+              label="Add Images"
+              className="text-white hover:bg-white/10"
+            />
+          )}
+        </div>
+
+        <div className="px-6 pb-6">
+          <h1 className="text-2xl font-bold text-white">{selectedGroup.group.name}</h1>
+          <p className="text-white/60 text-sm mt-1">
+            {selectedGroup.group.images.length} image{selectedGroup.group.images.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        <div className="flex-1 px-6 pb-6 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+            {selectedGroup.group.images.map((image, index) => (
+              <div
+                key={index}
+                className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-colors"
+              >
+                <img
+                  src={image || "/placeholder.svg"}
+                  alt={`${selectedGroup.group.name} ${index + 1}`}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hasInitialized, setHasInitialized] = useState(false)
@@ -260,8 +361,8 @@ export default function PortfolioBuilder({
     }
 
     if (!currentPortfolioId) {
-      console.log("[v0] ⏸️ Skipping save - no portfolio ID (user needs to create portfolio first)")
-      setSaveError("Please create a portfolio before editing")
+      console.log("[v0] ⏸️ Skipping save - no portfolio ID")
+      setSaveError("No portfolio selected")
       return
     }
 
@@ -272,12 +373,9 @@ export default function PortfolioBuilder({
     const timeout = setTimeout(async () => {
       setIsSaving(true)
       setSaveError(null)
-      console.log("[v0] 💾 Starting auto-save...")
+      console.log("[v0] 💾 Starting auto-save for portfolio:", currentPortfolioId)
       
       try {
-        console.log("[v0] 💾 Saving to portfolio:", currentPortfolioId)
-        console.log("[v0] 💾 With community context:", communityId)
-
         await updatePortfolioById(currentPortfolioId, {
           name: state.name?.trim() || "Untitled Portfolio",
           description: state.description?.trim(),
@@ -308,7 +406,7 @@ export default function PortfolioBuilder({
         await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, contentToSave, communityId)
 
         setLastSaveTime(new Date())
-        console.log("[v0] ✅ Auto-save completed successfully")
+        console.log("[v0] ✅ Auto-save completed successfully at", new Date().toLocaleTimeString())
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
@@ -316,19 +414,20 @@ export default function PortfolioBuilder({
       } finally {
         setIsSaving(false)
       }
-    }, 1500)
+    }, 800)
 
     setSaveTimeout(timeout)
   }, [hasInitialized, user, state, identity, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId])
 
   useEffect(() => {
-    if (hasInitialized && portfolioId) {
-      console.log("[v0] 🔄 State changed, triggering auto-save debounce")
+    if (hasInitialized && portfolioId && !isLoadingData) {
+      console.log("[v0] 🔄 State changed, triggering auto-save")
       debouncedSave()
     }
   }, [
     hasInitialized,
     portfolioId,
+    isLoadingData,
     state.name,
     state.description,
     identity.name,
@@ -716,144 +815,6 @@ export default function PortfolioBuilder({
       </div>
     </div>
   ) : null
-
-  const [projectColors, setProjectColors] = useState<Record<string, string>>({
-    aiml: "purple",
-    mobile: "purple",
-  })
-  const [showProjectColorPicker, setShowProjectColorPicker] = useState<Record<string, boolean>>({
-    aiml: false,
-    mobile: false,
-  })
-
-  const [widgetColors, setWidgetColors] = useState<Record<string, ThemeIndex>>({})
-
-  const [galleryGroups, setGalleryGroups] = useState<{
-    [key: string]: Array<{
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }>
-  }>({})
-
-  const [selectedGroup, setSelectedGroup] = useState<{
-    widgetId: string
-    groupId: string
-    group: {
-      id: string
-      name: string
-      description?: string
-      images: string[]
-      isVideo?: boolean
-    }
-  } | null>(null)
-
-  const projectColorOptions = [
-    { name: "rose", gradient: "from-rose-500/70 to-pink-500/70" },
-    { name: "blue", gradient: "from-blue-500/70 to-cyan-500/70" },
-    { name: "purple", gradient: "from-purple-500/70 to-blue-500/70" },
-    { name: "green", gradient: "from-green-500/70 to-emerald-500/70" },
-    { name: "orange", gradient: "from-orange-500/70 to-red-500/70" },
-    { name: "teal", gradient: "from-teal-500/70 to-blue-500/70" },
-    { name: "neutral", gradient: "from-neutral-500/70 to-neutral-600/70" },
-  ]
-
-  const GroupDetailView = () => {
-    if (!selectedGroup) return null
-
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        <div className="p-6 flex justify-between items-center">
-          <Button
-            onClick={() => setSelectedGroup(null)}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-
-          {!isPreviewMode && (
-            <AddButton
-              onClick={() => {
-                const input = document.createElement("input")
-                input.type = "file"
-                input.accept = "image/*"
-                input.multiple = true
-
-                input.onchange = (e) => {
-                  const files = (e.target as HTMLInputElement).files
-                  if (files) {
-                    Array.from(files).forEach((file) => {
-                      const reader = new FileReader()
-                      reader.onload = (e) => {
-                        const imageUrl = e.target?.result as string
-                        setGalleryGroups((prev) => ({
-                          ...prev,
-                          [selectedGroup.widgetId]:
-                            prev[selectedGroup.widgetId]?.map((group) =>
-                              group.id === selectedGroup.groupId
-                                ? { ...group, images: [...group.images, imageUrl] }
-                                : group,
-                            ) || [],
-                        }))
-
-                        setSelectedGroup((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                group: {
-                                  ...prev.group,
-                                  images: [...prev.group.images, imageUrl],
-                                },
-                              }
-                            : null,
-                        )
-                      }
-                      reader.readAsDataURL(file)
-                    })
-                  }
-                }
-
-                input.click()
-              }}
-              variant="compact"
-              size="sm"
-              label="Add Images"
-              className="text-white hover:bg-white/10"
-            />
-          )}
-        </div>
-
-        <div className="px-6 pb-6">
-          <h1 className="text-2xl font-bold text-white">{selectedGroup.group.name}</h1>
-          <p className="text-white/60 text-sm mt-1">
-            {selectedGroup.group.images.length} image{selectedGroup.group.images.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        <div className="flex-1 px-6 pb-6 overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
-            {selectedGroup.group.images.map((image, index) => (
-              <div
-                key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-colors"
-              >
-                <img
-                  src={image || "/placeholder.svg"}
-                  alt={`${selectedGroup.group.name} ${index + 1}`}
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <>

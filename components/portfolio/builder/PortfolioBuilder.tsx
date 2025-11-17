@@ -97,6 +97,13 @@ export default function PortfolioBuilder({
   const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([])
   const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([])
 
+  const setLeftWidgetsWithLogging = useCallback((value: WidgetDef[] | ((prev: WidgetDef[]) => WidgetDef[])) => {
+    const newValue = typeof value === 'function' ? value(leftWidgets) : value
+    console.log("[v0] 🔧 setLeftWidgets called. Old:", leftWidgets.length, "New:", newValue.length, "Widgets:", newValue.map(w => w.id))
+    console.trace("[v0] Stack trace for setLeftWidgets")
+    setLeftWidgets(newValue)
+  }, [leftWidgets])
+
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -432,6 +439,34 @@ export default function PortfolioBuilder({
     }
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
+  useEffect(() => {
+    if (leftWidgets.length > 0) {
+      const widgetIds = leftWidgets.map(w => w.id).join(',')
+      console.log("[v0] 📊 Current left widgets:", widgetIds, "Count:", leftWidgets.length)
+      
+      // Detect if description widget disappeared unexpectedly
+      const hadDescription = prevLeftWidgetsRef.current.includes('description')
+      const hasDescription = widgetIds.includes('description')
+      
+      if (hadDescription && !hasDescription && !isLoadingData) {
+        console.error("[v0] ⚠️ Description widget disappeared! Attempting recovery...")
+        console.log("[v0] Widget content keys:", Object.keys(widgetContent))
+        
+        // Try to restore the description widget if it has content
+        if (widgetContent.description) {
+          console.log("[v0] 🔧 Restoring description widget")
+          setLeftWidgets(prev => {
+            const hasDesc = prev.some(w => w.type === 'description')
+            if (!hasDesc) {
+              return [...prev, { id: 'description', type: 'description' }]
+            }
+            return prev
+          })
+        }
+      }
+    }
+  }, [leftWidgets, widgetContent, isLoadingData])
+
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
 
@@ -461,16 +496,6 @@ export default function PortfolioBuilder({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
-    // Check if widget already exists
-    const existsInLeft = leftWidgets.some(w => w.type === type)
-    const existsInRight = rightWidgets.some(w => w.type === type)
-    
-    if (existsInLeft || existsInRight) {
-      console.warn("[v0] ⚠️ Widget type already exists:", type)
-      alert(`You already have a ${type} widget. Only one widget of each type is allowed.`)
-      return
-    }
-
     const newWidget: WidgetDef = {
       id: type,  // Use type as ID
       type: type,
@@ -893,7 +918,10 @@ export default function PortfolioBuilder({
           <Reorder.Group
             axis="y"
             values={leftWidgets}
-            onReorder={setLeftWidgets}
+            onReorder={(newOrder) => {
+              console.log("[v0] 🔄 Reorder.Group onReorder called. New order:", newOrder.map(w => w.id))
+              setLeftWidgetsWithLogging(newOrder)
+            }}
             className="flex flex-col gap-4 sm:gap-6"
           >
             {leftWidgets.map((w) => (

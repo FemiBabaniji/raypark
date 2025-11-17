@@ -214,10 +214,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] ✅ Main page created:", mainPage.id)
 
-    let layoutStructure = {
-      left: { type: "vertical", widgets: [] as string[] },
-      right: { type: "vertical", widgets: [] as string[] },
-    }
+    let layoutWidgetIds: string[] = []
 
     // Fetch widget type IDs
     const { data: widgetTypes } = await supabase
@@ -233,8 +230,6 @@ export async function POST(request: NextRequest) {
     const descriptionTypeId = keyToId["description"]
 
     // Create identity widget with template-specific data
-    let identityWidgetId: string | null = null
-    
     if (identityTypeId) {
       const identityProps: any = {
         name: user.user_metadata?.full_name || name,
@@ -263,6 +258,8 @@ export async function POST(request: NextRequest) {
         identityProps.selectedColor = 3 // Default red
       }
 
+      console.log("[v0] Creating identity widget with color:", identityProps.selectedColor)
+
       const { data: identityWidget, error: identityError } = await supabase
         .from("widget_instances")
         .insert({
@@ -275,20 +272,25 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (identityError) {
-        console.error("[v0] ❌ Failed to create identity widget:", identityError)
+        console.error("[v0] ⚠️ Failed to create identity widget:", identityError)
       } else if (identityWidget?.id) {
-        identityWidgetId = identityWidget.id
-        layoutStructure.left.widgets.push(`identity-${identityWidget.id}`)
+        layoutWidgetIds.push("identity")
+        console.log("[v0] ✅ Identity widget created with ID:", identityWidget.id)
       }
     }
 
     // Create template-specific description widgets
     if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType] && descriptionTypeId) {
+      console.log("[v0] 📋 Creating template widgets for:", template)
+      
       const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
       
       if (templateConfig.widgets.length > 0) {
+        console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
+        
         for (let i = 0; i < templateConfig.widgets.length; i++) {
           const widget = templateConfig.widgets[i]
+          console.log("[v0] Creating widget", i, "with props:", JSON.stringify(widget.props))
           
           const { data: createdWidget, error: widgetError } = await supabase
             .from("widget_instances")
@@ -302,45 +304,41 @@ export async function POST(request: NextRequest) {
             .single()
 
           if (widgetError) {
-            console.error("[v0] ❌ Failed to create template widget", i, ":", widgetError)
+            console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
           } else if (createdWidget?.id) {
-            layoutStructure.left.widgets.push(`description-${createdWidget.id}`)
+            const widgetKey = `description-${createdWidget.id}`
+            layoutWidgetIds.push(widgetKey)
+            console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id, "-> layout key:", widgetKey)
           }
         }
       }
     }
 
+    const layoutStructure = {
+      left: { type: "vertical", widgets: layoutWidgetIds },
+      right: { type: "vertical", widgets: [] as string[] },
+    }
+
+    console.log("[v0] 📐 Final layout structure before save:", JSON.stringify(layoutStructure, null, 2))
+    console.log("[v0] 📐 Layout has", layoutStructure.left.widgets.length, "left widgets")
+    
     const { data: savedLayout, error: layoutError } = await supabase
       .from("page_layouts")
-      .upsert(
-        {
-          page_id: mainPage.id,
-          layout: layoutStructure,
-        },
-        { onConflict: "page_id" }
-      )
-      .select("layout")
+      .insert({
+        page_id: mainPage.id,
+        layout: layoutStructure,
+      })
+      .select("*")
       .single()
 
     if (layoutError) {
       console.error("[v0] ❌ Failed to create page layout:", layoutError)
-      return NextResponse.json(
-        {
-          error: "Layout creation failed",
-          message: "Failed to save portfolio layout.",
-          details: layoutError.message,
-        },
-        { status: 500 },
-      )
+    } else {
+      console.log("[v0] ✅ Page layout saved successfully")
+      console.log("[v0] ✅ Saved layout data:", JSON.stringify(savedLayout, null, 2))
     }
 
-    // Verify layout was saved correctly
-    if (savedLayout && savedLayout.layout) {
-      const savedWidgets = (savedLayout.layout as any).left?.widgets || []
-      if (savedWidgets.length !== layoutStructure.left.widgets.length) {
-        console.error("[v0] ⚠️ Layout widget count mismatch! Expected:", layoutStructure.left.widgets.length, "Got:", savedWidgets.length)
-      }
-    }
+    console.log("[v0] ✅ Portfolio fully initialized:", portfolio.id)
     
     return NextResponse.json({ 
       portfolio,

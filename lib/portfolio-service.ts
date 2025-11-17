@@ -698,32 +698,17 @@ export async function saveWidgetLayout(
     const keyToId = Object.fromEntries((types ?? []).map((t) => [t.key, t.id]))
     console.log("[v0] Available widget types:", Object.keys(keyToId))
 
-    const extractBaseType = (widgetId: string): string => {
-      // If it's a compound ID like "description-1", extract the base type
-      if (widgetId.includes("-")) {
-        const parts = widgetId.split("-")
-        // Check if the last part is a number or UUID-like
-        const lastPart = parts[parts.length - 1]
-        if (/^\d+$/.test(lastPart) || lastPart.length > 10) {
-          // It's a compound ID, return everything except the last part
-          return parts.slice(0, -1).join("-")
-        }
-      }
-      // Otherwise, return as-is
-      return widgetId
+    const widgetIdToType: Record<string, string> = {}
+    for (const widget of [...leftWidgets, ...rightWidgets]) {
+      widgetIdToType[widget.id] = widget.type
     }
 
-    // Collect all unique widget IDs (not types)
     const allWidgetIds = [
       ...leftWidgets.map(w => w.id),
       ...rightWidgets.map(w => w.id)
     ]
 
     console.log("[v0] Saving", allWidgetIds.length, "widgets")
-
-    let successCount = 0
-    let failCount = 0
-    let savedIdentityColor: number | undefined = undefined
 
     // Delete existing widget instances for this page first
     console.log("[v0] Clearing existing widget instances for page:", pageId)
@@ -736,25 +721,24 @@ export async function saveWidgetLayout(
       console.warn("[v0] ⚠️ Could not delete existing widgets:", deleteError)
     }
 
-    // Save each widget instance
     for (const widgetId of allWidgetIds) {
-      const baseType = extractBaseType(widgetId)
-      const widget_type_id = keyToId[baseType]
+      const widgetType = widgetIdToType[widgetId]
+      
+      if (!widgetType) {
+        console.warn("[v0] ⚠️ Widget type not found in layout for ID:", widgetId)
+        continue
+      }
+
+      const widget_type_id = keyToId[widgetType]
       
       if (!widget_type_id) {
-        console.warn("[v0] ⚠️ Widget type not found in database for base type:", baseType, "(from ID:", widgetId, ")")
-        failCount++
+        console.warn("[v0] ⚠️ Widget type not found in database:", widgetType)
         continue
       }
 
       const content = widgetContent[widgetId] || {}
 
-      if (widgetId === "identity") {
-        console.log(`[v0] 🎨 SAVING IDENTITY WIDGET - selectedColor:`, content.selectedColor, "full content:", JSON.stringify(content, null, 2))
-        savedIdentityColor = content.selectedColor
-      }
-
-      console.log(`[v0] Saving widget '${widgetId}' (base type: '${baseType}') with ${Object.keys(content).length} properties`)
+      console.log(`[v0] Saving widget '${widgetId}' (type: '${widgetType}') with ${Object.keys(content).length} properties`)
 
       const { error: widgetError } = await supabase
         .from("widget_instances")
@@ -767,27 +751,12 @@ export async function saveWidgetLayout(
 
       if (widgetError) {
         console.error(`[v0] ❌ Failed to save widget '${widgetId}':`, widgetError)
-        failCount++
       } else {
         console.log(`[v0] ✅ Widget '${widgetId}' saved`)
-        successCount++
       }
     }
 
-    console.log(`[v0] ✅ Save complete: ${successCount} succeeded, ${failCount} failed`)
-    
-    if (failCount > 0) {
-      throw new Error(`Some widgets failed to save (${failCount}/${allWidgetIds.length})`)
-    }
-
-    if (typeof savedIdentityColor === "number" && typeof window !== "undefined") {
-      console.log("[v0] 📡 Broadcasting color update event - portfolioId:", portfolioId, "color:", savedIdentityColor)
-      window.dispatchEvent(
-        new CustomEvent("portfolio-color-updated", {
-          detail: { portfolioId, selectedColor: savedIdentityColor }
-        })
-      )
-    }
+    console.log("[v0] ✅ Save complete")
     
   } catch (error) {
     console.error("[v0] ❌ saveWidgetLayout failed:", error)
@@ -914,21 +883,32 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       
       const widgetContent: Record<string, any> = {}
       
+      // Build a map from widget ID to full config (including type)
       for (const config of template.widget_configs) {
         widgetContent[config.id] = config.props
+        console.log(`[v0] Loaded template widget '${config.id}' of type '${config.type}'`)
       }
 
-      const leftWidgets = template.layout.left.widgets.map((id: string) => ({
-        id,
-        type: widgetContent[id]?.type || id
-      }))
+      // Map layout widgets using config array to preserve type information
+      const leftWidgets = template.layout.left.widgets.map((widgetId: string) => {
+        const config = template.widget_configs.find((c: any) => c.id === widgetId)
+        return {
+          id: widgetId,
+          type: config?.type || widgetId
+        }
+      })
 
-      const rightWidgets = template.layout.right.widgets.map((id: string) => ({
-        id,
-        type: widgetContent[id]?.type || id
-      }))
+      const rightWidgets = template.layout.right.widgets.map((widgetId: string) => {
+        const config = template.widget_configs.find((c: any) => c.id === widgetId)
+        return {
+          id: widgetId,
+          type: config?.type || widgetId
+        }
+      })
 
       console.log("[v0] ✅ Loaded template with", Object.keys(widgetContent).length, "widgets")
+      console.log("[v0] Left widgets:", leftWidgets)
+      console.log("[v0] Right widgets:", rightWidgets)
       
       return {
         layout: { left: leftWidgets, right: rightWidgets },
@@ -989,6 +969,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       return { id: key, type: key }
     }
     
+    // Check if it's a UUID-based key (description-{uuid})
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -998,6 +979,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       }
     }
     
+    // Otherwise treat as widget type key
     if (typeToPropsMap[key]) {
       widgetContent[key] = typeToPropsMap[key]
       console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
@@ -1009,6 +991,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
   })
 
   const rightWidgets = rightWidgetKeys.map((key: string) => {
+    // Check if it's a UUID-based key (description-{uuid})
     if (key.includes("-") && key.length > 20) {
       const instanceId = key.split("-").slice(1).join("-")
       const widgetData = instanceMap[instanceId]
@@ -1018,6 +1001,7 @@ export async function loadPortfolioData(portfolioId: string, communityId?: strin
       }
     }
     
+    // Otherwise treat as widget type key
     if (typeToPropsMap[key]) {
       widgetContent[key] = typeToPropsMap[key]
       console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))

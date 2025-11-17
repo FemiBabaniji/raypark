@@ -21,7 +21,6 @@ import {
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
 import type { MeetingSchedulerContent } from "./widgets/MeetingSchedulerWidget"
-import { PORTFOLIO_TEMPLATES } from "@/lib/portfolio-templates"
 
 type Props = {
   isPreviewMode?: boolean
@@ -123,70 +122,6 @@ export default function PortfolioBuilder({
   )
 
   useEffect(() => {
-    const pendingTemplateData = localStorage.getItem('pending_template')
-    if (pendingTemplateData) {
-      try {
-        const { portfolioId: templatePortfolioId, template } = JSON.parse(pendingTemplateData)
-        
-        if (templatePortfolioId === identity.id) {
-          console.log("[v0] ✨ Applying template:", template.name)
-          
-          const leftWidgetList = template.presets.widgets.left.map((type: string) => ({
-            id: type,
-            type,
-          }))
-          const rightWidgetList = template.presets.widgets.right.map((type: string) => ({
-            id: type,
-            type,
-          }))
-          
-          setLeftWidgets(leftWidgetList)
-          setRightWidgets(rightWidgetList)
-          
-          const templateContent: Record<string, any> = {}
-          
-          if (template.presets.sampleContent.description) {
-            templateContent.description = template.presets.sampleContent.description
-          }
-          
-          if (template.presets.sampleContent.projects) {
-            templateContent.projects = template.presets.sampleContent.projects
-          }
-          
-          if (template.presets.sampleContent.education) {
-            templateContent.education = template.presets.sampleContent.education
-          }
-          
-          if (template.presets.sampleContent.services) {
-            templateContent.services = template.presets.sampleContent.services
-          }
-          
-          setWidgetContent(templateContent)
-          
-          parentOnIdentityChange({
-            title: template.presets.identity.title,
-            bio: template.presets.identity.bio,
-            location: template.presets.identity.location,
-            selectedColor: template.selectedColor,
-          })
-          
-          console.log("[v0] ✅ Template applied successfully with color:", template.selectedColor)
-          
-          localStorage.removeItem('pending_template')
-          
-          hasLoadedDataRef.current = identity.id
-          setTimeout(() => {
-            setHasInitialized(true)
-          }, 1000)
-        }
-      } catch (error) {
-        console.error("[v0] ❌ Error applying template:", error)
-        localStorage.removeItem('pending_template')
-      }
-    }
-  }, [identity.id, parentOnIdentityChange])
-
-  useEffect(() => {
     async function loadData() {
       const idToLoad = identity.id || portfolioId
       
@@ -215,13 +150,14 @@ export default function PortfolioBuilder({
             console.log("[v0] 🎨 Loading identity with selectedColor:", data.identity.selectedColor)
             console.log("[v0] 🎨 Full identity data:", JSON.stringify(data.identity, null, 2))
             
+            // Ensure selectedColor is a number, default to 0 if missing
             const selectedColor = typeof data.identity.selectedColor === "number" 
               ? data.identity.selectedColor 
               : 0
             
             parentOnIdentityChange({
               ...data.identity,
-              selectedColor,
+              selectedColor, // Explicitly set selectedColor
             })
             
             console.log("[v0] ✅ Identity updated with selectedColor:", selectedColor)
@@ -516,10 +452,12 @@ export default function PortfolioBuilder({
       return
     }
 
+    // Serialize current state for comparison
     const leftSerialized = JSON.stringify(leftWidgets)
     const rightSerialized = JSON.stringify(rightWidgets)
     const contentSerialized = JSON.stringify(widgetContent)
 
+    // Check if anything actually changed
     const leftChanged = leftSerialized !== prevLeftWidgetsRef.current
     const rightChanged = rightSerialized !== prevRightWidgetsRef.current
     const contentChanged = contentSerialized !== prevWidgetContentRef.current
@@ -530,10 +468,12 @@ export default function PortfolioBuilder({
       if (rightChanged) console.log("[v0]   - Right widgets changed")  
       if (contentChanged) console.log("[v0]   - Widget content changed")
       
+      // Update refs
       prevLeftWidgetsRef.current = leftSerialized
       prevRightWidgetsRef.current = rightSerialized
       prevWidgetContentRef.current = contentSerialized
       
+      // Trigger save
       debouncedSave()
     }
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
@@ -571,12 +511,14 @@ export default function PortfolioBuilder({
   const moveWidgetToColumn = (widget: WidgetDef, fromColumn: "left" | "right", toColumn: "left" | "right") => {
     if (fromColumn === toColumn || widget.id === "identity") return
 
+    // Remove from source column
     if (fromColumn === "left") {
       setLeftWidgets((prev) => prev.filter((w) => w.id !== widget.id))
     } else {
       setRightWidgets((prev) => prev.filter((w) => w.id !== widget.id))
     }
 
+    // Add to target column
     if (toColumn === "left") {
       setLeftWidgets((prev) => [...prev, widget])
     } else {
@@ -585,6 +527,7 @@ export default function PortfolioBuilder({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
+    // Check if widget already exists
     const existsInLeft = leftWidgets.some(w => w.type === type)
     const existsInRight = rightWidgets.some(w => w.type === type)
     
@@ -646,6 +589,7 @@ export default function PortfolioBuilder({
       }
     }
 
+    // Set default content for this widget type if it doesn't exist
     if (!widgetContent[type] && defaultContent[type]) {
       console.log("[v0] 📝 Initializing default content for widget:", type)
       setWidgetContent(prev => ({
@@ -678,6 +622,7 @@ export default function PortfolioBuilder({
     if (onExportData) {
       onExportData(exportData)
     } else {
+      // Default export as JSON download
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")

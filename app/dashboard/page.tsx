@@ -22,8 +22,6 @@ import { DashboardPortfolioGrid, type ExtendedPortfolio } from "@/components/das
 import { loadUserCommunities, getPortfolioForCommunity, swapPortfolioToCommunity } from "@/lib/community-service"
 import { linkPortfolioToCommunity } from "@/lib/community-service"
 import type { Community } from "@/lib/community-service"
-import { TemplateLibraryModal } from "@/components/template-library-modal"
-import { PORTFOLIO_TEMPLATES, type PortfolioTemplate } from "@/lib/portfolio-templates"
 
 interface ExtendedPortfolio extends UnifiedPortfolio {
   community?: {
@@ -127,7 +125,6 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"list" | "editor">("list")
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -176,22 +173,16 @@ export default function DashboardPage() {
   }, [authLoading, user])
 
   const handleCreatePortfolio = async () => {
-    setIsTemplateModalOpen(true)
-  }
-
-  const handleSelectTemplate = async (template: PortfolioTemplate | null) => {
-    console.log("[v0] Template selected:", template?.name || "blank")
-    
     if (!user?.id) {
       const newPortfolio: ExtendedPortfolio = {
         id: safeUUID(),
-        name: template ? `${template.name} Portfolio` : "New Portfolio",
-        title: template?.presets.identity.title || "Portfolio",
+        name: "New Portfolio",
+        title: "Portfolio",
         email: "new@example.com",
-        location: template?.presets.identity.location || "Location",
+        location: "Location",
         handle: "@newuser",
         initials: "NP",
-        selectedColor: template?.selectedColor || Math.floor(Math.random() * 7) as ThemeIndex,
+        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: false,
         isTemplate: false,
         community: undefined,
@@ -199,51 +190,38 @@ export default function DashboardPage() {
       setPortfolios((prev) => [...prev, newPortfolio])
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
-      setIsTemplateModalOpen(false)
       return
     }
 
     try {
-      const portfolioName = template ? `${template.name} Portfolio` : "New Portfolio"
       const portfolioData = await createPortfolioOnce({
         userId: user.id,
-        name: portfolioName,
+        name: "New Portfolio",
         theme_id: "default",
-        description: template?.description || "A new portfolio",
+        description: "A new portfolio",
       })
 
       const newPortfolio: ExtendedPortfolio = {
         id: portfolioData.id,
         name: portfolioData.name,
-        title: template?.presets.identity.title || "Portfolio",
+        title: "Portfolio",
         email: `${portfolioData.slug}@example.com`,
-        location: template?.presets.identity.location || "Location",
+        location: "Location",
         handle: `@${portfolioData.slug}`,
         initials: portfolioData.name.slice(0, 2).toUpperCase(),
-        selectedColor: template?.selectedColor || Math.floor(Math.random() * 7) as ThemeIndex,
+        selectedColor: Math.floor(Math.random() * 7) as ThemeIndex,
         isLive: portfolioData.is_public || false,
         isTemplate: false,
         community: undefined,
       }
 
-      console.log("[v0] Created portfolio from template:", template?.name || "blank", newPortfolio)
-      
-      // If template selected, apply the template configuration
-      if (template) {
-        // Store template data in localStorage for the builder to use
-        localStorage.setItem('pending_template', JSON.stringify({
-          portfolioId: newPortfolio.id,
-          template: template,
-        }))
-        console.log("[v0] Stored pending template in localStorage for portfolio:", newPortfolio.id)
-      }
+      console.log("[v0] Created portfolio:", newPortfolio)
       
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
       
       setSelectedPortfolioId(newPortfolio.id)
       setViewMode("editor")
-      setIsTemplateModalOpen(false)
     } catch (error) {
       console.error("Error creating portfolio:", error)
       alert(error instanceof Error ? error.message : "Failed to create portfolio")
@@ -296,26 +274,6 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("[v0] Error checking existing portfolio:", error)
       return null
-    }
-  }
-
-  const handleDeletePortfolio = async (portfolioId: string) => {
-    if (!user?.id) {
-      console.log("[v0] User not authenticated, cannot delete portfolio")
-      return
-    }
-
-    try {
-      console.log("[v0] Deleting portfolio:", portfolioId)
-      await deletePortfolio(portfolioId)
-      
-      // Remove from local state
-      setPortfolios((prev) => prev.filter((p) => p.id !== portfolioId))
-      
-      console.log("[v0] Portfolio deleted successfully")
-    } catch (error) {
-      console.error("[v0] Error deleting portfolio:", error)
-      alert(error instanceof Error ? error.message : "Failed to delete portfolio")
     }
   }
 
@@ -446,7 +404,6 @@ export default function DashboardPage() {
               onPortfolioClick={handlePortfolioClick}
               onCreatePortfolio={handleCreatePortfolio}
               onSyncCommunity={handleSyncCommunity}
-              onDeletePortfolio={handleDeletePortfolio}
               userCommunities={userCommunities}
               onCheckExistingPortfolio={handleCheckExistingPortfolio}
             />
@@ -466,12 +423,6 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
-
-      <TemplateLibraryModal
-        isOpen={isTemplateModalOpen}
-        onClose={() => setIsTemplateModalOpen(false)}
-        onSelectTemplate={handleSelectTemplate}
-      />
     </div>
   )
 }

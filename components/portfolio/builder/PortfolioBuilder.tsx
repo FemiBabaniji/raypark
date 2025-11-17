@@ -458,57 +458,40 @@ export default function PortfolioBuilder({
   const prevLeftWidgetsRef = useRef<string>("")
   const prevRightWidgetsRef = useRef<string>("")
   const prevWidgetContentRef = useRef<string>("")
+  const prevIdentityRef = useRef<string>("")
 
   useEffect(() => {
     if (!hasInitialized || !portfolioId || isLoadingData) {
       return
     }
 
-    // Serialize current state for comparison
     const leftSerialized = JSON.stringify(leftWidgets)
     const rightSerialized = JSON.stringify(rightWidgets)
     const contentSerialized = JSON.stringify(widgetContent)
+    const identitySerialized = JSON.stringify({
+      name: identity.name,
+      handle: identity.handle,
+      title: identity.title,
+      email: identity.email,
+      location: identity.location,
+      bio: identity.bio,
+      selectedColor: identity.selectedColor,
+    })
 
-    // Check if anything actually changed
     const leftChanged = leftSerialized !== prevLeftWidgetsRef.current
     const rightChanged = rightSerialized !== prevRightWidgetsRef.current
     const contentChanged = contentSerialized !== prevWidgetContentRef.current
+    const identityChanged = identitySerialized !== prevIdentityRef.current
 
-    if (leftChanged || rightChanged || contentChanged) {
-      console.log("[v0] 📝 Widget state changed:")
-      if (leftChanged) console.log("[v0]   - Left widgets changed")
-      if (rightChanged) console.log("[v0]   - Right widgets changed")  
-      if (contentChanged) console.log("[v0]   - Widget content changed")
-      
-      // Update refs
+    if (leftChanged || rightChanged || contentChanged || identityChanged) {
       prevLeftWidgetsRef.current = leftSerialized
       prevRightWidgetsRef.current = rightSerialized
       prevWidgetContentRef.current = contentSerialized
+      prevIdentityRef.current = identitySerialized
       
-      // Trigger save
       debouncedSave()
     }
-  }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
-
-  useEffect(() => {
-    if (hasInitialized && portfolioId && !isLoadingData) {
-      console.log("[v0] 🔄 Identity/metadata changed, triggering auto-save")
-      debouncedSave()
-    }
-  }, [
-    hasInitialized,
-    portfolioId,
-    isLoadingData,
-    debouncedSave,
-    state.name,
-    state.description,
-    identity.name,
-    identity.handle,
-    identity.title,
-    identity.email,
-    identity.location,
-    identity.bio,
-  ])
+  }, [leftWidgets, rightWidgets, widgetContent, identity, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget

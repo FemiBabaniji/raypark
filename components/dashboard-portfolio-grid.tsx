@@ -151,7 +151,7 @@ const PortfolioCard = ({
 
   return (
     <>
-      <div className="relative w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] group">
+      <div className={`relative w-full bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm rounded-2xl transition-all duration-200 border border-white/[0.08] group ${isMenuOpen ? 'z-50' : 'z-0'}`}>
         <button
           onClick={(e) => {
             e.stopPropagation()
@@ -199,7 +199,7 @@ const PortfolioCard = ({
                 setIsMenuOpen(false)
               }} 
             />
-            <div className="absolute right-0 top-10 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+            <div className="absolute right-0 top-10 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-[60]">
               <div className="p-2">
                 <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
                   Sync to Community
@@ -325,8 +325,6 @@ export function DashboardPortfolioGrid({
     const handleColorUpdate = (event: CustomEvent) => {
       const { portfolioId: updatedPortfolioId, selectedColor } = event.detail
       
-      console.log("[v0] Dashboard received color update for:", updatedPortfolioId, "color:", selectedColor)
-      
       setLocalPortfolios(prev => 
         prev.map(p => 
           p.id === updatedPortfolioId ? { ...p, selectedColor } : p
@@ -442,7 +440,7 @@ export function DashboardPortfolioGrid({
               }
 
               return (
-                <div key={portfolio.id} className="relative">
+                <div key={portfolio.id} className={`relative ${isMenuOpen ? 'z-50' : 'z-0'}`}>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -489,7 +487,7 @@ export function DashboardPortfolioGrid({
                           setIsMenuOpen(false)
                         }} 
                       />
-                      <div className="absolute right-0 top-16 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-50">
+                      <div className="absolute right-0 top-16 w-56 bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-lg border border-white/10 overflow-hidden z-[60]">
                         <div className="p-2">
                           <div className="px-3 py-2 text-xs text-white/50 font-medium uppercase tracking-wider">
                             Sync to Community

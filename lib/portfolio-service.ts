@@ -42,8 +42,28 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
       .select("id")
       .single()
 
-    if (error) throw error
-    pageId = data.id
+    if (error) {
+      // If duplicate key error (23505), query for the existing page instead of throwing
+      if (error.code === '23505') {
+        console.log("[v0] ℹ️ Page already exists, fetching existing page")
+        const { data: existingPage } = await supabase
+          .from("pages")
+          .select("id")
+          .eq("portfolio_id", portfolioId)
+          .eq("key", "main")
+          .single()
+        
+        if (existingPage?.id) {
+          pageId = existingPage.id
+        } else {
+          throw new Error("Failed to create or find main page")
+        }
+      } else {
+        throw error
+      }
+    } else {
+      pageId = data.id
+    }
   }
 
   // Ensure page_layouts row exists (idempotent)
@@ -54,9 +74,15 @@ export async function ensureMainPage(supabase: ReturnType<typeof createClient>, 
       left: { type: "vertical", widgets: ["identity"] },
       right: { type: "vertical", widgets: [] },
     }
-    const { error } = await supabase.from("page_layouts").insert({ page_id: pageId, layout: defaultLayout })
+    
+    const { error: layoutError } = await supabase
+      .from("page_layouts")
+      .insert({ page_id: pageId, layout: defaultLayout })
 
-    if (error) throw error
+    if (layoutError && layoutError.code !== '23505') {
+      // Ignore duplicate errors, throw others
+      throw layoutError
+    }
   }
 
   return pageId

@@ -483,6 +483,62 @@ export default function PortfolioBuilder({
       type: type,
     }
 
+    const defaultContent: Record<string, any> = {
+      education: {
+        title: "Education",
+        items: [
+          {
+            degree: "Bachelor of Science",
+            school: "University Name",
+            year: "2020-2024",
+            description: "",
+            certified: false
+          }
+        ]
+      },
+      projects: {
+        title: "Projects",
+        items: [
+          {
+            name: "Project Name",
+            description: "Project description goes here...",
+            year: "2024",
+            tags: ["React", "TypeScript"]
+          }
+        ]
+      },
+      description: {
+        title: "About Me",
+        description: "Tell your story here..."
+      },
+      services: {
+        title: "Services",
+        description: "Describe the services you offer...",
+        items: []
+      },
+      gallery: {
+        title: "Gallery",
+        groups: []
+      },
+      startup: {
+        title: "Startup",
+        description: "Describe your startup..."
+      },
+      "meeting-scheduler": {
+        mode: "button",
+        calendlyUrl: ""
+      }
+    }
+
+    // Set default content for this widget type if it doesn't exist
+    if (!widgetContent[type] && defaultContent[type]) {
+      console.log("[v0] 📝 Initializing default content for widget:", type)
+      setWidgetContent(prev => ({
+        ...prev,
+        [type]: defaultContent[type]
+      }))
+    }
+
     if (column === "left") {
       setLeftWidgets([...leftWidgets, newWidget])
     } else {

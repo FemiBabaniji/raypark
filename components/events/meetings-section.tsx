@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Plus } from 'lucide-react'
 import { MeetingsCalendarView } from "./meetings-calendar-view"
@@ -53,7 +51,7 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
   ]
 
   return (
-    <div className="h-full max-h-[600px] flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div>
           <h2 className="text-xl font-semibold text-white">My Meetings</h2>

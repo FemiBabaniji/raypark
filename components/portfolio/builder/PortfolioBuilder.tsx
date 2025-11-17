@@ -80,6 +80,8 @@ export default function PortfolioBuilder({
   const [isLoadingData, setIsLoadingData] = useState(false)
   const hasLoadedDataRef = useRef<string | null>(null)
 
+  const prevSelectedColorRef = useRef<number | undefined>(identity.selectedColor)
+
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
@@ -443,6 +445,19 @@ export default function PortfolioBuilder({
 
   useEffect(() => {
     if (hasInitialized && portfolioId && !isLoadingData) {
+      const currentColor = identity.selectedColor
+      const prevColor = prevSelectedColorRef.current
+      
+      if (currentColor !== prevColor) {
+        console.log("[v0] 🎨 Color changed from", prevColor, "to", currentColor, "- triggering save")
+        prevSelectedColorRef.current = currentColor
+        debouncedSave()
+      }
+    }
+  }, [identity.selectedColor, hasInitialized, portfolioId, isLoadingData, debouncedSave])
+
+  useEffect(() => {
+    if (hasInitialized && portfolioId && !isLoadingData) {
       console.log("[v0] 🔄 State changed, triggering auto-save")
       debouncedSave()
     }
@@ -459,7 +474,7 @@ export default function PortfolioBuilder({
     identity.email,
     identity.location,
     identity.bio,
-    identity.selectedColor,
+    // Removed identity.selectedColor - now tracked separately above
     leftWidgets,
     rightWidgets,
     widgetContent,

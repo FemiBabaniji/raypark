@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { Calendar, Clock, MapPin, Users } from 'lucide-react'
+import { TimelineCard } from "@/components/ui/timeline-card"
+import { colors, typography, shadows } from "@/lib/design-system"
 
 interface EventCardProps {
   title: string
@@ -16,88 +18,36 @@ interface EventCardProps {
   onEventClick?: (eventId: string) => void
 }
 
-export function EventCard({ title, date, description, time, attending, location, onEventClick }: EventCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
-  const getGradient = (title: string) => {
-    // Workshop (Blue) - deeper blue
+export function EventCard({ 
+  title, 
+  date, 
+  description, 
+  time, 
+  attending, 
+  location, 
+  onEventClick 
+}: EventCardProps) {
+  const getEventAccent = (title: string) => {
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#4a6bb3] to-[#3a5a9d]"
+      return colors.accent.blue
     } 
-    // Networking/Mixer (Green) - deeper green
-    else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-[#4a9e7c] to-[#3a8866]"
+    if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
+      return colors.accent.green
     } 
-    // Masterclass (Purple) - deeper purple
-    else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-[#7568b3] to-[#5f529d]"
+    if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
+      return colors.accent.purple
     }
-    // Conference (Orange) - deeper orange
-    else if (title.includes("Conference")) {
-      return "from-[#c0795d] to-[#a66347]"
-    }
-    // Seminar (Coral) - deeper coral
-    else if (title.includes("Seminar")) {
-      return "from-[#c96868] to-[#b35252]"
-    }
-    // Hackathon (Cyan) - deeper cyan
-    else if (title.includes("Hackathon")) {
-      return "from-[#4ab3c9] to-[#3a9db3]"
-    }
-    // Meetup (Pink) - deeper pink
-    else if (title.includes("Meetup")) {
-      return "from-[#c068b3] to-[#a6529d]"
-    }
-    // Summit (Amber) - deeper amber
-    else if (title.includes("Summit")) {
-      return "from-[#c9a54a] to-[#b38f3a]"
-    }
-    // Social (Magenta) - deeper magenta
-    else if (title.includes("Social")) {
-      return "from-[#b368c9] to-[#9d52b3]"
-    }
-    // Default to Workshop blue
-    return "from-[#4a6bb3] to-[#3a5a9d]"
-  }
-
-  const getTitleGradient = (title: string) => {
-    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-white via-white to-[#4a6bb3]" // Deeper Blue
-    } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-white via-white to-[#4a9e7c]" // Deeper Green
-    } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-white via-white to-[#7568b3]" // Deeper Purple
-    } else if (title.includes("Conference")) {
-      return "from-white via-white to-[#c0795d]" // Deeper Orange
-    } else if (title.includes("Seminar")) {
-      return "from-white via-white to-[#c96868]" // Deeper Coral
-    } else if (title.includes("Hackathon")) {
-      return "from-white via-white to-[#4ab3c9]" // Deeper Cyan
-    } else if (title.includes("Meetup")) {
-      return "from-white via-white to-[#c068b3]" // Deeper Pink
-    } else if (title.includes("Summit")) {
-      return "from-white via-white to-[#c9a54a]" // Deeper Amber
-    } else if (title.includes("Social")) {
-      return "from-white via-white to-[#b368c9]" // Deeper Magenta
-    }
-    return "from-white via-white to-[#4a6bb3]" // Default deeper blue
+    return colors.accent.blue
   }
 
   const getEventType = (title: string) => {
     if (title.includes("Workshop")) return "Workshop"
     if (title.includes("Mixer") || title.includes("Networking")) return "Networking"
     if (title.includes("Masterclass")) return "Masterclass"
-    if (title.includes("Conference")) return "Conference"
-    if (title.includes("Seminar")) return "Seminar"
-    if (title.includes("Hackathon")) return "Hackathon"
-    if (title.includes("Meetup")) return "Meetup"
-    if (title.includes("Summit")) return "Summit"
-    if (title.includes("Social")) return "Social"
     return "Event"
   }
 
-  const gradient = getGradient(title)
-  const titleGradient = getTitleGradient(title)
+  const accent = getEventAccent(title)
   const type = getEventType(title)
 
   const handleEventClick = () => {
@@ -113,79 +63,70 @@ export function EventCard({ title, date, description, time, attending, location,
   }
 
   return (
-    <button
-      type="button"
+    <TimelineCard
       onClick={handleEventClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`
-        relative overflow-hidden
-        bg-gradient-to-br ${gradient}
-        backdrop-blur-xl
-        rounded-3xl 
-        p-5
-        transition-all duration-300 ease-out
-        ${isHovered ? "scale-[1.02]" : ""}
-        text-left text-white
-        w-56 sm:w-64
-        flex-shrink-0
-        shadow-lg
-      `}
-      style={{
-        minHeight: "260px",
-        maxWidth: "256px",
-      }}
+      accentColor={accent}
+      className="w-56 sm:w-64 flex-shrink-0"
     >
-
-      <div className="relative flex flex-col justify-between h-full">
-        <div className="mb-3">
-          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3
-            className={`text-3xl font-bold leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
+      <div className="flex flex-col h-full min-h-[260px]">
+        <div className="mb-4">
+          <div 
+            className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3"
+            style={{
+              backgroundColor: `${accent}20`,
+              color: accent,
+              ...typography.caption
+            }}
+          >
+            {type}
+          </div>
+          <h3 
+            className="font-bold leading-tight text-balance"
+            style={{
+              ...typography.h2,
+              color: colors.foreground.primary
+            }}
           >
             {title}
           </h3>
         </div>
 
-        <div className="mt-auto space-y-4">
-          {/* Date, time, location metadata */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-white/85">
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-medium">{date}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-white/85">
-              <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-medium">{time}</span>
-            </div>
-            {location && (
-              <div className="flex items-center gap-2 text-xs text-white/85">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                <span className="font-medium">{location}</span>
-              </div>
-            )}
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center gap-2" style={{ ...typography.caption, color: colors.foreground.secondary }}>
+            <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
+            <span>{date}</span>
           </div>
+          <div className="flex items-center gap-2" style={{ ...typography.caption, color: colors.foreground.secondary }}>
+            <Clock className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
+            <span>{time}</span>
+          </div>
+          {location && (
+            <div className="flex items-center gap-2" style={{ ...typography.caption, color: colors.foreground.secondary }}>
+              <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
+              <span className="truncate">{location}</span>
+            </div>
+          )}
 
-          {/* Bottom buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/10">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-              <Users className="w-3.5 h-3.5" />
-              <span className="font-semibold text-xs">{attending}</span>
+          <div className="flex items-center justify-between pt-4 mt-4" style={{ borderTop: `1px solid ${colors.foreground.primary}10` }}>
+            <div 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: `${accent}20` }}
+            >
+              <Users className="w-4 h-4" style={{ color: accent }} />
+              <span className="font-semibold text-sm" style={{ color: accent }}>{attending}</span>
             </div>
             <div
-              className={`
-                px-4 py-2 
-                bg-white/95 text-black 
-                font-semibold rounded-full text-xs
-                transition-all
-                ${isHovered ? "bg-white" : ""}
-              `}
+              className="px-4 py-2 font-semibold rounded-full text-xs transition-all"
+              style={{
+                backgroundColor: accent,
+                color: colors.background.primary,
+              }}
             >
               View
             </div>
           </div>
         </div>
       </div>
-    </button>
+    </TimelineCard>
   )
 }

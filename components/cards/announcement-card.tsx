@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { ChevronDown, Pin } from 'lucide-react'
+import { TimelineCard } from "@/components/ui/timeline-card"
+import { colors, typography } from "@/lib/design-system"
 
 interface AnnouncementCardProps {
   title: string
@@ -23,88 +25,85 @@ export function AnnouncementCard({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div
-      className={`relative group cursor-pointer transition-all duration-300 ${isExpanded ? "" : ""}`}
+    <TimelineCard
       onClick={() => setIsExpanded(!isExpanded)}
+      accentColor={isImportant ? colors.accent.purple : undefined}
+      className="cursor-pointer"
     >
-      <div
-        className={`relative overflow-hidden rounded-2xl bg-zinc-900/50 backdrop-blur-xl border transition-all duration-300 ${
-          isImportant
-            ? "border-purple-500/30 hover:border-purple-500/50 shadow-lg shadow-purple-500/10"
-            : "border-zinc-700/50 hover:border-zinc-600/50 shadow-lg"
-        } ${isExpanded ? "" : "hover:bg-zinc-900/70"}`}
-      >
-        {isImportant && (
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-fuchsia-500" />
-        )}
+      <div className="flex items-start gap-4">
+        <div
+          className="h-10 w-10 rounded-full flex-shrink-0 flex items-center justify-center font-semibold text-sm"
+          style={{
+            backgroundColor: avatarColor,
+            color: colors.foreground.primary,
+            ...typography.body
+          }}
+        >
+          {author.charAt(0)}
+        </div>
 
-        <div className="p-5">
-          <div className="flex items-start gap-4">
-            <div
-              className="h-11 w-11 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white text-sm shadow-lg"
-              style={{
-                backgroundColor: avatarColor,
-                boxShadow: `0 4px 12px ${avatarColor}50`,
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 style={{ ...typography.h3, color: colors.foreground.primary }}>{title}</h3>
+                {isImportant && <Pin className="h-4 w-4 flex-shrink-0" style={{ color: colors.accent.purple }} />}
+              </div>
+              <div style={{ ...typography.caption, color: colors.foreground.tertiary }}>
+                {author} · {timeAgo}
+              </div>
+            </div>
+
+            <button
+              className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all flex-shrink-0 hover:bg-white/5 ${
+                isExpanded ? "rotate-180 bg-white/5" : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
               }}
             >
-              {author.charAt(0)}
-            </div>
+              <ChevronDown className="h-4 w-4" style={{ color: colors.foreground.secondary }} />
+            </button>
+          </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-base font-semibold text-white">{title}</h3>
-                    {isImportant && <Pin className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />}
-                  </div>
-                  <div className="text-xs text-zinc-400 font-medium">
-                    {author} · {timeAgo}
-                  </div>
-                </div>
+          <p
+            className={`leading-relaxed transition-all ${isExpanded ? "line-clamp-none" : "line-clamp-2"}`}
+            style={{ ...typography.body, color: colors.foreground.secondary }}
+          >
+            {content}
+          </p>
 
+          {isExpanded && (
+            <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${colors.foreground.primary}10` }}>
+              <div className="flex items-center gap-2">
                 <button
-                  className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-300 hover:bg-white/5 flex-shrink-0 ${
-                    isExpanded ? "rotate-180 bg-white/5" : ""
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setIsExpanded(!isExpanded)
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    backgroundColor: `${colors.accent.blue}20`,
+                    color: colors.accent.blue,
+                    ...typography.caption
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <ChevronDown className="h-4 w-4 text-zinc-400" />
+                  View Details
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    backgroundColor: colors.background.secondary,
+                    color: colors.foreground.secondary,
+                    ...typography.caption
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Dismiss
                 </button>
               </div>
-
-              <p
-                className={`text-sm text-zinc-300 leading-relaxed transition-all duration-300 ${
-                  isExpanded ? "line-clamp-none" : "line-clamp-2"
-                }`}
-              >
-                {content}
-              </p>
-
-              {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-zinc-700/50">
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium rounded-lg transition-all"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View Details
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-zinc-800/50 hover:bg-zinc-800/70 text-zinc-300 text-xs font-medium rounded-lg transition-all"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </div>
+    </TimelineCard>
   )
 }

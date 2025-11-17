@@ -219,67 +219,73 @@ export async function POST(request: NextRequest) {
       right: { type: "vertical", widgets: [] as string[] },
     }
 
-    const { data: identityType } = await supabase
+    // Fetch widget type IDs
+    const { data: widgetTypes } = await supabase
       .from("widget_types")
-      .select("id")
-      .eq("key", "identity")
-      .maybeSingle()
+      .select("id, key")
+    
+    const keyToId: Record<string, string> = {}
+    for (const wt of widgetTypes || []) {
+      keyToId[wt.key] = wt.id
+    }
 
-    if (identityType?.id) {
+    const identityTypeId = keyToId["identity"]
+    const descriptionTypeId = keyToId["description"]
+
+    // Create identity widget with template-specific data
+    if (identityTypeId) {
       const identityProps: any = {
         name: user.user_metadata?.full_name || name,
         email: user.email || "",
         handle: `@${portfolio.slug}`,
       }
 
+      // Apply template-specific identity customizations
       if (template === "designer") {
-        identityProps.selectedColor = 4
+        identityProps.selectedColor = 4 // Purple
         identityProps.title = "UI/UX Designer"
         identityProps.bio = "I create intuitive digital experiences that delight users."
       } else if (template === "developer") {
-        identityProps.selectedColor = 2
+        identityProps.selectedColor = 2 // Green
         identityProps.title = "Full Stack Developer"
         identityProps.bio = "Building scalable web applications with modern technologies."
       } else if (template === "marketing") {
-        identityProps.selectedColor = 1
+        identityProps.selectedColor = 1 // Orange/Red
         identityProps.title = "Growth Marketing Manager"
         identityProps.bio = "Data-driven marketer scaling startups through strategic campaigns."
       } else if (template === "founder") {
-        identityProps.selectedColor = 0
+        identityProps.selectedColor = 0 // Blue
         identityProps.title = "Founder & CEO"
         identityProps.bio = "Building the future. Previously exited startup."
       } else {
-        identityProps.selectedColor = 3
+        identityProps.selectedColor = 3 // Default red
       }
 
-      const { error: widgetError } = await supabase
+      console.log("[v0] Creating identity widget with color:", identityProps.selectedColor)
+
+      const { error: identityError } = await supabase
         .from("widget_instances")
         .insert({
           page_id: mainPage.id,
-          widget_type_id: identityType.id,
+          widget_type_id: identityTypeId,
           props: identityProps,
           enabled: true,
         })
 
-      if (widgetError) {
-        console.error("[v0] ⚠️ Failed to create identity widget:", widgetError)
+      if (identityError) {
+        console.error("[v0] ⚠️ Failed to create identity widget:", identityError)
       } else {
         console.log("[v0] ✅ Identity widget created")
       }
     }
 
-    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]) {
+    // Create template-specific description widgets
+    if (template && template !== "blank" && PORTFOLIO_TEMPLATES[template as PortfolioTemplateType] && descriptionTypeId) {
       console.log("[v0] 📋 Creating template widgets for:", template)
       
       const templateConfig = PORTFOLIO_TEMPLATES[template as PortfolioTemplateType]
       
-      const { data: descriptionType } = await supabase
-        .from("widget_types")
-        .select("id")
-        .eq("key", "description")
-        .maybeSingle()
-
-      if (descriptionType?.id && templateConfig.widgets.length > 0) {
+      if (templateConfig.widgets.length > 0) {
         console.log("[v0] Creating", templateConfig.widgets.length, "description widgets")
         
         for (let i = 0; i < templateConfig.widgets.length; i++) {
@@ -289,7 +295,7 @@ export async function POST(request: NextRequest) {
             .from("widget_instances")
             .insert({
               page_id: mainPage.id,
-              widget_type_id: descriptionType.id,
+              widget_type_id: descriptionTypeId,
               props: widget.props || {},
               enabled: true,
             })
@@ -298,13 +304,11 @@ export async function POST(request: NextRequest) {
 
           if (widgetError) {
             console.error("[v0] ⚠️ Failed to create template widget", i, ":", widgetError)
-          } else {
+          } else if (createdWidget?.id) {
             layoutStructure.left.widgets.push(`description-${createdWidget.id}`)
             console.log("[v0] ✅ Template widget", i, "created with ID:", createdWidget.id)
           }
         }
-      } else {
-        console.error("[v0] ⚠️ Description widget type not found or no widgets in template")
       }
     }
 

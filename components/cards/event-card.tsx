@@ -20,66 +20,27 @@ export function EventCard({ title, date, description, time, attending, location,
   const [isHovered, setIsHovered] = useState(false)
 
   const getGradient = (title: string) => {
-    // Workshop (Blue) - deeper blue
+    // Workshop (Blue)
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#4a6bb3] to-[#3a5a9d]"
+      return "from-[#5b7fc9] to-[#4a6bb3]"
     } 
-    // Networking/Mixer (Green) - deeper green
+    // Networking (Green)
     else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-[#4a9e7c] to-[#3a8866]"
+      return "from-[#5fb88f] to-[#4a9e7c]"
     } 
-    // Masterclass (Purple) - deeper purple
+    // Masterclass (Purple)
     else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-[#7568b3] to-[#5f529d]"
+      return "from-[#8b7fc9] to-[#7568b3]"
     }
-    // Conference (Orange) - deeper orange
-    else if (title.includes("Conference")) {
-      return "from-[#c0795d] to-[#a66347]"
+    // Workshop/Pitch (Orange)
+    else if (title.includes("Conference") || title.includes("Pitch")) {
+      return "from-[#d9926f] to-[#c0795d]"
     }
-    // Seminar (Coral) - deeper coral
-    else if (title.includes("Seminar")) {
-      return "from-[#c96868] to-[#b35252]"
+    // Mixer (Teal)
+    else if (title.includes("Meetup") || title.includes("Social")) {
+      return "from-[#5fb8c9] to-[#4a9eb3]"
     }
-    // Hackathon (Cyan) - deeper cyan
-    else if (title.includes("Hackathon")) {
-      return "from-[#4ab3c9] to-[#3a9db3]"
-    }
-    // Meetup (Pink) - deeper pink
-    else if (title.includes("Meetup")) {
-      return "from-[#c068b3] to-[#a6529d]"
-    }
-    // Summit (Amber) - deeper amber
-    else if (title.includes("Summit")) {
-      return "from-[#c9a54a] to-[#b38f3a]"
-    }
-    // Social (Magenta) - deeper magenta
-    else if (title.includes("Social")) {
-      return "from-[#b368c9] to-[#9d52b3]"
-    }
-    return "from-[#4a6bb3] to-[#3a5a9d]"
-  }
-
-  const getTitleGradient = (title: string) => {
-    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-white via-white to-[#4a6bb3]" // Deeper Blue
-    } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-white via-white to-[#4a9e7c]" // Deeper Green
-    } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-white via-white to-[#7568b3]" // Deeper Purple
-    } else if (title.includes("Conference")) {
-      return "from-white via-white to-[#c0795d]" // Deeper Orange
-    } else if (title.includes("Seminar")) {
-      return "from-white via-white to-[#c96868]" // Deeper Coral
-    } else if (title.includes("Hackathon")) {
-      return "from-white via-white to-[#4ab3c9]" // Deeper Cyan
-    } else if (title.includes("Meetup")) {
-      return "from-white via-white to-[#c068b3]" // Deeper Pink
-    } else if (title.includes("Summit")) {
-      return "from-white via-white to-[#c9a54a]" // Deeper Amber
-    } else if (title.includes("Social")) {
-      return "from-white via-white to-[#b368c9]" // Deeper Magenta
-    }
-    return "from-white via-white to-[#4a6bb3]" // Default deeper blue
+    return "from-[#5b7fc9] to-[#4a6bb3]"
   }
 
   const getEventType = (title: string) => {
@@ -87,16 +48,11 @@ export function EventCard({ title, date, description, time, attending, location,
     if (title.includes("Mixer") || title.includes("Networking")) return "Networking"
     if (title.includes("Masterclass")) return "Masterclass"
     if (title.includes("Conference")) return "Conference"
-    if (title.includes("Seminar")) return "Seminar"
-    if (title.includes("Hackathon")) return "Hackathon"
     if (title.includes("Meetup")) return "Meetup"
-    if (title.includes("Summit")) return "Summit"
-    if (title.includes("Social")) return "Social"
     return "Event"
   }
 
   const gradient = getGradient(title)
-  const titleGradient = getTitleGradient(title)
   const type = getEventType(title)
 
   const handleEventClick = () => {
@@ -136,38 +92,32 @@ export function EventCard({ title, date, description, time, attending, location,
         aspectRatio: "1 / 1.1"
       }}
     >
+      <div className="absolute top-4 right-4 bg-black/30 backdrop-blur-sm rounded-xl px-3 py-2">
+        <p className="text-white font-bold text-base leading-none">{date}</p>
+      </div>
 
-      <div className="relative flex flex-col justify-between h-full">
-        <div className="mb-2">
-          <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3
-            className={`text-2xl font-bold leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
-          >
+      <div className="relative flex flex-col h-full">
+        <div className="mb-auto pr-20">
+          <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
+          <h3 className="text-xl font-bold leading-tight text-white">
             {title}
           </h3>
         </div>
 
-        <div className="mt-auto space-y-2">
-          {/* Date, time, location metadata */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-sm text-white font-semibold">
-              <Calendar className="w-4 h-4 flex-shrink-0 opacity-80" />
-              <span>{date}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-white/85">
-              <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-medium">{time}</span>
-            </div>
-            {location && (
-              <div className="flex items-center gap-2 text-xs text-white/85">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                <span className="font-medium">{location}</span>
-              </div>
-            )}
+        <div className="mt-auto space-y-1.5">
+          <div className="flex items-center gap-2 text-xs text-white/90">
+            <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+            <span className="font-normal">{time}</span>
           </div>
-
+          {location && (
+            <div className="flex items-center gap-2 text-xs text-white/90">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+              <span className="font-normal truncate">{location}</span>
+            </div>
+          )}
+          
           {/* Bottom buttons */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/10">
+          <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-3">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
               <Users className="w-3.5 h-3.5" />
               <span className="font-semibold text-xs">{attending}</span>

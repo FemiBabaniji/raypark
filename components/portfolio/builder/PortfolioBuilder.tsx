@@ -97,13 +97,6 @@ export default function PortfolioBuilder({
   const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([])
   const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([])
 
-  const setLeftWidgetsWithLogging = useCallback((value: WidgetDef[] | ((prev: WidgetDef[]) => WidgetDef[])) => {
-    const newValue = typeof value === 'function' ? value(leftWidgets) : value
-    console.log("[v0] 🔧 setLeftWidgets called. Old:", leftWidgets.length, "New:", newValue.length, "Widgets:", newValue.map(w => w.id))
-    console.trace("[v0] Stack trace for setLeftWidgets")
-    setLeftWidgets(newValue)
-  }, [leftWidgets])
-
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -364,22 +357,18 @@ export default function PortfolioBuilder({
     const currentPortfolioId = portfolioIdRef.current
     
     if (!user?.id) {
-      console.log("[v0] ⏸️ Skipping save - no authenticated user")
       return
     }
     
     if (!hasInitialized) {
-      console.log("[v0] ⏸️ Skipping save - not initialized yet")
       return
     }
     
     if (isLoadingData) {
-      console.log("[v0] ⏸️ Skipping save - still loading data")
       return
     }
 
     if (!currentPortfolioId) {
-      console.log("[v0] ⏸️ Skipping save - no portfolio ID")
       setSaveError("No portfolio selected")
       return
     }
@@ -391,13 +380,11 @@ export default function PortfolioBuilder({
     const timeout = setTimeout(async () => {
       setIsSaving(true)
       setSaveError(null)
-      console.log("[v0] 💾 Starting auto-save for portfolio:", currentPortfolioId)
       
       try {
         if (isFromTemplate) {
-          console.log("[v0] 🔧 Portfolio is from template, materializing widgets...")
           await materializeTemplateWidgets(currentPortfolioId)
-          setIsFromTemplate(false) // Mark as materialized
+          setIsFromTemplate(false)
         }
 
         await updatePortfolioById(currentPortfolioId, {
@@ -410,7 +397,6 @@ export default function PortfolioBuilder({
         await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, widgetContent, communityId)
 
         setLastSaveTime(new Date())
-        console.log("[v0] ✅ Auto-save completed successfully at", new Date().toLocaleTimeString())
         
         window.dispatchEvent(new CustomEvent("portfolio-identity-updated", {
           detail: {
@@ -458,21 +444,13 @@ export default function PortfolioBuilder({
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
-    if (leftWidgets.length > 0) {
-      const widgetIds = leftWidgets.map(w => w.id).join(',')
-      console.log("[v0] 📊 Current left widgets:", widgetIds, "Count:", leftWidgets.length)
-      
-      // Detect if description widget disappeared unexpectedly
+    if (leftWidgets.length > 0 && !isLoadingData) {
       const hadDescription = prevLeftWidgetsRef.current.includes('description')
+      const widgetIds = leftWidgets.map(w => w.id).join(',')
       const hasDescription = widgetIds.includes('description')
       
-      if (hadDescription && !hasDescription && !isLoadingData) {
-        console.error("[v0] ⚠️ Description widget disappeared! Attempting recovery...")
-        console.log("[v0] Widget content keys:", Object.keys(widgetContent))
-        
-        // Try to restore the description widget if it has content
+      if (hadDescription && !hasDescription) {
         if (widgetContent.description) {
-          console.log("[v0] 🔧 Restoring description widget")
           setLeftWidgets(prev => {
             const hasDesc = prev.some(w => w.type === 'description')
             if (!hasDesc) {
@@ -483,7 +461,7 @@ export default function PortfolioBuilder({
         }
       }
     }
-  }, [leftWidgets, widgetContent, isLoadingData])
+  }, [leftWidgets, widgetContent.description, isLoadingData])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -936,10 +914,7 @@ export default function PortfolioBuilder({
           <Reorder.Group
             axis="y"
             values={leftWidgets}
-            onReorder={(newOrder) => {
-              console.log("[v0] 🔄 Reorder.Group onReorder called. New order:", newOrder.map(w => w.id))
-              setLeftWidgetsWithLogging(newOrder)
-            }}
+            onReorder={setLeftWidgets}
             className="flex flex-col gap-4 sm:gap-6"
           >
             {leftWidgets.map((w) => (

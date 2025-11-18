@@ -1,17 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  MapPin,
-  Clock,
-  X,
-  GripVertical,
-  Palette,
-  ExternalLink,
-} from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Calendar, ChevronLeft, ChevronRight, MapPin, Clock, X, GripVertical, Palette, ExternalLink } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { THEME_COLOR_OPTIONS } from "@/lib/theme"
 import type { ThemeIndex } from "@/lib/theme"
@@ -53,19 +43,37 @@ export default function MeetingSchedulerWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const gradient = THEME_COLOR_OPTIONS[selectedColor]?.gradient ?? "from-teal-400/40 to-teal-600/60"
+  
+  const prevModeRef = useRef<string | undefined>();
+  const prevUrlRef = useRef<string | undefined>();
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
-    if (onContentChange) {
-      onContentChange({ mode, calendlyUrl })
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      return;
     }
-  }, [mode, calendlyUrl, onContentChange])
+    
+    if (onContentChange && (mode !== prevModeRef.current || calendlyUrl !== prevUrlRef.current)) {
+      prevModeRef.current = mode;
+      prevUrlRef.current = calendlyUrl;
+      onContentChange({ mode, calendlyUrl });
+    }
+  }, [mode, calendlyUrl, onContentChange]);
 
   useEffect(() => {
     if (content) {
-      setMode(content.mode || "custom")
-      setCalendlyUrl(content.calendlyUrl || "https://calendly.com/your-username/30min")
+      const newMode = content.mode || "custom";
+      const newUrl = content.calendlyUrl || "https://calendly.com/your-username/30min";
+      
+      if (newMode !== mode) {
+        setMode(newMode);
+      }
+      if (newUrl !== calendlyUrl) {
+        setCalendlyUrl(newUrl);
+      }
     }
-  }, [content])
+  }, [content]);
 
   useEffect(() => {
     if (mode === "calendly") {

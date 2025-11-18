@@ -34,22 +34,9 @@ export default function IdentityWidget({
   })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
-    console.log("[v0] IdentityWidget received identity prop - selectedColor:", identity.selectedColor, "type:", typeof identity.selectedColor)
-    console.log("[v0] Full identity:", { 
-      name: identity.name,
-      firstName: identity.firstName,
-      lastName: identity.lastName,
-      profileName: identity.profileName,
-      skills: identity.skills
-    })
-  }, [identity])
-
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
   const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
   
-  console.log("[v0] IdentityWidget rendering with selectedColor:", identity.selectedColor, "gradient:", gradient)
-
   const displayName = identity.firstName && identity.lastName 
     ? `${identity.firstName} ${identity.lastName}`
     : identity.name || "jenny wilson"
@@ -88,12 +75,7 @@ export default function IdentityWidget({
                         } hover:ring-2 hover:ring-white/50 transition-all`}
                         onClick={() => {
                           const i = idx as ThemeIndex
-                          console.log("[v0] 🎨 COLOR PICKER CLICKED")
-                          console.log("[v0] 🎨 Current color:", identity.selectedColor, "type:", typeof identity.selectedColor)
-                          console.log("[v0] 🎨 New color:", i, "type:", typeof i)
-                          console.log("[v0] 🎨 Calling onChange with:", { selectedColor: i })
                           onChange({ selectedColor: i })
-                          console.log("[v0] 🎨 onChange called successfully")
                           setShowColorPicker(false)
                         }}
                       />
@@ -105,10 +87,7 @@ export default function IdentityWidget({
                 size="sm"
                 variant="ghost"
                 className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/30 text-white p-2"
-                onClick={() => {
-                  console.log("[v0] 🎨 Color picker button clicked, current state:", showColorPicker)
-                  setShowColorPicker(!showColorPicker)
-                }}
+                onClick={() => setShowColorPicker(!showColorPicker)}
               >
                 <Palette className="w-4 h-4" />
               </Button>
@@ -139,7 +118,6 @@ export default function IdentityWidget({
               value={displayBio}
               onChange={(e) => {
                 onChange({ bio: e.target.value })
-                // Auto-resize on change
                 e.target.style.height = "auto"
                 e.target.style.height = `${e.target.scrollHeight}px`
               }}

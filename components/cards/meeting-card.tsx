@@ -36,7 +36,7 @@ export function MeetingCard({ title, organizer, date, time, attendees, gradientF
         }}
       />
       <h3 className="mb-1 text-base font-semibold leading-tight">{title}</h3>
-      <p className="mb-2 text-sm text-gray-400">{organizer}</p>
+      <p className="mb-3 text-sm text-gray-400">{organizer}</p>
       <div className="flex items-center justify-between text-sm text-gray-400">
         <span>{date} • {time}</span>
         <span>{attendees} attending</span>

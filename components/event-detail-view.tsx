@@ -123,9 +123,9 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
             </div>
           </div>
 
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left side - Registration & Event Details */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />

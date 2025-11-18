@@ -19,16 +19,18 @@ export function MeetingCard({ title, organizer, date, time, attendees, gradientF
   return (
     <div
       className={`
-        relative overflow-hidden rounded-xl bg-[#1a1a1a] p-4
-        transition-all duration-300 ease-out
+        relative overflow-hidden rounded-lg bg-[#1a1a1a]
+        transition-all duration-200 ease-out
         ${isHovered ? "scale-[1.01]" : ""}
         text-left text-white
         w-full
-        shadow-lg
         border border-white/5
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{
+        padding: "0.625rem 0.75rem"
+      }}
     >
       <div 
         className="absolute left-0 top-0 h-full w-1"
@@ -36,10 +38,10 @@ export function MeetingCard({ title, organizer, date, time, attendees, gradientF
           background: `linear-gradient(to bottom, ${gradientFrom}, ${gradientTo})`
         }}
       />
-      <h3 className="mb-1 text-base font-semibold leading-tight">{title}</h3>
-      <p className="mb-1 text-sm text-gray-400">{organizer}</p>
-      {subtext && <p className="mb-2 text-xs text-gray-500">{subtext}</p>}
-      <div className="flex items-center justify-between text-sm text-gray-400">
+      <h3 className="mb-0.5 text-sm font-semibold leading-tight">{title}</h3>
+      <p className="mb-0.5 text-xs text-gray-400">{organizer}</p>
+      {subtext && <p className="mb-1.5 text-xs text-gray-500">{subtext}</p>}
+      <div className="flex items-center justify-between text-xs text-gray-400">
         <span>{date} • {time}</span>
         <span>{attendees} attending</span>
       </div>

@@ -9,11 +9,10 @@ import {
   EVENT_CATEGORY_FILTERS,
   MEMBER_ROLE_FILTERS,
 } from "@/components/event-nav"
-import { ViewToggle } from "@/components/event-nav/view-toggle"
 import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsSection } from "@/components/events/meetings-section"
 import type { EventDetailData } from "@/components/event-detail"
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react'
 
 const CONTAINER_STYLES = "bg-zinc-900/30 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-white/5"
 
@@ -332,10 +331,33 @@ export default function EventsLeftColumn({
                 <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <div className="mb-4 flex items-start justify-between flex-shrink-0">
                     <div>
-                      <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                      <h2 className="text-xl font-semibold text-white mb-1">Events</h2>
                       <p className="text-zinc-400 text-sm">Discover and join community events</p>
                     </div>
-                    <ViewToggle view={view} onViewChange={setView} />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setView("grid")}
+                        className={`p-2 rounded-lg transition-colors ${
+                          view === "grid" 
+                            ? "bg-zinc-800 text-white" 
+                            : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+                        }`}
+                        aria-label="Grid view"
+                      >
+                        <LayoutGrid className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setView("calendar")}
+                        className={`p-2 rounded-lg transition-colors ${
+                          view === "calendar" 
+                            ? "bg-zinc-800 text-white" 
+                            : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+                        }`}
+                        aria-label="Calendar view"
+                      >
+                        <List className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex-shrink-0">
@@ -563,7 +585,30 @@ export default function EventsLeftColumn({
                   <h1 className="text-3xl font-bold text-white mb-1.5">Events</h1>
                   <p className="text-zinc-400 text-base">Discover and join community events</p>
                 </div>
-                <ViewToggle view={view} onViewChange={setView} />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setView("grid")}
+                    className={`p-2 rounded-lg transition-colors ${
+                      view === "grid" 
+                        ? "bg-zinc-800 text-white" 
+                        : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+                    }`}
+                    aria-label="Grid view"
+                  >
+                    <LayoutGrid className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => setView("calendar")}
+                    className={`p-2 rounded-lg transition-colors ${
+                      view === "calendar" 
+                        ? "bg-zinc-800 text-white" 
+                        : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+                    }`}
+                    aria-label="Calendar view"
+                  >
+                    <List className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="flex-shrink-0">

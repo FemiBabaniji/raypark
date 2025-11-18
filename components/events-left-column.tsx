@@ -322,7 +322,7 @@ export default function EventsLeftColumn({
         ) : activeTab === "Home" ? (
           <>
             <div className="mt-6 flex flex-col xl:flex-row gap-6 w-full">
-              <div className="w-full xl:w-[70%] xl:flex-shrink-0">
+              <div className="w-full xl:w-[60%] xl:flex-shrink-0">
                 <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <div className="mb-4 flex items-start justify-between flex-shrink-0">
                     <div>
@@ -398,7 +398,7 @@ export default function EventsLeftColumn({
                 </div>
               </div>
 
-              <div className="w-full xl:w-[30%] xl:flex-shrink-0">
+              <div className="w-full lg:w-[60%] xl:w-[40%] xl:flex-shrink-0">
                 <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <MeetingsSection onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
@@ -406,7 +406,7 @@ export default function EventsLeftColumn({
             </div>
 
             <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
-              <div className="w-full lg:w-[30%] lg:flex-shrink-0">
+              <div className="w-full lg:w-[40%] lg:flex-shrink-0">
                 <div className={CONTAINER_STYLES}>
                   <h2 className="text-xl font-bold mb-4 text-white">Announcements</h2>
 
@@ -433,7 +433,7 @@ export default function EventsLeftColumn({
                 </div>
               </div>
 
-              <div className="w-full lg:w-[70%] lg:flex-shrink-0">
+              <div className="w-full lg:w-[60%] xl:w-[70%] xl:flex-shrink-0">
                 <div className={CONTAINER_STYLES}>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
                     <div>

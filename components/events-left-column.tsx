@@ -413,25 +413,21 @@ export default function EventsLeftColumn({
                   <div className="space-y-3">
                     <AnnouncementCard
                       title="New Partnership with TechCorp"
-                      content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community."
-                      author="Admin"
-                      timeAgo="2 hours ago"
-                      avatarColor="#8B5CF6"
-                      isImportant={true}
+                      initials="TC"
+                      gradientFrom="#8B5CF6"
+                      gradientTo="#6366F1"
                     />
                     <AnnouncementCard
                       title="Upcoming Hackathon Registration"
-                      content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes."
-                      author="Events Team"
-                      timeAgo="1 day ago"
-                      avatarColor="#10B981"
+                      initials="HR"
+                      gradientFrom="#10B981"
+                      gradientTo="#059669"
                     />
                     <AnnouncementCard
                       title="New Workspace Hours"
-                      content="Starting next week, our co-working space will be open 24/7 for all premium members."
-                      author="Facilities"
-                      timeAgo="3 days ago"
-                      avatarColor="#F59E0B"
+                      initials="WH"
+                      gradientFrom="#F59E0B"
+                      gradientTo="#D97706"
                     />
                   </div>
                 </div>
@@ -609,25 +605,21 @@ export default function EventsLeftColumn({
               <div className="space-y-5">
                 <AnnouncementCard
                   title="New Partnership with TechCorp"
-                  content="We're excited to announce our strategic partnership with TechCorp, bringing cutting-edge AI tools and resources to our community. This collaboration will provide exclusive access to their latest machine learning platforms, mentorship opportunities with their senior engineers, and potential internship placements for our most promising members."
-                  author="Admin"
-                  timeAgo="2 hours ago"
-                  avatarColor="#8B5CF6"
-                  isImportant={true}
+                  initials="TC"
+                  gradientFrom="#8B5CF6"
+                  gradientTo="#6366F1"
                 />
                 <AnnouncementCard
                   title="Upcoming Hackathon Registration"
-                  content="Registration is now open for our annual 48-hour hackathon! Teams of 2-4 members can compete for $10,000 in prizes while building innovative solutions for real-world problems. Mentors from top tech companies will be available throughout the event."
-                  author="Events Team"
-                  timeAgo="1 day ago"
-                  avatarColor="#10B981"
+                  initials="HR"
+                  gradientFrom="#10B981"
+                  gradientTo="#059669"
                 />
                 <AnnouncementCard
                   title="New Workspace Hours"
-                  content="Starting next week, our co-working space will be open 24/7 for all premium members. We've also added new high-speed internet, upgraded workstations, and a dedicated quiet zone for focused work sessions."
-                  author="Facilities"
-                  timeAgo="3 days ago"
-                  avatarColor="#F59E0B"
+                  initials="WH"
+                  gradientFrom="#F59E0B"
+                  gradientTo="#D97706"
                 />
               </div>
             </section>

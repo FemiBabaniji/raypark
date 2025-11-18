@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, MoreHorizontal } from 'lucide-react'
 
 interface AnnouncementCardProps {
   title: string
@@ -11,25 +11,23 @@ interface AnnouncementCardProps {
 
 export function AnnouncementCard({ title, initials, gradientFrom, gradientTo }: AnnouncementCardProps) {
   return (
-    <div className="rounded-2xl border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-      <div className="flex items-center gap-4">
+    <div className="rounded-xl border border-white/5 bg-[#1a1a1a] p-4 shadow-lg">
+      <div className="flex items-center gap-3">
         <div 
-          className="flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0"
+          className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0"
           style={{
             background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`
           }}
         >
-          <span className="text-xl font-bold">{initials}</span>
+          <span className="text-sm font-semibold">{initials}</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-semibold text-white truncate">{title}</h3>
+            <h3 className="text-base font-medium text-white truncate">{title}</h3>
             <div className="flex items-center gap-1 flex-shrink-0">
-              <ChevronDown className="h-5 w-5 text-gray-400" />
-              <button className="text-gray-400 hover:text-white">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                </svg>
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+              <button className="text-gray-400 hover:text-white transition-colors">
+                <MoreHorizontal className="h-4 w-4" />
               </button>
             </div>
           </div>

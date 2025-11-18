@@ -35,11 +35,11 @@ export function MeetingCard({ title, organizer, date, time, attendees, gradientF
           background: `linear-gradient(to bottom, ${gradientFrom}, ${gradientTo})`
         }}
       />
-      <h3 className="mb-1 font-semibold">{title}</h3>
-      <p className="mb-2 text-xs text-gray-400">{organizer}</p>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-400">{date} • {time}</span>
-        <span className="text-gray-400">{attendees} attending</span>
+      <h3 className="mb-1 text-lg font-semibold leading-tight">{title}</h3>
+      <p className="mb-3 text-sm text-gray-400">{organizer}</p>
+      <div className="flex items-center justify-between text-sm text-gray-400">
+        <span>{date} • {time}</span>
+        <span>{attendees} attending</span>
       </div>
     </div>
   )

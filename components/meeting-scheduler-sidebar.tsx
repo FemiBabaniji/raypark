@@ -19,8 +19,6 @@ export default function MeetingSchedulerSidebar({
   onGoogleConnect,
 }: MeetingSidebarProps) {
   const [activeTab, setActiveTab] = useState<Tab>("event")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
     date: "",
@@ -48,55 +46,8 @@ export default function MeetingSchedulerSidebar({
   }
 
   const handleSave = async () => {
-    if (!formData.title || !formData.date) return
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/google/calendar/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          startDateTime: `${formData.date}T${convertTo24Hour(formData.startTime)}`,
-          endDateTime: `${formData.date}T${convertTo24Hour(formData.endTime)}`,
-          timezone: formData.timezone,
-          attendees: formData.guests,
-          location: formData.location,
-          addGoogleMeet: formData.addGoogleMeet,
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to create meeting')
-      }
-
-      const meeting = await response.json()
-      console.log('[v0] Meeting created:', meeting)
-      
-      onClose()
-    } catch (err) {
-      console.error('[v0] Failed to create meeting:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create meeting')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const convertTo24Hour = (time: string) => {
-    const match = time.match(/(\d+):(\d+)\s*(am|pm)/i)
-    if (!match) return '09:00:00'
-    
-    let [_, hours, minutes, period] = match
-    let hour = parseInt(hours)
-    
-    if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12
-    if (period.toLowerCase() === 'am' && hour === 12) hour = 0
-    
-    return `${hour.toString().padStart(2, '0')}:${minutes}:00`
+    console.log("Creating meeting:", formData)
+    onClose()
   }
 
   if (!isOpen) return null
@@ -177,12 +128,6 @@ export default function MeetingSchedulerSidebar({
 
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-              <p className="text-xs text-red-400">{error}</p>
-            </div>
-          )}
-          
           <div className="space-y-4">
             <div>
               <input
@@ -320,10 +265,10 @@ export default function MeetingSchedulerSidebar({
           </button>
           <button
             onClick={handleSave}
-            disabled={!formData.title || !formData.date || isLoading}
+            disabled={!formData.title || !formData.date}
             className="px-4 py-2 rounded-lg bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
-            {isLoading ? 'Creating...' : 'Save'}
+            Save
           </button>
         </div>
       </div>

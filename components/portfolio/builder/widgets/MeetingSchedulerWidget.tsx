@@ -56,20 +56,6 @@ export default function MeetingSchedulerWidget({
   const isInitializedRef = useRef(false);
 
   useEffect(() => {
-    checkGoogleConnection()
-  }, [])
-
-  const checkGoogleConnection = async () => {
-    try {
-      const response = await fetch('/api/google/auth/status')
-      const data = await response.json()
-      setGoogleConnected(data.connected)
-    } catch (error) {
-      console.error('Failed to check Google connection:', error)
-    }
-  }
-
-  useEffect(() => {
     if (!isInitializedRef.current) {
       isInitializedRef.current = true;
       return;
@@ -210,17 +196,16 @@ export default function MeetingSchedulerWidget({
     setSelectedSlot(null)
   }
 
-  const handleGoogleConnect = () => {
-    window.location.href = '/api/google/auth/connect'
+  const handleGoogleConnect = async () => {
+    // TODO: Implement OAuth flow
+    console.log("Initiating Google OAuth...")
+    // For now, just simulate connection
+    setGoogleConnected(true)
+    setShowAccountSettings(false)
   }
 
-  const handleGoogleDisconnect = async () => {
-    try {
-      await fetch('/api/google/auth/disconnect', { method: 'POST' })
-      setGoogleConnected(false)
-    } catch (error) {
-      console.error('Failed to disconnect Google:', error)
-    }
+  const handleGoogleDisconnect = () => {
+    setGoogleConnected(false)
   }
 
   return (

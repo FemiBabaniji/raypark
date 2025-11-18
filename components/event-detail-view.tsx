@@ -94,24 +94,25 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="w-full pb-12 relative"
+      className="w-full pb-12"
     >
-      <button
-        onClick={onBack}
-        className="absolute -top-12 left-0 flex items-center gap-2 px-3 py-2 bg-zinc-800/60 hover:bg-zinc-800 rounded-lg transition-all z-10"
-      >
-        <ArrowLeft className="w-4 h-4 text-zinc-300" />
-        <span className="text-sm text-zinc-300">Back to Events</span>
-      </button>
-
       <div className="space-y-6">
+        {/* Left side - Registration & Event Details */}
         <div className="bg-zinc-900 rounded-2xl shadow-lg border border-white/5 overflow-hidden">
           <div className={`relative w-full h-48 bg-gradient-to-br ${gradient}`}>
             <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
             
-            <div className="absolute top-4 left-4">
-              <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-center mb-2">
-                <div className="text-zinc-400 text-xs uppercase">NOV</div>
+            <button
+              onClick={onBack}
+              className="absolute top-4 left-4 flex items-center gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm hover:bg-black/40 rounded-lg transition-all border border-white/20"
+            >
+              <ArrowLeft className="w-4 h-4 text-white" />
+              <span className="text-sm text-white">Back to Events</span>
+            </button>
+
+            <div className="absolute top-4 right-4">
+              <div className="bg-black/30 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-center mb-2 border border-white/20">
+                <div className="text-white/80 text-xs uppercase">NOV</div>
                 <div className="text-white font-bold text-lg">19</div>
               </div>
             </div>

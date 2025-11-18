@@ -58,26 +58,26 @@ export default function MeetingSchedulerSidebar({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
       
       {/* Sidebar */}
-      <div className="relative ml-auto w-full max-w-md bg-white shadow-2xl flex flex-col h-full overflow-hidden">
+      <div className="relative ml-auto w-full max-w-md bg-zinc-900 shadow-2xl flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-neutral-700" />
+            <X className="w-5 h-5 text-zinc-400" />
           </button>
-          <h2 className="text-lg font-semibold text-neutral-900">Create Event</h2>
+          <h2 className="text-lg font-semibold text-white">Create Event</h2>
           <div className="w-9" /> {/* Spacer for centering */}
         </div>
 
         {/* Google Connection Banner */}
         {!googleConnected && (
-          <div className="p-4 bg-blue-50 border-b border-blue-100">
-            <p className="text-sm text-blue-900 mb-2">
+          <div className="p-4 bg-blue-950/30 border-b border-blue-900/50">
+            <p className="text-sm text-blue-200 mb-2">
               Connect your Google account to create meetings with Google Meet links
             </p>
             <Button 
@@ -97,26 +97,26 @@ export default function MeetingSchedulerSidebar({
         )}
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-neutral-200 bg-neutral-50">
+        <div className="flex border-b border-zinc-800 bg-zinc-900">
           <button
             onClick={() => setActiveTab("event")}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
               activeTab === "event"
-                ? "text-blue-600 bg-blue-50"
-                : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+                ? "text-blue-400 bg-zinc-800/50"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
             }`}
           >
             Event
             {activeTab === "event" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
             )}
           </button>
           <button
             onClick={() => setActiveTab("task")}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
               activeTab === "task"
-                ? "text-blue-600 bg-blue-50"
-                : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+                ? "text-blue-400 bg-zinc-800/50"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
             }`}
           >
             Task
@@ -125,8 +125,8 @@ export default function MeetingSchedulerSidebar({
             onClick={() => setActiveTab("appointment")}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
               activeTab === "appointment"
-                ? "text-blue-600 bg-blue-50"
-                : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+                ? "text-blue-400 bg-zinc-800/50"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
             }`}
           >
             Appointment schedule
@@ -143,20 +143,20 @@ export default function MeetingSchedulerSidebar({
                 placeholder="Add title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-0 py-2 text-2xl font-normal text-neutral-900 placeholder:text-neutral-400 border-0 focus:outline-none focus:ring-0"
+                className="w-full px-0 py-2 text-2xl font-normal text-white placeholder:text-zinc-500 bg-transparent border-0 focus:outline-none focus:ring-0"
               />
             </div>
 
             {/* Date and Time */}
             <div className="flex items-start gap-3 py-3">
-              <Clock className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
+              <Clock className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-neutral-900">
+                <div className="flex items-center gap-2 text-sm text-white">
                   <input
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="border-0 focus:outline-none focus:ring-0 p-0"
+                    className="bg-transparent border-0 focus:outline-none focus:ring-0 p-0 text-white"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -164,29 +164,29 @@ export default function MeetingSchedulerSidebar({
                     type="text"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    className="w-20 text-sm border-0 focus:outline-none focus:ring-0 p-0"
+                    className="w-20 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 p-0 text-white"
                   />
-                  <span className="text-neutral-400">–</span>
+                  <span className="text-zinc-500">–</span>
                   <input
                     type="text"
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    className="w-20 text-sm border-0 focus:outline-none focus:ring-0 p-0"
+                    className="w-20 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 p-0 text-white"
                   />
                 </div>
-                <button className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-1">
+                <button className="text-sm text-zinc-400 hover:text-zinc-200 flex items-center gap-1">
                   {formData.timezone}
                   <ChevronDown className="w-4 h-4" />
                 </button>
-                <button className="text-sm text-neutral-600 hover:text-neutral-900">
+                <button className="text-sm text-zinc-400 hover:text-zinc-200">
                   Does not repeat
                 </button>
               </div>
             </div>
 
             {/* Add Guests */}
-            <div className="flex items-start gap-3 py-3 border-t border-neutral-200">
-              <Users className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
+            <div className="flex items-start gap-3 py-3 border-t border-zinc-800">
+              <Users className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
               <div className="flex-1">
                 <input
                   type="email"
@@ -194,16 +194,16 @@ export default function MeetingSchedulerSidebar({
                   value={guestInput}
                   onChange={(e) => setGuestInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && addGuest()}
-                  className="w-full text-sm text-neutral-900 placeholder:text-neutral-400 border-0 focus:outline-none focus:ring-0 p-0"
+                  className="w-full text-sm text-white placeholder:text-zinc-500 bg-transparent border-0 focus:outline-none focus:ring-0 p-0"
                 />
                 {formData.guests.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {formData.guests.map((guest, i) => (
                       <div key={i} className="flex items-center justify-between text-sm">
-                        <span className="text-neutral-700">{guest}</span>
+                        <span className="text-zinc-300">{guest}</span>
                         <button
                           onClick={() => removeGuest(i)}
-                          className="text-neutral-400 hover:text-neutral-600"
+                          className="text-zinc-500 hover:text-zinc-300"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -218,48 +218,48 @@ export default function MeetingSchedulerSidebar({
             {googleConnected && (
               <button
                 onClick={() => setFormData({ ...formData, addGoogleMeet: !formData.addGoogleMeet })}
-                className="flex items-start gap-3 py-3 w-full hover:bg-neutral-50 rounded-lg transition-colors border-t border-neutral-200"
+                className="flex items-start gap-3 py-3 w-full hover:bg-zinc-800/50 rounded-lg transition-colors border-t border-zinc-800"
               >
-                <Video className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
-                <span className="text-sm text-neutral-900">
+                <Video className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
+                <span className="text-sm text-white">
                   {formData.addGoogleMeet ? "Google Meet added" : "Add Google Meet video conferencing"}
                 </span>
               </button>
             )}
 
             {/* Add Location */}
-            <div className="flex items-start gap-3 py-3 border-t border-neutral-200">
-              <MapPin className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
+            <div className="flex items-start gap-3 py-3 border-t border-zinc-800">
+              <MapPin className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
               <input
                 type="text"
                 placeholder="Add location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 border-0 focus:outline-none focus:ring-0 p-0"
+                className="flex-1 text-sm text-white placeholder:text-zinc-500 bg-transparent border-0 focus:outline-none focus:ring-0 p-0"
               />
             </div>
 
             {/* Add Description */}
-            <div className="flex items-start gap-3 py-3 border-t border-neutral-200">
-              <AlignLeft className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
+            <div className="flex items-start gap-3 py-3 border-t border-zinc-800">
+              <AlignLeft className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
               <textarea
                 placeholder="Add description or a Google Drive attachment"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-400 border-0 focus:outline-none focus:ring-0 p-0 resize-none"
+                className="flex-1 text-sm text-white placeholder:text-zinc-500 bg-transparent border-0 focus:outline-none focus:ring-0 p-0 resize-none"
               />
             </div>
 
             {/* Calendar Owner Info */}
-            <div className="flex items-start gap-3 py-3 border-t border-neutral-200">
-              <Calendar className="w-5 h-5 text-neutral-600 mt-1 flex-shrink-0" />
+            <div className="flex items-start gap-3 py-3 border-t border-zinc-800">
+              <Calendar className="w-5 h-5 text-zinc-400 mt-1 flex-shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-neutral-900">Oluwafemi Babaniji</span>
+                  <span className="text-sm text-white">Oluwafemi Babaniji</span>
                   <span className="w-2 h-2 rounded-full bg-blue-500" />
                 </div>
-                <div className="text-xs text-neutral-500 mt-1">
+                <div className="text-xs text-zinc-400 mt-1">
                   Busy • Default visibility • Notify 30 minutes before
                 </div>
               </div>
@@ -268,18 +268,18 @@ export default function MeetingSchedulerSidebar({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-neutral-200 bg-white flex items-center justify-between">
+        <div className="p-4 border-t border-zinc-800 bg-zinc-900 flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
-            className="text-blue-600 hover:bg-blue-50"
+            className="text-blue-400 hover:bg-zinc-800 hover:text-blue-300"
           >
             More options
           </Button>
           <Button
             onClick={handleSave}
             disabled={!formData.title || !formData.date}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save
           </Button>

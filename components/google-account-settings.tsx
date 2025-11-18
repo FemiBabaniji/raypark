@@ -60,10 +60,10 @@ export default function GoogleAccountSettings({
   ]
 
   return (
-    <div className="bg-neutral-900 rounded-2xl p-6 space-y-6">
+    <div className="bg-zinc-900 rounded-2xl p-6 space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-white mb-2">Third Party Accounts</h2>
-        <p className="text-neutral-400 text-sm">
+        <p className="text-zinc-400 text-sm">
           Link your accounts to sign in to Luma and automate your workflows.
         </p>
       </div>
@@ -72,13 +72,13 @@ export default function GoogleAccountSettings({
         {accounts.map((account) => (
           <div
             key={account.id}
-            className="bg-neutral-800 rounded-xl p-4 flex items-center justify-between"
+            className="bg-zinc-800 rounded-xl p-4 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               {account.icon}
               <div>
                 <div className="text-white font-medium">{account.name}</div>
-                <div className="text-neutral-400 text-sm">
+                <div className="text-zinc-400 text-sm">
                   {account.connected ? account.email : "Not Linked"}
                 </div>
               </div>
@@ -99,38 +99,38 @@ export default function GoogleAccountSettings({
       </div>
 
       {/* Account Syncing Section */}
-      <div className="pt-6 border-t border-neutral-800">
+      <div className="pt-6 border-t border-zinc-800">
         <h3 className="text-lg font-semibold text-white mb-4">Account Syncing</h3>
         
         <div className="space-y-3">
-          <div className="bg-neutral-800 rounded-xl p-4">
+          <div className="bg-zinc-800 rounded-xl p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span className="text-white font-medium">Calendar Syncing</span>
                 </div>
-                <p className="text-neutral-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                   Sync your Luma events with your Google, Outlook, or Apple calendar.
                 </p>
               </div>
               <Button
                 size="sm"
                 variant="secondary"
-                className="bg-neutral-700 hover:bg-neutral-600 text-white ml-4"
+                className="bg-zinc-700 hover:bg-zinc-600 text-white ml-4"
               >
                 Add iCal Subscription
               </Button>
             </div>
           </div>
 
-          <div className="bg-neutral-800 rounded-xl p-4">
+          <div className="bg-zinc-800 rounded-xl p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-5 h-5 text-neutral-400" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-zinc-400" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -138,14 +138,14 @@ export default function GoogleAccountSettings({
                   </svg>
                   <span className="text-white font-medium">Sync Contacts with Google</span>
                 </div>
-                <p className="text-neutral-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                   Sync your Gmail contacts to easily invite them to your events.
                 </p>
               </div>
               <Button
                 size="sm"
                 variant="default"
-                className="bg-white hover:bg-neutral-100 text-neutral-900 ml-4"
+                className="bg-white hover:bg-zinc-100 text-zinc-900 ml-4"
               >
                 Enable Syncing
               </Button>

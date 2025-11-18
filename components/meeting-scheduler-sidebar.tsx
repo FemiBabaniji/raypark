@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { X, Calendar, Clock, MapPin, Users, Video, AlignLeft, Bell, ChevronDown, Loader2 } from 'lucide-react'
+import { useState } from "react"
+import { X, Calendar, Clock, MapPin, Users, Video, AlignLeft, Bell, ChevronDown } from 'lucide-react'
 
 type Tab = "event" | "task" | "appointment"
 
@@ -19,10 +19,8 @@ export default function MeetingSchedulerSidebar({
   onGoogleConnect,
 }: MeetingSidebarProps) {
   const [activeTab, setActiveTab] = useState<Tab>("event")
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isGoogleConnected, setIsGoogleConnected] = useState(false)
-  
   const [formData, setFormData] = useState({
     title: "",
     date: "",
@@ -38,22 +36,6 @@ export default function MeetingSchedulerSidebar({
 
   const [guestInput, setGuestInput] = useState("")
 
-  useEffect(() => {
-    if (isOpen) {
-      checkGoogleConnection()
-    }
-  }, [isOpen])
-
-  const checkGoogleConnection = async () => {
-    try {
-      const res = await fetch('/api/google/auth/status')
-      const data = await res.json()
-      setIsGoogleConnected(data.connected)
-    } catch (error) {
-      console.error('[v0] Failed to check Google connection:', error)
-    }
-  }
-
   const addGuest = () => {
     if (guestInput.trim() && formData.guests.length < 10) {
       setFormData({ ...formData, guests: [...formData.guests, guestInput.trim()] })
@@ -66,63 +48,49 @@ export default function MeetingSchedulerSidebar({
   }
 
   const handleSave = async () => {
-    if (!formData.title || !formData.date) {
-      setError('Please fill in title and date')
-      return
-    }
+    if (!formData.title || !formData.date) return
 
-    setLoading(true)
+    setIsLoading(true)
     setError(null)
 
     try {
-      const res = await fetch('/api/google/calendar/events', {
+      const response = await fetch('/api/google/calendar/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
-          startTime: `${formData.date}T${convertTo24Hour(formData.startTime)}`,
-          endTime: `${formData.date}T${convertTo24Hour(formData.endTime)}`,
+          startDateTime: `${formData.date}T${convertTo24Hour(formData.startTime)}`,
+          endDateTime: `${formData.date}T${convertTo24Hour(formData.endTime)}`,
           timezone: formData.timezone,
           attendees: formData.guests,
           location: formData.location,
-          addGoogleMeet: formData.addGoogleMeet && isGoogleConnected,
+          addGoogleMeet: formData.addGoogleMeet,
         }),
       })
 
-      if (!res.ok) {
-        throw new Error('Failed to create meeting')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to create meeting')
       }
 
-      const data = await res.json()
-      console.log('[v0] Meeting created:', data)
+      const meeting = await response.json()
+      console.log('[v0] Meeting created:', meeting)
       
-      setFormData({
-        title: "",
-        date: "",
-        startTime: "9:30pm",
-        endTime: "10:30pm",
-        timezone: "Eastern Time",
-        guests: [],
-        addGoogleMeet: false,
-        location: "",
-        description: "",
-        reminder: 30,
-      })
       onClose()
     } catch (err) {
       console.error('[v0] Failed to create meeting:', err)
       setError(err instanceof Error ? err.message : 'Failed to create meeting')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const convertTo24Hour = (time: string): string => {
-    const match = time.match(/(\d+):(\d+)(am|pm)/i)
+  const convertTo24Hour = (time: string) => {
+    const match = time.match(/(\d+):(\d+)\s*(am|pm)/i)
     if (!match) return '09:00:00'
     
-    let [, hours, minutes, period] = match
+    let [_, hours, minutes, period] = match
     let hour = parseInt(hours)
     
     if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12
@@ -151,7 +119,7 @@ export default function MeetingSchedulerSidebar({
           <div className="w-5" />
         </div>
 
-        {!isGoogleConnected && (
+        {!googleConnected && (
           <div className="p-4 bg-white/5 border-b border-white/5">
             <p className="text-xs text-white/60 mb-2">
               Connect your Google account to create meetings with Google Meet links
@@ -209,6 +177,12 @@ export default function MeetingSchedulerSidebar({
 
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto p-4">
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <p className="text-xs text-red-400">{error}</p>
+            </div>
+          )}
+          
           <div className="space-y-4">
             <div>
               <input
@@ -288,7 +262,7 @@ export default function MeetingSchedulerSidebar({
             </div>
 
             {/* Add Google Meet */}
-            {isGoogleConnected && (
+            {googleConnected && (
               <button
                 onClick={() => setFormData({ ...formData, addGoogleMeet: !formData.addGoogleMeet })}
                 className="flex items-start gap-3 py-3 w-full hover:bg-white/5 rounded-lg transition-colors border-t border-white/5"
@@ -340,25 +314,17 @@ export default function MeetingSchedulerSidebar({
           </div>
         </div>
 
-        <div className="p-4 border-t border-white/5">
-          {error && (
-            <div className="mb-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-400">
-              {error}
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <button className="text-xs text-white/60 hover:text-white transition-colors">
-              More options
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!formData.title || !formData.date || loading}
-              className="px-4 py-2 rounded-lg bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
-            >
-              {loading && <Loader2 className="w-3 h-3 animate-spin" />}
-              {loading ? 'Creating...' : 'Save'}
-            </button>
-          </div>
+        <div className="p-4 border-t border-white/5 flex items-center justify-between">
+          <button className="text-xs text-white/60 hover:text-white transition-colors">
+            More options
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!formData.title || !formData.date || isLoading}
+            className="px-4 py-2 rounded-lg bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            {isLoading ? 'Creating...' : 'Save'}
+          </button>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Plus, Loader2 } from 'lucide-react'
+import { Check, Plus } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 type AccountConnection = {
@@ -20,9 +20,10 @@ export default function GoogleAccountSettings({
   onConnect,
   onDisconnect,
 }: GoogleAccountSettingsProps) {
-  const [googleConnected, setGoogleConnected] = useState(false)
-  const [googleEmail, setGoogleEmail] = useState<string | undefined>()
-  const [loading, setLoading] = useState(false)
+  const [googleStatus, setGoogleStatus] = useState<{
+    connected: boolean
+    email?: string
+  }>({ connected: false })
 
   useEffect(() => {
     checkGoogleStatus()
@@ -30,46 +31,41 @@ export default function GoogleAccountSettings({
 
   const checkGoogleStatus = async () => {
     try {
-      const res = await fetch('/api/google/auth/status')
-      const data = await res.json()
-      setGoogleConnected(data.connected)
-      setGoogleEmail(data.email)
+      const response = await fetch('/api/google/auth/status')
+      const data = await response.json()
+      setGoogleStatus(data)
     } catch (error) {
-      console.error('[v0] Failed to check Google status:', error)
+      console.error('Failed to check Google status:', error)
     }
   }
 
-  const handleGoogleConnect = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/google/auth/connect')
-      const data = await res.json()
-      window.location.href = data.authUrl
-    } catch (error) {
-      console.error('[v0] Failed to connect Google:', error)
-      setLoading(false)
+  const handleConnect = async (accountId: string) => {
+    if (accountId === 'google') {
+      window.location.href = '/api/google/auth/connect'
+    } else {
+      onConnect(accountId)
     }
   }
 
-  const handleGoogleDisconnect = async () => {
-    setLoading(true)
-    try {
-      await fetch('/api/google/auth/disconnect', { method: 'POST' })
-      setGoogleConnected(false)
-      setGoogleEmail(undefined)
-      onDisconnect('google')
-    } catch (error) {
-      console.error('[v0] Failed to disconnect Google:', error)
+  const handleDisconnect = async (accountId: string) => {
+    if (accountId === 'google') {
+      try {
+        await fetch('/api/google/auth/disconnect', { method: 'POST' })
+        setGoogleStatus({ connected: false })
+      } catch (error) {
+        console.error('Failed to disconnect Google:', error)
+      }
+    } else {
+      onDisconnect(accountId)
     }
-    setLoading(false)
   }
 
   const accounts: AccountConnection[] = [
     {
       id: "google",
       name: "Google",
-      email: googleEmail,
-      connected: googleConnected,
+      email: googleStatus.email || "ofbabaniji@gmail.com",
+      connected: googleStatus.connected,
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -129,32 +125,20 @@ export default function GoogleAccountSettings({
             </div>
 
             <button
-              onClick={() => {
-                if (account.id === 'google') {
-                  account.connected ? handleGoogleDisconnect() : handleGoogleConnect()
-                } else {
-                  account.connected ? onDisconnect(account.id) : onConnect(account.id)
-                }
-              }}
-              disabled={loading && account.id === 'google'}
+              onClick={() => account.connected ? handleDisconnect(account.id) : handleConnect(account.id)}
               className={`p-1.5 rounded-full transition-colors ${
                 account.connected
                   ? "bg-green-500/20 text-green-400"
                   : "bg-white/10 text-white hover:bg-white/20"
               }`}
             >
-              {loading && account.id === 'google' ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : account.connected ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
+              {account.connected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </button>
           </div>
         ))}
       </div>
 
+      {/* Account Syncing Section */}
       <div className="pt-3 border-t border-white/10">
         <h3 className="text-sm font-semibold text-white mb-3">Account Syncing</h3>
         

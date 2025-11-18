@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus } from 'lucide-react'
+import { Plus, LayoutGrid, List } from 'lucide-react'
 import { MeetingsCalendarView } from "./meetings-calendar-view"
 import { MeetingCard } from "@/components/cards/meeting-card"
 import { Meeting } from "@/types/meeting"
@@ -54,41 +54,34 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
-        <div>
-          <h2 className="text-xl font-semibold text-white">My Meetings</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-white">My Meetings</h2>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 text-white rounded-lg text-sm font-medium transition-colors border border-white/10">
-            <Plus className="h-4 w-4" />
-            Create
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-lg transition-colors ${
+              viewMode === "list" 
+                ? "bg-zinc-800 text-white" 
+                : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+            }`}
+            aria-label="List view"
+          >
+            <List className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setViewMode("calendar")}
+            className={`p-2 rounded-lg transition-colors ${
+              viewMode === "calendar" 
+                ? "bg-zinc-800 text-white" 
+                : "bg-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/30"
+            }`}
+            aria-label="Calendar view"
+          >
+            <LayoutGrid className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-        <button
-          onClick={() => setViewMode("list")}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-            viewMode === "list" 
-              ? "bg-zinc-700 text-white" 
-              : "bg-zinc-800/30 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/50"
-          }`}
-        >
-          List
-        </button>
-        <button
-          onClick={() => setViewMode("calendar")}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-            viewMode === "calendar" 
-              ? "bg-zinc-700 text-white" 
-              : "bg-zinc-800/30 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/50"
-          }`}
-        >
-          Calendar
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-hidden min-h-0">
+      <div className="flex-1 overflow-hidden min-h-0 mb-4">
         {viewMode === "list" ? (
           <div className="space-y-2 h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
             {upcomingMeetings.map((meeting) => {
@@ -103,6 +96,7 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
                   attendees={meeting.attendees}
                   gradientFrom={colors.from}
                   gradientTo={colors.to}
+                  subtext={meeting.type === "team" ? "Team Meeting" : meeting.type === "1-on-1" ? "1:1 Meeting" : "All Hands Meeting"}
                 />
               )
             })}
@@ -111,6 +105,11 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
           <MeetingsCalendarView meetings={upcomingMeetings} onMeetingClick={onMeetingClick} />
         )}
       </div>
+
+      <button className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-zinc-800/50 hover:bg-zinc-700/50 text-white rounded-lg text-sm font-medium transition-colors border border-white/10">
+        <Plus className="h-4 w-4" />
+        Create
+      </button>
     </div>
   )
 }

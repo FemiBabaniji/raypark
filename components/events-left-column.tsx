@@ -346,7 +346,8 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="mt-6 flex-shrink-0 flex-1 flex flex-col">
+                  {/* Increased margin-top from mt-6 to mt-10 for more spacing between filters and event cards */}
+                  <div className="mt-10 flex-shrink-0 flex-1 flex flex-col">
                     {view === "grid" ? (
                       <>
                         <div className="relative group flex-1">
@@ -573,7 +574,8 @@ export default function EventsLeftColumn({
                 />
               </div>
 
-              <div className="mt-6 flex-1 overflow-hidden mt-5 flex flex-col">
+              {/* Increased margin-top from mt-6 to mt-10 for more spacing between filters and event cards */}
+              <div className="mt-10 flex-1 overflow-hidden mt-5 flex flex-col">
                 {view === "grid" ? (
                   <div className="relative group">
                     {showLeftArrow && (

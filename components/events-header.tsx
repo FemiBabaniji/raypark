@@ -55,9 +55,8 @@ export default function EventsHeader({
             </span>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-bold leading-tight">
-            <span className="text-white">Your hub. </span>
-            <span style={{ color: "#4169E1" }}>Your community.</span>
+          <h1 className="text-2xl font-bold leading-tight text-white">
+            Your hub. Your community.
           </h1>
         </div>
         

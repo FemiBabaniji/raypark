@@ -221,7 +221,7 @@ export default function MusicAppInterface({
         }}
       />
 
-      <div className="fixed right-4 top-20 w-72 max-w-[320px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pb-4 space-y-4">
+      <div className="fixed right-4 top-20 w-80 max-w-[360px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pr-6 pb-4 space-y-4">
         {editOpen && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -609,50 +609,62 @@ export default function MusicAppInterface({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
           >
-            <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-2xl p-4 flex flex-col h-[40vh] max-h-[450px] border border-white/5">
-              <div className="flex items-center gap-2 mb-2">
-                <Bot className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-zinc-300 text-xs">Portfolio Co-pilot</span>
-                {onTogglePreview && (
-                  <button
-                    onClick={onTogglePreview}
-                    className="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20"
-                  >
-                    Toggle Preview
-                  </button>
-                )}
+            <div className="rounded-3xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-white">AI Assistant</h3>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-                {msgs.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`text-xs leading-relaxed ${m.role === "assistant" ? "text-zinc-200" : "text-white"}`}
-                  >
-                    {m.text}
-                  </div>
-                ))}
-                {loading && (
-                  <div className="text-xs text-zinc-400 flex items-center gap-2">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                    Working…
-                  </div>
-                )}
-                <div ref={endRef} />
-              </div>
+              <p className="text-sm mb-4 text-zinc-400">
+                Get instant help with portfolio edits, widgets, and customization
+              </p>
 
-              <div className="mt-2 flex items-center gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder='Try: add gallery right'
-                  className="flex-1 bg-white/10 border border-white/10 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-white/30"
-                />
-                <button onClick={handleSend} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20" aria-label="Send">
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <button
+                onClick={() => setLoading(!loading)}
+                className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900"
+              >
+                {msgs.length > 1 ? "Close Chat" : "Start Chat"}
+              </button>
+
+              {msgs.length > 1 && (
+                <div className="mt-3 rounded-xl p-3 bg-zinc-800/40 border border-white/5">
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {msgs.map((m, i) => (
+                      <div
+                        key={i}
+                        className={`text-sm leading-relaxed ${
+                          m.role === "assistant" ? "text-zinc-200" : "text-white"
+                        }`}
+                      >
+                        {m.text}
+                      </div>
+                    ))}
+                    {loading && (
+                      <div className="text-sm text-zinc-400 flex items-center gap-2">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Working…
+                      </div>
+                    )}
+                    <div ref={endRef} />
+                  </div>
+
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                      placeholder="Try: add gallery right"
+                      className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 bg-zinc-900/60 text-white border border-zinc-700 placeholder:text-zinc-500"
+                    />
+                    <button 
+                      onClick={handleSend} 
+                      className="px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-zinc-700/60 bg-zinc-800/60 text-white"
+                      aria-label="Send"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

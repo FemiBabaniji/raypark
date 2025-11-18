@@ -219,6 +219,30 @@ export default function EventsLeftColumn({
       tags: ["UX/UI", "Design Thinking", "Masterclass", "Portfolio Review"],
       type: "masterclass",
     },
+    {
+      title: "Startup Pitch Competition",
+      date: "5 Oct 2025",
+      description: "Present your startup idea to investors and win funding opportunities.",
+      time: "4:00 PM - 8:00 PM",
+      attending: 67,
+      dateLabel: "Oct 5",
+      location: "Main Auditorium",
+      instructor: "Investment Panel",
+      tags: ["Pitch", "Funding", "Competition", "Investors"],
+      type: "conference",
+    },
+    {
+      title: "Tech Social Meetup",
+      date: "12 Oct 2025",
+      description: "Casual meetup for tech professionals to connect and share ideas.",
+      time: "6:30 PM - 9:00 PM",
+      attending: 52,
+      dateLabel: "Oct 12",
+      location: "Cafe Lounge",
+      instructor: "Community Organizers",
+      tags: ["Social", "Networking", "Casual", "Tech"],
+      type: "meetup",
+    },
   ]
 
   const filterEvents = (events: typeof upcomingEvents) => {

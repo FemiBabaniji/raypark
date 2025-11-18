@@ -92,14 +92,14 @@ export function EventCard({ title, date, description, time, attending, location,
         aspectRatio: "1 / 1.1"
       }}
     >
-      <div className="absolute top-4 right-4 bg-black/30 backdrop-blur-sm rounded-xl px-3 py-2">
-        <p className="text-white font-bold text-base leading-none">{date}</p>
+      <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md rounded-lg px-2.5 py-1.5 z-10">
+        <p className="text-white font-semibold text-xs leading-none whitespace-nowrap">{date}</p>
       </div>
 
       <div className="relative flex flex-col h-full">
-        <div className="mb-auto pr-20">
+        <div className="mb-auto pr-0">
           <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3 className="text-xl font-bold leading-tight text-white">
+          <h3 className="text-xl font-bold leading-tight text-white line-clamp-3 mb-3">
             {title}
           </h3>
         </div>

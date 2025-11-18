@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, MapPin, Users, Search, ArrowLeft, Clock } from "lucide-react"
+import { Calendar, MapPin, Users, Search, ArrowLeft, Clock, Mail, MessageSquare, Share2, Copy, ExternalLink, Facebook, Twitter, Linkedin, Plus, Edit, Camera, AlertTriangle } from 'lucide-react'
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
 interface EventDetailProps {
@@ -46,6 +46,7 @@ interface EventDetailProps {
 export default function EventDetailView({ event, onBack, onAttendeeClick }: EventDetailProps) {
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState("")
   const [attendeeFilter, setAttendeeFilter] = useState("all")
+  const [copied, setCopied] = useState(false)
 
   const filteredAttendees = event.attendees.filter((attendee) => {
     const matchesSearch =
@@ -71,275 +72,300 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
 
   const getGradient = (title: string) => {
     if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#3B82F6]/70 to-[#06B6D4]/70"
+      return "from-blue-400/90 via-cyan-400/90 to-teal-400/90"
     } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-[#34D399]/70 to-[#6EE7B7]/70"
+      return "from-emerald-400/90 via-green-400/90 to-lime-400/90"
     } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-[#A855F7]/70 to-[#7C3AED]/70"
+      return "from-purple-400/90 via-violet-400/90 to-fuchsia-400/90"
     }
-    return "from-[#F87171]/70 to-[#FB7185]/70"
-  }
-
-  const getTitleGradient = (title: string) => {
-    if (title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-white via-white to-[#3B82F6]"
-    } else if (title.includes("Networking") || title.includes("Founder")) {
-      return "from-white via-white to-[#34D399]"
-    } else if (title.includes("Design") || title.includes("Product")) {
-      return "from-white via-white to-[#A855F7]"
-    }
-    return "from-white via-white to-[#F87171]"
+    return "from-orange-400/90 via-amber-400/90 to-yellow-400/90"
   }
 
   const gradient = getGradient(event.title)
-  const titleGradient = getTitleGradient(event.title)
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`luma.com/ebv3f82b`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="w-full"
+      className="w-full pb-12"
     >
-      <div className={`relative rounded-3xl overflow-hidden mb-4 bg-gradient-to-br ${gradient} backdrop-blur-xl`}>
-        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
+      <div className="flex items-center gap-3 mb-6">
+        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
+          <Mail className="w-4 h-4 text-blue-400" />
+          Invite Guests
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
+          <MessageSquare className="w-4 h-4 text-purple-400" />
+          Send a Blast
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
+          <Share2 className="w-4 h-4 text-pink-400" />
+          Share Event
+        </button>
+      </div>
 
-        <div className="relative z-10 px-5 py-5">
-          <button
-            onClick={onBack}
-            className="mb-3 flex items-center gap-2 text-white/90 hover:text-white transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </button>
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Left: Event Card */}
+        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
+          <div className={`relative w-full aspect-[4/3] rounded-xl mb-4 bg-gradient-to-br ${gradient} overflow-hidden`}>
+            <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
+          </div>
 
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-1 bg-white/20 backdrop-blur-xl rounded-full text-xs font-medium text-white uppercase tracking-wide">
-                  {event.type}
-                </span>
-                <span className="px-2.5 py-1 bg-white/20 backdrop-blur-xl rounded-full text-xs font-medium text-white flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5" />
-                  {event.attending}
-                </span>
+          <h2 className="text-2xl font-bold text-white mb-4">{event.title}</h2>
+
+          {/* Date & Time */}
+          <div className="bg-zinc-800/60 rounded-xl p-3 mb-3">
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-zinc-400 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-white font-semibold text-sm mb-1">{event.date}</div>
+                <div className="text-zinc-400 text-xs">{event.time}</div>
               </div>
-              <h1
-                className={`text-2xl font-bold mb-2 leading-tight bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
-              >
-                {event.title}
-              </h1>
-              <p className="text-sm text-white/90 leading-relaxed">{event.description}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3">
-              <div className="flex items-center gap-1.5 text-white/70 mb-1">
-                <Calendar className="w-3.5 h-3.5 opacity-70" />
-                <span className="text-xs font-medium">Date</span>
+          {/* Location */}
+          <div className="bg-zinc-800/60 rounded-xl p-3 mb-4">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-zinc-400 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-white font-semibold text-sm">Register to See Address</div>
               </div>
-              <p className="font-semibold text-white text-xs">{event.date}</p>
-              <p className="text-xs text-white/85 flex items-center gap-1 mt-0.5">
-                <Clock className="w-3 h-3 opacity-70" />
-                {event.time}
-              </p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3">
-              <div className="flex items-center gap-1.5 text-white/70 mb-1">
-                <MapPin className="w-3.5 h-3.5 opacity-70" />
-                <span className="text-xs font-medium">Location</span>
-              </div>
-              <p className="font-semibold text-white text-xs">{event.location}</p>
-              <p className="text-xs text-white/85">{event.venue || "In-Person"}</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3">
-              <div className="flex items-center gap-1.5 text-white/70 mb-1">
-                <Users className="w-3.5 h-3.5 opacity-70" />
-                <span className="text-xs font-medium">Dress Code</span>
-              </div>
-              <p className="font-semibold text-white text-xs">{event.dressCode || "Casual"}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button className="px-5 py-2 rounded-full font-semibold text-black bg-white/95 hover:bg-white text-sm transition-all hover:scale-105 shadow-lg">
-              RSVP
+          {/* Registration Section */}
+          <div className="bg-zinc-800/40 rounded-xl p-4 mb-4">
+            <h3 className="text-white font-semibold text-sm mb-2">Registration</h3>
+            <p className="text-zinc-400 text-sm mb-3">Welcome! To join the event, please register below.</p>
+            
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+              </div>
+              <div>
+                <div className="text-white font-medium text-sm">{event.host || "Oluwafemi Babaniji"}</div>
+                <div className="text-zinc-400 text-xs">ofbabaniji@gmail.com</div>
+              </div>
+            </div>
+
+            <button className="w-full py-2.5 bg-white hover:bg-white/90 text-black font-semibold rounded-lg text-sm transition-all">
+              One-Click RSVP
             </button>
-            <button className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl text-white rounded-full font-semibold text-sm transition-all hover:scale-105 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              Add to Calendar
+          </div>
+
+          {/* Presented by */}
+          <div className="mb-4">
+            <h3 className="text-zinc-400 text-xs mb-2">Presented by</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center">
+                <span className="text-xs font-bold">DMZ</span>
+              </div>
+              <span className="text-white font-medium text-sm">DMZ</span>
+            </div>
+          </div>
+
+          {/* Hosted By */}
+          <div className="mb-4">
+            <h3 className="text-zinc-400 text-xs mb-2">Hosted By</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+              </div>
+              <span className="text-white font-medium text-sm">{event.host || "Oluwafemi Babaniji"}</span>
+            </div>
+          </div>
+
+          {/* Event URL */}
+          <div className="flex items-center gap-2 bg-zinc-800/60 rounded-lg p-2.5 mb-4">
+            <span className="text-zinc-400 text-sm flex-1 truncate">luma.com/ebv3f82b</span>
+            <button 
+              onClick={handleCopyLink}
+              className="px-3 py-1.5 bg-zinc-700/60 hover:bg-zinc-700 rounded text-white text-xs font-medium transition-all"
+            >
+              {copied ? "Copied!" : "COPY"}
+            </button>
+          </div>
+
+          {/* Share & Edit buttons */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/5">
+            <div className="flex items-center gap-1">
+              <span className="text-zinc-400 text-sm mr-2">Share Event</span>
+              <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                <Facebook className="w-4 h-4 text-zinc-400" />
+              </button>
+              <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                <Twitter className="w-4 h-4 text-zinc-400" />
+              </button>
+              <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                <Linkedin className="w-4 h-4 text-zinc-400" />
+              </button>
+              <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                <ExternalLink className="w-4 h-4 text-zinc-400" />
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-all">
+                Edit Event
+              </button>
+              <button className="px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-all">
+                Change Photo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: When & Where */}
+        <div className="space-y-6">
+          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
+            <h2 className="text-xl font-bold text-white mb-4">When & Where</h2>
+            
+            {/* Date/Time */}
+            <div className="bg-zinc-800/40 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="bg-zinc-700/60 rounded-lg px-2.5 py-1.5 text-center">
+                  <div className="text-zinc-400 text-xs uppercase">NOV</div>
+                  <div className="text-white font-bold text-lg">19</div>
+                </div>
+                <div className="flex-1">
+                  <div className="text-white font-semibold mb-1">Tomorrow</div>
+                  <div className="text-zinc-400 text-sm">{event.time} EST</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Warning */}
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="text-yellow-500 font-semibold text-sm mb-1">Location Missing</div>
+                  <div className="text-yellow-500/80 text-xs">Please enter the location of the event before it starts.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">Invites</h2>
+          <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 rounded-lg text-white text-sm font-medium transition-all">
+            <Plus className="w-4 h-4" />
+            Invite Guests
+          </button>
+        </div>
+        <p className="text-zinc-400 text-sm mb-4">Invite subscribers, contacts and past guests via email or SMS.</p>
+        
+        <div className="bg-zinc-800/40 rounded-xl p-6 text-center">
+          <div className="w-12 h-12 rounded-lg bg-zinc-700/60 flex items-center justify-center mx-auto mb-3">
+            <Mail className="w-6 h-6 text-zinc-400" />
+          </div>
+          <h3 className="text-white font-semibold mb-1">No Invites Sent</h3>
+          <p className="text-zinc-400 text-sm">You can invite subscribers, contacts and past guests to the event.</p>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">Hosts</h2>
+          <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 rounded-lg text-white text-sm font-medium transition-all">
+            <Plus className="w-4 h-4" />
+            Add Host
+          </button>
+        </div>
+        <p className="text-zinc-400 text-sm mb-4">Add hosts, special guests, and event managers.</p>
+        
+        <div className="flex items-center justify-between bg-zinc-800/40 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+            </div>
+            <div>
+              <div className="text-white font-semibold text-sm">{event.host || "Oluwafemi Babaniji"}</div>
+              <div className="text-zinc-400 text-xs">ofbabaniji@gmail.com</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-md text-xs font-medium">Creator</span>
+            <button className="w-8 h-8 rounded-lg bg-zinc-700/60 hover:bg-zinc-700 flex items-center justify-center transition-all">
+              <Edit className="w-4 h-4 text-zinc-400" />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {/* Left Column - About & Attendees */}
-        <div className="col-span-2 space-y-4">
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-            <h3 className="text-lg font-bold text-white mb-3">About This Event</h3>
-            <div className="space-y-2.5 text-zinc-300 text-sm">
-              {event.fullDescription ? (
-                event.fullDescription.split("\n\n").map((para, i) => (
-                  <p key={i} className="whitespace-pre-line leading-relaxed">
-                    {para}
-                  </p>
-                ))
-              ) : (
-                <p className="leading-relaxed">{event.description}</p>
-              )}
+      <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
+        <div className="flex items-center gap-2 mb-4">
+          <Users className="w-5 h-5 text-zinc-400" />
+          <h2 className="text-xl font-bold text-white">Event Attendees</h2>
+          <span className="text-sm text-zinc-400">({filteredAttendees.length})</span>
+        </div>
 
-              {event.agenda && event.agenda.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-zinc-700/50">
-                  <h4 className="font-semibold text-white text-sm mb-2">Agenda:</h4>
-                  <ul className="space-y-1.5">
-                    {event.agenda.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-zinc-400">
-                        <span className="text-zinc-500 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+        <div className="space-y-3 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Search attendees..."
+              value={attendeeSearchQuery}
+              onChange={(e) => setAttendeeSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-800/60 rounded-xl text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
+            />
           </div>
 
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-4 h-4 text-zinc-400" />
-              <h2 className="text-lg font-bold text-white">Attendees</h2>
-              <span className="text-sm text-zinc-400">({filteredAttendees.length})</span>
-            </div>
-
-            <div className="space-y-2.5 mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                <input
-                  type="text"
-                  placeholder="Search attendees..."
-                  value={attendeeSearchQuery}
-                  onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-zinc-800/60 rounded-xl text-white text-xs placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: "all", label: "All" },
-                  { id: "design", label: "Design" },
-                  { id: "engineering", label: "Engineering" },
-                  { id: "product", label: "Product" },
-                  { id: "data", label: "Data" },
-                ].map((filter) => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setAttendeeFilter(filter.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      attendeeFilter === filter.id
-                        ? `bg-gradient-to-br ${gradient} text-white`
-                        : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-800"
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-              {filteredAttendees.map((attendee) => (
-                <div key={attendee.id} className="flex-shrink-0 w-32">
-                  <UnifiedPortfolioCard
-                    portfolio={attendee}
-                    onClick={(id) => {
-                      if (onAttendeeClick) {
-                        onAttendeeClick(id)
-                      }
-                    }}
-                    onShare={(id) => console.log("Share attendee:", id)}
-                    onMore={(id) => console.log("More options for attendee:", id)}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {filteredAttendees.length === 0 && (
-              <div className="text-center py-6">
-                <p className="text-zinc-500 text-xs">No attendees found.</p>
-              </div>
-            )}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: "all", label: "All" },
+              { id: "design", label: "Design" },
+              { id: "engineering", label: "Engineering" },
+              { id: "product", label: "Product" },
+              { id: "data", label: "Data" },
+            ].map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setAttendeeFilter(filter.id)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  attendeeFilter === filter.id
+                    ? "bg-white text-black"
+                    : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Right Sidebar - Host, Stats, Topics */}
-        <div className="space-y-4">
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 shadow-lg shadow-black/20">
-            <h3 className="text-sm font-bold text-white mb-3">Hosted By</h3>
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-800/60 flex items-center justify-center text-sm font-bold text-white">
-                {(event.host || "TC").substring(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <h4 className="font-semibold text-white text-sm">{event.host || "Tech Community"}</h4>
-                <p className="text-xs text-zinc-400">Organizer</p>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-400 mb-3 leading-relaxed">
-              {event.hostDescription || "Leading community for tech professionals."}
-            </p>
-            <button className="w-full py-2 bg-zinc-800/60 hover:bg-zinc-800 rounded-xl text-white text-xs font-medium transition-all">
-              Follow
-            </button>
-          </div>
-
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 shadow-lg shadow-black/20">
-            <h3 className="text-sm font-bold text-white mb-3">Stats</h3>
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Attendees</span>
-                <span className="font-bold text-white text-sm">{event.attending}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Spots Left</span>
-                <span className="font-bold text-white text-sm">27</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Format</span>
-                <span className="font-bold text-white text-sm">In-Person</span>
-              </div>
-            </div>
-          </div>
-
-          {event.tags && event.tags.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 shadow-lg shadow-black/20">
-              <h3 className="text-sm font-bold text-white mb-2.5">Topics</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {event.tags.slice(0, 6).map((tag, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-zinc-800/60 text-zinc-300 rounded-lg text-xs font-medium">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {event.partners && event.partners.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-4 shadow-lg shadow-black/20">
-              <h3 className="text-sm font-bold text-white mb-2.5">Partners</h3>
-              <div className="space-y-2">
-                {event.partners.slice(0, 3).map((partner, i) => (
-                  <div key={i} className="px-2.5 py-1.5 bg-zinc-800/60 text-zinc-300 rounded-lg text-xs font-medium">
-                    {partner}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="grid grid-cols-5 gap-4">
+          {filteredAttendees.map((attendee) => (
+            <UnifiedPortfolioCard
+              key={attendee.id}
+              portfolio={attendee}
+              onClick={(id) => {
+                if (onAttendeeClick) {
+                  onAttendeeClick(id)
+                }
+              }}
+              onShare={(id) => console.log("Share attendee:", id)}
+              onMore={(id) => console.log("More options for attendee:", id)}
+            />
+          ))}
         </div>
+
+        {filteredAttendees.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-zinc-500 text-sm">No attendees found.</p>
+          </div>
+        )}
       </div>
     </motion.div>
   )

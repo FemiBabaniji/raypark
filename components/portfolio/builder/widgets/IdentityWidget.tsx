@@ -36,14 +36,25 @@ export default function IdentityWidget({
 
   useEffect(() => {
     console.log("[v0] IdentityWidget received identity prop - selectedColor:", identity.selectedColor, "type:", typeof identity.selectedColor)
-  }, [identity.selectedColor])
+    console.log("[v0] Full identity:", { 
+      name: identity.name,
+      firstName: identity.firstName,
+      lastName: identity.lastName,
+      profileName: identity.profileName,
+      skills: identity.skills
+    })
+  }, [identity])
 
   const gradient = THEME_COLOR_OPTIONS[identity.selectedColor]?.gradient ?? "from-neutral-600/50 to-neutral-800/50"
   const backgroundStyle = identity.selectedColor !== undefined ? `bg-gradient-to-br ${gradient}` : "bg-[#1a1a1a]"
   
   console.log("[v0] IdentityWidget rendering with selectedColor:", identity.selectedColor, "gradient:", gradient)
 
-  const defaultBio = `${identity.name || "jenny wilson"} ${identity.title || "is a digital product designer"} ${identity.subtitle || "currently designing at acme."}`
+  const displayName = identity.firstName && identity.lastName 
+    ? `${identity.firstName} ${identity.lastName}`
+    : identity.name || "jenny wilson"
+    
+  const defaultBio = `${displayName} ${identity.title || "is a digital product designer"} ${identity.subtitle || "currently designing at acme."}`
   const displayBio = identity.bio || defaultBio
 
   useEffect(() => {
@@ -110,7 +121,7 @@ export default function IdentityWidget({
         <div className="w-16 h-16 rounded-full bg-white/20 overflow-hidden">
           <img
             src={identity.avatarUrl || "/professional-woman-headshot.png"}
-            alt={identity.name || "Profile"}
+            alt={displayName}
             className="w-full h-full object-cover"
           />
         </div>
@@ -164,6 +175,19 @@ export default function IdentityWidget({
             </h1>
           )}
         </div>
+
+        {identity.skills && identity.skills.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {identity.skills.map((skill, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-1 rounded-md bg-white/10 text-white/80 border border-white/10 text-xs"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-3 pt-4">
           {(["linkedin", "dribbble", "behance", "twitter", "unsplash", "instagram"] as const).map((social) => (

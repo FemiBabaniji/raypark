@@ -3,6 +3,9 @@ export type ThemeIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export type Identity = {
   id?: string
   name: string
+  firstName?: string
+  lastName?: string
+  profileName?: string // Username for slug generation
   title: string
   subtitle?: string
   bio?: string
@@ -18,6 +21,10 @@ export type Identity = {
   twitter?: string
   unsplash?: string
   instagram?: string
+  youtube?: string
+  tiktok?: string
+  website?: string
+  skills?: string[]
 }
 
 export type WidgetPosition = {

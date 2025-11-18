@@ -118,6 +118,16 @@ export default function PortfolioBuilder({
 
   const handleIdentityChange = useCallback(
     (updates: Partial<Identity>) => {
+      console.log("[v0] 🎨 handleIdentityChange called with updates:", updates)
+      
+      // Generate slug from profileName if it changed
+      if (updates.profileName) {
+        const slug = toSlug(updates.profileName)
+        console.log("[v0] Generated slug from profileName:", slug)
+        // You can optionally update the portfolio slug here if needed
+        // This would require an additional API call or state update
+      }
+      
       setWidgetContent((prev) => ({
         ...prev,
         identity: {
@@ -991,3 +1001,11 @@ export default function PortfolioBuilder({
     </>
   )
 }
+
+// Helper function for slug generation
+const toSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 64)

@@ -101,7 +101,7 @@ export default function MusicAppInterface({
   type ChatMsg = { role: "assistant" | "user"; text: string }
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
     const intro =
-      "Hi! I’m your portfolio co-pilot. Ask me to add/remove/move widgets, change your theme, or rename your profile."
+      "Hi! I'm your portfolio co-pilot. Ask me to add/remove/move widgets, change your theme, or rename your profile."
     const summary = getWidgetsSummary?.()
     return [{ role: "assistant", text: summary ? `${intro}\n\nCurrent layout: ${summary}` : intro }]
   })
@@ -221,7 +221,7 @@ export default function MusicAppInterface({
         }}
       />
 
-      <div className="fixed right-4 top-20 w-80 max-w-[360px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pr-6 pb-4 space-y-4">
+      <div className="fixed right-4 top-20 w-80 max-w-[360px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pr-8 pb-4 space-y-4">
         {editOpen && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -451,11 +451,25 @@ export default function MusicAppInterface({
               <button
                 onClick={() => {
                   const fullName = [draft.firstName, draft.lastName].filter(Boolean).join(" ")
-                  const updates = {
-                    ...draft,
-                    name: fullName || draft.name,
+                  const updates: Partial<IdentityShape> = {
+                    firstName: draft.firstName,
+                    lastName: draft.lastName,
+                    profileName: draft.profileName,
+                    name: fullName || draft.name, // Full display name
                     handle: draft.profileName ? `@${draft.profileName}` : draft.handle,
+                    bio: draft.bio,
+                    skills: draft.skills,
+                    avatarUrl: draft.avatarUrl,
+                    // Social links
+                    linkedin: draft.linkedin,
+                    twitter: draft.twitter,
+                    instagram: draft.instagram,
+                    youtube: draft.youtube,
+                    tiktok: draft.tiktok,
+                    website: draft.website,
                   }
+                  
+                  console.log("[v0] 💾 Saving profile updates:", updates)
                   onIdentityChange?.(updates)
                   setEditOpen(false)
                 }}
@@ -619,8 +633,15 @@ export default function MusicAppInterface({
               </p>
 
               <button
-                onClick={() => setLoading(!loading)}
+                onClick={() => setShowTraitQuestionnaire(true)}
                 className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900"
+              >
+                Discover Your Traits
+              </button>
+
+              <button
+                onClick={() => setLoading(!loading)}
+                className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
               >
                 {msgs.length > 1 ? "Close Chat" : "Start Chat"}
               </button>

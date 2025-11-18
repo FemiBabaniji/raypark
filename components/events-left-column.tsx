@@ -340,7 +340,7 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="flex-1 overflow-hidden mt-4 flex flex-col">
+                  <div className="mt-4 flex-shrink-0 h-[320px] overflow-y-auto scrollbar-thin">
                     {view === "grid" ? (
                       <div className="relative group">
                         {showLeftArrow && (
@@ -390,7 +390,7 @@ export default function EventsLeftColumn({
                         )}
                       </div>
                     ) : (
-                      <div className="flex-1 overflow-hidden">
+                      <div className="h-full">
                         <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />
                       </div>
                     )}

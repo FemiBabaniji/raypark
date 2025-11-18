@@ -96,23 +96,8 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="w-full pb-12"
     >
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
-          <Mail className="w-4 h-4 text-blue-400" />
-          Invite Guests
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
-          <MessageSquare className="w-4 h-4 text-purple-400" />
-          Send a Blast
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl text-white text-sm font-medium transition-all">
-          <Share2 className="w-4 h-4 text-pink-400" />
-          Share Event
-        </button>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,360px] gap-6">
-        {/* Left Column - Event Card, About, and Attendees */}
+        {/* Left Column - Event Card and Attendees */}
         <div className="space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl shadow-lg border border-white/5 overflow-hidden">
             <div className={`relative w-full h-48 bg-gradient-to-br ${gradient}`}>
@@ -131,89 +116,93 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mb-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <div className="text-yellow-500 font-semibold text-sm mb-1">Location Missing</div>
-                    <div className="text-yellow-500/80 text-xs">Please enter the location of the event before it starts.</div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left side - Registration & Event Details */}
+              <div className="space-y-4">
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-yellow-500 font-semibold text-sm mb-1">Location Missing</div>
+                      <div className="text-yellow-500/80 text-xs">Please enter the location of the event before it starts.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-800/40 rounded-xl p-4">
+                  <h3 className="text-white font-semibold text-sm mb-2">Registration</h3>
+                  <p className="text-zinc-400 text-sm mb-3">Welcome! To join the event, please register below.</p>
+                  
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium text-sm">{event.host || "Tech Community"}</div>
+                      <div className="text-zinc-400 text-xs">ofbabaniji@gmail.com</div>
+                    </div>
+                  </div>
+
+                  <button className="w-full py-2.5 bg-white hover:bg-white/90 text-black font-semibold rounded-lg text-sm transition-all">
+                    One-Click RSVP
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 bg-zinc-800/60 rounded-lg p-2.5">
+                  <span className="text-zinc-400 text-sm flex-1 truncate">pathwai.com/ebv3f82b</span>
+                  <button 
+                    onClick={handleCopyLink}
+                    className="px-3 py-1.5 bg-zinc-700/60 hover:bg-zinc-700 rounded text-white text-xs font-medium transition-all"
+                  >
+                    {copied ? "Copied!" : "COPY"}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-zinc-400 text-xs mr-2">Share Event</span>
+                    <button className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                      <Facebook className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+                    <button className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                      <Twitter className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+                    <button className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                      <Linkedin className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+                    <button className="w-7 h-7 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="px-3 py-1.5 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-xs font-medium transition-all">
+                      Edit Event
+                    </button>
+                    <button className="px-3 py-1.5 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-xs font-medium transition-all">
+                      Change Photo
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Registration Section */}
-              <div className="bg-zinc-800/40 rounded-xl p-4 mb-4">
-                <h3 className="text-white font-semibold text-sm mb-2">Registration</h3>
-                <p className="text-zinc-400 text-sm mb-3">Welcome! To join the event, please register below.</p>
-                
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                  </div>
-                  <div>
-                    <div className="text-white font-medium text-sm">{event.host || "Oluwafemi Babaniji"}</div>
-                    <div className="text-zinc-400 text-xs">ofbabaniji@gmail.com</div>
-                  </div>
-                </div>
-
-                <button className="w-full py-2.5 bg-white hover:bg-white/90 text-black font-semibold rounded-lg text-sm transition-all">
-                  One-Click RSVP
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 bg-zinc-800/60 rounded-lg p-2.5 mb-4">
-                <span className="text-zinc-400 text-sm flex-1 truncate">pathwai.com/ebv3f82b</span>
-                <button 
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 bg-zinc-700/60 hover:bg-zinc-700 rounded text-white text-xs font-medium transition-all"
-                >
-                  {copied ? "Copied!" : "COPY"}
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                <div className="flex items-center gap-1">
-                  <span className="text-zinc-400 text-sm mr-2">Share Event</span>
-                  <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
-                    <Facebook className="w-4 h-4 text-zinc-400" />
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
-                    <Twitter className="w-4 h-4 text-zinc-400" />
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
-                    <Linkedin className="w-4 h-4 text-zinc-400" />
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 flex items-center justify-center transition-all">
-                    <ExternalLink className="w-4 h-4 text-zinc-400" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-all">
-                    Edit Event
-                  </button>
-                  <button className="px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-all">
-                    Change Photo
-                  </button>
+              {/* Right side - About this Event */}
+              <div className="bg-zinc-800/20 rounded-xl p-4">
+                <h3 className="text-white font-semibold text-base mb-3">About this Event</h3>
+                <div className="text-zinc-300 text-sm space-y-2 leading-relaxed">
+                  <p>{event.description}</p>
+                  {event.fullDescription && <p>{event.fullDescription}</p>}
+                  {!event.fullDescription && (
+                    <>
+                      <p>Join us for an exciting exploration of artificial intelligence and machine learning technologies. This event brings together industry experts, researchers, and enthusiasts.</p>
+                      <p>Network with fellow professionals, learn from hands-on workshops, and discover how AI is transforming various industries.</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
-            <h3 className="text-white font-semibold text-lg mb-4">About this Event</h3>
-            <div className="text-zinc-300 text-sm space-y-3">
-              <p>{event.description}</p>
-              {event.fullDescription && <p>{event.fullDescription}</p>}
-              {!event.fullDescription && (
-                <>
-                  <p>Join us for an exciting exploration of artificial intelligence and machine learning technologies. This event brings together industry experts, researchers, and enthusiasts to discuss the latest trends and breakthroughs in AI.</p>
-                  <p>Network with fellow professionals, learn from hands-on workshops, and discover how AI is transforming various industries. Whether you're a beginner or an experienced practitioner, there's something for everyone.</p>
-                </>
-              )}
-            </div>
-          </div>
-
+          {/* Event Attendees Section */}
           <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-zinc-400" />

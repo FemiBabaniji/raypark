@@ -10,6 +10,9 @@ interface AnnouncementCardProps {
   timeAgo: string
   avatarColor: string
   isImportant?: boolean
+  initials: string
+  gradientFrom: string
+  gradientTo: string
 }
 
 export function AnnouncementCard({
@@ -19,6 +22,9 @@ export function AnnouncementCard({
   timeAgo,
   avatarColor,
   isImportant = false,
+  initials,
+  gradientFrom,
+  gradientTo,
 }: AnnouncementCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -40,16 +46,14 @@ export function AnnouncementCard({
 
         <div className="p-5">
           <div className="flex items-start gap-4">
-            <div
-              className="h-11 w-11 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white text-sm shadow-lg"
+            <div 
+              className="flex h-12 w-12 items-center justify-center rounded-full"
               style={{
-                backgroundColor: avatarColor,
-                boxShadow: `0 4px 12px ${avatarColor}50`,
+                background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`
               }}
             >
-              {author.charAt(0)}
+              <span className="text-xl font-bold">{initials}</span>
             </div>
-
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex-1 min-w-0">
@@ -62,16 +66,10 @@ export function AnnouncementCard({
                   </div>
                 </div>
 
-                <button
-                  className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all duration-300 hover:bg-white/5 flex-shrink-0 ${
-                    isExpanded ? "rotate-180 bg-white/5" : ""
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setIsExpanded(!isExpanded)
-                  }}
-                >
-                  <ChevronDown className="h-4 w-4 text-zinc-400" />
+                <button className="text-gray-400 hover:text-white">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                  </svg>
                 </button>
               </div>
 

@@ -41,6 +41,16 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
     },
   ]
 
+  const getGradientColors = (type: string) => {
+    const gradients = {
+      team: { from: '#3b82f6', to: '#1e40af' }, // blue
+      '1-on-1': { from: '#10b981', to: '#059669' }, // green
+      'all-hands': { from: '#a855f7', to: '#7c3aed' }, // purple
+      default: { from: '#f97316', to: '#ea580c' } // orange
+    }
+    return gradients[type as keyof typeof gradients] || gradients.default
+  }
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
@@ -81,13 +91,21 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
       <div className="flex-1 overflow-hidden min-h-0">
         {viewMode === "list" ? (
           <div className="space-y-2 h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
-            {upcomingMeetings.map((meeting) => (
-              <MeetingCard 
-                key={meeting.id} 
-                meeting={meeting} 
-                onClick={onMeetingClick}
-              />
-            ))}
+            {upcomingMeetings.map((meeting) => {
+              const colors = getGradientColors(meeting.type)
+              return (
+                <MeetingCard 
+                  key={meeting.id} 
+                  title={meeting.title}
+                  organizer={meeting.host}
+                  date={meeting.date}
+                  time={meeting.time}
+                  attendees={meeting.attendees}
+                  gradientFrom={colors.from}
+                  gradientTo={colors.to}
+                />
+              )
+            })}
           </div>
         ) : (
           <MeetingsCalendarView meetings={upcomingMeetings} onMeetingClick={onMeetingClick} />

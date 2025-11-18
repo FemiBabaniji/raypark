@@ -92,7 +92,7 @@ export function EventCard({ title, date, description, time, attending, location,
         aspectRatio: "1 / 1.1"
       }}
     >
-      <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md rounded-lg px-2.5 py-1.5 z-10">
+      <div className={`absolute top-3 right-3 bg-gradient-to-br ${gradient} backdrop-blur-md rounded-lg px-2.5 py-1.5 z-10 shadow-md border border-white/20`}>
         <p className="text-white font-semibold text-xs leading-none whitespace-nowrap">{date}</p>
       </div>
 

@@ -96,23 +96,23 @@ export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare,
         </div>
 
         {/* Identity */}
-        <div className="flex flex-col mb-4">
-          <div className="text-white font-bold text-base leading-tight line-clamp-2">{portfolio.name}</div>
-          <div className="text-white/90 text-xs leading-snug line-clamp-2 mt-0.5">{portfolio.title}</div>
+        <div className="flex flex-col mb-auto">
+          <div className="text-white font-bold text-xl leading-tight line-clamp-2 mb-1">{portfolio.name}</div>
+          <div className="text-white/80 text-base leading-snug line-clamp-2">{portfolio.title}</div>
         </div>
 
         <div className="flex-1" />
 
         {/* Contact */}
-        <div className="space-y-1">
-          {portfolio.email ? <div className="text-white font-medium text-xs line-clamp-1 break-all">{portfolio.email}</div> : null}
-          {portfolio.location ? <div className="text-white/90 text-xs line-clamp-1">{portfolio.location}</div> : null}
+        <div className="space-y-1.5 mt-auto">
+          {portfolio.email ? <div className="text-white font-medium text-sm line-clamp-1 break-all">{portfolio.email}</div> : null}
+          {portfolio.location ? <div className="text-white/90 text-sm line-clamp-1">{portfolio.location}</div> : null}
         </div>
 
         {/* Footer: handle */}
-        <div className="mt-2">
+        <div className="mt-3">
           {portfolio.handle ? (
-            <Badge className="bg-white/15 text-white border-white/25 px-2 py-1 rounded-full text-[10px] font-medium">
+            <Badge className="bg-white/15 text-white border-white/25 px-2.5 py-1.5 rounded-full text-xs font-medium">
               @{portfolio.handle.replace(/^@/, "")}
             </Badge>
           ) : null}

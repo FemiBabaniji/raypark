@@ -55,8 +55,8 @@ export function MeetingsSection({ onMeetingClick }: MeetingsSectionProps) {
     <div className="h-full flex flex-col">
       <div className="flex items-start justify-between mb-4 flex-shrink-0">
         <div>
-          <h2 className="text-xl font-semibold text-white mb-1">My Meetings</h2>
-          <p className="text-zinc-400 text-sm">Manage your upcoming meetings</p>
+          <h2 className="text-xl font-semibold text-white mb-1">Meetings</h2>
+          <p className="text-zinc-400 text-sm">Manage your meetings</p>
         </div>
         <div className="flex items-center gap-2">
           <button

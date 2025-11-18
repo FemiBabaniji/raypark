@@ -338,7 +338,7 @@ export default function EventsLeftColumn({
                     <ViewToggle view={view} onViewChange={setView} />
                   </div>
 
-                  <div className="mt-6 flex-shrink-0">
+                  <div className="flex-shrink-0">
                     <CategoryFilters
                       filters={EVENT_CATEGORY_FILTERS}
                       selectedCategory={selectedCategory}
@@ -346,7 +346,7 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="mt-4 flex-shrink-0 flex-1 flex flex-col">
+                  <div className="mt-6 flex-shrink-0 flex-1 flex flex-col">
                     {view === "grid" ? (
                       <>
                         <div className="relative group flex-1">
@@ -565,7 +565,7 @@ export default function EventsLeftColumn({
                 <ViewToggle view={view} onViewChange={setView} />
               </div>
 
-              <div className="mt-4 flex-shrink-0">
+              <div className="flex-shrink-0">
                 <CategoryFilters
                   filters={EVENT_CATEGORY_FILTERS}
                   selectedCategory={selectedCategory}
@@ -573,7 +573,7 @@ export default function EventsLeftColumn({
                 />
               </div>
 
-              <div className="flex-1 overflow-hidden mt-5 flex flex-col">
+              <div className="mt-6 flex-1 overflow-hidden mt-5 flex flex-col">
                 {view === "grid" ? (
                   <div className="relative group">
                     {showLeftArrow && (

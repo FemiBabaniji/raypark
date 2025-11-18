@@ -96,13 +96,15 @@ export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare,
         </div>
 
         {/* Identity */}
-        <div className="flex flex-col mb-3">
+        <div className="flex flex-col mb-4">
           <div className="text-white font-bold text-base leading-tight line-clamp-2">{portfolio.name}</div>
           <div className="text-white/90 text-xs leading-snug line-clamp-2 mt-0.5">{portfolio.title}</div>
         </div>
 
+        <div className="flex-1" />
+
         {/* Contact */}
-        <div className="mt-auto space-y-1">
+        <div className="space-y-1">
           {portfolio.email ? <div className="text-white font-medium text-xs line-clamp-1 break-all">{portfolio.email}</div> : null}
           {portfolio.location ? <div className="text-white/90 text-xs line-clamp-1">{portfolio.location}</div> : null}
         </div>

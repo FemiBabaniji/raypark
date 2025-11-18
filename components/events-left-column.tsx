@@ -159,11 +159,17 @@ export default function EventsLeftColumn({
 
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(true)
+  
+  const [currentEventPage, setCurrentEventPage] = useState(0)
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget
     setShowLeftArrow(target.scrollLeft > 0)
     setShowRightArrow(target.scrollLeft < target.scrollWidth - target.clientWidth - 10)
+    
+    const cardWidth = 240 // approximate card width + gap
+    const currentPage = Math.round(target.scrollLeft / cardWidth)
+    setCurrentEventPage(currentPage)
   }
 
   const scrollContainer = (direction: 'left' | 'right', containerId: string) => {
@@ -332,7 +338,7 @@ export default function EventsLeftColumn({
                     <ViewToggle view={view} onViewChange={setView} />
                   </div>
 
-                  <div className="mt-3 flex-shrink-0">
+                  <div className="mt-6 flex-shrink-0">
                     <CategoryFilters
                       filters={EVENT_CATEGORY_FILTERS}
                       selectedCategory={selectedCategory}
@@ -340,55 +346,83 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="mt-4 flex-shrink-0 h-[320px] overflow-y-auto scrollbar-thin">
+                  <div className="mt-4 flex-shrink-0 flex-1 flex flex-col">
                     {view === "grid" ? (
-                      <div className="relative group">
-                        {showLeftArrow && (
-                          <button
-                            onClick={() => scrollContainer('left', 'events-scroll-home')}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                            aria-label="Scroll left"
+                      <>
+                        <div className="relative group flex-1">
+                          {showLeftArrow && (
+                            <button
+                              onClick={() => scrollContainer('left', 'events-scroll-home')}
+                              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                              aria-label="Scroll left"
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                            </button>
+                          )}
+                          <div 
+                            id="events-scroll-home"
+                            className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
+                            onScroll={handleScroll}
                           >
-                            <ChevronLeft className="w-5 h-5" />
-                          </button>
-                        )}
-                        <div 
-                          id="events-scroll-home"
-                          className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
-                          onScroll={handleScroll}
-                        >
-                          {filteredUpcomingEvents.length > 0 ? (
-                            filteredUpcomingEvents.map((event, index) => (
-                              <EventCard
-                                key={index}
-                                title={event.title}
-                                date={event.date}
-                                description={event.description}
-                                time={event.time}
-                                attending={event.attending}
-                                dateLabel={event.dateLabel}
-                                location={event.location}
-                                instructor={event.instructor}
-                                tags={event.tags}
-                                onEventClick={onEventClick}
-                              />
-                            ))
-                          ) : (
-                            <div className="w-full text-center py-12">
-                              <p className="text-zinc-500">No workshops found matching your criteria.</p>
-                            </div>
+                            {filteredUpcomingEvents.length > 0 ? (
+                              filteredUpcomingEvents.map((event, index) => (
+                                <EventCard
+                                  key={index}
+                                  title={event.title}
+                                  date={event.date}
+                                  description={event.description}
+                                  time={event.time}
+                                  attending={event.attending}
+                                  dateLabel={event.dateLabel}
+                                  location={event.location}
+                                  instructor={event.instructor}
+                                  tags={event.tags}
+                                  onEventClick={onEventClick}
+                                />
+                              ))
+                            ) : (
+                              <div className="w-full text-center py-12">
+                                <p className="text-zinc-500">No workshops found matching your criteria.</p>
+                              </div>
+                            )}
+                          </div>
+                          {showRightArrow && (
+                            <button
+                              onClick={() => scrollContainer('right', 'events-scroll-home')}
+                              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
+                              aria-label="Scroll right"
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
                           )}
                         </div>
-                        {showRightArrow && (
-                          <button
-                            onClick={() => scrollContainer('right', 'events-scroll-home')}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg opacity-0 group-hover:opacity-100"
-                            aria-label="Scroll right"
-                          >
-                            <ChevronRight className="w-5 h-5" />
-                          </button>
+                        
+                        {filteredUpcomingEvents.length > 0 && (
+                          <div className="flex items-center justify-center gap-2 mt-4 pb-2">
+                            {filteredUpcomingEvents.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => {
+                                  const container = document.getElementById('events-scroll-home')
+                                  if (container) {
+                                    const cardWidth = 240
+                                    container.scrollTo({
+                                      left: index * cardWidth,
+                                      behavior: 'smooth'
+                                    })
+                                  }
+                                }}
+                                className={`h-2 rounded-full transition-all ${
+                                  index === currentEventPage
+                                    ? 'w-8 bg-white'
+                                    : 'w-2 bg-white/30 hover:bg-white/50'
+                                }`}
+                                aria-label={`Go to event ${index + 1}`}
+                              />
+                            ))}
+                          </div>
                         )}
-                      </div>
+                      </>
                     ) : (
                       <div className="h-full">
                         <CalendarView events={filteredUpcomingEvents} onEventClick={onEventClick} />

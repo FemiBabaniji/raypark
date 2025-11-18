@@ -67,12 +67,12 @@ export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare,
       )}
 
       {/* Card background */}
-      <div className={`h-full w-full bg-neutral-900 bg-gradient-to-br ${gradient} backdrop-blur-xl p-6 flex flex-col`}>
+      <div className={`h-full w-full bg-neutral-900 bg-gradient-to-br ${gradient} backdrop-blur-xl p-4 flex flex-col`}>
         {/* Top-right 'More' */}
         <button
           type="button"
           aria-label="More options"
-          className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 transition-colors"
+          className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/5 hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 transition-colors"
           onClick={(e) => {
             e.stopPropagation()
             onMore?.(portfolio.id)
@@ -82,7 +82,7 @@ export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare,
         </button>
 
         {/* Avatar */}
-        <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center mb-5">
+        <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center mb-3">
           {portfolio.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -91,26 +91,26 @@ export function UnifiedPortfolioCard({ portfolio, communityId, onClick, onShare,
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-lg font-semibold text-white">{initials}</span>
+            <span className="text-base font-semibold text-white">{initials}</span>
           )}
         </div>
 
         {/* Identity */}
-        <div className="flex flex-col mb-4">
-          <div className="text-white font-bold text-xl leading-tight truncate">{portfolio.name}</div>
-          <div className="text-white/90 text-sm leading-snug truncate">{portfolio.title}</div>
+        <div className="flex flex-col mb-3">
+          <div className="text-white font-bold text-base leading-tight line-clamp-2">{portfolio.name}</div>
+          <div className="text-white/90 text-xs leading-snug line-clamp-2 mt-0.5">{portfolio.title}</div>
         </div>
 
         {/* Contact */}
-        <div className="mt-auto space-y-1.5">
-          {portfolio.email ? <div className="text-white font-medium text-sm truncate">{portfolio.email}</div> : null}
-          {portfolio.location ? <div className="text-white/90 text-sm truncate">{portfolio.location}</div> : null}
+        <div className="mt-auto space-y-1">
+          {portfolio.email ? <div className="text-white font-medium text-xs line-clamp-1 break-all">{portfolio.email}</div> : null}
+          {portfolio.location ? <div className="text-white/90 text-xs line-clamp-1">{portfolio.location}</div> : null}
         </div>
 
         {/* Footer: handle */}
-        <div className="mt-4">
+        <div className="mt-2">
           {portfolio.handle ? (
-            <Badge className="bg-white/15 text-white border-white/25 px-3 py-1.5 rounded-full text-xs font-medium">
+            <Badge className="bg-white/15 text-white border-white/25 px-2 py-1 rounded-full text-[10px] font-medium">
               @{portfolio.handle.replace(/^@/, "")}
             </Badge>
           ) : null}

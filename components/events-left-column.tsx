@@ -470,7 +470,7 @@ export default function EventsLeftColumn({
                     </button>
                     <div id="networks-scroll-home" className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                       {filteredHomeNetworks.slice(0, 8).map((member) => (
-                        <div key={member.id} className="flex-shrink-0 w-36 sm:w-44">
+                        <div key={member.id} className="flex-shrink-0 w-56 sm:w-64">
                           <UnifiedPortfolioCard
                             portfolio={member}
                             onClick={(id) => handleMemberClick(id)}

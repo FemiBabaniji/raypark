@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, MapPin, Calendar, Users, Search } from "lucide-react"
+import { ChevronLeft, MapPin, Calendar, Users, Search } from 'lucide-react'
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { spotsRemaining, makeMapSrc, generateICS, sanitizeFilename } from "@/utils"
 import { useState } from "react"
@@ -199,248 +199,220 @@ export default function EventDetail({
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-neutral-400 hover:text-white transition-all duration-200 hover:gap-3 group"
-      >
-        <ChevronLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
-        <span className="font-medium">Back to Home</span>
-      </button>
-
-      <div className="relative">
-        <div
-          className={`rounded-3xl p-8 bg-gradient-to-br ${e.gradient || "from-sky-400/35 to-blue-600/20"} relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-black/20`}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+          <ChevronLeft className="w-4 h-4 text-white" />
+          <span className="text-white text-sm font-medium">Invite Guests</span>
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
+        >
+          <span className="text-white text-sm font-medium">Send a Blast</span>
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
+        >
+          <span className="text-white text-sm font-medium">Share Event</span>
+        </button>
+      </div>
 
-          <div className="relative z-10 space-y-6">
-            {/* Type badge and attending count */}
-            <div className="flex items-center gap-3">
-              {e.type && (
-                <span className="px-4 py-1.5 bg-white/20 backdrop-blur-xl rounded-full text-sm font-medium text-white">
-                  {e.type}
-                </span>
-              )}
-              <span className="px-4 py-1.5 bg-white/20 backdrop-blur-xl rounded-full text-sm font-medium text-white flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                {e.attending} attending
-              </span>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left - Event Card */}
+        <div
+          className={`rounded-3xl bg-gradient-to-br ${e.gradient || "from-sky-400/35 to-blue-600/20"} overflow-hidden shadow-2xl`}
+        >
+          <div className="p-6 space-y-4">
+            {/* Cover Image Placeholder with Gradient */}
+            <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-amber-200 via-cyan-300 to-purple-300 shadow-lg" />
 
-            {/* Title and description */}
+            {/* Event Title */}
             <div>
-              <h1 className="text-4xl font-bold text-white mb-3 leading-tight">{e.title}</h1>
-              <p className="text-lg text-white/90 leading-relaxed">{e.description}</p>
+              <h1 className="text-2xl font-bold text-white mb-2">{e.title}</h1>
             </div>
 
-            {/* Info cards grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-2 text-white/70 mb-2">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-xs font-medium">Date & Time</span>
+            {/* Date, Time, Location */}
+            <div className="space-y-2 text-white/90 text-sm">
+              <div className="flex items-start gap-3">
+                <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold">{e.date}</p>
+                  <p className="text-white/70 text-xs">{e.time}</p>
                 </div>
-                <p className="font-semibold text-white">{e.date}</p>
-                <p className="text-sm text-white/90">{e.time}</p>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-2 text-white/70 mb-2">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-xs font-medium">Location</span>
-                </div>
-                <p className="font-semibold text-white">{e.location.name}</p>
-                <p className="text-sm text-white/90">{e.location.venue || "In-Person Event"}</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-2 text-white/70 mb-2">
-                  <Users className="w-4 h-4" />
-                  <span className="text-xs font-medium">Dress Code</span>
-                </div>
-                <p className="font-semibold text-white">{e.dressCode || "Casual"}</p>
-                <p className="text-sm text-white/90">Come as you are</p>
+              <div className="flex items-center gap-3">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <p className="text-white/90">Register to See Address</p>
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <Button
+            {/* Registration Section */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-3">
+              <h3 className="font-semibold text-white text-sm">Registration</h3>
+              <p className="text-white/90 text-xs">Welcome! To join the event, please register below.</p>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-green-500" />
+                <div className="text-xs">
+                  <p className="text-white font-medium">{e.host?.name || "Event Host"}</p>
+                  <p className="text-white/70">{e.host?.description?.substring(0, 30) || "ofbabaniji@gmail.com"}</p>
+                </div>
+              </div>
+              <button
                 onClick={onRSVP}
-                className="px-6 py-2.5 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                style={{ backgroundColor: e.accent || "#06b6d4" }}
+                className="w-full py-3 bg-white hover:bg-white/90 text-black font-semibold rounded-xl transition-all"
               >
-                RSVP Now
-              </Button>
-              <Button
-                onClick={handleICS}
-                className="px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/30 text-white rounded-xl font-semibold transition-all hover:scale-105"
-              >
-                Add to Calendar
-              </Button>
-              <Button
+                One-Click RSVP
+              </button>
+            </div>
+
+            {/* Presented By */}
+            <div className="pt-3 border-t border-white/10">
+              <p className="text-xs text-white/60 mb-1">Presented by</p>
+              <p className="text-sm text-white font-medium">{e.host?.name || "Tech Community"} &gt;</p>
+            </div>
+
+            {/* Hosted By */}
+            <div className="pt-2">
+              <p className="text-xs text-white/60 mb-2">Hosted By</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">
+                    {(e.host?.avatarText || e.host?.name || "TC").substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-sm text-white font-medium">{e.host?.name || "Event Organizer"}</p>
+              </div>
+            </div>
+
+            {/* Event Link */}
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              <p className="text-xs text-white/90">luma.com/{e.id}</p>
+              <button className="text-xs text-white/90 hover:text-white">COPY</button>
+            </div>
+
+            {/* Share & Edit Buttons */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
                 onClick={handleShare}
-                className="px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-xl border border-white/30 text-white rounded-xl font-semibold transition-all hover:scale-105"
+                className="text-sm text-white/70 hover:text-white transition-colors"
               >
                 Share Event
-              </Button>
+              </button>
+              <div className="flex gap-3">
+                <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition-colors">
+                  Edit Event
+                </button>
+                <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition-colors">
+                  Change Photo
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column - About Event */}
-        <div className="lg:col-span-2 space-y-6">
-          <section className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
-            <h3 className="text-xl font-bold mb-4 text-white">About This Event</h3>
-            <div className="space-y-3 text-sm text-neutral-300 leading-relaxed">
-              {e.fullDescription ? (
-                e.fullDescription.split("\n\n").map((para, i) => (
-                  <p key={i} className="whitespace-pre-line">
-                    {para}
-                  </p>
-                ))
-              ) : (
-                <p>{e.description}</p>
-              )}
-
-              {e.agenda && e.agenda.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold text-white mb-2">Event Agenda:</h4>
-                  <ul className="space-y-1.5">
-                    {e.agenda.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-cyan-400 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Location & Map */}
-          {e.location.addressLine && (
-            <section className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
-              <h3 className="text-xl font-bold mb-4 text-white">Location & Directions</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-white">{e.location.name}</p>
-                    <p className="text-sm text-neutral-400 mt-1">{e.location.addressLine}</p>
-                    {e.location.venueDetails && (
-                      <p className="text-xs text-neutral-500 mt-1">{e.location.venueDetails}</p>
-                    )}
-                  </div>
-                </div>
-
-                {mapSrc && (
-                  <div className="w-full h-48 bg-neutral-800/50 rounded-xl overflow-hidden border border-white/10">
-                    <iframe width="100%" height="100%" frameBorder="0" src={mapSrc} style={{ border: 0 }} />
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          {/* Host Card */}
-          {e.host && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-              <h3 className="text-sm font-bold text-white mb-3">Hosted By</h3>
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white"
-                  style={{
-                    background: `linear-gradient(135deg, ${e.accent || "#06b6d4"}, ${e.accent || "#06b6d4"}dd)`,
-                  }}
-                >
-                  {(e.host.avatarText || e.host.name || "TC").substring(0, 2).toUpperCase()}
+        {/* Right - When & Where */}
+        <div className="space-y-4">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <h2 className="text-lg font-bold text-white mb-4">When & Where</h2>
+            
+            <div className="space-y-4">
+              {/* Date & Time */}
+              <div className="flex items-start gap-4">
+                <div className="text-center bg-white/10 rounded-lg px-3 py-2">
+                  <p className="text-xs text-white/60 uppercase">Nov</p>
+                  <p className="text-2xl font-bold text-white">19</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-sm">{e.host.name || "Tech Community"}</h4>
-                  <p className="text-xs text-neutral-400">Event Organizer</p>
+                  <p className="font-semibold text-white">Tomorrow</p>
+                  <p className="text-sm text-white/70">{e.time} EST</p>
                 </div>
               </div>
-              <p className="text-xs text-neutral-300 leading-relaxed">
-                {e.host.description || "Leading community for tech professionals."}
-              </p>
-            </div>
-          )}
 
-          {/* Event Stats */}
-          <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-            <h3 className="text-sm font-bold text-white mb-3">Event Stats</h3>
-            <div className="space-y-2.5">
-              <KV label="Total Attendees" value={e.attending.toString()} />
-              <KV label="Spots Remaining" value={remaining.toString()} emphasis="positive" />
-              <KV label="Engagement" value="High" />
-              <KV label="Event Format" value={e.location.format || "In-Person"} />
+              {/* Location */}
+              <div className="flex items-start gap-4 pt-4 border-t border-white/10">
+                <MapPin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
+                <div>
+                  <p className="font-semibold text-amber-400 text-sm mb-1">Location Missing</p>
+                  <p className="text-xs text-white/70">Please enter the location of the event before it starts.</p>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Topics/Tags */}
-          {e.tags && e.tags.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-              <h3 className="text-sm font-bold text-white mb-3">Topics</h3>
-              <div className="flex flex-wrap gap-2">
-                {e.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1 bg-neutral-800/50 text-neutral-300 rounded-lg text-xs border border-white/10 hover:bg-neutral-700/50 transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Partners */}
-          {e.partners && e.partners.length > 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-5 shadow-lg shadow-black/20">
-              <h3 className="text-sm font-bold text-white mb-3">Official Partners</h3>
-              <div className="flex flex-wrap gap-2">
-                {e.partners.map((partner, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1.5 bg-neutral-800/50 hover:bg-neutral-700/50 text-neutral-300 rounded-lg text-xs transition-colors border border-white/10"
-                  >
-                    {partner}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <section className="bg-zinc-900/40 backdrop-blur-sm rounded-3xl p-6 shadow-lg shadow-black/20">
+      <section className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-white">Invites</h2>
+            <p className="text-sm text-white/60">Invite subscribers, contacts and past guests via email or SMS.</p>
+          </div>
+          <button className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors flex items-center gap-2">
+            <span>+</span> Invite Guests
+          </button>
+        </div>
+        
+        <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
+          <div className="w-12 h-12 bg-white/10 rounded-lg mx-auto mb-3 flex items-center justify-center">
+            <Users className="w-6 h-6 text-white/40" />
+          </div>
+          <h3 className="font-semibold text-white mb-1">No Invites Sent</h3>
+          <p className="text-sm text-white/60">You can invite subscribers, contacts and past guests to the event.</p>
+        </div>
+      </section>
+
+      <section className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-white">Hosts</h2>
+            <p className="text-sm text-white/60">Add hosts, special guests, and event managers.</p>
+          </div>
+          <button className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors flex items-center gap-2">
+            <span>+</span> Add Host
+          </button>
+        </div>
+        
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-500" />
+              <div>
+                <p className="text-white font-medium">{e.host?.name || "Oluwafemi Babaniji"}</p>
+                <p className="text-sm text-white/60">ofbabaniji@gmail.com</p>
+              </div>
+              <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">Creator</span>
+            </div>
+            <button className="text-white/60 hover:text-white transition-colors">
+              <span className="text-lg">✎</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
         <div className="flex items-center gap-3 mb-5">
           <Users className="w-6 h-6 text-cyan-400" />
           <h2 className="text-2xl font-bold text-white">Event Attendees</h2>
-          <span className="text-sm text-neutral-400">({filteredAttendees.length})</span>
+          <span className="text-sm text-white/60">({filteredAttendees.length})</span>
         </div>
 
         {/* Search and Filter Bar */}
         <div className="space-y-4 mb-6">
-          {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
             <input
               type="text"
               placeholder="Search attendees by name, title, or location..."
               value={attendeeSearchQuery}
               onChange={(e) => setAttendeeSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-neutral-800/50 backdrop-blur-xl border border-neutral-700/50 rounded-xl text-white placeholder:text-neutral-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+              className="w-full pl-12 pr-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-cyan-500/50 transition-colors"
             />
           </div>
 
-          {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             {[
               { id: "all", label: "All Attendees" },
@@ -456,7 +428,7 @@ export default function EventDetail({
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   attendeeFilter === filter.id
                     ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800/70 border border-neutral-700/50"
+                    : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
                 }`}
               >
                 {filter.label}
@@ -465,7 +437,6 @@ export default function EventDetail({
           </div>
         </div>
 
-        {/* Attendees Grid with UnifiedPortfolioCard */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredAttendees.map((attendee) => (
             <UnifiedPortfolioCard
@@ -480,7 +451,7 @@ export default function EventDetail({
 
         {filteredAttendees.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-neutral-400">No attendees found matching your search.</p>
+            <p className="text-white/60">No attendees found matching your search.</p>
           </div>
         )}
       </section>

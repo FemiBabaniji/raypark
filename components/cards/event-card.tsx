@@ -56,7 +56,6 @@ export function EventCard({ title, date, description, time, attending, location,
     else if (title.includes("Social")) {
       return "from-[#b368c9] to-[#9d52b3]"
     }
-    // Default to Workshop blue
     return "from-[#4a6bb3] to-[#3a5a9d]"
   }
 
@@ -127,32 +126,33 @@ export function EventCard({ title, date, description, time, attending, location,
         transition-all duration-300 ease-out
         ${isHovered ? "scale-[1.02]" : ""}
         text-left text-white
-        w-56 sm:w-64
+        w-52 sm:w-56
         flex-shrink-0
         shadow-lg
       `}
       style={{
-        minHeight: "260px",
-        maxWidth: "256px",
+        minHeight: "224px",
+        maxWidth: "224px",
+        aspectRatio: "1 / 1.1"
       }}
     >
 
       <div className="relative flex flex-col justify-between h-full">
-        <div className="mb-3">
+        <div className="mb-2">
           <p className="text-white/60 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
           <h3
-            className={`text-3xl font-bold leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
+            className={`text-2xl font-bold leading-tight text-balance bg-gradient-to-br ${titleGradient} bg-clip-text text-transparent`}
           >
             {title}
           </h3>
         </div>
 
-        <div className="mt-auto space-y-4">
+        <div className="mt-auto space-y-2">
           {/* Date, time, location metadata */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-white/85">
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-medium">{date}</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-sm text-white font-semibold">
+              <Calendar className="w-4 h-4 flex-shrink-0 opacity-80" />
+              <span>{date}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-white/85">
               <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
@@ -167,7 +167,7 @@ export function EventCard({ title, date, description, time, attending, location,
           </div>
 
           {/* Bottom buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between pt-2 border-t border-white/10">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
               <Users className="w-3.5 h-3.5" />
               <span className="font-semibold text-xs">{attending}</span>

@@ -169,6 +169,17 @@ export default function DashboardPage() {
     }
 
     fetchPortfolios()
+    
+    const handlePortfolioUpdate = () => {
+      console.log("[v0] Portfolio update detected, refreshing...")
+      fetchPortfolios()
+    }
+    
+    window.addEventListener("portfolio-updated", handlePortfolioUpdate)
+    
+    return () => {
+      window.removeEventListener("portfolio-updated", handlePortfolioUpdate)
+    }
   }, [authLoading, user])
 
   const handleCreatePortfolio = () => {

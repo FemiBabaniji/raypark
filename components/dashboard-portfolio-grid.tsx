@@ -323,11 +323,24 @@ export function DashboardPortfolioGrid({
         )
       )
     }
+    
+    const handleIdentityUpdate = (event: CustomEvent) => {
+      const { portfolioId, updates } = event.detail
+      console.log("[v0] Identity update detected:", portfolioId, updates)
+      
+      setLocalPortfolios(prev => 
+        prev.map(p => 
+          p.id === portfolioId ? { ...p, ...updates } : p
+        )
+      )
+    }
 
     window.addEventListener("portfolio-color-updated" as any, handleColorUpdate)
+    window.addEventListener("portfolio-identity-updated" as any, handleIdentityUpdate)
 
     return () => {
       window.removeEventListener("portfolio-color-updated" as any, handleColorUpdate)
+      window.removeEventListener("portfolio-identity-updated" as any, handleIdentityUpdate)
     }
   }, [])
 

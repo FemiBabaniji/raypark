@@ -411,6 +411,14 @@ export default function PortfolioBuilder({
 
         setLastSaveTime(new Date())
         console.log("[v0] ✅ Auto-save completed successfully at", new Date().toLocaleTimeString())
+        
+        window.dispatchEvent(new CustomEvent("portfolio-identity-updated", {
+          detail: {
+            portfolioId: currentPortfolioId,
+            updates: widgetContent.identity || {}
+          }
+        }))
+        
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)

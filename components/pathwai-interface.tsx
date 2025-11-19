@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import type React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-import { useChat } from "ai/react"
+import { useChat } from "@ai-sdk/react"
 import DiscoverTab from "./tabs/discover-tab"
 import GenerateTab from "./tabs/generate-tab"
 import NetworkTab from "./tabs/network-tab"

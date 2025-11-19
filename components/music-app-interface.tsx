@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, ChevronRight, Upload, Sparkles, MessageCircle } from 'lucide-react'
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
-import { useChat } from 'ai/react'
+import { useChat } from '@ai-sdk/react'
 
 /** Types the side panel can use */
 type TraitScores = {

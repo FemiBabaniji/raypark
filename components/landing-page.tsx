@@ -13,8 +13,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-white/10 pt-1">
-        <div className="max-w-7xl mx-auto px-2 lg:px-4 h-16 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-white/10 pt-4">
+        <div className="max-w-7xl mx-auto px-4 lg:px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-yellow-300 via-blue-300 to-purple-300 flex items-center justify-center">

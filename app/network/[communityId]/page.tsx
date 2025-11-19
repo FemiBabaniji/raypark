@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Loader2 } from 'lucide-react'
@@ -9,7 +9,9 @@ import EventsPage from "@/components/events-page"
 export default function CommunityHubPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const communityId = params.communityId as string
+  const initialTab = searchParams.get('tab') || 'Home'
   const [community, setCommunity] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
@@ -94,6 +96,7 @@ export default function CommunityHubPage() {
       communityId={community.id}
       hasUserPortfolio={!!userPortfolio}
       userPortfolio={userPortfolio}
+      initialTab={initialTab}
     />
   )
 }

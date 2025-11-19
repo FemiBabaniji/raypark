@@ -175,16 +175,18 @@ export default function EventsPage({
   communityName = "BEA",
   communityId,
   hasUserPortfolio = false,
-  userPortfolio = null
+  userPortfolio = null,
+  initialTab = "Home"
 }: { 
   logo?: string
   communityName?: string
   communityId?: string
   hasUserPortfolio?: boolean
   userPortfolio?: any
+  initialTab?: string
 }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("Home")
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [useGradient, setUseGradient] = useState(true)
   const [showRightColumn, setShowRightColumn] = useState(true)
 

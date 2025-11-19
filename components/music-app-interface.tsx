@@ -116,7 +116,9 @@ export default function MusicAppInterface({
   const { messages: aiMessages, input: aiInput, handleInputChange: handleAiInputChange, handleSubmit: handleAiSubmit, isLoading: aiLoading } = useChat({
     api: '/api/portfolio-chat',
     body: {
-      portfolio: draft,
+      portfolio: Object.fromEntries(
+        Object.entries(draft).filter(([_, v]) => v !== undefined)
+      ),
       communityName: 'DMZ',
     }
   })

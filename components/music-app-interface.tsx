@@ -4,9 +4,8 @@ import type React from "react"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, ChevronRight, Upload, Sparkles, MessageCircle } from 'lucide-react'
+import { Palette, Save, X, Bot, Send, Loader2, Plus, Tag, LinkIcon, ChevronRight, Upload } from 'lucide-react'
 import { THEME_COLOR_OPTIONS, type ThemeIndex } from "@/lib/theme"
-import { useChat } from '@ai-sdk/react'
 
 /** Types the side panel can use */
 type TraitScores = {
@@ -79,8 +78,6 @@ export default function MusicAppInterface({
   const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
   const [traitsExpanded, setTraitsExpanded] = useState(false)
 
-  const [chatMode, setChatMode] = useState<'commands' | 'ai'>('commands')
-
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
   useEffect(() => setDraft(identity ?? {}), [identity])
@@ -112,23 +109,6 @@ export default function MusicAppInterface({
   const [loading, setLoading] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [msgs, loading])
-
-  const { messages: aiMessages, input: aiInput, handleInputChange: handleAiInputChange, handleSubmit: handleAiSubmit, isLoading: aiLoading } = useChat({
-    api: '/api/portfolio-chat',
-    body: {
-      portfolio: Object.fromEntries(
-        Object.entries(draft).filter(([_, v]) => v !== undefined)
-      ),
-      communityName: 'DMZ',
-    }
-  })
-
-  const aiChatEndRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (chatMode === 'ai') {
-      aiChatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-    }
-  }, [aiMessages, aiLoading, chatMode])
 
   /** -------------------- Bot command parsing -------------------- */
   function parseCommand(raw: string): BotCommand {
@@ -220,9 +200,39 @@ export default function MusicAppInterface({
           },
         ])
       } else {
-        runLocalSideEffects(cmd)
-        onCommand?.(cmd)
-        setMsgs((m) => [...m, { role: "assistant", text: "Done ✅" }])
+        const lowerInput = userLine.toLowerCase()
+        
+        // Portfolio guidance responses
+        if (lowerInput.includes("portfolio") && !lowerInput.includes("add") && !lowerInput.includes("remove")) {
+          setMsgs((m) => [
+            ...m,
+            {
+              role: "assistant",
+              text: "Portfolio tips:\n• Keep About section concise\n• Add 2-3 strong projects\n• Use quality images\n• Update contact info\n\nUse commands like 'add gallery right' to customize!"
+            }
+          ])
+        } else if (lowerInput.includes("network") || lowerInput.includes("connect")) {
+          setMsgs((m) => [
+            ...m,
+            {
+              role: "assistant",
+              text: "Networking advice:\n• Attend community events\n• Engage with member projects\n• Find complementary skills\n• Collaborate!\n\nCheck the Network tab for connections."
+            }
+          ])
+        } else if (lowerInput.includes("event") || lowerInput.includes("meeting")) {
+          setMsgs((m) => [
+            ...m,
+            {
+              role: "assistant",
+              text: "Upcoming events:\n• AI Workshop (Mar 20)\n• Networking Mixer (Mar 22)\n• Portfolio Reviews (Mar 25)\n\nRSVP from Events tab!"
+            }
+          ])
+        } else {
+          // Default command handling
+          runLocalSideEffects(cmd)
+          onCommand?.(cmd)
+          setMsgs((m) => [...m, { role: "assistant", text: "Done ✅" }])
+        }
       }
     } finally {
       setLoading(false)
@@ -652,34 +662,6 @@ export default function MusicAppInterface({
                 Get instant help with portfolio edits, widgets, and customization
               </p>
 
-              <div className="flex gap-2 mb-3">
-                <button
-                  onClick={() => {
-                    setChatMode('commands')
-                    if (msgs.length === 1) setLoading(true)
-                  }}
-                  className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                    chatMode === 'commands'
-                      ? 'bg-white text-zinc-900'
-                      : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
-                >
-                  <Bot className="w-4 h-4" />
-                  Commands
-                </button>
-                <button
-                  onClick={() => setChatMode('ai')}
-                  className={`flex-1 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                    chatMode === 'ai'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                      : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  AI Admin
-                </button>
-              </div>
-
               <button
                 onClick={() => setShowTraitQuestionnaire(true)}
                 className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900"
@@ -687,7 +669,14 @@ export default function MusicAppInterface({
                 Discover Your Traits
               </button>
 
-              {chatMode === 'commands' && msgs.length > 1 && (
+              <button
+                onClick={() => setLoading(!loading)}
+                className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
+              >
+                {msgs.length > 1 ? "Close Chat" : "Start Chat"}
+              </button>
+
+              {msgs.length > 1 && (
                 <div className="mt-3 rounded-xl p-3 bg-zinc-800/40 border border-white/5">
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {msgs.map((m, i) => (
@@ -725,76 +714,6 @@ export default function MusicAppInterface({
                       <Send className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </div>
-              )}
-
-              {chatMode === 'ai' && (
-                <div className="mt-3 rounded-xl p-3 bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20">
-                  <div className="space-y-3 max-h-64 overflow-y-auto mb-3">
-                    {aiMessages.length === 0 && (
-                      <div className="text-center py-6">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                          <Sparkles className="w-6 h-6 text-white" />
-                        </div>
-                        <p className="text-sm text-white/80 mb-1">DMZ Community Admin</p>
-                        <p className="text-xs text-white/50">Ask me anything about building your portfolio!</p>
-                      </div>
-                    )}
-
-                    {aiMessages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
-                            message.role === 'user'
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white/10 text-white'
-                          }`}
-                        >
-                          {message.role === 'assistant' && (
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <Sparkles className="w-3 h-3 text-purple-400" />
-                              <span className="text-[10px] text-white/60 font-medium">Admin</span>
-                            </div>
-                          )}
-                          <p className="leading-relaxed">{message.content}</p>
-                        </div>
-                      </div>
-                    ))}
-
-                    {aiLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-white/10 px-3 py-2 rounded-2xl">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
-                            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <div ref={aiChatEndRef} />
-                  </div>
-
-                  <form onSubmit={handleAiSubmit} className="flex gap-2">
-                    <input
-                      value={aiInput}
-                      onChange={handleAiInputChange}
-                      placeholder="Ask the community admin..."
-                      disabled={aiLoading}
-                      className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-zinc-900/60 text-white border border-purple-500/30 placeholder:text-zinc-500 disabled:opacity-50"
-                    />
-                    <button 
-                      type="submit"
-                      disabled={aiLoading || !aiInput.trim()}
-                      className="px-3 py-2 rounded-lg text-sm font-medium transition-all bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Send"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </form>
                 </div>
               )}
             </div>

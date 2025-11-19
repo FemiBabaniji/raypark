@@ -523,7 +523,7 @@ export default function EventsLeftColumn({
                     </div>
                     <button
                       onClick={() => onTabChange?.("Networks")}
-                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
+                      className="px-5 py-2 bg-white/5 hover:bg-white/10 text-white rounded-full text-sm font-medium transition-colors backdrop-blur-sm border border-white/10 self-start sm:self-auto"
                     >
                       View All
                     </button>

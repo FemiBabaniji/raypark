@@ -131,16 +131,16 @@ export function PortfolioTemplateModal({ isOpen, onClose, onSelectTemplate, comm
                 <div className={`h-full w-full ${getBackground(template.name)} backdrop-blur-sm p-6 flex flex-col justify-between`}>
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
                   
-                  <div className="relative z-10">
-                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
                       <div className={`w-5 h-5 rounded ${getIconColor(template.name)}`} />
                     </div>
+                    <h3 className="text-white font-semibold text-sm text-left leading-tight">
+                      {template.name}
+                    </h3>
                   </div>
 
                   <div className="relative z-10">
-                    <h3 className="text-white font-semibold text-sm mb-1 text-balance leading-tight">
-                      {template.name}
-                    </h3>
                     <p className="text-neutral-400 text-[11px] leading-relaxed text-balance">
                       {template.description || "No description available"}
                     </p>

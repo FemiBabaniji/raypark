@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from "lucide-react"
+import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from 'lucide-react'
 
 interface NavigationProps {
   currentView: string
@@ -40,8 +40,8 @@ export function Navigation({
   }
 
   return (
-    <div className="absolute top-12 left-0 right-0 z-10">
-      <div className="flex items-center justify-between px-6 py-4">
+    <div className="absolute top-12 left-0 right-0 z-10 pt-1">
+      <div className="flex items-center justify-between px-2 py-4">
         {/* Left - Logo */}
         <div className="flex items-center ml-6">
           <img src="/bea-logo.svg" alt="BEA" className="h-12 w-auto" />

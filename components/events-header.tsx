@@ -10,6 +10,8 @@ interface EventsHeaderProps {
   showRightColumn: boolean
   onToggleGradient: () => void
   onToggleRightColumn: () => void
+  activeTab?: string
+  onTabChange?: (tab: string) => void
 }
 
 export default function EventsHeader({
@@ -17,10 +19,11 @@ export default function EventsHeader({
   useGradient,
   showRightColumn,
   onToggleGradient,
-  onToggleRightColumn
+  onToggleRightColumn,
+  activeTab = "Home",
+  onTabChange = () => {}
 }: EventsHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('home')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,75 +42,44 @@ export default function EventsHeader({
     }
   }, [isDropdownOpen])
 
-  return (
-    <div className="px-4 pt-3 pb-2">
-      <div className="flex items-center justify-between w-full">
-        {/* Left: Logo/Brand */}
-        <div className="flex items-center">
-          <div 
-            className="flex items-center justify-center rounded-xl aspect-square"
-            style={{
-              height: '2.5rem',
-              background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
-              boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
-            }}
-          >
-            <span className="text-zinc-900 font-bold text-lg tracking-tight">
-              {communityName}
-            </span>
-          </div>
-        </div>
+  const tabs = ["Home", "Events", "Network", "Meetings"]
 
-        {/* Center: Navigation Tabs */}
-        <nav className="flex items-center gap-1">
-          <Link 
-            href="/dashboard"
-            onClick={() => setActiveTab('home')}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
-              activeTab === 'home' 
-                ? 'text-white bg-white/10' 
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Home
-          </Link>
-          <Link 
-            href="/network"
-            onClick={() => setActiveTab('events')}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
-              activeTab === 'events' 
-                ? 'text-white bg-white/10' 
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Events
-          </Link>
-          <Link 
-            href="/network"
-            onClick={() => setActiveTab('network')}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
-              activeTab === 'network' 
-                ? 'text-white bg-white/10' 
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Network
-          </Link>
-          <Link 
-            href="/network"
-            onClick={() => setActiveTab('meetings')}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
-              activeTab === 'meetings' 
-                ? 'text-white bg-white/10' 
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Meetings
-          </Link>
-        </nav>
+  return (
+    <div className="py-2 border-b border-white/5">
+      <div className="flex items-center justify-between">
+        {/* Left: Logo */}
+        <div 
+          className="flex items-center justify-center rounded-xl aspect-square flex-shrink-0"
+          style={{
+            height: '2.5rem',
+            background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
+            boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
+          }}
+        >
+          <span className="text-zinc-900 font-bold text-lg tracking-tight">
+            {communityName}
+          </span>
+        </div>
         
-        {/* Right: Existing elements (gradient toggle, notification, user menu) */}
-        <div className="flex items-center gap-2">
+        {/* Center: Navigation Tabs */}
+        <div className="flex items-center gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+                activeTab === tab
+                  ? "text-white bg-white/10"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        
+        {/* Right: Existing buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Gradient toggle button */}
           <button
             onClick={onToggleGradient}
@@ -165,9 +137,6 @@ export default function EventsHeader({
           </div>
         </div>
       </div>
-      
-      {/* Divider below navbar */}
-      <div className="w-full h-px bg-white/10 mt-2" />
     </div>
   )
 }

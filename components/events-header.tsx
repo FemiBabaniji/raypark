@@ -48,17 +48,23 @@ export default function EventsHeader({
     <div className="px-2 pt-1 py-2 border-b border-white/5">
       <div className="flex items-center justify-between">
         {/* Left: Logo */}
-        <div 
-          className="flex items-center justify-center rounded-xl aspect-square flex-shrink-0"
-          style={{
-            height: '2.5rem',
-            background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
-            boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
-          }}
-        >
-          <span className="text-zinc-900 font-bold text-lg tracking-tight">
-            {communityName}
-          </span>
+        <div className="flex items-center gap-2">
+          <div 
+            className="flex items-center justify-center rounded-xl aspect-square flex-shrink-0"
+            style={{
+              height: '2rem',
+              background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
+              boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
+            }}
+          >
+            <span className="text-zinc-900 font-bold text-base tracking-tight">
+              {communityName}
+            </span>
+          </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-white text-sm font-semibold">Your Hub.</span>
+            <span className="text-white/70 text-xs">Your Community.</span>
+          </div>
         </div>
         
         {/* Center: Navigation Tabs */}

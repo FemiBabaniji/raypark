@@ -50,14 +50,14 @@ export default function EventsHeader({
         {/* Left: Logo */}
         <div className="flex items-center gap-2">
           <div 
-            className="flex items-center justify-center rounded-xl aspect-square flex-shrink-0"
+            className="flex items-center justify-center rounded-lg aspect-square flex-shrink-0"
             style={{
               height: '2rem',
               background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
               boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
             }}
           >
-            <span className="text-zinc-900 font-bold text-base tracking-tight">
+            <span className="text-zinc-900 font-bold text-sm tracking-tight">
               {communityName}
             </span>
           </div>

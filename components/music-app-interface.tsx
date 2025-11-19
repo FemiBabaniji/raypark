@@ -285,7 +285,7 @@ export default function MusicAppInterface({
                     className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-white/30 transition-colors"
                     value={draft.firstName ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, firstName: e.target.value }))}
-                    placeholder="Oluwafemi"
+                    placeholder="First name"
                   />
                 </Field>
                 <Field label="Last Name">
@@ -293,7 +293,7 @@ export default function MusicAppInterface({
                     className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-white/30 transition-colors"
                     value={draft.lastName ?? ""}
                     onChange={(e) => setDraft((d) => ({ ...d, lastName: e.target.value }))}
-                    placeholder="Babaniji"
+                    placeholder="Last name"
                   />
                 </Field>
               </div>

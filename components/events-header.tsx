@@ -10,6 +10,8 @@ interface EventsHeaderProps {
   showRightColumn: boolean
   onToggleGradient: () => void
   onToggleRightColumn: () => void
+  activeTab?: string
+  onTabChange?: (tab: string) => void
 }
 
 export default function EventsHeader({
@@ -17,7 +19,9 @@ export default function EventsHeader({
   useGradient,
   showRightColumn,
   onToggleGradient,
-  onToggleRightColumn
+  onToggleRightColumn,
+  activeTab = "Home",
+  onTabChange = () => {}
 }: EventsHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -38,29 +42,44 @@ export default function EventsHeader({
     }
   }, [isDropdownOpen])
 
+  const tabs = ["Home", "Events", "Network", "Meetings"]
+
   return (
-    <div className="pt-1 pb-4">
+    <div className="py-2 border-b border-white/5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div 
-            className="flex items-center justify-center rounded-xl aspect-square"
-            style={{
-              height: '3rem',
-              background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
-              boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
-            }}
-          >
-            <span className="text-zinc-900 font-bold text-xl tracking-tight">
-              {communityName}
-            </span>
-          </div>
-          
-          <h1 className="text-2xl font-bold leading-tight text-white">
-            Your hub. Your community.
-          </h1>
+        {/* Left: Logo */}
+        <div 
+          className="flex items-center justify-center rounded-xl aspect-square flex-shrink-0"
+          style={{
+            height: '2.5rem',
+            background: 'linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)',
+            boxShadow: '0 4px 24px rgba(191, 219, 254, 0.2)'
+          }}
+        >
+          <span className="text-zinc-900 font-bold text-lg tracking-tight">
+            {communityName}
+          </span>
         </div>
         
-        <div className="flex items-center gap-2">
+        {/* Center: Navigation Tabs */}
+        <div className="flex items-center gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+                activeTab === tab
+                  ? "text-white bg-white/10"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        
+        {/* Right: Existing buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Gradient toggle button */}
           <button
             onClick={onToggleGradient}

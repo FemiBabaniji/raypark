@@ -13,7 +13,7 @@ interface CategoryFiltersProps {
 
 export function CategoryFilters({ filters, selectedCategory, onCategoryChange }: CategoryFiltersProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex gap-1.5 flex-wrap">
       {filters.map((filter) => (
         <button
           key={filter.key}

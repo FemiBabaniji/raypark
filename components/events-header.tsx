@@ -45,7 +45,7 @@ export default function EventsHeader({
   const tabs = ["Home", "Events", "Network", "Meetings"]
 
   return (
-    <div className="py-2 border-b border-white/5">
+    <div className="px-2 pt-1 py-2 border-b border-white/5">
       <div className="flex items-center justify-between">
         {/* Left: Logo */}
         <div 

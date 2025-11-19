@@ -252,6 +252,99 @@ export default function MusicAppInterface({
         }}
       />
 
+      <AnimatePresence>
+        {chatOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-6"
+            onClick={() => setChatOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl shadow-2xl max-h-[85vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Community Admin Assistant</h2>
+                  <p className="text-sm text-neutral-400 mt-1">Here to help with your portfolio</p>
+                </div>
+                <button
+                  onClick={() => setChatOpen(false)}
+                  className="text-2xl text-neutral-400 hover:text-white transition-colors"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Chat Messages */}
+              <div className="mb-6 rounded-2xl p-4 bg-neutral-900/30 border border-white/5 max-h-[55vh] overflow-y-auto">
+                <div className="space-y-4">
+                  {msgs.map((m, i) => (
+                    <div
+                      key={i}
+                      className={`flex ${m.role === "assistant" ? "justify-start" : "justify-end"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                          m.role === "assistant"
+                            ? "bg-neutral-800/50 text-neutral-200"
+                            : "bg-white/10 text-white"
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-line">{m.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {loading && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] px-4 py-3 rounded-2xl bg-neutral-800/50">
+                        <div className="flex items-center gap-2 text-neutral-400">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm">Thinking...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={endRef} />
+                </div>
+              </div>
+
+              {/* Input Area */}
+              <div className="flex gap-3">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                  placeholder="Ask about portfolio tips, events, or try: add gallery right"
+                  className="flex-1 px-4 py-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-neutral-900/60 text-white border border-neutral-700/50 placeholder:text-neutral-500"
+                />
+                <button 
+                  onClick={handleSend} 
+                  disabled={!input.trim() || loading}
+                  className="px-6 py-3 rounded-2xl text-sm font-medium transition-all bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
+                  aria-label="Send message"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Helper Text */}
+              <p className="text-xs text-neutral-500 mt-4 text-center">
+                Try commands like: "add gallery right", "theme purple", or ask questions about networking and events
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="fixed right-4 top-20 w-80 max-w-[360px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pr-8 pb-4 space-y-4">
         {editOpen && (
           <motion.div
@@ -671,52 +764,12 @@ export default function MusicAppInterface({
               </button>
 
               <button
-                onClick={() => setChatOpen(!chatOpen)}
+                onClick={() => setChatOpen(true)}
                 className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
               >
-                {chatOpen ? "Close Chat" : "Start Chat"}
+                <Bot className="w-4 h-4" />
+                Start Chat
               </button>
-
-              {chatOpen && (
-                <div className="mt-3 rounded-xl p-3 bg-zinc-800/40 border border-white/5">
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {msgs.map((m, i) => (
-                      <div
-                        key={i}
-                        className={`text-sm leading-relaxed ${
-                          m.role === "assistant" ? "text-zinc-200" : "text-white"
-                        }`}
-                      >
-                        {m.text}
-                      </div>
-                    ))}
-                    {loading && (
-                      <div className="text-sm text-zinc-400 flex items-center gap-2">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        Working…
-                      </div>
-                    )}
-                    <div ref={endRef} />
-                  </div>
-
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                      placeholder="Try: add gallery right"
-                      className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-600 bg-zinc-900/60 text-white border border-zinc-700 placeholder:text-zinc-500"
-                    />
-                    <button 
-                      onClick={handleSend} 
-                      className="px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-zinc-700/60 bg-zinc-800/60 text-white"
-                      aria-label="Send"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </motion.div>
         )}

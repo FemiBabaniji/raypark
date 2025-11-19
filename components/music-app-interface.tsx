@@ -77,7 +77,7 @@ export default function MusicAppInterface({
   const [showPalette, setShowPalette] = useState(false)
   const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
   const [traitsExpanded, setTraitsExpanded] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
+  const [chatExpanded, setChatExpanded] = useState(false)
 
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
@@ -252,98 +252,6 @@ export default function MusicAppInterface({
         }}
       />
 
-      <AnimatePresence>
-        {chatOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-6"
-            onClick={() => setChatOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 backdrop-blur-xl rounded-3xl p-8 w-full max-w-3xl shadow-2xl max-h-[85vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Community Admin Assistant</h2>
-                  <p className="text-sm text-neutral-400 mt-1">Here to help with your portfolio</p>
-                </div>
-                <button
-                  onClick={() => setChatOpen(false)}
-                  className="text-2xl text-neutral-400 hover:text-white transition-colors"
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* Chat Messages */}
-              <div className="mb-6 rounded-2xl p-4 bg-neutral-900/30 border border-white/5 max-h-[55vh] overflow-y-auto">
-                <div className="space-y-4">
-                  {msgs.map((m, i) => (
-                    <div
-                      key={i}
-                      className={`flex ${m.role === "assistant" ? "justify-start" : "justify-end"}`}
-                    >
-                      <div
-                        className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-                          m.role === "assistant"
-                            ? "bg-neutral-800/50 text-neutral-200"
-                            : "bg-white/10 text-white"
-                        }`}
-                      >
-                        <p className="text-sm leading-relaxed whitespace-pre-line">{m.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                  {loading && (
-                    <div className="flex justify-start">
-                      <div className="max-w-[80%] px-4 py-3 rounded-2xl bg-neutral-800/50">
-                        <div className="flex items-center gap-2 text-neutral-400">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span className="text-sm">Thinking...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={endRef} />
-                </div>
-              </div>
-
-              {/* Input Area */}
-              <div className="flex gap-3">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                  placeholder="Ask about portfolio tips, events, or try: add gallery right"
-                  className="flex-1 px-4 py-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-neutral-900/60 text-white border border-neutral-700/50 placeholder:text-neutral-500"
-                />
-                <button 
-                  onClick={handleSend} 
-                  disabled={!input.trim() || loading}
-                  className="px-6 py-3 rounded-2xl text-sm font-medium transition-all bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
-                  aria-label="Send message"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Helper Text */}
-              <p className="text-xs text-neutral-500 mt-4 text-center">
-                Try commands like: "add gallery right", "theme purple", or ask questions about networking and events
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="fixed right-4 top-20 w-80 max-w-[360px] max-h-[85vh] overflow-y-auto bg-transparent text-white px-3 pr-8 pb-4 space-y-4">
         {editOpen && (
@@ -740,37 +648,118 @@ export default function MusicAppInterface({
           </motion.div>
         )}
 
-        {/* Bot card */}
+        {/* Bot card - now expands in place like edit profile */}
         {!editOpen && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
           >
-            <div className="rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold text-white">AI Assistant</h3>
+            {chatExpanded ? (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="backdrop-blur-xl rounded-2xl p-4 border border-white/5"
+              >
+                {/* Header */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-base font-semibold text-white">AI Assistant</h2>
+                    <button
+                      onClick={() => setChatExpanded(false)}
+                      className="text-white/60 hover:text-white transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-white/50">
+                    Ask about portfolios, networking, or events
+                  </p>
+                </div>
+
+                {/* Chat Messages */}
+                <div className="mb-4 rounded-xl p-3 bg-neutral-900/30 border border-white/5 max-h-[50vh] overflow-y-auto">
+                  <div className="space-y-3">
+                    {msgs.map((m, i) => (
+                      <div
+                        key={i}
+                        className={`flex ${m.role === "assistant" ? "justify-start" : "justify-end"}`}
+                      >
+                        <div
+                          className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
+                            m.role === "assistant"
+                              ? "bg-neutral-800/50 text-neutral-200"
+                              : "bg-white/10 text-white"
+                          }`}
+                        >
+                          <p className="leading-relaxed whitespace-pre-line">{m.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {loading && (
+                      <div className="flex justify-start">
+                        <div className="px-3 py-2 rounded-xl bg-neutral-800/50">
+                          <div className="flex items-center gap-2 text-neutral-400">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span className="text-xs">Thinking...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={endRef} />
+                  </div>
+                </div>
+
+                {/* Input Area */}
+                <div className="flex gap-2 mb-3">
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                    placeholder="Ask me anything..."
+                    className="flex-1 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-white/30 bg-[#2a2a2a] text-white border border-white/10 placeholder:text-neutral-500"
+                  />
+                  <button 
+                    onClick={handleSend} 
+                    disabled={!input.trim() || loading}
+                    className="px-3 py-2 rounded-lg text-xs font-medium transition-all bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Send message"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-white/40 text-center">
+                  Try: "add gallery right" or "theme purple"
+                </p>
+              </motion.div>
+            ) : (
+              <div className="rounded-3xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-semibold text-white">AI Assistant</h3>
+                </div>
+
+                <p className="text-sm mb-4 text-zinc-400">
+                  Get instant help with portfolio edits, widgets, and customization
+                </p>
+
+                <button
+                  onClick={() => setShowTraitQuestionnaire(true)}
+                  className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900"
+                >
+                  Discover Your Traits
+                </button>
+
+                <button
+                  onClick={() => setChatExpanded(true)}
+                  className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
+                >
+                  <Bot className="w-4 h-4" />
+                  Start Chat
+                </button>
               </div>
-
-              <p className="text-sm mb-4 text-zinc-400">
-                Get instant help with portfolio edits, widgets, and customization
-              </p>
-
-              <button
-                onClick={() => setShowTraitQuestionnaire(true)}
-                className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900"
-              >
-                Discover Your Traits
-              </button>
-
-              <button
-                onClick={() => setChatOpen(true)}
-                className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
-              >
-                <Bot className="w-4 h-4" />
-                Start Chat
-              </button>
-            </div>
+            )}
           </motion.div>
         )}
       </div>

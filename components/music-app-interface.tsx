@@ -77,6 +77,7 @@ export default function MusicAppInterface({
   const [showPalette, setShowPalette] = useState(false)
   const [showTraitQuestionnaire, setShowTraitQuestionnaire] = useState(false)
   const [traitsExpanded, setTraitsExpanded] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
   // Local editable copy so users can cancel or save
   const [draft, setDraft] = useState<IdentityShape>(() => identity ?? {})
@@ -101,7 +102,7 @@ export default function MusicAppInterface({
   type ChatMsg = { role: "assistant" | "user"; text: string }
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => {
     const intro =
-      "Hi! I'm your portfolio co-pilot. Ask me to add/remove/move widgets, change your theme, or rename your profile."
+      "Hi! I'm your community admin helping with portfolios. Ask me about portfolio tips, networking, events, or customizing your layout!"
     const summary = getWidgetsSummary?.()
     return [{ role: "assistant", text: summary ? `${intro}\n\nCurrent layout: ${summary}` : intro }]
   })
@@ -439,7 +440,7 @@ export default function MusicAppInterface({
                   
                   {/* YouTube */}
                   <SocialLinkField
-                    icon={<svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>}
+                    icon={<svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>}
                     platform="youtube.com/@"
                     value={draft.youtube ?? ""}
                     onChange={(v) => setDraft((d) => ({ ...d, youtube: v }))}
@@ -670,13 +671,13 @@ export default function MusicAppInterface({
               </button>
 
               <button
-                onClick={() => setLoading(!loading)}
+                onClick={() => setChatOpen(!chatOpen)}
                 className="w-full py-2.5 rounded-xl font-medium text-sm transition-all duration-200 hover:bg-zinc-100 flex items-center justify-center gap-2 bg-white text-zinc-900 mt-2"
               >
-                {msgs.length > 1 ? "Close Chat" : "Start Chat"}
+                {chatOpen ? "Close Chat" : "Start Chat"}
               </button>
 
-              {msgs.length > 1 && (
+              {chatOpen && (
                 <div className="mt-3 rounded-xl p-3 bg-zinc-800/40 border border-white/5">
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {msgs.map((m, i) => (

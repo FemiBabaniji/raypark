@@ -107,7 +107,7 @@ export default function MarcusJohnsonPortfolio({ isPreviewMode = false }: { isPr
   )
 
   return (
-    <PortfolioShell title="marcus johnson." isPreviewMode={isPreviewMode} logoHref="/network" logoSrc="/logo.svg">
+    <PortfolioShell title="marcus johnson." isPreviewMode={isPreviewMode} logoHref="/network" logoSrc="/dmz-logo-white.svg">
       <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
         <ProfileWidget />
         <EducationWidget />

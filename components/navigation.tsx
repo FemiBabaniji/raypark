@@ -98,6 +98,17 @@ export function Navigation({
                     <Compass className="w-4 h-4" />
                     Discover
                   </button>
+                  <button
+                    onClick={() => handleNavClick("network")}
+                    className={`w-full px-4 py-2 text-left flex items-center gap-3 transition-colors text-sm ${
+                      currentView === "network"
+                        ? "text-white bg-zinc-700"
+                        : "text-zinc-300 hover:text-white hover:bg-zinc-700"
+                    }`}
+                  >
+                    <NetworkIcon className="w-4 h-4" />
+                    Network
+                  </button>
                   <a
                     href="/network?tab=Networks"
                     className="w-full px-4 py-2 text-left flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors text-sm"

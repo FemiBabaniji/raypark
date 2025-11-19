@@ -12,19 +12,11 @@ interface PortfolioTemplateModalProps {
 }
 
 const backgroundMap: Record<string, string> = {
-  "Blank Portfolio": "bg-neutral-800/50",
-  "Designer Portfolio": "bg-neutral-800/70",
-  "Developer Portfolio": "bg-neutral-800/60",
-  "Marketing Portfolio": "bg-neutral-800/65",
-  "Founder Portfolio": "bg-neutral-800/55",
-}
-
-const accentMap: Record<string, string> = {
-  "Blank Portfolio": "hover:border-neutral-600",
-  "Designer Portfolio": "hover:border-purple-500/30",
-  "Developer Portfolio": "hover:border-blue-500/30",
-  "Marketing Portfolio": "hover:border-orange-500/30",
-  "Founder Portfolio": "hover:border-teal-500/30",
+  "Blank Portfolio": "bg-gradient-to-br from-neutral-700 to-neutral-800",
+  "Designer Portfolio": "bg-gradient-to-br from-purple-600 to-pink-600",
+  "Developer Portfolio": "bg-gradient-to-br from-blue-600 to-cyan-600",
+  "Marketing Portfolio": "bg-gradient-to-br from-orange-600 to-red-700",
+  "Founder Portfolio": "bg-gradient-to-br from-teal-600 to-emerald-700",
 }
 
 export function PortfolioTemplateModal({ isOpen, onClose, onSelectTemplate, communityId }: PortfolioTemplateModalProps) {
@@ -71,11 +63,7 @@ export function PortfolioTemplateModal({ isOpen, onClose, onSelectTemplate, comm
   }
 
   const getBackground = (name: string): string => {
-    return backgroundMap[name] || "bg-neutral-800/50"
-  }
-
-  const getAccent = (name: string): string => {
-    return accentMap[name] || "hover:border-neutral-600"
+    return backgroundMap[name] || "bg-gradient-to-br from-neutral-700 to-neutral-800"
   }
 
   return (
@@ -84,10 +72,10 @@ export function PortfolioTemplateModal({ isOpen, onClose, onSelectTemplate, comm
         onClose()
       }
     }}>
-      <DialogContent className="max-w-4xl bg-neutral-900 border-white/10">
+      <DialogContent className="max-w-5xl bg-neutral-900 border-white/10">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-semibold text-white tracking-tight">Choose a Template</DialogTitle>
-          <p className="text-neutral-400 text-base mt-3">Select a starting point for your portfolio</p>
+          <DialogTitle className="text-3xl font-bold text-white">Choose a Template</DialogTitle>
+          <p className="text-neutral-400 text-base mt-2">Select a starting point for your portfolio</p>
         </DialogHeader>
 
         {isCreating && (
@@ -104,38 +92,32 @@ export function PortfolioTemplateModal({ isOpen, onClose, onSelectTemplate, comm
             <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-5 mt-8 pb-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-6 pb-4">
             {templates.map((template) => (
               <button
                 key={template.id}
                 onClick={() => handleSelect(template.id)}
                 disabled={isCreating}
-                className={`group relative aspect-[3/4] rounded-2xl overflow-hidden transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 border-2 ${
+                className={`group relative aspect-square rounded-3xl overflow-hidden transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
                   selectedTemplateId === template.id
-                    ? 'border-white/60 scale-[0.98]'
-                    : `border-white/5 ${getAccent(template.name)}`
-                } ${isCreating ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'}`}
+                    ? 'scale-[0.98] ring-2 ring-white/60'
+                    : ''
+                } ${isCreating ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] hover:shadow-2xl'}`}
               >
-                <div className={`h-full w-full ${getBackground(template.name)} backdrop-blur-sm p-6 flex flex-col justify-between`}>
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+                <div className={`h-full w-full ${getBackground(template.name)} p-6 flex flex-col justify-between`}>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/40" />
                   
-                  <div className="relative z-10">
-                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-3">
-                      <div className="w-5 h-5 rounded bg-white/10" />
-                    </div>
-                  </div>
-
-                  <div className="relative z-10">
-                    <h3 className="text-white font-semibold text-lg mb-2 text-balance leading-tight">
+                  <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center">
+                    <h3 className="text-white font-bold text-xl mb-3 leading-tight px-2">
                       {template.name}
                     </h3>
-                    <p className="text-neutral-400 text-sm leading-relaxed text-balance">
+                    <p className="text-white/90 text-sm leading-relaxed px-4">
                       {template.description || "No description available"}
                     </p>
                   </div>
 
                   {selectedTemplateId === template.id && isCreating && (
-                    <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                    <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-white flex items-center justify-center z-20">
                       <div className="w-3 h-3 rounded-full bg-neutral-900 animate-pulse" />
                     </div>
                   )}

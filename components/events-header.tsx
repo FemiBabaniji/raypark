@@ -40,10 +40,10 @@ export default function EventsHeader({
   }, [isDropdownOpen])
 
   return (
-    <div className="px-6 py-3 bg-zinc-900/80 backdrop-blur-md">
+    <div className="px-4 pt-3 pb-2">
       <div className="flex items-center justify-between w-full">
-        {/* Left: Logo/Brand with tagline */}
-        <div className="flex items-center gap-4">
+        {/* Left: Logo/Brand */}
+        <div className="flex items-center">
           <div 
             className="flex items-center justify-center rounded-xl aspect-square"
             style={{
@@ -56,17 +56,14 @@ export default function EventsHeader({
               {communityName}
             </span>
           </div>
-          <div className="text-2xl text-white">
-            Your hub. <span className="text-white">Your community.</span>
-          </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1">
           <Link 
             href="/dashboard"
             onClick={() => setActiveTab('home')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
               activeTab === 'home' 
                 ? 'text-white bg-white/10' 
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -77,7 +74,7 @@ export default function EventsHeader({
           <Link 
             href="/network"
             onClick={() => setActiveTab('events')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
               activeTab === 'events' 
                 ? 'text-white bg-white/10' 
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -88,7 +85,7 @@ export default function EventsHeader({
           <Link 
             href="/network"
             onClick={() => setActiveTab('network')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
               activeTab === 'network' 
                 ? 'text-white bg-white/10' 
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -99,7 +96,7 @@ export default function EventsHeader({
           <Link 
             href="/network"
             onClick={() => setActiveTab('meetings')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
               activeTab === 'meetings' 
                 ? 'text-white bg-white/10' 
                 : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -110,7 +107,7 @@ export default function EventsHeader({
         </nav>
         
         {/* Right: Existing elements (gradient toggle, notification, user menu) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Gradient toggle button */}
           <button
             onClick={onToggleGradient}
@@ -170,7 +167,7 @@ export default function EventsHeader({
       </div>
       
       {/* Divider below navbar */}
-      <div className="w-full h-px bg-white/10 mt-3" />
+      <div className="w-full h-px bg-white/10 mt-2" />
     </div>
   )
 }

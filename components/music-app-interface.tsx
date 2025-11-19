@@ -116,14 +116,8 @@ export default function MusicAppInterface({
   const { messages: aiMessages, input: aiInput, handleInputChange: handleAiInputChange, handleSubmit: handleAiSubmit, isLoading: aiLoading } = useChat({
     api: '/api/portfolio-chat',
     body: {
-      portfolioContext: {
-        userName: draft.name || draft.firstName || 'User',
-        userTitle: draft.title || 'Not set',
-        userBio: draft.bio || 'Not set',
-        userHandle: draft.handle || 'Not set',
-        userSkills: draft.skills || [],
-        communityName: 'DMZ',
-      }
+      portfolio: draft,
+      communityName: 'DMZ',
     }
   })
 

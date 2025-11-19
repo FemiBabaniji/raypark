@@ -4,23 +4,29 @@ import { streamText } from 'ai'
 export const maxDuration = 30
 
 export async function POST(req: Request) {
-  const { messages, portfolioContext } = await req.json()
+  const { messages, portfolio, communityName } = await req.json()
 
-  const systemPrompt = `You are a helpful community admin assistant for ${portfolioContext.communityName || 'DMZ'}.
+  const userName = portfolio?.name || portfolio?.firstName || 'User'
+  const userTitle = portfolio?.title || 'Not set'
+  const userBio = portfolio?.bio || 'Not set'
+  const userHandle = portfolio?.handle || 'Not set'
+  const userSkills = portfolio?.skills || []
 
-You're helping ${portfolioContext.userName || 'the user'} build their portfolio. Here's their current info:
-- Name: ${portfolioContext.userName || 'Not set'}
-- Title: ${portfolioContext.userTitle || 'Not set'}
-- Bio: ${portfolioContext.userBio || 'Not set'}
-- Handle: ${portfolioContext.userHandle || 'Not set'}
-- Skills: ${portfolioContext.userSkills?.length > 0 ? portfolioContext.userSkills.join(', ') : 'None added'}
+  const systemPrompt = `You are a helpful community admin assistant for ${communityName || 'DMZ'}.
+
+You're helping ${userName} build their portfolio. Here's their current info:
+- Name: ${userName}
+- Title: ${userTitle}
+- Bio: ${userBio}
+- Handle: ${userHandle}
+- Skills: ${userSkills.length > 0 ? userSkills.join(', ') : 'None added'}
 
 Your role:
 - Give specific, actionable advice for improving their portfolio
 - Suggest content for missing sections (bio, title, skills, projects, etc.)
 - Recommend relevant skills or descriptions based on their current info
 - Be encouraging, professional, and supportive
-- Reference the community (${portfolioContext.communityName || 'DMZ'}) when relevant
+- Reference the community (${communityName || 'DMZ'}) when relevant
 - Help them understand what makes a great portfolio
 
 Keep responses concise (2-4 sentences unless asked for more detail). Be conversational and friendly.`

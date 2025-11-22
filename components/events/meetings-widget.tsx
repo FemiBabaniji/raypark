@@ -68,7 +68,7 @@ export function MeetingsWidget({ onMeetingClick }: { onMeetingClick?: (id: strin
         </button>
       </div>
 
-      <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+      <div className="max-h-[320px] overflow-y-auto pr-2 space-y-3 scrollbar-hide scroll-smooth">
         {meetings.map((meeting) => (
           <div
             key={meeting.id}

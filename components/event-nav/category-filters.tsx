@@ -13,13 +13,15 @@ interface CategoryFiltersProps {
 
 export function CategoryFilters({ filters, selectedCategory, onCategoryChange }: CategoryFiltersProps) {
   return (
-    <div className="flex gap-1.5 flex-wrap">
+    <div className="flex gap-3 overflow-x-auto pb-2">
       {filters.map((filter) => (
         <button
           key={filter.key}
           onClick={() => onCategoryChange(filter.key)}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-            selectedCategory === filter.key ? "bg-white text-zinc-900" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+          className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+            selectedCategory === filter.key
+              ? "bg-white text-black"
+              : "bg-[#2a2a2a] text-gray-400 hover:bg-[#333333] hover:text-gray-300"
           }`}
         >
           {filter.label}

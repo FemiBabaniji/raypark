@@ -14,7 +14,7 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121212]">
+    <div className="min-h-screen bg-background">
       <div className="flex flex-col items-center justify-center min-h-[80vh] px-8">
         <h1 className="text-4xl font-semibold mb-4 text-center" style={{ color: "#FFFFFF" }}>
           Choose Your Community

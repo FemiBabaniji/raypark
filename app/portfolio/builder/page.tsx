@@ -280,7 +280,7 @@ export default function PortfolioBuilderPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     )
@@ -292,7 +292,7 @@ export default function PortfolioBuilderPage() {
 
   if (securityError) {
     return (
-      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="max-w-md p-8 bg-red-900/20 border border-red-500/50 rounded-xl">
           <h2 className="text-xl font-semibold text-red-400 mb-4">Access Denied</h2>
           <p className="text-white/80 mb-6">{securityError}</p>
@@ -305,7 +305,7 @@ export default function PortfolioBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121212]">
+    <div className="min-h-screen bg-background">
       <div className="fixed top-4 right-4 z-50">
         <Button
           onClick={togglePreview}

@@ -37,22 +37,32 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Add whitelabel theme CSS variables (defaults) */
+  --page-background: #121212;
+  --widget-background: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --accent-primary: #84cc16;
+  --page-background-gradient: #121212;
+  --widget-background-gradient: #1a1a1a;
 }
 
-/* Updated dark mode colors to use #121212 for background and #1a1a1a for cards/widgets */
+/* Updated dark mode to use whitelabel theme CSS variables */
 .dark {
-  --background: #121212;
-  --foreground: oklch(0.985 0 0);
-  --card: #1a1a1a;
-  --card-foreground: oklch(0.985 0 0);
-  --popover: #1a1a1a;
-  --popover-foreground: oklch(0.985 0 0);
+  --background: var(--page-background);
+  --foreground: var(--text-primary);
+  --card: var(--widget-background);
+  --card-foreground: var(--text-primary);
+  --popover: var(--widget-background);
+  --popover-foreground: var(--text-primary);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: var(--text-muted);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);

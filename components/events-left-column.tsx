@@ -12,7 +12,7 @@ import type { EventDetailData } from "@/components/event-detail"
 import { ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react"
 import type { EventCategory } from "@/lib/theme-colors"
 
-const CONTAINER_STYLES = "bg-[#1a1a1a] rounded-2xl p-8 shadow-sm"
+const CONTAINER_STYLES = "bg-card rounded-2xl p-8 shadow-sm"
 
 const mockMembers = [
   {
@@ -601,7 +601,7 @@ export default function EventsLeftColumn({
         ) : null}
 
         {activeTab === "Networks" && (
-          <div className="mt-6 bg-[#1a1a1a] rounded-2xl p-8 shadow-sm">
+          <div className="mt-6 bg-card rounded-2xl p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-white text-2xl mb-1">Networks</h2>

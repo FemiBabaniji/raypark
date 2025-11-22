@@ -11,9 +11,9 @@ export default function HomePage() {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white">
+    <div className="min-h-screen bg-background text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/80 backdrop-blur-md border-b border-white/10 pt-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/10 pt-4">
         <div className="max-w-7xl mx-auto px-4 lg:px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">

@@ -46,7 +46,7 @@ export default function EventsHeader({
   const mutedGradient = getMutedGradient(theme)
 
   return (
-    <div className="bg-[#1a1a1a] px-6 py-3.5 shadow-sm">
+    <div className="bg-card px-6 py-3.5 shadow-sm">
       <div className="flex items-center justify-between gap-6">
         {/* Left: Logo with theme-based gradient */}
         <div className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function EventsHeader({
 
             {/* Dropdown menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-[#1a1a1a]">
+              <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-card">
                 <Link
                   href="/dashboard"
                   onClick={() => setIsDropdownOpen(false)}
@@ -126,7 +126,7 @@ export default function EventsHeader({
                         title={THEMES[themeName].displayName}
                       >
                         {theme === themeName && (
-                          <span className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-2 ring-offset-[#1a1a1a]" />
+                          <span className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-2 ring-offset-card" />
                         )}
                       </button>
                     ))}

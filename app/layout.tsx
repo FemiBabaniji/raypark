@@ -6,6 +6,7 @@ import { AuthProvider } from "@/lib/auth"
 import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from "@/components/app-layout"
 import { ThemeProvider } from "@/lib/theme-context"
+import { WhitelabelThemeApplier } from "@/lib/whitelabel-theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,9 +23,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#121212] text-foreground`}>
+      <body className={`${inter.className} text-foreground`}>
         <AuthProvider>
           <ThemeProvider>
+            <WhitelabelThemeApplier />
             <AppLayout>{children}</AppLayout>
             <Toaster />
           </ThemeProvider>

@@ -21,10 +21,10 @@ export default function MinimalPortfolio() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#121212] p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <Card className="bg-[#1a1a1a] border-zinc-800 p-6 text-center rounded-3xl">
+          <Card className="bg-card border-zinc-800 p-6 text-center rounded-3xl">
             <div className="flex flex-col items-center space-y-3">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                 <div className="w-4 h-4 bg-white rounded-full"></div>
@@ -44,10 +44,10 @@ export default function MinimalPortfolio() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-[#1a1a1a] border-zinc-800 rounded-3xl h-80"></Card>
+            <Card className="bg-card border-zinc-800 rounded-3xl h-80"></Card>
 
             {/* Projects Portfolio */}
-            <Card className="bg-[#1a1a1a] border-zinc-800 p-6 rounded-3xl">
+            <Card className="bg-card border-zinc-800 p-6 rounded-3xl">
               <h2 className="text-white text-lg font-medium mb-6">Projects Portfolio</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {projects.map((project, index) => (
@@ -63,11 +63,11 @@ export default function MinimalPortfolio() {
 
           {/* Right Sidebar */}
           <div className="space-y-4">
-            <Card className="bg-[#1a1a1a] border-zinc-800 h-24 rounded-3xl"></Card>
-            <Card className="bg-[#1a1a1a] border-zinc-800 h-20 rounded-3xl"></Card>
+            <Card className="bg-card border-zinc-800 h-24 rounded-3xl"></Card>
+            <Card className="bg-card border-zinc-800 h-20 rounded-3xl"></Card>
 
             {/* Education Section */}
-            <Card className="bg-[#1a1a1a] border-zinc-800 p-4 rounded-3xl">
+            <Card className="bg-card border-zinc-800 p-4 rounded-3xl">
               <h3 className="text-white text-sm font-medium mb-4">Education</h3>
               <div className="space-y-3">
                 <Card className="bg-zinc-800 border-zinc-700 p-3 rounded-2xl">

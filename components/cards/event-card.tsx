@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Clock, MapPin, Users } from 'lucide-react'
 
 interface EventCardProps {
   title: string
@@ -19,40 +18,31 @@ interface EventCardProps {
 export function EventCard({ title, date, description, time, attending, location, onEventClick }: EventCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  const getGradient = (title: string) => {
-    // Workshop (Blue)
+  const getBackgroundColor = (title: string) => {
     if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "from-[#5b7fc9] to-[#4a6bb3]"
-    } 
-    // Networking (Green)
-    else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "from-[#5fb88f] to-[#4a9e7c]"
-    } 
-    // Masterclass (Purple)
-    else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "from-[#8b7fc9] to-[#7568b3]"
+      return "bg-[#5b7fc9]"
+    } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
+      return "bg-[#5fb88f]"
+    } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
+      return "bg-[#8b7fc9]"
+    } else if (title.includes("Conference") || title.includes("Pitch")) {
+      return "bg-[#d9926f]"
+    } else if (title.includes("Meetup") || title.includes("Social")) {
+      return "bg-[#5fb8c9]"
     }
-    // Workshop/Pitch (Orange)
-    else if (title.includes("Conference") || title.includes("Pitch")) {
-      return "from-[#d9926f] to-[#c0795d]"
-    }
-    // Mixer (Teal)
-    else if (title.includes("Meetup") || title.includes("Social")) {
-      return "from-[#5fb8c9] to-[#4a9eb3]"
-    }
-    return "from-[#5b7fc9] to-[#4a6bb3]"
+    return "bg-[#5b7fc9]"
   }
 
   const getEventType = (title: string) => {
-    if (title.includes("Workshop")) return "Workshop"
-    if (title.includes("Mixer") || title.includes("Networking")) return "Networking"
-    if (title.includes("Masterclass")) return "Masterclass"
-    if (title.includes("Conference")) return "Conference"
-    if (title.includes("Meetup")) return "Meetup"
-    return "Event"
+    if (title.includes("Workshop")) return "WORKSHOP"
+    if (title.includes("Mixer") || title.includes("Networking")) return "NETWORKING"
+    if (title.includes("Masterclass")) return "MASTERCLASS"
+    if (title.includes("Conference")) return "CONFERENCE"
+    if (title.includes("Meetup")) return "MEETUP"
+    return "EVENT"
   }
 
-  const gradient = getGradient(title)
+  const bgColor = getBackgroundColor(title)
   const type = getEventType(title)
 
   const handleEventClick = () => {
@@ -68,74 +58,63 @@ export function EventCard({ title, date, description, time, attending, location,
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleEventClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`
-        relative overflow-hidden
-        bg-gradient-to-br ${gradient}
-        backdrop-blur-xl
-        rounded-3xl 
-        p-5
-        transition-all duration-300 ease-out
-        ${isHovered ? "scale-[1.02]" : ""}
-        text-left text-white
-        w-52 sm:w-56
-        flex-shrink-0
-        shadow-lg
-      `}
-      style={{
-        minHeight: "224px",
-        maxWidth: "224px",
-        aspectRatio: "1 / 1.1"
-      }}
-    >
-      <div className={`absolute top-3 right-3 bg-gradient-to-br ${gradient} backdrop-blur-md rounded-lg px-2.5 py-1.5 z-10 shadow-md border border-white/20`}>
-        <p className="text-white font-semibold text-xs leading-none whitespace-nowrap">{date}</p>
-      </div>
+    <div className="relative group flex-shrink-0 w-[280px]">
+      <div
+        className={`relative ${bgColor} rounded-xl p-6 shadow-lg transition-transform hover:translate-y-[-2px] duration-300 h-[280px] flex flex-col cursor-pointer`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleEventClick}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl pointer-events-none" />
 
-      <div className="relative flex flex-col h-full">
-        <div className="mb-auto pr-0">
-          <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-2">{type}</p>
-          <h3 className="text-xl font-bold leading-tight text-white line-clamp-3 mb-3">
-            {title}
-          </h3>
+        <div className="relative z-10 flex items-start justify-between mb-auto">
+          <div className="flex flex-col gap-2">
+            <span className="text-white/60 text-[10px] uppercase tracking-widest font-medium">{type}</span>
+            <h3 className="text-white text-xl font-medium leading-tight pr-4 max-w-[200px]">{title}</h3>
+          </div>
+          <span className="px-3 py-1 bg-white/15 backdrop-blur-sm text-white/90 text-[11px] font-medium rounded-full whitespace-nowrap mt-1">
+            {date}
+          </span>
         </div>
 
-        <div className="mt-auto space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-white/90">
-            <Clock className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-            <span className="font-normal">{time}</span>
+        <div className="relative z-10 space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-white/80">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" strokeWidth="2" />
+              <path d="M12 6v6l4 2" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span className="text-xs">{time}</span>
           </div>
           {location && (
-            <div className="flex items-center gap-2 text-xs text-white/90">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-              <span className="font-normal truncate">{location}</span>
+            <div className="flex items-center gap-2 text-white/80">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeWidth="2" />
+                <circle cx="12" cy="10" r="3" strokeWidth="2" />
+              </svg>
+              <span className="text-xs">{location}</span>
             </div>
           )}
-          
-          {/* Bottom buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-              <Users className="w-3.5 h-3.5" />
-              <span className="font-semibold text-xs">{attending}</span>
-            </div>
-            <div
-              className={`
-                px-4 py-2 
-                bg-white/95 text-black 
-                font-semibold rounded-full text-xs
-                transition-all
-                ${isHovered ? "bg-white" : ""}
-              `}
-            >
-              View
-            </div>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/10">
+          <div className="flex items-center gap-2 px-2.5 py-1 bg-black/10 backdrop-blur-sm rounded-full">
+            <svg className="w-3 h-3 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-white/90 text-xs font-medium">{attending}</span>
           </div>
+          <button
+            className={`px-4 py-1.5 bg-white text-black rounded-full transition-colors text-xs font-medium ${isHovered ? "bg-white" : "bg-white/90"}`}
+          >
+            View Event
+          </button>
         </div>
       </div>
-    </button>
+    </div>
   )
 }

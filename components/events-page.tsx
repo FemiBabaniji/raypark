@@ -1,12 +1,9 @@
 "use client"
 import { useState } from "react"
-import { motion } from "framer-motion"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventsHeader from "@/components/events-header"
 import type { EventDetailData } from "@/components/event-detail"
-import { FilterTabs, FILTER_TABS } from "@/components/event-nav"
-import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 const eventData = {
   "ai-ml-workshop": {
@@ -170,14 +167,14 @@ const eventData = {
   },
 }
 
-export default function EventsPage({ 
+export default function EventsPage({
   logo = "/bea-logo.svg",
   communityName = "BEA",
   communityId,
   hasUserPortfolio = false,
   userPortfolio = null,
-  initialTab = "Home"
-}: { 
+  initialTab = "Home",
+}: {
   logo?: string
   communityName?: string
   communityId?: string
@@ -187,7 +184,6 @@ export default function EventsPage({
 }) {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState(initialTab)
-  const [useGradient, setUseGradient] = useState(true)
   const [showRightColumn, setShowRightColumn] = useState(true)
 
   const handleEventClick = (eventId: string) => {
@@ -239,68 +235,26 @@ export default function EventsPage({
     : null
 
   return (
-    <div className="min-h-screen relative pt-0" style={{ backgroundColor: "oklch(0.18 0 0)", color: "#FFFFFF" }}>
-      {useGradient && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Large blue gradient orb - top left */}
-          <div 
-            className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Purple gradient orb - top right */}
-          <div 
-            className="absolute -top-1/3 right-0 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #7B68EE 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Blue gradient orb - middle left */}
-          <div 
-            className="absolute top-1/2 -left-1/4 w-[700px] h-[700px] rounded-full opacity-20 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #4169E1 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Purple/Violet gradient orb - bottom right */}
-          <div 
-            className="absolute bottom-0 right-1/4 w-[900px] h-[900px] rounded-full opacity-25 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #8B5CF6 0%, transparent 70%)",
-            }}
-          />
-          
-          {/* Smaller accent blue orb - bottom left */}
-          <div 
-            className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl"
-            style={{
-              background: "radial-gradient(circle, #0EA5E9 0%, transparent 70%)",
-            }}
-          />
-        </div>
-      )}
-      
+    <div className="min-h-screen relative pt-0 bg-background text-foreground">
       {/* Content layer */}
       <div className="relative z-10">
-        <EventsHeader 
-          communityName={communityName} 
-          useGradient={useGradient}
+        <EventsHeader
+          communityName={communityName}
           showRightColumn={showRightColumn}
-          onToggleGradient={() => setUseGradient(!useGradient)}
           onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
-        
+
         {/* Main content area */}
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
           <main className="w-full relative mt-4">
-            <div className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? 'justify-between' : 'justify-center'}`}>
-              <div className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]' : 'max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]'}`}>
+            <div
+              className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? "justify-between" : "justify-center"}`}
+            >
+              <div
+                className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? "max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]" : "max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"}`}
+              >
                 <EventsLeftColumn
                   onEventClick={handleEventClick}
                   selectedEvent={selectedEvent}
@@ -313,11 +267,11 @@ export default function EventsPage({
                 />
               </div>
 
-              <div 
-                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
+              <div
+                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"}`}
               >
-                <EventsRightColumn 
-                  onToggleRightColumn={() => setShowRightColumn(!showRightColumn)} 
+                <EventsRightColumn
+                  onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
                   communityId={communityId}
                   hasUserPortfolio={hasUserPortfolio}
                   userPortfolio={userPortfolio}

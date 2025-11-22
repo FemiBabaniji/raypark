@@ -39,12 +39,13 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Updated dark mode colors to use zinc-950 for background and zinc-900/50 for cards/widgets */
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: #09090b;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: rgba(24, 24, 27, 0.5);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
+  --popover: rgba(24, 24, 27, 0.5);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);

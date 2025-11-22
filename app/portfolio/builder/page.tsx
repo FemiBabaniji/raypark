@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Eye, EyeOff } from 'lucide-react'
+import { useRouter, useSearchParams } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
 import MusicAppInterface from "@/components/music-app-interface"
 import { Button } from "@/components/ui/button"
@@ -43,8 +43,8 @@ export default function PortfolioBuilderPage() {
   const [communityId, setCommunityId] = useState<string | null>(null)
   const [securityError, setSecurityError] = useState<string | null>(null)
 
-  const portfolioIdFromUrl = searchParams?.get('portfolio')
-  const communityIdFromUrl = searchParams?.get('community')
+  const portfolioIdFromUrl = searchParams?.get("portfolio")
+  const communityIdFromUrl = searchParams?.get("community")
 
   useEffect(() => {
     if (!loading && !user) {
@@ -64,11 +64,13 @@ export default function PortfolioBuilderPage() {
           if (communityIdFromUrl) {
             const isValid = await verifyPortfolioCommunity(portfolioIdFromUrl, communityIdFromUrl)
             if (!isValid) {
-              setSecurityError("This portfolio does not belong to the selected community. Please go back and select the correct portfolio.")
+              setSecurityError(
+                "This portfolio does not belong to the selected community. Please go back and select the correct portfolio.",
+              )
               return
             }
           }
-          
+
           const data = await loadPortfolioData(portfolioIdFromUrl, communityIdFromUrl)
           const identity = data?.widgetContent.identity
 
@@ -91,11 +93,11 @@ export default function PortfolioBuilderPage() {
           }
 
           setActiveIdentity(loadedIdentity)
-          
+
           if (communityIdFromUrl) {
             setCommunityId(communityIdFromUrl)
           }
-          
+
           return
         }
 
@@ -173,7 +175,7 @@ export default function PortfolioBuilderPage() {
 
     setActiveIdentity((prev) => {
       const merged = { ...prev, ...next }
-      
+
       console.log("[v0] 🎨 Merged identity state - selectedColor:", merged.selectedColor)
 
       try {
@@ -192,7 +194,7 @@ export default function PortfolioBuilderPage() {
 
       if (merged.id) {
         const supabase = createClient()
-        
+
         supabase
           .from("pages")
           .select("id")
@@ -201,7 +203,7 @@ export default function PortfolioBuilderPage() {
           .maybeSingle()
           .then(({ data: page }) => {
             if (!page?.id) return
-            
+
             return supabase
               .from("widget_types")
               .select("id")
@@ -209,33 +211,31 @@ export default function PortfolioBuilderPage() {
               .maybeSingle()
               .then(({ data: widgetType }) => {
                 if (!widgetType?.id) return
-                
-                return supabase
-                  .from("widget_instances")
-                  .upsert(
-                    {
-                      page_id: page.id,
-                      widget_type_id: widgetType.id,
-                      props: {
-                        name: merged.name,
-                        handle: merged.handle,
-                        avatarUrl: merged.avatarUrl,
-                        selectedColor: merged.selectedColor,
-                        title: merged.title,
-                        email: merged.email,
-                        location: merged.location,
-                        bio: merged.bio,
-                        linkedin: merged.linkedin,
-                        dribbble: merged.dribbble,
-                        behance: merged.behance,
-                        twitter: merged.twitter,
-                        unsplash: merged.unsplash,
-                        instagram: merged.instagram,
-                      },
-                      enabled: true,
+
+                return supabase.from("widget_instances").upsert(
+                  {
+                    page_id: page.id,
+                    widget_type_id: widgetType.id,
+                    props: {
+                      name: merged.name,
+                      handle: merged.handle,
+                      avatarUrl: merged.avatarUrl,
+                      selectedColor: merged.selectedColor,
+                      title: merged.title,
+                      email: merged.email,
+                      location: merged.location,
+                      bio: merged.bio,
+                      linkedin: merged.linkedin,
+                      dribbble: merged.dribbble,
+                      behance: merged.behance,
+                      twitter: merged.twitter,
+                      unsplash: merged.unsplash,
+                      instagram: merged.instagram,
                     },
-                    { onConflict: "page_id,widget_type_id" }
-                  )
+                    enabled: true,
+                  },
+                  { onConflict: "page_id,widget_type_id" },
+                )
               })
           })
           .catch((err) => {
@@ -280,7 +280,7 @@ export default function PortfolioBuilderPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[oklch(0.18_0_0)] flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     )
@@ -292,14 +292,11 @@ export default function PortfolioBuilderPage() {
 
   if (securityError) {
     return (
-      <div className="min-h-screen bg-[oklch(0.18_0_0)] flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="max-w-md p-8 bg-red-900/20 border border-red-500/50 rounded-xl">
           <h2 className="text-xl font-semibold text-red-400 mb-4">Access Denied</h2>
           <p className="text-white/80 mb-6">{securityError}</p>
-          <Button
-            onClick={() => router.back()}
-            className="w-full bg-red-600 hover:bg-red-700"
-          >
+          <Button onClick={() => router.back()} className="w-full bg-red-600 hover:bg-red-700">
             Go Back
           </Button>
         </div>
@@ -308,7 +305,7 @@ export default function PortfolioBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[oklch(0.18_0_0)]">
+    <div className="min-h-screen bg-zinc-950">
       <div className="fixed top-4 right-4 z-50">
         <Button
           onClick={togglePreview}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 
 export default function NetworkPage() {
   const router = useRouter()
@@ -14,7 +14,7 @@ export default function NetworkPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "oklch(0.18 0 0)" }}>
+    <div className="min-h-screen bg-zinc-950">
       <div className="flex flex-col items-center justify-center min-h-[80vh] px-8">
         <h1 className="text-4xl font-semibold mb-4 text-center" style={{ color: "#FFFFFF" }}>
           Choose Your Community

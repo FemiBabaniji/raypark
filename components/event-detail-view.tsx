@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, MapPin, Users, Search, ArrowLeft, Clock, Mail, MessageSquare, Share2, Copy, ExternalLink, Facebook, Twitter, Linkedin, Plus, Edit, Camera, AlertTriangle } from 'lucide-react'
+import { Users, Search, ArrowLeft, ExternalLink, Facebook, Twitter, Linkedin, AlertTriangle } from "lucide-react"
 import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 
 interface EventDetailProps {
@@ -98,10 +98,10 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
     >
       <div className="space-y-6">
         {/* Left side - Registration & Event Details */}
-        <div className="bg-zinc-900 rounded-2xl shadow-lg border border-white/5 overflow-hidden">
+        <div className="bg-zinc-900/50 rounded-2xl shadow-lg border border-white/5 overflow-hidden">
           <div className={`relative w-full h-48 bg-gradient-to-br ${gradient}`}>
             <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
-            
+
             <button
               onClick={onBack}
               className="absolute top-4 left-4 flex items-center gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm hover:bg-black/40 rounded-lg transition-all border border-white/20"
@@ -116,7 +116,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
                 <div className="text-white font-bold text-lg">19</div>
               </div>
             </div>
-            
+
             <div className="absolute bottom-4 left-4 right-4">
               <h2 className="text-2xl font-bold text-white mb-2">{event.title}</h2>
               <div className="text-white/90 text-sm">Wednesday, November 19 • {event.time} EST</div>
@@ -131,7 +131,9 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
                   <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <div className="text-yellow-500 font-semibold text-sm mb-1">Location Missing</div>
-                    <div className="text-yellow-500/80 text-xs">Please enter the location of the event before it starts.</div>
+                    <div className="text-yellow-500/80 text-xs">
+                      Please enter the location of the event before it starts.
+                    </div>
                   </div>
                 </div>
               </div>
@@ -139,7 +141,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
               <div className="bg-zinc-800/40 rounded-xl p-4">
                 <h3 className="text-white font-semibold text-sm mb-2">Registration</h3>
                 <p className="text-zinc-400 text-sm mb-3">Welcome! To join the event, please register below.</p>
-                
+
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -157,7 +159,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
 
               <div className="flex items-center gap-2 bg-zinc-800/60 rounded-lg p-2.5">
                 <span className="text-zinc-400 text-sm flex-1 truncate">pathwai.com/ebv3f82b</span>
-                <button 
+                <button
                   onClick={handleCopyLink}
                   className="px-3 py-1.5 bg-zinc-700/60 hover:bg-zinc-700 rounded text-white text-xs font-medium transition-all"
                 >
@@ -200,8 +202,14 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
                 {event.fullDescription && <p>{event.fullDescription}</p>}
                 {!event.fullDescription && (
                   <>
-                    <p>Join us for an exciting exploration of artificial intelligence and machine learning technologies. This event brings together industry experts, researchers, and enthusiasts.</p>
-                    <p>Network with fellow professionals, learn from hands-on workshops, and discover how AI is transforming various industries.</p>
+                    <p>
+                      Join us for an exciting exploration of artificial intelligence and machine learning technologies.
+                      This event brings together industry experts, researchers, and enthusiasts.
+                    </p>
+                    <p>
+                      Network with fellow professionals, learn from hands-on workshops, and discover how AI is
+                      transforming various industries.
+                    </p>
                   </>
                 )}
               </div>

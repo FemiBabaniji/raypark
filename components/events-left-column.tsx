@@ -475,7 +475,7 @@ export default function EventsLeftColumn({
               </div>
 
               <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col`}>
+                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
                   <MeetingsWidget onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
               </div>

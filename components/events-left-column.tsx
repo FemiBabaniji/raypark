@@ -475,7 +475,7 @@ export default function EventsLeftColumn({
               </div>
 
               <div className="w-full xl:w-[30%] xl:flex-shrink-0">
-                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col overflow-hidden`}>
+                <div className={`${CONTAINER_STYLES} min-h-[320px] flex flex-col`}>
                   <MeetingsWidget onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
                 </div>
               </div>
@@ -819,7 +819,7 @@ export default function EventsLeftColumn({
         )}
 
         {activeTab === "Meetings" && (
-          <div className={`mt-6 ${CONTAINER_STYLES} min-h-[480px] flex flex-col overflow-hidden`}>
+          <div className={`mt-6 ${CONTAINER_STYLES} min-h-[480px] flex flex-col`}>
             <MeetingsWidget onMeetingClick={(id) => console.log("Meeting clicked:", id)} />
           </div>
         )}

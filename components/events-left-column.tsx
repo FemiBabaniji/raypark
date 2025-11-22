@@ -10,6 +10,7 @@ import { CalendarView } from "@/components/events/calendar-view"
 import { MeetingsWidget } from "@/components/events/meetings-widget"
 import type { EventDetailData } from "@/components/event-detail"
 import { ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react"
+import type { EventCategory } from "@/lib/theme-colors"
 
 const CONTAINER_STYLES = "bg-[#1a1a1a] rounded-2xl p-8 shadow-sm"
 
@@ -420,6 +421,7 @@ export default function EventsLeftColumn({
                                   instructor={event.instructor}
                                   tags={event.tags}
                                   onEventClick={onEventClick}
+                                  category={event.type as EventCategory}
                                 />
                               ))
                             ) : (
@@ -760,6 +762,7 @@ export default function EventsLeftColumn({
                             instructor={event.instructor}
                             tags={event.tags}
                             onEventClick={onEventClick}
+                            category={event.type as EventCategory}
                           />
                         ))
                       ) : (

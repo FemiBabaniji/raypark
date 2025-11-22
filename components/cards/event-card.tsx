@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useTheme } from "@/lib/theme-context"
+import { getThemeColor, type EventCategory } from "@/lib/theme-colors"
 
 interface EventCardProps {
   title: string
@@ -13,24 +15,30 @@ interface EventCardProps {
   tags?: string[]
   dateLabel?: string
   onEventClick?: (eventId: string) => void
+  category?: EventCategory
 }
 
-export function EventCard({ title, date, description, time, attending, location, onEventClick }: EventCardProps) {
+export function EventCard({
+  title,
+  date,
+  description,
+  time,
+  attending,
+  location,
+  onEventClick,
+  category,
+}: EventCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const { theme } = useTheme()
 
-  const getBackgroundColor = (title: string) => {
-    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) {
-      return "bg-[#5b7fc9]"
-    } else if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) {
-      return "bg-[#5fb88f]"
-    } else if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) {
-      return "bg-[#8b7fc9]"
-    } else if (title.includes("Conference") || title.includes("Pitch")) {
-      return "bg-[#d9926f]"
-    } else if (title.includes("Meetup") || title.includes("Social")) {
-      return "bg-[#5fb8c9]"
-    }
-    return "bg-[#5b7fc9]"
+  const getEventCategory = (title: string): EventCategory => {
+    if (category) return category
+    if (title.includes("Workshop") || title.includes("AI") || title.includes("Machine Learning")) return "workshop"
+    if (title.includes("Networking") || title.includes("Mixer") || title.includes("Founder")) return "mixer"
+    if (title.includes("Masterclass") || title.includes("Design") || title.includes("Product")) return "masterclass"
+    if (title.includes("Conference") || title.includes("Pitch")) return "conference"
+    if (title.includes("Meetup") || title.includes("Social")) return "meetup"
+    return "workshop"
   }
 
   const getEventType = (title: string) => {
@@ -42,7 +50,8 @@ export function EventCard({ title, date, description, time, attending, location,
     return "EVENT"
   }
 
-  const bgColor = getBackgroundColor(title)
+  const eventCategory = getEventCategory(title)
+  const bgColor = getThemeColor(theme, eventCategory)
   const type = getEventType(title)
 
   const handleEventClick = () => {
@@ -60,7 +69,8 @@ export function EventCard({ title, date, description, time, attending, location,
   return (
     <div className="relative group flex-shrink-0 w-[280px]">
       <div
-        className={`relative ${bgColor} rounded-xl p-6 shadow-lg transition-transform hover:translate-y-[-2px] duration-300 h-[280px] flex flex-col cursor-pointer`}
+        className="relative rounded-xl p-6 shadow-lg transition-all hover:translate-y-[-2px] duration-300 h-[280px] flex flex-col cursor-pointer"
+        style={{ backgroundColor: bgColor }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleEventClick}

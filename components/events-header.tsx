@@ -1,8 +1,10 @@
 "use client"
 
-import { Bell, User } from "lucide-react"
+import { Bell, User, Palette } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useTheme } from "@/lib/theme-context"
+import { THEMES, type ThemeName } from "@/lib/theme-colors"
 
 interface EventsHeaderProps {
   communityName: string
@@ -21,6 +23,7 @@ export default function EventsHeader({
 }: EventsHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -98,7 +101,7 @@ export default function EventsHeader({
 
             {/* Dropdown menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-[#1a1a1a]">
+              <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-[#1a1a1a]">
                 <Link
                   href="/dashboard"
                   onClick={() => setIsDropdownOpen(false)}
@@ -106,6 +109,31 @@ export default function EventsHeader({
                 >
                   Dashboard
                 </Link>
+
+                {/* Theme Section */}
+                <div className="border-t border-white/5 px-4 py-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Palette className="w-4 h-4 text-white/70" />
+                    <span className="text-white/90 text-sm font-medium">Theme</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(Object.keys(THEMES) as ThemeName[]).map((themeName) => (
+                      <button
+                        key={themeName}
+                        onClick={() => setTheme(themeName)}
+                        className="relative w-8 h-8 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30"
+                        style={{ backgroundColor: THEMES[themeName].dotColor }}
+                        aria-label={`Select ${THEMES[themeName].displayName} theme`}
+                        title={THEMES[themeName].displayName}
+                      >
+                        {theme === themeName && (
+                          <span className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-2 ring-offset-[#1a1a1a]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false)

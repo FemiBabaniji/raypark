@@ -4,7 +4,7 @@ import { Bell, User, Palette } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useTheme } from "@/lib/theme-context"
-import { THEMES, type ThemeName } from "@/lib/theme-colors"
+import { THEMES, type ThemeName, getMutedGradient } from "@/lib/theme-colors"
 
 interface EventsHeaderProps {
   communityName: string
@@ -42,61 +42,60 @@ export default function EventsHeader({
   }, [isDropdownOpen])
 
   const tabs = ["Home", "Events", "Network", "Meetings"]
+  const mutedGradient = getMutedGradient(theme)
 
   return (
-    <div className="px-4 pt-4 py-2 border-b border-white/5">
-      <div className="flex items-center justify-between">
-        {/* Left: Logo */}
-        <div className="flex items-center gap-2">
+    <div className="bg-[#1a1a1a] rounded-2xl px-6 py-3.5 shadow-sm mx-4 mt-4">
+      <div className="flex items-center justify-between gap-6">
+        {/* Left: Logo with theme-based gradient */}
+        <div className="flex items-center gap-3">
           <div
-            className="flex items-center justify-center rounded-lg aspect-square flex-shrink-0"
+            className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"
             style={{
-              height: "2rem",
-              background: "linear-gradient(135deg, #FEF08A 0%, #BFDBFE 40%, #DDD6FE 80%, #E9D5FF 100%)",
-              boxShadow: "0 4px 24px rgba(191, 219, 254, 0.2)",
+              background: `linear-gradient(135deg, ${mutedGradient.from}, ${mutedGradient.to})`,
             }}
           >
-            <span className="text-zinc-900 font-bold text-sm tracking-tight">{communityName}</span>
+            <span className="text-white font-bold text-sm">{communityName}</span>
           </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-white text-sm font-semibold">Your Hub.</span>
-            <span className="text-white/70 text-xs">Your Community.</span>
+          <div className="flex flex-col">
+            <span className="text-white font-semibold text-sm">Your Hub.</span>
+            <span className="text-zinc-400 text-xs">Your Community.</span>
           </div>
         </div>
 
         {/* Center: Navigation Tabs */}
-        <div className="flex items-center gap-1">
+        <nav className="flex gap-2 absolute left-1/2 transform -translate-x-1/2">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => onTabChange(tab)}
-              className={`px-4 py-1.5 text-sm font-medium transition-colors rounded-lg ${
-                activeTab === tab ? "text-white bg-white/10" : "text-white/60 hover:text-white hover:bg-white/5"
+              className={`px-5 py-2 text-sm font-medium rounded-full transition-colors ${
+                activeTab === tab ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-300"
               }`}
             >
               {tab}
             </button>
           ))}
-        </div>
+        </nav>
 
-        {/* Right: Existing buttons */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Right: Action buttons */}
+        <div className="flex items-center gap-2 ml-2">
           {/* Notification bell */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors flex items-center justify-center"
             aria-label="Notifications"
           >
-            <Bell className="w-4 h-4 text-white" strokeWidth={2} />
+            <Bell className="w-5 h-5 text-zinc-400" strokeWidth={2} />
           </button>
 
           {/* User icon with dropdown */}
           <div className="relative z-50" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
+              className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors flex items-center justify-center"
               aria-label="User menu"
             >
-              <User className="w-4 h-4 text-white" strokeWidth={2} />
+              <User className="w-5 h-5 text-zinc-400" strokeWidth={2} />
             </button>
 
             {/* Dropdown menu */}

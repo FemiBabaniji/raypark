@@ -102,3 +102,15 @@ export function getThemeColor(themeName: ThemeName, category: EventCategory): st
 export function getDefaultTheme(): ThemeName {
   return "green"
 }
+
+export function getMutedGradient(themeName: ThemeName): { from: string; to: string } {
+  const gradients: Record<ThemeName, { from: string; to: string }> = {
+    green: { from: "#86efac", to: "#10b981" }, // green-300 to green-500
+    blue: { from: "#93c5fd", to: "#3b82f6" }, // blue-300 to blue-500
+    purple: { from: "#d8b4fe", to: "#a855f7" }, // purple-300 to purple-500
+    orange: { from: "#fdba74", to: "#f97316" }, // orange-300 to orange-500
+    pink: { from: "#f9a8d4", to: "#ec4899" }, // pink-300 to pink-500
+    teal: { from: "#5eead4", to: "#14b8a6" }, // teal-300 to teal-500
+  }
+  return gradients[themeName]
+}

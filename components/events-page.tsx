@@ -248,7 +248,7 @@ export default function EventsPage({
 
         {/* Main content area */}
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
-          <main className="w-full relative mt-4">
+          <main className="w-full relative mt-6">
             <div
               className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? "justify-between" : "justify-center"}`}
             >

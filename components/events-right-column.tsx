@@ -317,7 +317,7 @@ export default function EventsRightColumn({
 
       <div className="space-y-6">
         {/* Profile editing card */}
-        <div className="bg-[#1a1a1a] rounded-2xl p-6 shadow-sm">
+        <div className="rounded-2xl p-6">
           <div className="mb-4">
             <h3 className="text-white text-lg">Your Profile</h3>
             <p className="text-gray-400 text-sm">Customize who you are and what you represent</p>
@@ -406,7 +406,7 @@ export default function EventsRightColumn({
         </div>
 
         {/* AI Assistant */}
-        <div className="bg-[#1a1a1a] rounded-2xl p-6 shadow-sm">
+        <div className="rounded-2xl p-6">
           <h3 className="text-white text-lg mb-2">AI Assistant</h3>
           <p className="text-gray-400 text-sm mb-6">
             Get instant help with events, networking, and profile optimization

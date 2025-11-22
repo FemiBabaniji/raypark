@@ -45,7 +45,7 @@ export default function EventsHeader({
   const mutedGradient = getMutedGradient(theme)
 
   return (
-    <div className="bg-[#1a1a1a] rounded-2xl px-6 py-3.5 shadow-sm mx-4 mt-4">
+    <div className="bg-[#1a1a1a] px-6 py-3.5 shadow-sm">
       <div className="flex items-center justify-between gap-6">
         {/* Left: Logo with theme-based gradient */}
         <div className="flex items-center gap-3">

@@ -53,7 +53,7 @@ export function MeetingsWidget({ onMeetingClick }: { onMeetingClick?: (id: strin
   ]
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div>
           <h2 className="text-white text-xl mb-1">Today's Schedule</h2>
@@ -68,7 +68,7 @@ export function MeetingsWidget({ onMeetingClick }: { onMeetingClick?: (id: strin
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto pr-2 space-y-3 scrollbar-hide scroll-smooth">
+      <div className="max-h-[240px] overflow-y-auto pr-2 space-y-3 scrollbar-hide scroll-smooth">
         {meetings.map((meeting) => (
           <div
             key={meeting.id}

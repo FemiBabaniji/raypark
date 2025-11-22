@@ -20,6 +20,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Load themes from localStorage on mount
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     const savedTheme = localStorage.getItem("event-theme") as ThemeName | null
     if (savedTheme && ["green", "blue", "purple", "orange", "pink", "teal"].includes(savedTheme)) {
       setThemeState(savedTheme)
@@ -34,22 +40,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     ) {
       setWhitelabelThemeState(savedWhitelabelTheme)
     }
-    setMounted(true)
-  }, [])
+  }, [mounted])
 
   const setTheme = (newTheme: ThemeName) => {
     setThemeState(newTheme)
-    localStorage.setItem("event-theme", newTheme)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("event-theme", newTheme)
+    }
   }
 
   const setWhitelabelTheme = (newTheme: WhitelabelTheme) => {
     setWhitelabelThemeState(newTheme)
-    localStorage.setItem("whitelabel-theme", newTheme)
-  }
-
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return <>{children}</>
+    if (typeof window !== "undefined") {
+      localStorage.setItem("whitelabel-theme", newTheme)
+    }
   }
 
   return (

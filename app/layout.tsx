@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-zinc-950 text-foreground`}>
+      <body className={`${inter.className} bg-[#121212] text-foreground`}>
         <AuthProvider>
           <AppLayout>{children}</AppLayout>
           <Toaster />

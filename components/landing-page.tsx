@@ -2,18 +2,18 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight } from "lucide-react"
 
 export default function HomePage() {
   const router = useRouter()
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-[#121212] text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-white/10 pt-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/80 backdrop-blur-md border-b border-white/10 pt-4">
         <div className="max-w-7xl mx-auto px-4 lg:px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -71,7 +71,8 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl md:text-2xl text-zinc-400 mb-12 max-w-3xl mx-auto leading-relaxed"
           >
-            Build thriving communities where members connect, collaborate, and grow together. Your space for meaningful relationships and shared success.
+            Build thriving communities where members connect, collaborate, and grow together. Your space for meaningful
+            relationships and shared success.
           </motion.p>
 
           <motion.div
@@ -86,7 +87,7 @@ export default function HomePage() {
               onMouseLeave={() => setIsHovered(false)}
             >
               Get Started
-              <ArrowRight className={`w-5 h-5 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
+              <ArrowRight className={`w-5 h-5 transition-transform duration-300 ${isHovered ? "translate-x-1" : ""}`} />
             </button>
           </motion.div>
         </div>

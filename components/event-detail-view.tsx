@@ -98,7 +98,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
     >
       <div className="space-y-6">
         {/* Left side - Registration & Event Details */}
-        <div className="bg-zinc-900/50 rounded-2xl shadow-lg border border-white/5 overflow-hidden">
+        <div className="bg-[#1a1a1a] rounded-2xl shadow-lg border border-white/5 overflow-hidden">
           <div className={`relative w-full h-48 bg-gradient-to-br ${gradient}`}>
             <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
 
@@ -218,7 +218,7 @@ export default function EventDetailView({ event, onBack, onAttendeeClick }: Even
         </div>
 
         {/* Event Attendees Section */}
-        <div className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
+        <div className="bg-[#1a1a1a] backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/5">
           <div className="flex items-center gap-2 mb-4">
             <Users className="w-5 h-5 text-zinc-400" />
             <h3 className="text-lg font-bold text-white">Event Attendees</h3>

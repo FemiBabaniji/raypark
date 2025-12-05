@@ -13,7 +13,18 @@ import { AdminCohorts } from "@/components/admin/admin-cohorts"
 import { AdminAnalytics } from "@/components/admin/admin-analytics"
 import { AdminIntegrations } from "@/components/admin/admin-integrations"
 import { AdminSettings } from "@/components/admin/admin-settings"
-import { Loader2, LayoutDashboard, Activity, Users, UserCog, FileText, Settings, ShieldCheck } from "lucide-react"
+import { AdminAssignments } from "@/components/admin/admin-assignments"
+import {
+  Loader2,
+  LayoutDashboard,
+  Activity,
+  Users,
+  UserCog,
+  FileText,
+  Settings,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import EventsHeader from "@/components/events-header"
 
@@ -126,7 +137,7 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-8 py-8">
         <Tabs defaultValue="home" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
             <TabsTrigger value="home" className="gap-2">
               <LayoutDashboard className="size-4" />
               Home
@@ -142,6 +153,10 @@ export default function AdminPage() {
             <TabsTrigger value="cohorts" className="gap-2">
               <UserCog className="size-4" />
               Cohorts
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="gap-2">
+              <UserCheck className="size-4" />
+              Assignments
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <FileText className="size-4" />
@@ -171,6 +186,10 @@ export default function AdminPage() {
 
           <TabsContent value="cohorts" className="space-y-6">
             <AdminCohorts communityId={selectedCommunity} />
+          </TabsContent>
+
+          <TabsContent value="assignments" className="space-y-6">
+            <AdminAssignments communityId={selectedCommunity} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

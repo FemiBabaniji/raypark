@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { useUserRole } from "@/hooks/use-user-role"
+import { useIsAdmin } from "@/hooks/use-is-admin"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RoleBadge } from "@/components/admin/role-badge"
 import { RoleAssignmentForm } from "@/components/admin/role-assignment-form"
 import { RoleList } from "@/components/admin/role-list"
 import { AdminStats } from "@/components/admin/admin-stats"
+import { AdminSettings } from "@/components/admin/admin-settings"
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -20,7 +21,7 @@ export default function AdminPage() {
   const [selectedCommunity, setSelectedCommunity] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
-  const { isCommunityAdmin, isLoading: roleLoading } = useUserRole(selectedCommunity)
+  const { isAdmin, isLoading: roleLoading } = useIsAdmin(selectedCommunity)
 
   useEffect(() => {
     async function loadUser() {
@@ -73,7 +74,7 @@ export default function AdminPage() {
     )
   }
 
-  if (!isCommunityAdmin) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background p-8">
         <Alert>
@@ -118,6 +119,7 @@ export default function AdminPage() {
             <TabsTrigger value="community-roles">Community Roles</TabsTrigger>
             <TabsTrigger value="cohort-roles">Cohort Roles</TabsTrigger>
             <TabsTrigger value="assign-role">Assign Role</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="community-roles">
@@ -156,6 +158,18 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <RoleAssignmentForm communityId={selectedCommunity} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Community Settings</CardTitle>
+                <CardDescription>Configure admin access control and security settings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
               </CardContent>
             </Card>
           </TabsContent>

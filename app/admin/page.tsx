@@ -4,15 +4,18 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useIsAdmin } from "@/hooks/use-is-admin"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RoleBadge } from "@/components/admin/role-badge"
-import { RoleAssignmentForm } from "@/components/admin/role-assignment-form"
-import { RoleList } from "@/components/admin/role-list"
-import { AdminStats } from "@/components/admin/admin-stats"
+import { AdminHome } from "@/components/admin/admin-home"
+import { AdminEvents } from "@/components/admin/admin-events"
+import { AdminNetwork } from "@/components/admin/admin-network"
+import { AdminCohorts } from "@/components/admin/admin-cohorts"
+import { AdminAnalytics } from "@/components/admin/admin-analytics"
+import { AdminIntegrations } from "@/components/admin/admin-integrations"
 import { AdminSettings } from "@/components/admin/admin-settings"
-import { Loader2 } from "lucide-react"
+import { Loader2, LayoutDashboard, Activity, Users, UserCog, FileText, Settings, ShieldCheck } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import EventsHeader from "@/components/events-header"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -86,24 +89,32 @@ export default function AdminPage() {
     )
   }
 
+  const selectedCommunityData = communities.find((c) => c.id === selectedCommunity)
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage roles and permissions for your community</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <RoleBadge role="community_admin" />
+      <EventsHeader
+        communityName={selectedCommunityData?.code || "BEA"}
+        showRightColumn={false}
+        onToggleRightColumn={() => {}}
+        activeTab="Admin"
+      />
+
+      <div className="border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">Community Administration</h1>
+              <p className="text-white/60 mt-1">Manage roles, permissions, and community settings</p>
+            </div>
             {communities.length > 1 && (
               <select
                 value={selectedCommunity}
                 onChange={(e) => setSelectedCommunity(e.target.value)}
-                className="px-4 py-2 border rounded-lg bg-background"
+                className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {communities.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.id} className="bg-zinc-900">
                     {c.name}
                   </option>
                 ))}
@@ -111,66 +122,68 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+      </div>
 
-        <AdminStats communityId={selectedCommunity} />
-
-        <Tabs defaultValue="community-roles" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="community-roles">Community Roles</TabsTrigger>
-            <TabsTrigger value="cohort-roles">Cohort Roles</TabsTrigger>
-            <TabsTrigger value="assign-role">Assign Role</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <Tabs defaultValue="home" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+            <TabsTrigger value="home" className="gap-2">
+              <LayoutDashboard className="size-4" />
+              Home
+            </TabsTrigger>
+            <TabsTrigger value="events" className="gap-2">
+              <Activity className="size-4" />
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="network" className="gap-2">
+              <Users className="size-4" />
+              Network
+            </TabsTrigger>
+            <TabsTrigger value="cohorts" className="gap-2">
+              <UserCog className="size-4" />
+              Cohorts
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <FileText className="size-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="integrations" className="gap-2">
+              <Settings className="size-4" />
+              Integrations
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <ShieldCheck className="size-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="community-roles">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Administrators</CardTitle>
-                <CardDescription>
-                  Manage community-wide admin roles. Community admins have full access to all cohorts and members.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RoleList scope="community" scopeId={selectedCommunity} />
-              </CardContent>
-            </Card>
+          <TabsContent value="home" className="space-y-6">
+            <AdminHome communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="cohort-roles">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cohort Administrators</CardTitle>
-                <CardDescription>
-                  Manage cohort-specific admin roles. Cohort admins can only manage their assigned cohort.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RoleList scope="cohort" scopeId={selectedCommunity} />
-              </CardContent>
-            </Card>
+          <TabsContent value="events" className="space-y-6">
+            <AdminEvents communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="assign-role">
-            <Card>
-              <CardHeader>
-                <CardTitle>Assign New Role</CardTitle>
-                <CardDescription>Grant admin roles to community members</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RoleAssignmentForm communityId={selectedCommunity} />
-              </CardContent>
-            </Card>
+          <TabsContent value="network" className="space-y-6">
+            <AdminNetwork communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Settings</CardTitle>
-                <CardDescription>Configure admin access control and security settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
-              </CardContent>
+          <TabsContent value="cohorts" className="space-y-6">
+            <AdminCohorts communityId={selectedCommunity} />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AdminAnalytics communityId={selectedCommunity} />
+          </TabsContent>
+
+          <TabsContent value="integrations" className="space-y-6">
+            <AdminIntegrations communityId={selectedCommunity} />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-white/[0.03] border-white/10 max-w-3xl">
+              <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
             </Card>
           </TabsContent>
         </Tabs>

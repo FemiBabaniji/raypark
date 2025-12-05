@@ -59,35 +59,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to join community" }, { status: 500 })
     }
 
-    // Check if this is the first member - if so, make them admin
-    const { count } = await supabase
-      .from("community_members")
-      .select("*", { count: "exact", head: true })
-      .eq("community_id", community.id)
+    const isTestCommunity = community.code === "test-admin-community"
 
-    console.log("[v0] Member count for community:", count)
-
-    if (count === 1) {
-      // First member - make them admin
+    if (isTestCommunity) {
       const { error: roleError } = await supabase.from("user_community_roles").insert({
         user_id: user.id,
         community_id: community.id,
         role: "community_admin",
         assigned_at: new Date().toISOString(),
-        notes: "Bootstrap first admin",
+        notes: "Auto-admin for test community",
       })
 
       if (roleError) {
         console.error("[v0] Error assigning admin role:", roleError)
       } else {
-        console.log("[v0] First member - assigned admin role")
+        console.log("[v0] Test community - assigned admin role")
       }
     }
 
     return NextResponse.json({
       message: "Successfully joined community",
       community,
-      isFirstMember: count === 1,
+      isTestCommunity,
+      madeAdmin: isTestCommunity,
     })
   } catch (error) {
     console.error("[v0] Join community error:", error)

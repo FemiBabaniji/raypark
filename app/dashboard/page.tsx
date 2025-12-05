@@ -1,39 +1,24 @@
 "use client"
-
-import type React from "react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from "framer-motion"
-import MusicAppInterface from "@/components/music-app-interface"
+import { useRouter } from "next/navigation"
 import BackButton from "@/components/ui/back-button"
 import { getPublishedPortfolios } from "@/lib/portfolio-data"
-import { DebugPanel } from "@/components/debug-panel"
-import type { Portfolio } from "@/lib/portfolio-data"
-import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/lib/theme"
 import PortfolioCanvas from "@/components/home/PortfolioCanvas"
-import { savePortfolio, loadUserPortfolios, deletePortfolio, createPortfolioOnce } from "@/lib/portfolio-service"
+import { savePortfolio, loadUserPortfolios, deletePortfolio } from "@/lib/portfolio-service"
 import { useAuth } from "@/lib/auth"
-import { safeUUID } from "@/lib/utils"
-import { THEME_COLOR_OPTIONS } from "@/lib/theme"
-import { Plus, MoreVertical, Grid3x3, List } from 'lucide-react'
+import { Shield } from "lucide-react"
 import { DashboardPortfolioGrid, type ExtendedPortfolio } from "@/components/dashboard-portfolio-grid"
 import { loadUserCommunities, getPortfolioForCommunity, swapPortfolioToCommunity } from "@/lib/community-service"
 import { linkPortfolioToCommunity } from "@/lib/community-service"
 import type { Community } from "@/lib/community-service"
-import { PortfolioTemplateModal, type PortfolioTemplateType } from "@/components/portfolio-template-modal"
-
-interface ExtendedPortfolio extends UnifiedPortfolio {
-  community?: {
-    id: string
-    name: string
-    code: string
-  }
-}
+import { PortfolioTemplateModal } from "@/components/portfolio-template-modal"
+import { useIsAdmin } from "@/hooks/use-is-admin"
 
 const DashboardHeader = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const { isAdmin } = useIsAdmin()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-white/10">
@@ -99,6 +84,20 @@ const DashboardHeader = () => {
                     >
                       Dashboard
                     </Link>
+                    {isAdmin && (
+                      <>
+                        <div className="border-t border-white/5" />
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <Shield className="w-4 h-4" />
+                          Admin
+                        </Link>
+                      </>
+                    )}
+                    <div className="border-t border-white/5" />
                     <Link
                       href="/settings"
                       className="block px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
@@ -135,9 +134,9 @@ export default function DashboardPage() {
       try {
         const [userPortfolios, communities] = await Promise.all([
           loadUserPortfolios(user),
-          loadUserCommunities(user?.id)
+          loadUserCommunities(user?.id),
         ])
-        
+
         if (userPortfolios.length > 0) {
           setPortfolios(userPortfolios)
         } else {
@@ -150,7 +149,12 @@ export default function DashboardPage() {
             location: "Location",
             handle: `@${portfolio.slug}`,
             initials: portfolio.title
-              ? portfolio.title.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+              ? portfolio.title
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()
               : "??",
             selectedColor: (index % 7) as ThemeIndex,
             isLive: false,
@@ -159,7 +163,7 @@ export default function DashboardPage() {
           }))
           setPortfolios(portfolioCards)
         }
-        
+
         setUserCommunities(communities)
       } catch (error) {
         console.error("Error fetching portfolios:", error)
@@ -169,14 +173,14 @@ export default function DashboardPage() {
     }
 
     fetchPortfolios()
-    
+
     const handlePortfolioUpdate = () => {
       console.log("[v0] Portfolio update detected, refreshing...")
       fetchPortfolios()
     }
-    
+
     window.addEventListener("portfolio-updated", handlePortfolioUpdate)
-    
+
     return () => {
       window.removeEventListener("portfolio-updated", handlePortfolioUpdate)
     }
@@ -211,11 +215,11 @@ export default function DashboardPage() {
       }
 
       const { portfolio } = await response.json()
-      
+
       setIsTemplateModalOpen(false)
-      
+
       window.dispatchEvent(new CustomEvent("portfolio-updated"))
-      
+
       router.push(`/portfolio/builder?portfolio=${portfolio.id}`)
     } catch (error) {
       console.error("Error creating portfolio:", error)
@@ -245,7 +249,7 @@ export default function DashboardPage() {
       } else {
         await swapPortfolioToCommunity(portfolioId, communityId, user.id)
       }
-      
+
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
     } catch (error) {
@@ -256,7 +260,7 @@ export default function DashboardPage() {
 
   const handleCheckExistingPortfolio = async (communityId: string) => {
     if (!user?.id) return null
-    
+
     try {
       const existing = await getPortfolioForCommunity(user.id, communityId)
       return existing
@@ -273,7 +277,7 @@ export default function DashboardPage() {
 
     try {
       await deletePortfolio(portfolioId)
-      
+
       const updatedPortfolios = await loadUserPortfolios(user)
       setPortfolios(updatedPortfolios)
     } catch (error) {
@@ -310,7 +314,7 @@ export default function DashboardPage() {
             </div>
           </>
         )}
-        
+
         {isPreviewMode && (
           <div className="fixed top-8 left-8 z-50">
             <BackButton onClick={() => setIsPreviewMode(false)} />
@@ -371,26 +375,28 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen relative bg-background overflow-hidden">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div 
+        <div
           className="absolute inset-0 opacity-40"
           style={{
-            background: "linear-gradient(135deg, #0d0d15 0%, #12121d 15%, #0a0a12 30%, #15152a 45%, #0f0f1a 60%, #1a1a28 75%, #0e0e16 90%, #13132a 100%)",
+            background:
+              "linear-gradient(135deg, #0d0d15 0%, #12121d 15%, #0a0a12 30%, #15152a 45%, #0f0f1a 60%, #1a1a28 75%, #0e0e16 90%, #13132a 100%)",
             filter: "blur(20px)",
           }}
         />
-        
-        <div 
+
+        <div
           className="absolute inset-0 opacity-[0.008]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             backgroundRepeat: "repeat",
           }}
         />
-        
-        <div 
+
+        <div
           className="absolute inset-0 opacity-[0.01]"
           style={{
-            backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%)",
+            backgroundImage:
+              "radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%)",
           }}
         />
       </div>
@@ -399,7 +405,7 @@ export default function DashboardPage() {
         <div className="fixed top-8 left-8 z-50">
           <BackButton onClick={() => router.back()} aria-label="Back" />
         </div>
-        
+
         <main className="pt-20 pb-16 px-8">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-3xl font-bold text-white mb-12">Workspace</h1>

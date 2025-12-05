@@ -69,7 +69,6 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
       const supabase = createClient()
 
       if (enableRestriction) {
-        // Auto-add current user as admin before enabling restriction
         const { error: roleError } = await supabase.from("user_community_roles").upsert(
           {
             user_id: currentUserId,
@@ -79,7 +78,7 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
             notes: "Auto-assigned when enabling admin access restriction",
           },
           {
-            onConflict: "user_id,community_id,role,scope,scope_id",
+            onConflict: "user_id,community_id,role",
           },
         )
 

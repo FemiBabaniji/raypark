@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2, ShieldAlert, ShieldCheck } from "lucide-react"
+import { enableAdminRestriction, disableAdminRestriction } from "@/app/actions/admin-settings"
 
 interface AdminSettingsProps {
   communityId: string
@@ -66,32 +67,13 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
     setMessage(null)
 
     try {
-      const supabase = createClient()
+      const result = enableRestriction
+        ? await enableAdminRestriction(communityId)
+        : await disableAdminRestriction(communityId)
 
-      if (enableRestriction) {
-        const { error: roleError } = await supabase.from("user_community_roles").upsert(
-          {
-            user_id: currentUserId,
-            community_id: communityId,
-            role: "community_admin",
-            assigned_at: new Date().toISOString(),
-            notes: "Auto-assigned when enabling admin access restriction",
-          },
-          {
-            onConflict: "user_id,community_id,role",
-          },
-        )
-
-        if (roleError) throw roleError
+      if (!result.success) {
+        throw new Error(result.error)
       }
-
-      // Update community setting
-      const { error: updateError } = await supabase
-        .from("communities")
-        .update({ admin_access_restricted: enableRestriction })
-        .eq("id", communityId)
-
-      if (updateError) throw updateError
 
       setRestricted(enableRestriction)
       setMessage({

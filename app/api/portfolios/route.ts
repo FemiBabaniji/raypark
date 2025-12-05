@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { PORTFOLIO_TEMPLATES, type PortfolioTemplateType } from "@/lib/portfolio-templates"
-import { getTemplateById } from "@/lib/template-service"
+import { isCommunityAdmin } from "@/lib/permissions"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.error("[v0] Missing Supabase environment variables")
@@ -18,6 +17,36 @@ export async function GET() {
 
     const supabase = await createClient()
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    const { searchParams } = new URL(request.url)
+    const communityId = searchParams.get("communityId")
+
+    // If community admin, return all community portfolios (not just public)
+    if (user && communityId) {
+      const isAdmin = await isCommunityAdmin(user.id, communityId)
+
+      if (isAdmin) {
+        console.log("[v0] Community admin viewing all portfolios for community:", communityId)
+
+        const { data: portfolios, error } = await supabase
+          .from("portfolios")
+          .select("*")
+          .eq("community_id", communityId)
+          .order("created_at", { ascending: false })
+
+        if (error) {
+          console.error("Error fetching portfolios:", error)
+          return NextResponse.json({ error: "Failed to fetch portfolios" }, { status: 500 })
+        }
+
+        return NextResponse.json({ portfolios, isAdmin: true })
+      }
+    }
+
+    // Default behavior: return public portfolios only
     const { data: portfolios, error } = await supabase
       .from("public_portfolio_by_slug")
       .select("*")
@@ -76,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     if (community_id) {
       console.log("[v0] Checking for existing community portfolio, user:", user.id, "community:", community_id)
-      
+
       const { data: existingPortfolio } = await supabase
         .from("portfolios")
         .select("id, name")
@@ -108,7 +137,7 @@ export async function POST(request: NextRequest) {
       "Community:",
       community_id || "none (personal)",
       "Template:",
-      templateId || "blank"
+      templateId || "blank",
     )
 
     const timestamp = Date.now()
@@ -116,7 +145,7 @@ export async function POST(request: NextRequest) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
-    
+
     const slug = `${baseSlug}-${timestamp}`
 
     console.log("[v0] Generated unique slug:", slug)
@@ -152,7 +181,7 @@ export async function POST(request: NextRequest) {
 
     if (portfolioError) {
       console.error("[v0] ❌ Failed to create portfolio:", portfolioError)
-      
+
       if (portfolioError.code === "23505" && portfolioError.message.includes("idx_unique_user_community_portfolio")) {
         console.error("[v0] User already has a portfolio for this community:", portfolioError)
         return NextResponse.json(
@@ -206,9 +235,9 @@ export async function POST(request: NextRequest) {
 
     if (pageError) {
       console.error("[v0] ❌ Failed to create main page:", pageError)
-      
+
       await supabase.from("portfolios").delete().eq("id", portfolio.id)
-      
+
       return NextResponse.json(
         {
           error: "Page creation failed",
@@ -220,18 +249,23 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[v0] ✅ Main page created:", mainPage.id)
-    console.log("[v0] ✅ Portfolio fully initialized with template reference (widgets will be materialized on first edit)")
-    
-    return NextResponse.json({ 
+    console.log(
+      "[v0] ✅ Portfolio fully initialized with template reference (widgets will be materialized on first edit)",
+    )
+
+    return NextResponse.json({
       portfolio,
-      message: "Portfolio created successfully"
+      message: "Portfolio created successfully",
     })
   } catch (error) {
     console.error("[v0] ❌ API Error in portfolio POST:", error)
-    return NextResponse.json({ 
-      error: "Internal server error",
-      message: "An unexpected error occurred. Please try again.",
-      details: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        message: "An unexpected error occurred. Please try again.",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }

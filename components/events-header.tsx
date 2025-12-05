@@ -1,11 +1,12 @@
 "use client"
 
-import { Bell, User, Palette } from "lucide-react"
+import { Bell, User, Palette, Shield } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useTheme } from "@/lib/theme-context"
 import { THEMES, type ThemeName, getMutedGradient } from "@/lib/theme-colors"
 import { whitelabelThemes, type WhitelabelTheme } from "@/lib/whitelabel-themes"
+import { useIsAdmin } from "@/hooks/use-is-admin"
 
 interface EventsHeaderProps {
   communityName: string
@@ -25,6 +26,7 @@ export default function EventsHeader({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { theme, setTheme, whitelabelTheme, setWhitelabelTheme } = useTheme()
+  const { isAdmin } = useIsAdmin()
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -109,6 +111,20 @@ export default function EventsHeader({
                 >
                   Dashboard
                 </Link>
+
+                {isAdmin && (
+                  <>
+                    <div className="border-t border-white/5" />
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-2 w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin Portal
+                    </Link>
+                  </>
+                )}
 
                 <div className="border-t border-white/5 px-4 py-3">
                   <div className="flex items-center gap-2 mb-3">

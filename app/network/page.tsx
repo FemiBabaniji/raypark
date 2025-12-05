@@ -91,6 +91,38 @@ export default function NetworkPage() {
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
             </div>
           </div>
+
+          <div
+            onClick={() => handleCommunitySelect("test-admin-community")}
+            className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl bg-gradient-to-br from-neutral-900/30 to-neutral-800/20 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative p-8 text-center">
+              <div className="rounded-lg w-40 h-32 flex items-center justify-center mx-auto mb-4 p-3 group-hover:scale-105 transition-transform duration-300 bg-gradient-to-br from-neutral-900/30 to-neutral-800/20">
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className="text-4xl font-black tracking-tighter group-hover:text-cyan-300 transition-colors duration-300"
+                    style={{ color: "#FFFFFF" }}
+                  >
+                    TEST
+                  </div>
+                  <div className="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    Admin Testing
+                  </div>
+                </div>
+              </div>
+              <h3
+                className="text-xl font-semibold mb-2 group-hover:text-cyan-300 transition-colors duration-300"
+                style={{ color: "#FFFFFF" }}
+              >
+                Test Admin Community
+              </h3>
+              <p className="text-sm" style={{ color: "#B3B3B3" }}>
+                First member becomes admin
+              </p>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

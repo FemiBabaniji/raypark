@@ -2,7 +2,9 @@
 
 import { useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon } from 'lucide-react'
+import { Bell, LayoutDashboard, Briefcase, Compass, NetworkIcon, Shield } from "lucide-react"
+import { useIsAdmin } from "@/hooks/use-is-admin"
+import Link from "next/link"
 
 interface NavigationProps {
   currentView: string
@@ -21,6 +23,8 @@ export function Navigation({
   setIsUserDropdownOpen,
   setIsLoggedIn,
 }: NavigationProps) {
+  const { isAdmin } = useIsAdmin()
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isUserDropdownOpen && !(event.target as Element)?.closest(".user-dropdown")) {
@@ -116,6 +120,20 @@ export function Navigation({
                     <NetworkIcon className="w-4 h-4" />
                     Network
                   </a>
+
+                  {isAdmin && (
+                    <>
+                      <div className="my-2 border-t border-zinc-700" />
+                      <Link
+                        href="/admin"
+                        className="w-full px-4 py-2 text-left flex items-center gap-3 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors text-sm"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin
+                      </Link>
+                    </>
+                  )}
 
                   <div className="my-2 border-t border-zinc-700" />
 

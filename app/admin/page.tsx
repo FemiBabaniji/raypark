@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useIsAdmin } from "@/hooks/use-is-admin"
-import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminHome } from "@/components/admin/admin-home"
 import { AdminEvents } from "@/components/admin/admin-events"
@@ -17,13 +16,13 @@ import { AdminAssignments } from "@/components/admin/admin-assignments"
 import {
   Loader2,
   LayoutDashboard,
-  Activity,
+  Calendar,
   Users,
-  UserCog,
-  FileText,
-  Settings,
-  ShieldCheck,
+  GraduationCap,
   UserCheck,
+  BarChart3,
+  Puzzle,
+  Settings,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import EventsHeader from "@/components/events-header"
@@ -111,102 +110,76 @@ export default function AdminPage() {
         activeTab="Admin"
       />
 
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Community Administration</h1>
-              <p className="text-white/60 mt-1">Manage roles, permissions, and community settings</p>
-            </div>
-            {communities.length > 1 && (
-              <select
-                value={selectedCommunity}
-                onChange={(e) => setSelectedCommunity(e.target.value)}
-                className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {communities.map((c) => (
-                  <option key={c.id} value={c.id} className="bg-zinc-900">
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-8 py-8">
+      <main className="max-w-[1400px] mx-auto px-8 py-8">
         <Tabs defaultValue="home" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
-            <TabsTrigger value="home" className="gap-2">
+          <TabsList>
+            <TabsTrigger value="home">
               <LayoutDashboard className="size-4" />
               Home
             </TabsTrigger>
-            <TabsTrigger value="events" className="gap-2">
-              <Activity className="size-4" />
+            <TabsTrigger value="events">
+              <Calendar className="size-4" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="network" className="gap-2">
+            <TabsTrigger value="network">
               <Users className="size-4" />
               Network
             </TabsTrigger>
-            <TabsTrigger value="cohorts" className="gap-2">
-              <UserCog className="size-4" />
+            <TabsTrigger value="cohorts">
+              <GraduationCap className="size-4" />
               Cohorts
             </TabsTrigger>
-            <TabsTrigger value="assignments" className="gap-2">
+            <TabsTrigger value="assignments">
               <UserCheck className="size-4" />
               Assignments
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <FileText className="size-4" />
+            <TabsTrigger value="analytics">
+              <BarChart3 className="size-4" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="gap-2">
-              <Settings className="size-4" />
+            <TabsTrigger value="integrations">
+              <Puzzle className="size-4" />
               Integrations
             </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2">
-              <ShieldCheck className="size-4" />
+            <TabsTrigger value="settings">
+              <Settings className="size-4" />
               Settings
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="home" className="space-y-6">
+          <TabsContent value="home">
             <AdminHome communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="events" className="space-y-6">
+          <TabsContent value="events">
             <AdminEvents communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="network" className="space-y-6">
+          <TabsContent value="network">
             <AdminNetwork communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="cohorts" className="space-y-6">
+          <TabsContent value="cohorts">
             <AdminCohorts communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="assignments" className="space-y-6">
+          <TabsContent value="assignments">
             <AdminAssignments communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
+          <TabsContent value="analytics">
             <AdminAnalytics communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="integrations" className="space-y-6">
+          <TabsContent value="integrations">
             <AdminIntegrations communityId={selectedCommunity} />
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white/[0.03] border-white/10 max-w-3xl">
-              <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
-            </Card>
+          <TabsContent value="settings">
+            <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   )
 }

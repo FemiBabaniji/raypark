@@ -25,7 +25,6 @@ import {
   Settings,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import EventsHeader from "@/components/events-header"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -99,17 +98,8 @@ export default function AdminPage() {
     )
   }
 
-  const selectedCommunityData = communities.find((c) => c.id === selectedCommunity)
-
   return (
     <div className="min-h-screen bg-background">
-      <EventsHeader
-        communityName={selectedCommunityData?.code || "BEA"}
-        showRightColumn={false}
-        onToggleRightColumn={() => {}}
-        activeTab="Admin"
-      />
-
       <main className="max-w-[1400px] mx-auto px-8 py-8">
         <Tabs defaultValue="home" className="space-y-6">
           <TabsList>

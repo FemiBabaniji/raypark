@@ -84,6 +84,14 @@ const DashboardHeader = () => {
                     >
                       Dashboard
                     </Link>
+                    <div className="border-t border-white/5" />
+                    <Link
+                      href="/settings"
+                      className="block px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      Settings
+                    </Link>
                     {isAdmin && (
                       <>
                         <div className="border-t border-white/5" />
@@ -97,14 +105,6 @@ const DashboardHeader = () => {
                         </Link>
                       </>
                     )}
-                    <div className="border-t border-white/5" />
-                    <Link
-                      href="/settings"
-                      className="block px-4 py-3 text-white hover:bg-white/5 transition-colors text-sm"
-                      onClick={() => setIsUserDropdownOpen(false)}
-                    >
-                      Settings
-                    </Link>
                   </div>
                 </>
               )}

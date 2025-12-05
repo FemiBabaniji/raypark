@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { Navigation } from "./navigation"
 import { useAuth } from "@/lib/auth"
 
 interface AppLayoutProps {
@@ -17,8 +16,6 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [currentView, setCurrentView] = useState("dashboard")
   const { user, loading } = useAuth()
   const isLoggedIn = !!user && !loading
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
 
   useEffect(() => {
     if (pathname === "/") setCurrentView("dashboard")
@@ -54,24 +51,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isDashboard = pathname === "/" || pathname === "/dashboard"
   const isNetworkWorkflow = pathname.startsWith("/network")
   const isCommunityPage = pathname === "/bea" || pathname === "/dmz"
+  const isAdminPage = pathname === "/admin"
   const shouldShowNavigation =
-    isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow && !isCommunityPage
+    isLoggedIn && !isPortfolioBuilder && !isAuthPage && !isNetworkWorkflow && !isCommunityPage && !isAdminPage
 
-  return (
-    <>
-      {shouldShowNavigation && !isDashboard && (
-        <Navigation
-          currentView={currentView}
-          isLoggedIn={isLoggedIn}
-          isSearchExpanded={isSearchExpanded}
-          isUserDropdownOpen={isUserDropdownOpen}
-          setCurrentView={handleSetCurrentView}
-          setIsSearchExpanded={setIsSearchExpanded}
-          setIsUserDropdownOpen={setIsUserDropdownOpen}
-          setIsLoggedIn={() => {}} // Empty function since auth is handled by AuthProvider
-        />
-      )}
-      <div>{children}</div>
-    </>
-  )
+  return <div>{children}</div>
 }

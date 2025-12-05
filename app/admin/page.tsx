@@ -25,6 +25,7 @@ import {
   Settings,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import BackButton from "@/components/ui/back-button"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -99,77 +100,116 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-[1400px] mx-auto px-8 py-8">
-        <Tabs defaultValue="home" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="home">
-              <LayoutDashboard className="size-4" />
-              Home
-            </TabsTrigger>
-            <TabsTrigger value="events">
-              <Calendar className="size-4" />
-              Events
-            </TabsTrigger>
-            <TabsTrigger value="network">
-              <Users className="size-4" />
-              Network
-            </TabsTrigger>
-            <TabsTrigger value="cohorts">
-              <GraduationCap className="size-4" />
-              Cohorts
-            </TabsTrigger>
-            <TabsTrigger value="assignments">
-              <UserCheck className="size-4" />
-              Assignments
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart3 className="size-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="integrations">
-              <Puzzle className="size-4" />
-              Integrations
-            </TabsTrigger>
-            <TabsTrigger value="settings">
-              <Settings className="size-4" />
-              Settings
-            </TabsTrigger>
-          </TabsList>
+    <div className="min-h-screen relative bg-background overflow-hidden">
+      {/* Background gradient and texture layers */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            background:
+              "linear-gradient(135deg, #0d0d15 0%, #12121d 15%, #0a0a12 30%, #15152a 45%, #0f0f1a 60%, #1a1a28 75%, #0e0e16 90%, #13132a 100%)",
+            filter: "blur(20px)",
+          }}
+        />
 
-          <TabsContent value="home">
-            <AdminHome communityId={selectedCommunity} />
-          </TabsContent>
+        <div
+          className="absolute inset-0 opacity-[0.008]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
+          }}
+        />
 
-          <TabsContent value="events">
-            <AdminEvents communityId={selectedCommunity} />
-          </TabsContent>
+        <div
+          className="absolute inset-0 opacity-[0.01]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%)",
+          }}
+        />
+      </div>
 
-          <TabsContent value="network">
-            <AdminNetwork communityId={selectedCommunity} />
-          </TabsContent>
+      {/* BackButton in fixed position matching workspace layout */}
+      <div className="fixed top-8 left-8 z-50">
+        <BackButton onClick={() => router.back()} aria-label="Back" />
+      </div>
 
-          <TabsContent value="cohorts">
-            <AdminCohorts communityId={selectedCommunity} />
-          </TabsContent>
+      <div className="relative z-10">
+        <main className="pt-20 pb-16 px-8">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-12">Admin Portal</h1>
 
-          <TabsContent value="assignments">
-            <AdminAssignments communityId={selectedCommunity} />
-          </TabsContent>
+            <Tabs defaultValue="home" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="home">
+                  <LayoutDashboard className="size-4" />
+                  Home
+                </TabsTrigger>
+                <TabsTrigger value="events">
+                  <Calendar className="size-4" />
+                  Events
+                </TabsTrigger>
+                <TabsTrigger value="network">
+                  <Users className="size-4" />
+                  Network
+                </TabsTrigger>
+                <TabsTrigger value="cohorts">
+                  <GraduationCap className="size-4" />
+                  Cohorts
+                </TabsTrigger>
+                <TabsTrigger value="assignments">
+                  <UserCheck className="size-4" />
+                  Assignments
+                </TabsTrigger>
+                <TabsTrigger value="analytics">
+                  <BarChart3 className="size-4" />
+                  Analytics
+                </TabsTrigger>
+                <TabsTrigger value="integrations">
+                  <Puzzle className="size-4" />
+                  Integrations
+                </TabsTrigger>
+                <TabsTrigger value="settings">
+                  <Settings className="size-4" />
+                  Settings
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="analytics">
-            <AdminAnalytics communityId={selectedCommunity} />
-          </TabsContent>
+              <TabsContent value="home">
+                <AdminHome communityId={selectedCommunity} />
+              </TabsContent>
 
-          <TabsContent value="integrations">
-            <AdminIntegrations communityId={selectedCommunity} />
-          </TabsContent>
+              <TabsContent value="events">
+                <AdminEvents communityId={selectedCommunity} />
+              </TabsContent>
 
-          <TabsContent value="settings">
-            <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
-          </TabsContent>
-        </Tabs>
-      </main>
+              <TabsContent value="network">
+                <AdminNetwork communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="cohorts">
+                <AdminCohorts communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="assignments">
+                <AdminAssignments communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <AdminAnalytics communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="integrations">
+                <AdminIntegrations communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="settings">
+                <AdminSettings communityId={selectedCommunity} currentUserId={user?.id} />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

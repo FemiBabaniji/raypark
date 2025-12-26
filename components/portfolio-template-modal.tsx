@@ -1,11 +1,8 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { PortfolioTemplate } from "@/lib/template-service"
-import { Sparkles, Code, Palette, BarChart3, Rocket, FileText } from "lucide-react"
 
 interface PortfolioTemplateModalProps {
   isOpen: boolean
@@ -14,22 +11,31 @@ interface PortfolioTemplateModalProps {
   communityId?: string
 }
 
-const templateIcons: Record<string, React.ReactNode> = {
-  "Blank Portfolio": <FileText className="w-5 h-5 text-neutral-400" />,
-  "Designer Portfolio": <Palette className="w-5 h-5 text-purple-400" />,
-  "Developer Portfolio": <Code className="w-5 h-5 text-blue-400" />,
-  "Marketing Portfolio": <Sparkles className="w-5 h-5 text-orange-400" />,
-  "Founder Portfolio": <Rocket className="w-5 h-5 text-emerald-400" />,
-  "Analyst Portfolio": <BarChart3 className="w-5 h-5 text-cyan-400" />,
-}
-
-const templateAccents: Record<string, string> = {
-  "Blank Portfolio": "hover:border-neutral-600/50 group-hover:shadow-neutral-500/10",
-  "Designer Portfolio": "hover:border-purple-500/30 group-hover:shadow-purple-500/10",
-  "Developer Portfolio": "hover:border-blue-500/30 group-hover:shadow-blue-500/10",
-  "Marketing Portfolio": "hover:border-orange-500/30 group-hover:shadow-orange-500/10",
-  "Founder Portfolio": "hover:border-emerald-500/30 group-hover:shadow-emerald-500/10",
-  "Analyst Portfolio": "hover:border-cyan-500/30 group-hover:shadow-cyan-500/10",
+const templateVisuals: Record<string, { gradient: string; pattern: string }> = {
+  "Blank Portfolio": {
+    gradient: "from-neutral-800 to-neutral-900",
+    pattern: "Minimal",
+  },
+  "Designer Portfolio": {
+    gradient: "from-purple-900/40 via-pink-900/40 to-neutral-900",
+    pattern: "Creative",
+  },
+  "Developer Portfolio": {
+    gradient: "from-blue-900/40 via-cyan-900/40 to-neutral-900",
+    pattern: "Technical",
+  },
+  "Marketing Portfolio": {
+    gradient: "from-orange-900/40 via-amber-900/40 to-neutral-900",
+    pattern: "Dynamic",
+  },
+  "Founder Portfolio": {
+    gradient: "from-emerald-900/40 via-teal-900/40 to-neutral-900",
+    pattern: "Bold",
+  },
+  "Analyst Portfolio": {
+    gradient: "from-cyan-900/40 via-blue-900/40 to-neutral-900",
+    pattern: "Structured",
+  },
 }
 
 export function PortfolioTemplateModal({
@@ -80,12 +86,8 @@ export function PortfolioTemplateModal({
     setIsCreating(false)
   }
 
-  const getIcon = (name: string) => {
-    return templateIcons[name] || templateIcons["Blank Portfolio"]
-  }
-
-  const getAccent = (name: string) => {
-    return templateAccents[name] || templateAccents["Blank Portfolio"]
+  const getVisual = (name: string) => {
+    return templateVisuals[name] || templateVisuals["Blank Portfolio"]
   }
 
   return (
@@ -97,66 +99,71 @@ export function PortfolioTemplateModal({
         }
       }}
     >
-      <DialogContent className="max-w-4xl bg-neutral-900/95 backdrop-blur-xl border border-white/10">
+      <DialogContent className="max-w-5xl bg-neutral-950/98 backdrop-blur-2xl border-neutral-800/50">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">Choose a Template</DialogTitle>
-          <p className="text-neutral-400 text-sm mt-2">Select a starting point for your portfolio</p>
+          <DialogTitle className="text-3xl font-semibold text-white mb-2">Choose Your Template</DialogTitle>
+          <p className="text-neutral-400 text-base">Pick a starting point for your portfolio</p>
         </DialogHeader>
 
         {isCreating && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-50">
             <div className="text-center">
-              <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-foreground">Creating your portfolio...</p>
+              <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-base text-white font-medium">Creating your portfolio...</p>
             </div>
           </div>
         )}
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          <div className="flex items-center justify-center py-24">
+            <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 pb-2">
-            {templates.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => handleSelect(template.id)}
-                disabled={isCreating}
-                className={`group relative overflow-hidden rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 border ${
-                  selectedTemplateId === template.id
-                    ? "border-white/40 bg-white/5 shadow-lg shadow-white/10"
-                    : `border-white/10 ${getAccent(template.name)}`
-                } ${isCreating ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.02] hover:shadow-lg"}`}
-              >
-                <div className="bg-card/50 backdrop-blur-sm p-5 flex flex-col gap-4 min-h-[180px]">
-                  {/* Icon and Title */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-muted/50 border border-white/10 flex items-center justify-center flex-shrink-0">
-                      {getIcon(template.name)}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <h3 className="text-white font-semibold text-sm leading-tight mb-1">{template.name}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8 pb-2 max-h-[60vh] overflow-y-auto pr-2">
+            {templates.map((template) => {
+              const visual = getVisual(template.name)
+              return (
+                <button
+                  key={template.id}
+                  onClick={() => handleSelect(template.id)}
+                  disabled={isCreating}
+                  className={`group relative overflow-hidden rounded-2xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                    selectedTemplateId === template.id ? "ring-2 ring-white/80 scale-[0.98]" : "hover:scale-[1.02]"
+                  } ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${visual.gradient} transition-transform duration-500 group-hover:scale-105`}
+                    >
+                      {/* Pattern overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-white/5 text-7xl font-bold select-none">{visual.pattern}</div>
+                      </div>
+
+                      {/* Selection indicator */}
                       {selectedTemplateId === template.id && (
-                        <span className="text-xs text-emerald-400 font-medium">Selected</span>
+                        <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-lg">
+                          <div className="w-3 h-3 rounded-full bg-neutral-900" />
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Description */}
-                  <p className="text-muted-foreground text-xs leading-relaxed">
-                    {template.description || "No description available"}
-                  </p>
+                  <div className="bg-neutral-900/80 backdrop-blur-sm p-5 border-t border-neutral-800/50">
+                    <h3 className="text-white font-semibold text-lg mb-2 text-left">{template.name}</h3>
+                    <p className="text-neutral-400 text-sm leading-relaxed text-left line-clamp-2">
+                      {template.description || "A clean slate to build your unique portfolio"}
+                    </p>
+                  </div>
 
-                  {/* Loading indicator */}
                   {selectedTemplateId === template.id && isCreating && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-neutral-600 border-t-white rounded-full animate-spin" />
                     </div>
                   )}
-                </div>
-              </button>
-            ))}
+                </button>
+              )
+            })}
           </div>
         )}
       </DialogContent>

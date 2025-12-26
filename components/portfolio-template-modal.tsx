@@ -11,30 +11,60 @@ interface PortfolioTemplateModalProps {
   communityId?: string
 }
 
-const templateVisuals: Record<string, { color: string; widgets: string[] }> = {
+const templateVisuals: Record<string, { bgColor: string; widgets: { color: string; size: string }[] }> = {
   "Blank Portfolio": {
-    color: "bg-neutral-800",
-    widgets: ["bg-neutral-700", "bg-neutral-600", "bg-neutral-700"],
+    bgColor: "#374151",
+    widgets: [
+      { color: "#4B5563", size: "w-20 h-20" },
+      { color: "#6B7280", size: "w-20 h-16" },
+      { color: "#4B5563", size: "w-20 h-16" },
+      { color: "#6B7280", size: "w-20 h-20" },
+    ],
   },
   "Designer Portfolio": {
-    color: "bg-purple-600",
-    widgets: ["bg-purple-500", "bg-pink-500", "bg-purple-400"],
+    bgColor: "#9333EA",
+    widgets: [
+      { color: "#A855F7", size: "w-20 h-20" },
+      { color: "#EC4899", size: "w-20 h-16" },
+      { color: "#C084FC", size: "w-20 h-16" },
+      { color: "#A855F7", size: "w-20 h-20" },
+    ],
   },
   "Developer Portfolio": {
-    color: "bg-blue-600",
-    widgets: ["bg-blue-500", "bg-cyan-500", "bg-blue-400"],
+    bgColor: "#2563EB",
+    widgets: [
+      { color: "#3B82F6", size: "w-20 h-20" },
+      { color: "#06B6D4", size: "w-20 h-16" },
+      { color: "#60A5FA", size: "w-20 h-16" },
+      { color: "#3B82F6", size: "w-20 h-20" },
+    ],
   },
   "Marketing Portfolio": {
-    color: "bg-orange-600",
-    widgets: ["bg-orange-500", "bg-amber-500", "bg-orange-400"],
+    bgColor: "#EA580C",
+    widgets: [
+      { color: "#F97316", size: "w-20 h-20" },
+      { color: "#F59E0B", size: "w-20 h-16" },
+      { color: "#FB923C", size: "w-20 h-16" },
+      { color: "#F97316", size: "w-20 h-20" },
+    ],
   },
   "Founder Portfolio": {
-    color: "bg-emerald-600",
-    widgets: ["bg-emerald-500", "bg-teal-500", "bg-emerald-400"],
+    bgColor: "#059669",
+    widgets: [
+      { color: "#10B981", size: "w-20 h-20" },
+      { color: "#14B8A6", size: "w-20 h-16" },
+      { color: "#34D399", size: "w-20 h-16" },
+      { color: "#10B981", size: "w-20 h-20" },
+    ],
   },
   "Analyst Portfolio": {
-    color: "bg-cyan-600",
-    widgets: ["bg-cyan-500", "bg-blue-500", "bg-cyan-400"],
+    bgColor: "#0891B2",
+    widgets: [
+      { color: "#06B6D4", size: "w-20 h-20" },
+      { color: "#3B82F6", size: "w-20 h-16" },
+      { color: "#22D3EE", size: "w-20 h-16" },
+      { color: "#06B6D4", size: "w-20 h-20" },
+    ],
   },
 }
 
@@ -46,6 +76,7 @@ export function PortfolioTemplateModal({
 }: PortfolioTemplateModalProps) {
   const [isCreating, setIsCreating] = useState(false)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [hoveredTemplateId, setHoveredTemplateId] = useState<string | null>(null)
   const [templates, setTemplates] = useState<PortfolioTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -90,6 +121,15 @@ export function PortfolioTemplateModal({
     return templateVisuals[name] || templateVisuals["Blank Portfolio"]
   }
 
+  const getTemplateType = (name: string) => {
+    if (name.includes("Designer")) return "CREATIVE"
+    if (name.includes("Developer")) return "TECHNICAL"
+    if (name.includes("Marketing")) return "MARKETING"
+    if (name.includes("Founder")) return "ENTREPRENEURIAL"
+    if (name.includes("Analyst")) return "ANALYTICAL"
+    return "CUSTOM"
+  }
+
   return (
     <Dialog
       open={isOpen}
@@ -119,50 +159,84 @@ export function PortfolioTemplateModal({
             <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pb-2 max-h-[60vh] overflow-y-auto pr-2">
+          <div className="flex overflow-x-auto gap-4 mt-8 pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-neutral-950">
             {templates.map((template) => {
               const visual = getVisual(template.name)
+              const templateType = getTemplateType(template.name)
+              const isHovered = hoveredTemplateId === template.id
+              const isSelected = selectedTemplateId === template.id
+
               return (
-                <button
-                  key={template.id}
-                  onClick={() => handleSelect(template.id)}
-                  disabled={isCreating}
-                  className={`group relative overflow-hidden rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 text-left ${
-                    selectedTemplateId === template.id ? "ring-2 ring-white/80" : "hover:bg-neutral-900/40"
-                  } ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <div className="relative aspect-square overflow-hidden bg-neutral-900/60 rounded-t-xl">
-                    <div className={`absolute inset-0 ${visual.color} p-6 flex items-center justify-center gap-3`}>
-                      <div className="flex flex-col gap-3">
-                        <div className={`w-16 h-16 ${visual.widgets[0]} rounded-lg`} />
-                        <div className={`w-16 h-12 ${visual.widgets[1]} rounded-lg`} />
+                <div key={template.id} className="relative group flex-shrink-0 w-[280px] snap-center">
+                  <button
+                    onClick={() => handleSelect(template.id)}
+                    disabled={isCreating}
+                    onMouseEnter={() => setHoveredTemplateId(template.id)}
+                    onMouseLeave={() => setHoveredTemplateId(null)}
+                    className={`relative rounded-xl p-6 shadow-lg transition-all hover:translate-y-[-2px] duration-300 h-[280px] flex flex-col w-full cursor-pointer ${
+                      isCreating ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    style={{ backgroundColor: visual.bgColor }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl pointer-events-none" />
+
+                    <div className="relative z-10 flex items-start justify-between mb-auto">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-white/60 text-[10px] uppercase tracking-widest font-medium">
+                          {templateType}
+                        </span>
+                        <h3 className="text-white text-xl font-medium leading-tight pr-4">{template.name}</h3>
                       </div>
-                      <div className="flex flex-col gap-3">
-                        <div className={`w-16 h-12 ${visual.widgets[2]} rounded-lg`} />
-                        <div className={`w-16 h-16 ${visual.widgets[0]} rounded-lg`} />
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-lg">
+                          <div className="w-2.5 h-2.5 rounded-full bg-black" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="relative z-10 flex items-center justify-center gap-2 my-4">
+                      <div className="flex flex-col gap-2">
+                        {visual.widgets.slice(0, 2).map((widget, i) => (
+                          <div
+                            key={i}
+                            className={`${widget.size} ${widget.color} rounded-lg opacity-80 backdrop-blur-sm`}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {visual.widgets.slice(2, 4).map((widget, i) => (
+                          <div
+                            key={i}
+                            className={`${widget.size} ${widget.color} rounded-lg opacity-80 backdrop-blur-sm`}
+                          />
+                        ))}
                       </div>
                     </div>
 
-                    {selectedTemplateId === template.id && (
-                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-lg">
-                        <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
+                    <div className="relative z-10 space-y-3">
+                      <p className="text-white/80 text-xs leading-relaxed line-clamp-2">
+                        {template.description || "A clean slate to build your unique portfolio"}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                        <span className="text-white/60 text-[10px] uppercase tracking-wider">Template</span>
+                        <button
+                          className={`px-4 py-1.5 bg-white text-black rounded-full transition-colors text-xs font-medium ${
+                            isHovered ? "bg-white" : "bg-white/90"
+                          }`}
+                        >
+                          {isSelected ? "Selected" : "Select"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isSelected && isCreating && (
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       </div>
                     )}
-                  </div>
-
-                  <div className="bg-neutral-900/60 backdrop-blur-sm p-4 border-t border-neutral-800/50 rounded-b-xl">
-                    <h3 className="text-white font-semibold text-base mb-1.5">{template.name}</h3>
-                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-3">
-                      {template.description || "A clean slate to build your unique portfolio"}
-                    </p>
-                  </div>
-
-                  {selectedTemplateId === template.id && isCreating && (
-                    <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center rounded-xl">
-                      <div className="w-8 h-8 border-2 border-neutral-600 border-t-white rounded-full animate-spin" />
-                    </div>
-                  )}
-                </button>
+                  </button>
+                </div>
               )
             })}
           </div>

@@ -3,6 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AdminStats } from "@/components/admin/admin-stats"
+import { EngagementMetricsPanel } from "@/components/admin/engagement-metrics-panel"
+import { RecentActivityFeed } from "@/components/admin/recent-activity-feed"
 import { AddMemberModal } from "@/components/admin/add-member-modal"
 import { Plus, UserPlus, Upload } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -39,39 +41,45 @@ export function AdminHome({ communityId }: AdminHomeProps) {
     <div className="space-y-6">
       <AdminStats communityId={communityId} />
 
-      <Card className="bg-white/[0.03] border-white/10">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
-          <CardDescription className="text-white/60">Common administrative tasks</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <Button
-            onClick={() => setShowCreateEvent(true)}
-            className="w-full justify-center h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-          >
-            <Plus className="size-5" />
-            Create New Event
-          </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-white/[0.03] border-white/10">
+          <CardHeader>
+            <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
+            <CardDescription className="text-white/60">Common administrative tasks</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <Button
+              onClick={() => setShowCreateEvent(true)}
+              className="w-full justify-center h-12 bg-gradient-to-r from-purple-600/90 to-pink-600/90 hover:from-purple-600 hover:to-pink-600 text-white font-medium border-0"
+            >
+              <Plus className="size-5" />
+              Create New Event
+            </Button>
 
-          <Button
-            onClick={() => setShowAddMember(true)}
-            variant="secondary"
-            className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
-          >
-            <UserPlus className="size-5" />
-            Add Member
-          </Button>
+            <Button
+              onClick={() => setShowAddMember(true)}
+              variant="secondary"
+              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+            >
+              <UserPlus className="size-5" />
+              Add Member
+            </Button>
 
-          <Button
-            onClick={() => setShowImportData(true)}
-            variant="secondary"
-            className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
-          >
-            <Upload className="size-5" />
-            Import Data
-          </Button>
-        </CardContent>
-      </Card>
+            <Button
+              onClick={() => setShowImportData(true)}
+              variant="secondary"
+              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+            >
+              <Upload className="size-5" />
+              Import Data
+            </Button>
+          </CardContent>
+        </Card>
+
+        <EngagementMetricsPanel communityId={communityId} />
+      </div>
+
+      <RecentActivityFeed communityId={communityId} />
 
       <AddMemberModal
         open={showAddMember}

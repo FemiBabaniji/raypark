@@ -1,9 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventsHeader from "@/components/events-header"
 import type { EventDetailData } from "@/components/event-detail"
+import { getEventsForCommunity, type CommunityEvent } from "@/lib/event-service"
 
 const eventData = {
   "ai-ml-workshop": {
@@ -186,6 +187,29 @@ export default function EventsPage({
   const [activeTab, setActiveTab] = useState(initialTab)
   const [showRightColumn, setShowRightColumn] = useState(true)
 
+  const [events, setEvents] = useState<CommunityEvent[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (communityId) {
+      loadEvents()
+    }
+  }, [communityId])
+
+  const loadEvents = async () => {
+    if (!communityId) return
+
+    setLoading(true)
+    try {
+      const fetchedEvents = await getEventsForCommunity(communityId)
+      setEvents(fetchedEvents)
+    } catch (error) {
+      console.error("[v0] Failed to load events:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleEventClick = (eventId: string) => {
     setSelectedEvent(eventId)
   }
@@ -264,6 +288,8 @@ export default function EventsPage({
                   onTabChange={setActiveTab}
                   showRightColumn={showRightColumn}
                   onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
+                  databaseEvents={events}
+                  loadingEvents={loading}
                 />
               </div>
 

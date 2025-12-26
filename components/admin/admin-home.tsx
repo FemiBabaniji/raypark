@@ -6,6 +6,8 @@ import { AdminStats } from "@/components/admin/admin-stats"
 import { EngagementMetricsPanel } from "@/components/admin/engagement-metrics-panel"
 import { RecentActivityFeed } from "@/components/admin/recent-activity-feed"
 import { AddMemberModal } from "@/components/admin/add-member-modal"
+import { CreateEventModal } from "@/components/admin/create-event-modal"
+import { ImportDataModal } from "@/components/admin/import-data-modal"
 import { Plus, UserPlus, Upload } from "lucide-react"
 import { useState, useEffect } from "react"
 import { createBrowserClient } from "@supabase/ssr"
@@ -88,35 +90,19 @@ export function AdminHome({ communityId }: AdminHomeProps) {
         cohorts={cohorts}
       />
 
-      {/* Placeholder for Create Event modal - coming in phase 6 */}
-      {showCreateEvent && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => setShowCreateEvent(false)}
-        >
-          <div className="bg-[#1a1a1d] p-6 rounded-lg border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <p className="text-white">Create Event Modal - Coming in Phase 6</p>
-            <Button onClick={() => setShowCreateEvent(false)} className="mt-4">
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
+      <CreateEventModal
+        open={showCreateEvent}
+        onOpenChange={setShowCreateEvent}
+        communityId={communityId}
+        cohorts={cohorts}
+      />
 
-      {/* Placeholder for Import Data modal - coming in phase 7 */}
-      {showImportData && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => setShowImportData(false)}
-        >
-          <div className="bg-[#1a1a1d] p-6 rounded-lg border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <p className="text-white">Import Data Modal - Coming in Phase 7</p>
-            <Button onClick={() => setShowImportData(false)} className="mt-4">
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
+      <ImportDataModal
+        open={showImportData}
+        onOpenChange={setShowImportData}
+        communityId={communityId}
+        cohorts={cohorts}
+      />
     </div>
   )
 }

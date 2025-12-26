@@ -139,7 +139,7 @@ export function PortfolioTemplateModal({
         }
       }}
     >
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-neutral-950/98 backdrop-blur-2xl border-neutral-800/50">
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto bg-neutral-950/98 backdrop-blur-2xl border-neutral-800/50">
         <DialogHeader>
           <DialogTitle className="text-3xl font-semibold text-white mb-2">Choose Your Template</DialogTitle>
           <p className="text-neutral-400 text-base">Pick a starting point for your portfolio</p>
@@ -159,7 +159,7 @@ export function PortfolioTemplateModal({
             <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 pb-6">
             {templates.map((template) => {
               const visual = getVisual(template.name)
               const templateType = getTemplateType(template.name)
@@ -181,47 +181,45 @@ export function PortfolioTemplateModal({
                     <div className="aspect-square relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
 
-                      <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-10">
+                      <div className="absolute top-0 left-0 right-0 p-5 sm:p-6 z-10">
                         <div className="flex items-start justify-between">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-white/60 text-[9px] sm:text-[10px] uppercase tracking-widest font-medium">
+                          <div className="flex flex-col gap-2">
+                            <span className="text-white/60 text-xs uppercase tracking-widest font-medium">
                               {templateType}
                             </span>
-                            <h3 className="text-white text-base sm:text-lg font-medium leading-tight">
+                            <h3 className="text-white text-xl sm:text-2xl font-semibold leading-tight">
                               {template.name}
                             </h3>
                           </div>
                           {isSelected && (
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white flex items-center justify-center shadow-lg flex-shrink-0">
-                              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-black" />
+                            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-lg flex-shrink-0">
+                              <div className="w-3 h-3 rounded-full bg-black" />
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8">
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-[60%]">
+                      <div className="absolute inset-0 flex items-center justify-center p-10 sm:p-12">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-[70%]">
                           {visual.widgets.map((widget, i) => (
                             <div
                               key={i}
-                              className="w-full aspect-square rounded-lg opacity-70 backdrop-blur-sm transition-all group-hover:opacity-90"
+                              className="w-full aspect-square rounded-lg opacity-80 backdrop-blur-sm transition-all group-hover:opacity-95"
                               style={{ backgroundColor: widget.color }}
                             />
                           ))}
                         </div>
                       </div>
 
-                      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-10 space-y-2 sm:space-y-2.5 bg-gradient-to-t from-black/40 to-transparent pt-6 sm:pt-8">
-                        <p className="text-white/90 text-xs sm:text-sm leading-relaxed line-clamp-2 font-light">
+                      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 z-10 space-y-3 bg-gradient-to-t from-black/50 to-transparent pt-10 sm:pt-12">
+                        <p className="text-white/90 text-sm sm:text-base leading-relaxed line-clamp-2">
                           {template.description || "A clean slate to build your unique portfolio"}
                         </p>
 
-                        <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/20">
-                          <span className="text-white/60 text-[9px] sm:text-[10px] uppercase tracking-wider font-medium">
-                            Template
-                          </span>
+                        <div className="flex items-center justify-between pt-2 border-t border-white/20">
+                          <span className="text-white/60 text-xs uppercase tracking-wider font-medium">Template</span>
                           <button
-                            className={`px-3 sm:px-4 py-1 sm:py-1.5 bg-white text-black rounded-full transition-all text-[10px] sm:text-xs font-medium ${
+                            className={`px-5 py-2 bg-white text-black rounded-full transition-all text-sm font-medium ${
                               isHovered ? "bg-white shadow-lg" : "bg-white/90"
                             }`}
                           >

@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 import { formatDistanceToNow } from "date-fns"
@@ -87,7 +88,7 @@ export function RecentActivityFeed({ communityId }: RecentActivityFeedProps) {
     return (
       <Card className="bg-white/[0.03] border-white/10">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Recent Activity</CardTitle>
+          <CardTitle className="text-white text-lg font-semibold">Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-white/60 text-sm">Loading activity...</div>
@@ -97,24 +98,31 @@ export function RecentActivityFeed({ communityId }: RecentActivityFeedProps) {
   }
 
   return (
-    <Card className="bg-white/[0.03] border-white/10">
+    <Card className="bg-white/[0.03] border-white/10 w-full">
       <CardHeader>
-        <CardTitle className="text-white text-lg">Recent Activity</CardTitle>
+        <CardTitle className="text-white text-lg font-semibold">Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-3">
-              <div className={`size-2 rounded-full ${getActivityColor(activity.activity_type)} mt-1.5 shrink-0`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-white/90 text-sm leading-relaxed">{activity.description}</p>
-                <p className="text-white/40 text-xs mt-1">
-                  {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
-                </p>
+      <CardContent className="p-0">
+        <ScrollArea className="h-[320px] px-6 pb-6">
+          <div className="space-y-4 pr-4">
+            {activities.map((activity) => (
+              <div key={activity.id} className="flex items-start gap-3 py-2">
+                <div className="relative shrink-0 mt-1.5">
+                  <div className={`size-2.5 rounded-full ${getActivityColor(activity.activity_type)}`} />
+                  <div
+                    className={`absolute inset-0 size-2.5 rounded-full ${getActivityColor(activity.activity_type)} animate-ping opacity-20`}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-white/90 text-sm leading-relaxed font-medium truncate">{activity.description}</p>
+                  <p className="text-white/50 text-xs font-normal tabular-nums">
+                    {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   )

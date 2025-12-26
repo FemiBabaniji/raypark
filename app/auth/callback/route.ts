@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
+import { createBrowserClient } from "@supabase/ssr"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -11,28 +10,9 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth?error=missing_code`)
   }
 
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
+  const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          const allCookies = cookieStore.getAll()
-          return Array.isArray(allCookies) ? allCookies : Array.from(allCookies)
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch (error) {
-            // Cookies are already set in response by this point
-          }
-        },
-      },
-    },
   )
 
   const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -41,7 +21,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth?error=${encodeURIComponent(error.message)}`)
   }
 
-  // Redirect immediately after setting cookies
+  // Redirect to destination
   const forwardedHost = request.headers.get("x-forwarded-host")
   const isLocalEnv = process.env.NODE_ENV === "development"
 

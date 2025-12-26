@@ -8,6 +8,7 @@ interface EngagementMetric {
   label: string
   value: number
   color: string
+  gradient: string
 }
 
 interface EngagementMetricsPanelProps {
@@ -16,10 +17,15 @@ interface EngagementMetricsPanelProps {
 
 export function EngagementMetricsPanel({ communityId }: EngagementMetricsPanelProps) {
   const [metrics, setMetrics] = useState<EngagementMetric[]>([
-    { label: "Event Attendance", value: 0, color: "bg-blue-500" },
-    { label: "Member Engagement", value: 0, color: "bg-purple-500" },
-    { label: "Profile Completion", value: 0, color: "bg-emerald-500" },
-    { label: "Network Growth", value: 0, color: "bg-pink-500" },
+    { label: "Event Attendance", value: 0, color: "bg-blue-500", gradient: "from-blue-500/80 to-blue-600/80" },
+    { label: "Member Engagement", value: 0, color: "bg-purple-500", gradient: "from-purple-500/80 to-purple-600/80" },
+    {
+      label: "Profile Completion",
+      value: 0,
+      color: "bg-emerald-500",
+      gradient: "from-emerald-500/80 to-emerald-600/80",
+    },
+    { label: "Network Growth", value: 0, color: "bg-pink-500", gradient: "from-pink-500/80 to-pink-600/80" },
   ])
   const [loading, setLoading] = useState(true)
 
@@ -71,10 +77,30 @@ export function EngagementMetricsPanel({ communityId }: EngagementMetricsPanelPr
         const networkGrowth = totalMembers && newMembers ? Math.round((newMembers / totalMembers) * 100) : 45
 
         setMetrics([
-          { label: "Event Attendance", value: eventAttendance, color: "bg-blue-500" },
-          { label: "Member Engagement", value: avgEngagement, color: "bg-purple-500" },
-          { label: "Profile Completion", value: profileCompletion, color: "bg-emerald-500" },
-          { label: "Network Growth", value: networkGrowth, color: "bg-pink-500" },
+          {
+            label: "Event Attendance",
+            value: eventAttendance,
+            color: "bg-blue-500",
+            gradient: "from-blue-500/80 to-blue-600/80",
+          },
+          {
+            label: "Member Engagement",
+            value: avgEngagement,
+            color: "bg-purple-500",
+            gradient: "from-purple-500/80 to-purple-600/80",
+          },
+          {
+            label: "Profile Completion",
+            value: profileCompletion,
+            color: "bg-emerald-500",
+            gradient: "from-emerald-500/80 to-emerald-600/80",
+          },
+          {
+            label: "Network Growth",
+            value: networkGrowth,
+            color: "bg-pink-500",
+            gradient: "from-pink-500/80 to-pink-600/80",
+          },
         ])
       } catch (error) {
         console.error("[v0] Error loading engagement metrics:", error)
@@ -90,7 +116,7 @@ export function EngagementMetricsPanel({ communityId }: EngagementMetricsPanelPr
     return (
       <Card className="bg-white/[0.03] border-white/10">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Engagement Metrics</CardTitle>
+          <CardTitle className="text-white text-lg font-semibold">Engagement Metrics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-white/60 text-sm">Loading metrics...</div>
@@ -102,25 +128,26 @@ export function EngagementMetricsPanel({ communityId }: EngagementMetricsPanelPr
   return (
     <Card className="bg-white/[0.03] border-white/10">
       <CardHeader>
-        <CardTitle className="text-white text-lg">Engagement Metrics</CardTitle>
+        <CardTitle className="text-white text-lg font-semibold">Engagement Metrics</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {metrics.map((metric, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-white/80 text-sm">{metric.label}</span>
-                <span className="text-white font-semibold">{metric.value}%</span>
-              </div>
-              <div className="relative h-2 bg-white/[0.05] rounded-full overflow-hidden">
-                <div
-                  className={`absolute inset-y-0 left-0 ${metric.color} rounded-full transition-all duration-500`}
-                  style={{ width: `${metric.value}%` }}
-                />
-              </div>
+      <CardContent className="space-y-5">
+        {metrics.map((metric, index) => (
+          <div key={index} className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white/90 text-sm font-medium">{metric.label}</span>
+              <span className="text-white font-semibold tabular-nums text-base">{metric.value}%</span>
             </div>
-          ))}
-        </div>
+            <div className="relative h-2.5 bg-white/[0.05] rounded-full overflow-hidden">
+              <div
+                className={`absolute inset-y-0 left-0 bg-gradient-to-r ${metric.gradient} rounded-full transition-all duration-700 ease-out shadow-lg`}
+                style={{
+                  width: `${metric.value}%`,
+                  boxShadow: `0 0 12px ${metric.color.replace("bg-", "rgba(")}-500, 0.4)`,
+                }}
+              />
+            </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   )

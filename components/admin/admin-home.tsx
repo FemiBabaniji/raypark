@@ -41,16 +41,16 @@ export function AdminHome({ communityId }: AdminHomeProps) {
     <div className="space-y-6">
       <AdminStats communityId={communityId} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="bg-white/[0.03] border-white/10">
           <CardHeader>
-            <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
-            <CardDescription className="text-white/60">Common administrative tasks</CardDescription>
+            <CardTitle className="text-white text-lg font-semibold">Quick Actions</CardTitle>
+            <CardDescription className="text-white/60 text-sm">Common administrative tasks</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Button
               onClick={() => setShowCreateEvent(true)}
-              className="w-full justify-center h-12 bg-gradient-to-r from-purple-600/90 to-pink-600/90 hover:from-purple-600 hover:to-pink-600 text-white font-medium border-0"
+              className="w-full justify-center h-12 bg-gradient-to-r from-purple-600/90 to-pink-600/90 hover:from-purple-600 hover:to-pink-600 text-white font-semibold border-0 shadow-lg shadow-purple-500/20 transition-all duration-200 hover:shadow-purple-500/30"
             >
               <Plus className="size-5" />
               Create New Event
@@ -59,7 +59,7 @@ export function AdminHome({ communityId }: AdminHomeProps) {
             <Button
               onClick={() => setShowAddMember(true)}
               variant="secondary"
-              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-medium border-white/10 transition-all duration-200"
             >
               <UserPlus className="size-5" />
               Add Member
@@ -68,7 +68,7 @@ export function AdminHome({ communityId }: AdminHomeProps) {
             <Button
               onClick={() => setShowImportData(true)}
               variant="secondary"
-              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+              className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-medium border-white/10 transition-all duration-200"
             >
               <Upload className="size-5" />
               Import Data
@@ -79,7 +79,7 @@ export function AdminHome({ communityId }: AdminHomeProps) {
         <EngagementMetricsPanel communityId={communityId} />
       </div>
 
-      <RecentActivityFeed communityId={communityId} />
+      <RecentActivityFeed communityId={communityId} className="w-full" />
 
       <AddMemberModal
         open={showAddMember}

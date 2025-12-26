@@ -27,11 +27,11 @@ export function EnhancedMetricCard({
   return (
     <Card className="relative bg-[#1a1a1d] border-white/5 overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-white/60">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-white/60 truncate pr-2">{title}</CardTitle>
         {showTrend && (
           <div
             className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full",
+              "text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 tabular-nums",
               trendType === "up" && "bg-green-500/20 text-green-400",
               trendType === "down" && "bg-red-500/20 text-red-400",
               trendType === "neutral" && "bg-white/5 text-white/40",
@@ -42,12 +42,12 @@ export function EnhancedMetricCard({
             {suffix}
           </div>
         )}
-        {!showTrend && Icon && <Icon className="size-4 text-white/20" />}
+        {!showTrend && Icon && <Icon className="size-4 text-white/20 shrink-0" />}
       </CardHeader>
       <CardContent>
-        <div className="text-4xl font-bold text-white">
+        <div className="text-4xl font-bold text-white tabular-nums">
           {displayValue}
-          {suffix && !showTrend && <span className="text-2xl">{suffix}</span>}
+          {suffix && !showTrend && <span className="text-2xl ml-0.5">{suffix}</span>}
         </div>
       </CardContent>
     </Card>

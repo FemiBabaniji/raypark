@@ -1,8 +1,7 @@
 "use server"
 
 import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
-import { createClient as createServerClient } from "@/lib/supabase/server"
+import { createClient as createBrowserClient } from "@/lib/supabase/server"
 
 export async function enableAdminRestriction(communityId: string) {
   try {
@@ -13,9 +12,7 @@ export async function enableAdminRestriction(communityId: string) {
       },
     })
 
-    // Get the current user from the regular client
-    const cookieStore = await cookies()
-    const supabase = await createServerClient(cookieStore)
+    const supabase = await createBrowserClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -64,8 +61,7 @@ export async function enableAdminRestriction(communityId: string) {
 
 export async function disableAdminRestriction(communityId: string) {
   try {
-    const cookieStore = await cookies()
-    const supabase = await createServerClient(cookieStore)
+    const supabase = await createBrowserClient()
 
     const { error } = await supabase
       .from("communities")

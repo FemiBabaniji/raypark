@@ -3,55 +3,98 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AdminStats } from "@/components/admin/admin-stats"
-import { UserPlus, Settings, FileText, UserCog } from "lucide-react"
+import { Plus, UserPlus, Upload } from "lucide-react"
+import { useState } from "react"
 
 interface AdminHomeProps {
   communityId: string
 }
 
 export function AdminHome({ communityId }: AdminHomeProps) {
+  const [showCreateEvent, setShowCreateEvent] = useState(false)
+  const [showAddMember, setShowAddMember] = useState(false)
+  const [showImportData, setShowImportData] = useState(false)
+
   return (
     <div className="space-y-6">
       <AdminStats communityId={communityId} />
 
       <Card className="bg-white/[0.03] border-white/10">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <UserCog className="size-5" />
-            Quick Actions
-          </CardTitle>
+          <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
           <CardDescription className="text-white/60">Common administrative tasks</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button className="w-full justify-start h-auto py-4" variant="secondary">
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex items-center gap-2">
-                <UserPlus className="size-4" />
-                <span className="font-medium">Assign Admin Role</span>
-              </div>
-              <span className="text-xs text-white/60">Grant admin access to members</span>
-            </div>
+        <CardContent className="flex flex-col gap-3">
+          <Button
+            onClick={() => setShowCreateEvent(true)}
+            className="w-full justify-center h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            <Plus className="size-5" />
+            Create New Event
           </Button>
-          <Button className="w-full justify-start h-auto py-4 bg-transparent" variant="outline">
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex items-center gap-2">
-                <Settings className="size-4" />
-                <span className="font-medium">Configure Access</span>
-              </div>
-              <span className="text-xs text-white/60">Manage restriction settings</span>
-            </div>
+
+          <Button
+            onClick={() => setShowAddMember(true)}
+            variant="secondary"
+            className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+          >
+            <UserPlus className="size-5" />
+            Add Member
           </Button>
-          <Button className="w-full justify-start h-auto py-4 bg-transparent" variant="outline">
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex items-center gap-2">
-                <FileText className="size-4" />
-                <span className="font-medium">View Audit Log</span>
-              </div>
-              <span className="text-xs text-white/60">Track admin activities</span>
-            </div>
+
+          <Button
+            onClick={() => setShowImportData(true)}
+            variant="secondary"
+            className="w-full justify-center h-12 bg-white/[0.05] hover:bg-white/[0.08] text-white/90 font-normal border-white/10"
+          >
+            <Upload className="size-5" />
+            Import Data
           </Button>
         </CardContent>
       </Card>
+
+      {/* Placeholder for modals - will be implemented in phases 5-7 */}
+      {showCreateEvent && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowCreateEvent(false)}
+        >
+          <div className="bg-[#1a1a1d] p-6 rounded-lg border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <p className="text-white">Create Event Modal - Coming in Phase 5</p>
+            <Button onClick={() => setShowCreateEvent(false)} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {showAddMember && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowAddMember(false)}
+        >
+          <div className="bg-[#1a1a1d] p-6 rounded-lg border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <p className="text-white">Add Member Modal - Coming in Phase 6</p>
+            <Button onClick={() => setShowAddMember(false)} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {showImportData && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowImportData(false)}
+        >
+          <div className="bg-[#1a1a1d] p-6 rounded-lg border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <p className="text-white">Import Data Modal - Coming in Phase 7</p>
+            <Button onClick={() => setShowImportData(false)} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

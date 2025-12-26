@@ -1,104 +1,192 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { EnhancedMetricCard } from "./enhanced-metric-card"
+import { Users, Calendar, Activity, GraduationCap } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Shield, UserPlus, Activity } from "lucide-react"
 
 interface AdminStatsProps {
   communityId: string
 }
 
+interface MetricData {
+  value: number
+  trend: number | null
+  trendType: "up" | "down" | "neutral"
+}
+
+interface MetricsResponse {
+  totalMembers: MetricData
+  activeEvents: MetricData
+  avgEngagement: MetricData
+  cohortsActive: MetricData
+}
+
 export function AdminStats({ communityId }: AdminStatsProps) {
-  const [stats, setStats] = useState({
-    totalMembers: 0,
-    totalAdmins: 0,
-    newMembersThisMonth: 0,
-    activeMembers: 0,
-  })
+  const [metrics, setMetrics] = useState<MetricsResponse | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function loadStats() {
-      const supabase = createClient()
+    async function loadMetrics() {
+      try {
+        const supabase = createClient()
 
-      const { count: memberCount } = await supabase
-        .from("community_members")
-        .select("*", { count: "exact", head: true })
-        .eq("community_id", communityId)
+        const now = new Date()
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-      const { count: adminCount } = await supabase
-        .from("user_community_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("community_id", communityId)
+        // 1. Total Members with trend
+        const { count: currentMemberCount } = await supabase
+          .from("community_members")
+          .select("*", { count: "exact", head: true })
+          .eq("community_id", communityId)
 
-      const firstDayOfMonth = new Date()
-      firstDayOfMonth.setDate(1)
-      firstDayOfMonth.setHours(0, 0, 0, 0)
+        const { count: previousMemberCount } = await supabase
+          .from("community_members")
+          .select("*", { count: "exact", head: true })
+          .eq("community_id", communityId)
+          .lt("joined_at", thirtyDaysAgo.toISOString())
 
-      const { count: newMemberCount } = await supabase
-        .from("community_members")
-        .select("*", { count: "exact", head: true })
-        .eq("community_id", communityId)
-        .gte("joined_at", firstDayOfMonth.toISOString())
+        const memberTrend =
+          previousMemberCount && previousMemberCount > 0
+            ? Math.round((((currentMemberCount || 0) - previousMemberCount) / previousMemberCount) * 100)
+            : 0
 
-      const { count: activeCount } = await supabase
-        .from("community_members")
-        .select("*", { count: "exact", head: true })
-        .eq("community_id", communityId)
-        .eq("lifecycle_stage", "active")
+        // 2. Active Events with trend
+        let currentEventCount = 0
+        let previousEventCount = 0
 
-      setStats({
-        totalMembers: memberCount || 0,
-        totalAdmins: adminCount || 0,
-        newMembersThisMonth: newMemberCount || 0,
-        activeMembers: activeCount || 0,
-      })
+        try {
+          const { count: eventCount } = await supabase
+            .from("events")
+            .select("*", { count: "exact", head: true })
+            .eq("community_id", communityId)
+            .in("status", ["upcoming", "active"])
+            .gte("start_date", now.toISOString())
+
+          currentEventCount = eventCount || 0
+
+          const { count: prevEventCount } = await supabase
+            .from("events")
+            .select("*", { count: "exact", head: true })
+            .eq("community_id", communityId)
+            .in("status", ["upcoming", "active"])
+            .gte("start_date", thirtyDaysAgo.toISOString())
+            .lt("start_date", now.toISOString())
+
+          previousEventCount = prevEventCount || 0
+        } catch (eventTableError) {
+          console.log("[v0] Events table not yet created, using default values")
+        }
+
+        const eventTrend = currentEventCount - previousEventCount
+
+        // 3. Average Engagement with trend
+        const { data: currentEngagement } = await supabase
+          .from("community_members")
+          .select("engagement_score")
+          .eq("community_id", communityId)
+
+        const currentAvgEngagement = currentEngagement?.length
+          ? Math.round(
+              currentEngagement.reduce((sum, m) => sum + (m.engagement_score || 0), 0) / currentEngagement.length,
+            )
+          : 0
+
+        const { data: previousEngagement } = await supabase
+          .from("community_members")
+          .select("engagement_score")
+          .eq("community_id", communityId)
+          .lt("joined_at", thirtyDaysAgo.toISOString())
+
+        const previousAvgEngagement = previousEngagement?.length
+          ? Math.round(
+              previousEngagement.reduce((sum, m) => sum + (m.engagement_score || 0), 0) / previousEngagement.length,
+            )
+          : 0
+
+        const engagementTrend =
+          previousAvgEngagement > 0
+            ? Math.round(((currentAvgEngagement - previousAvgEngagement) / previousAvgEngagement) * 100)
+            : 0
+
+        // 4. Active Cohorts (no trend)
+        const { count: activeCohorts } = await supabase
+          .from("cohorts")
+          .select("*", { count: "exact", head: true })
+          .eq("community_id", communityId)
+          .eq("is_active", true)
+
+        setMetrics({
+          totalMembers: {
+            value: currentMemberCount || 0,
+            trend: memberTrend,
+            trendType: memberTrend > 0 ? "up" : memberTrend < 0 ? "down" : "neutral",
+          },
+          activeEvents: {
+            value: currentEventCount,
+            trend: eventTrend,
+            trendType: eventTrend > 0 ? "up" : eventTrend < 0 ? "down" : "neutral",
+          },
+          avgEngagement: {
+            value: currentAvgEngagement,
+            trend: engagementTrend,
+            trendType: engagementTrend > 0 ? "up" : engagementTrend < 0 ? "down" : "neutral",
+          },
+          cohortsActive: {
+            value: activeCohorts || 0,
+            trend: null,
+            trendType: "neutral",
+          },
+        })
+      } catch (error) {
+        console.error("[v0] Failed to load metrics:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    loadStats()
+    loadMetrics()
   }, [communityId])
+
+  if (loading || !metrics) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-32 bg-white/[0.03] border border-white/5 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-          <Users className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalMembers}</div>
-        </CardContent>
-      </Card>
+      <EnhancedMetricCard
+        title="Total Members"
+        value={metrics.totalMembers.value}
+        trend={metrics.totalMembers.trend}
+        trendType={metrics.totalMembers.trendType}
+        suffix="%"
+        icon={Users}
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Administrators</CardTitle>
-          <Shield className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalAdmins}</div>
-        </CardContent>
-      </Card>
+      <EnhancedMetricCard
+        title="Active Events"
+        value={metrics.activeEvents.value}
+        trend={metrics.activeEvents.trend}
+        trendType={metrics.activeEvents.trendType}
+        icon={Calendar}
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">New This Month</CardTitle>
-          <UserPlus className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.newMembersThisMonth}</div>
-        </CardContent>
-      </Card>
+      <EnhancedMetricCard
+        title="Avg Engagement"
+        value={`${metrics.avgEngagement.value}%`}
+        trend={metrics.avgEngagement.trend}
+        trendType={metrics.avgEngagement.trendType}
+        suffix="%"
+        icon={Activity}
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Active Members</CardTitle>
-          <Activity className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.activeMembers}</div>
-        </CardContent>
-      </Card>
+      <EnhancedMetricCard title="Cohorts Active" value={metrics.cohortsActive.value} icon={GraduationCap} />
     </div>
   )
 }

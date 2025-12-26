@@ -11,30 +11,30 @@ interface PortfolioTemplateModalProps {
   communityId?: string
 }
 
-const templateVisuals: Record<string, { gradient: string; pattern: string }> = {
+const templateVisuals: Record<string, { color: string; widgets: string[] }> = {
   "Blank Portfolio": {
-    gradient: "from-neutral-800 to-neutral-900",
-    pattern: "Minimal",
+    color: "bg-neutral-800",
+    widgets: ["bg-neutral-700", "bg-neutral-600", "bg-neutral-700"],
   },
   "Designer Portfolio": {
-    gradient: "from-purple-900/40 via-pink-900/40 to-neutral-900",
-    pattern: "Creative",
+    color: "bg-purple-600",
+    widgets: ["bg-purple-500", "bg-pink-500", "bg-purple-400"],
   },
   "Developer Portfolio": {
-    gradient: "from-blue-900/40 via-cyan-900/40 to-neutral-900",
-    pattern: "Technical",
+    color: "bg-blue-600",
+    widgets: ["bg-blue-500", "bg-cyan-500", "bg-blue-400"],
   },
   "Marketing Portfolio": {
-    gradient: "from-orange-900/40 via-amber-900/40 to-neutral-900",
-    pattern: "Dynamic",
+    color: "bg-orange-600",
+    widgets: ["bg-orange-500", "bg-amber-500", "bg-orange-400"],
   },
   "Founder Portfolio": {
-    gradient: "from-emerald-900/40 via-teal-900/40 to-neutral-900",
-    pattern: "Bold",
+    color: "bg-emerald-600",
+    widgets: ["bg-emerald-500", "bg-teal-500", "bg-emerald-400"],
   },
   "Analyst Portfolio": {
-    gradient: "from-cyan-900/40 via-blue-900/40 to-neutral-900",
-    pattern: "Structured",
+    color: "bg-cyan-600",
+    widgets: ["bg-cyan-500", "bg-blue-500", "bg-cyan-400"],
   },
 }
 
@@ -119,7 +119,7 @@ export function PortfolioTemplateModal({
             <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8 pb-2 max-h-[60vh] overflow-y-auto pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pb-2 max-h-[60vh] overflow-y-auto pr-2">
             {templates.map((template) => {
               const visual = getVisual(template.name)
               return (
@@ -127,37 +127,38 @@ export function PortfolioTemplateModal({
                   key={template.id}
                   onClick={() => handleSelect(template.id)}
                   disabled={isCreating}
-                  className={`group relative overflow-hidden rounded-2xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
-                    selectedTemplateId === template.id ? "ring-2 ring-white/80 scale-[0.98]" : "hover:scale-[1.02]"
+                  className={`group relative overflow-hidden rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 text-left ${
+                    selectedTemplateId === template.id ? "ring-2 ring-white/80" : "hover:bg-neutral-900/40"
                   } ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${visual.gradient} transition-transform duration-500 group-hover:scale-105`}
-                    >
-                      {/* Pattern overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-white/5 text-7xl font-bold select-none">{visual.pattern}</div>
+                  <div className="relative aspect-square overflow-hidden bg-neutral-900/60 rounded-t-xl">
+                    <div className={`absolute inset-0 ${visual.color} p-6 flex items-center justify-center gap-3`}>
+                      <div className="flex flex-col gap-3">
+                        <div className={`w-16 h-16 ${visual.widgets[0]} rounded-lg`} />
+                        <div className={`w-16 h-12 ${visual.widgets[1]} rounded-lg`} />
                       </div>
-
-                      {/* Selection indicator */}
-                      {selectedTemplateId === template.id && (
-                        <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-lg">
-                          <div className="w-3 h-3 rounded-full bg-neutral-900" />
-                        </div>
-                      )}
+                      <div className="flex flex-col gap-3">
+                        <div className={`w-16 h-12 ${visual.widgets[2]} rounded-lg`} />
+                        <div className={`w-16 h-16 ${visual.widgets[0]} rounded-lg`} />
+                      </div>
                     </div>
+
+                    {selectedTemplateId === template.id && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-lg">
+                        <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
+                      </div>
+                    )}
                   </div>
 
-                  <div className="bg-neutral-900/80 backdrop-blur-sm p-5 border-t border-neutral-800/50">
-                    <h3 className="text-white font-semibold text-lg mb-2 text-left">{template.name}</h3>
-                    <p className="text-neutral-400 text-sm leading-relaxed text-left line-clamp-2">
+                  <div className="bg-neutral-900/60 backdrop-blur-sm p-4 border-t border-neutral-800/50 rounded-b-xl">
+                    <h3 className="text-white font-semibold text-base mb-1.5">{template.name}</h3>
+                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-3">
                       {template.description || "A clean slate to build your unique portfolio"}
                     </p>
                   </div>
 
                   {selectedTemplateId === template.id && isCreating && (
-                    <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center">
+                    <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center rounded-xl">
                       <div className="w-8 h-8 border-2 border-neutral-600 border-t-white rounded-full animate-spin" />
                     </div>
                   )}

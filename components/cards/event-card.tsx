@@ -54,14 +54,15 @@ export function EventCard({
   const bgColor = getThemeColor(theme, eventCategory)
   const type = getEventType(title)
 
-  const getEventId = (title: string): string => {
-    return title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-  }
-
   const handleEventClick = () => {
     if (onEventClick) {
-      const eventId = getEventId(title)
-      onEventClick(eventId)
+      if (title.includes("AI & Machine Learning")) {
+        onEventClick("ai-ml-workshop")
+      } else if (title.includes("Founder Networking")) {
+        onEventClick("founder-networking-mixer")
+      } else if (title.includes("Product Design")) {
+        onEventClick("product-design-masterclass")
+      }
     }
   }
 

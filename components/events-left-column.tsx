@@ -11,8 +11,6 @@ import { MeetingsWidget } from "@/components/events/meetings-widget"
 import type { EventDetailData } from "@/components/event-detail"
 import { ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react"
 import type { EventCategory } from "@/lib/theme-colors"
-import type { CommunityEvent } from "@/lib/event-service"
-import { format, parseISO } from "date-fns"
 
 const CONTAINER_STYLES = "bg-card rounded-2xl p-8 shadow-sm"
 
@@ -135,8 +133,6 @@ export default function EventsLeftColumn({
   onTabChange,
   showRightColumn,
   onToggleRightColumn,
-  databaseEvents = [],
-  loadingEvents = false,
 }: {
   onEventClick?: (eventId: string) => void
   selectedEvent?: string | null
@@ -146,8 +142,6 @@ export default function EventsLeftColumn({
   onTabChange?: (tab: string) => void
   showRightColumn?: boolean
   onToggleRightColumn?: () => void
-  databaseEvents?: CommunityEvent[]
-  loadingEvents?: boolean
 }) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
@@ -186,27 +180,7 @@ export default function EventsLeftColumn({
     }
   }
 
-  const mappedDatabaseEvents = databaseEvents.map((event) => {
-    const startDate = parseISO(event.start_date)
-    const endDate = event.end_date ? parseISO(event.end_date) : startDate
-
-    return {
-      id: event.id,
-      title: event.title,
-      date: format(startDate, "d MMM yyyy"),
-      description: event.description || "",
-      time: `${format(startDate, "h:mm a")} - ${format(endDate, "h:mm a")}`,
-      attending: 0, // Will be fetched separately
-      dateLabel: format(startDate, "MMM d"),
-      location: event.location_name || "TBD",
-      instructor: "Community Host",
-      tags: [event.location_type, event.visibility],
-      type: "workshop", // Default type, can be derived from tags
-    }
-  })
-
   const upcomingEvents = [
-    ...mappedDatabaseEvents,
     {
       title: "AI & Machine Learning Workshop",
       date: "1 Sept 2025",
@@ -415,7 +389,7 @@ export default function EventsLeftColumn({
                     />
                   </div>
 
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-shrink-0 flex-1 flex flex-col">
                     {view === "grid" ? (
                       <>
                         <div className="relative group flex-1">
@@ -853,12 +827,6 @@ export default function EventsLeftColumn({
         {activeTab === "Projects" && (
           <div className="mt-8 text-center py-12">
             <p className="text-zinc-500">Projects section coming soon...</p>
-          </div>
-        )}
-
-        {loadingEvents && (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         )}
       </div>

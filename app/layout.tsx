@@ -1,8 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import Script from "next/script"
 import "./globals.css"
-import "@/lib/polyfills"
 import { AuthProvider } from "@/lib/auth"
 import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from "@/components/app-layout"
@@ -24,8 +24,78 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>{/* Polyfills script can remain here if needed */}</head>
       <body className={`${inter.className} text-foreground`}>
+        <Script
+          id="iterator-polyfill"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+(function() {
+  'use strict';
+  
+  function addToArray(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (obj.toArray) return obj;
+    
+    // Check if it's an iterator
+    if (typeof obj[Symbol.iterator] === 'function' || typeof obj.next === 'function') {
+      obj.toArray = function() {
+        const arr = [];
+        if (typeof this.next === 'function') {
+          // It's an iterator
+          let result = this.next();
+          while (!result.done) {
+            arr.push(result.value);
+            result = this.next();
+          }
+        } else {
+          // It's iterable
+          for (const item of this) {
+            arr.push(item);
+          }
+        }
+        return arr;
+      };
+    }
+    return obj;
+  }
+  
+  // Patch Iterator.prototype if it exists
+  if (typeof Iterator !== 'undefined' && Iterator.prototype && !Iterator.prototype.toArray) {
+    Iterator.prototype.toArray = function() {
+      return Array.from(this);
+    };
+  }
+  
+  // Patch all Map/Set/Array iterator methods
+  [Map, Set, Array].forEach(function(Constructor) {
+    if (typeof Constructor === 'undefined') return;
+    
+    ['values', 'keys', 'entries'].forEach(function(methodName) {
+      if (!Constructor.prototype[methodName]) return;
+      
+      const original = Constructor.prototype[methodName];
+      Constructor.prototype[methodName] = function() {
+        const iter = original.apply(this, arguments);
+        return addToArray(iter);
+      };
+    });
+    
+    // Also patch Symbol.iterator
+    if (Constructor.prototype[Symbol.iterator]) {
+      const originalIterator = Constructor.prototype[Symbol.iterator];
+      Constructor.prototype[Symbol.iterator] = function() {
+        const iter = originalIterator.apply(this, arguments);
+        return addToArray(iter);
+      };
+    }
+  });
+  
+  console.log('[v0] Iterator toArray polyfill applied via beforeInteractive');
+})();
+            `,
+          }}
+        />
         <AuthProvider>
           <ThemeProvider>
             <WhitelabelThemeApplier />

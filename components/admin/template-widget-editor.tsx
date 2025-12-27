@@ -30,6 +30,7 @@ export function TemplateWidgetEditor({
 }: TemplateWidgetEditorProps) {
   const [availableWidgets, setAvailableWidgets] = useState<WidgetType[]>([])
   const [selectedWidget, setSelectedWidget] = useState<string>("")
+  const [expandedWidget, setExpandedWidget] = useState<string | null>(null)
 
   useEffect(() => {
     loadWidgetTypes()
@@ -93,39 +94,85 @@ export function TemplateWidgetEditor({
     return widget?.name || widgetId
   }
 
+  const widgetInfo: Record<string, { description: string }> = {
+    identity: { description: "Name, title, avatar" },
+    description: { description: "About section, bio" },
+    projects: { description: "Project showcase grid" },
+    education: { description: "Education history" },
+    services: { description: "Services offered" },
+    gallery: { description: "Image gallery" },
+    startup: { description: "Startup info, metrics" },
+    meeting: { description: "Meeting scheduler" },
+  }
+
+  function getWidgetDescription(widgetId: string) {
+    const widget = availableWidgets.find((w) => w.id === widgetId)
+    if (!widget) return null
+    return widgetInfo[widget.key]?.description || "Widget"
+  }
+
   return (
-    <div className="border border-white/10 rounded-lg bg-[#2a2a2d] p-6">
+    <div className="border border-white/10 rounded-lg bg-white/5 backdrop-blur-sm p-6">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Left Column */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-white">Left Column</h3>
-            <span className="text-xs text-muted-foreground">{layout.left.widgets.length} widgets</span>
+            <span className="text-xs text-white/60">{layout.left.widgets.length} widgets</span>
           </div>
 
           <div className="space-y-2">
-            {layout.left.widgets.map((widgetId) => (
-              <div
-                key={widgetId}
-                className="flex items-center justify-between bg-[#1a1a1d] border border-white/10 rounded px-3 py-2"
-              >
-                <span className="text-sm text-white">{getWidgetName(widgetId)}</span>
-                <Button variant="ghost" size="sm" onClick={() => removeWidget("left", widgetId)}>
-                  <X className="size-4" />
-                </Button>
-              </div>
-            ))}
+            {layout.left.widgets.map((widgetId) => {
+              const description = getWidgetDescription(widgetId)
+              const isExpanded = expandedWidget === widgetId
 
-            {layout.left.widgets.length === 0 && (
-              <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-white/10 rounded">
-                No widgets added yet
-              </div>
-            )}
+              return (
+                <div
+                  key={widgetId}
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg group hover:border-white/20 transition-colors"
+                >
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <button
+                      onClick={() => setExpandedWidget(isExpanded ? null : widgetId)}
+                      className="flex-1 text-left"
+                    >
+                      <div className="text-sm font-medium text-white">{getWidgetName(widgetId)}</div>
+                      {description && <div className="text-xs text-white/60 mt-1">{description}</div>}
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeWidget("left", widgetId)}
+                      className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-white/10 p-4 bg-white/5">
+                      <div className="text-xs text-white/60 mb-3">Preview</div>
+                      <div className="rounded border border-white/10 p-4 space-y-2">
+                        <div className="h-3 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-2 bg-white/10 rounded w-full"></div>
+                        <div className="h-2 bg-white/10 rounded w-5/6"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
+
+          {layout.left.widgets.length === 0 && (
+            <div className="text-center py-8 text-sm text-white/60 border border-dashed border-white/10 rounded-lg">
+              No widgets added yet
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Select value={selectedWidget} onValueChange={setSelectedWidget}>
-              <SelectTrigger className="bg-[#1a1a1d] border-white/10 text-white">
+              <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/10 text-white">
                 <SelectValue placeholder="Select widget..." />
               </SelectTrigger>
               <SelectContent>
@@ -136,7 +183,12 @@ export function TemplateWidgetEditor({
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => addWidget("left")} disabled={!selectedWidget} size="sm">
+            <Button
+              onClick={() => addWidget("left")}
+              disabled={!selectedWidget}
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 border border-white/20"
+            >
               <Plus className="size-4" />
             </Button>
           </div>
@@ -146,32 +198,61 @@ export function TemplateWidgetEditor({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-white">Right Column</h3>
-            <span className="text-xs text-muted-foreground">{layout.right.widgets.length} widgets</span>
+            <span className="text-xs text-white/60">{layout.right.widgets.length} widgets</span>
           </div>
 
           <div className="space-y-2">
-            {layout.right.widgets.map((widgetId) => (
-              <div
-                key={widgetId}
-                className="flex items-center justify-between bg-[#1a1a1d] border border-white/10 rounded px-3 py-2"
-              >
-                <span className="text-sm text-white">{getWidgetName(widgetId)}</span>
-                <Button variant="ghost" size="sm" onClick={() => removeWidget("right", widgetId)}>
-                  <X className="size-4" />
-                </Button>
-              </div>
-            ))}
+            {layout.right.widgets.map((widgetId) => {
+              const description = getWidgetDescription(widgetId)
+              const isExpanded = expandedWidget === widgetId
 
-            {layout.right.widgets.length === 0 && (
-              <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-white/10 rounded">
-                No widgets added yet
-              </div>
-            )}
+              return (
+                <div
+                  key={widgetId}
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg group hover:border-white/20 transition-colors"
+                >
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <button
+                      onClick={() => setExpandedWidget(isExpanded ? null : widgetId)}
+                      className="flex-1 text-left"
+                    >
+                      <div className="text-sm font-medium text-white">{getWidgetName(widgetId)}</div>
+                      {description && <div className="text-xs text-white/60 mt-1">{description}</div>}
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeWidget("right", widgetId)}
+                      className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-white/10 p-4 bg-white/5">
+                      <div className="text-xs text-white/60 mb-3">Preview</div>
+                      <div className="rounded border border-white/10 p-4 space-y-2">
+                        <div className="h-3 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-2 bg-white/10 rounded w-full"></div>
+                        <div className="h-2 bg-white/10 rounded w-5/6"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
+
+          {layout.right.widgets.length === 0 && (
+            <div className="text-center py-8 text-sm text-white/60 border border-dashed border-white/10 rounded-lg">
+              No widgets added yet
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Select value={selectedWidget} onValueChange={setSelectedWidget}>
-              <SelectTrigger className="bg-[#1a1a1d] border-white/10 text-white">
+              <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/10 text-white">
                 <SelectValue placeholder="Select widget..." />
               </SelectTrigger>
               <SelectContent>
@@ -182,7 +263,12 @@ export function TemplateWidgetEditor({
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => addWidget("right")} disabled={!selectedWidget} size="sm">
+            <Button
+              onClick={() => addWidget("right")}
+              disabled={!selectedWidget}
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 border border-white/20"
+            >
               <Plus className="size-4" />
             </Button>
           </div>

@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import BackButton from "@/components/ui/back-button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -139,7 +140,24 @@ export default function AdminPage() {
       <div className="relative z-10">
         <main className="pt-20 pb-16 px-8">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-12">Admin Portal</h1>
+            <div className="flex items-center justify-between mb-12">
+              <h1 className="text-3xl font-bold text-white">Admin Portal</h1>
+
+              {communities.length > 1 && (
+                <Select value={selectedCommunity} onValueChange={setSelectedCommunity}>
+                  <SelectTrigger className="w-[280px] bg-[#1a1a1d] border-white/10">
+                    <SelectValue placeholder="Select community" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {communities.map((community) => (
+                      <SelectItem key={community.id} value={community.id}>
+                        {community.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
             <Tabs defaultValue="home" className="space-y-6">
               <TabsList>

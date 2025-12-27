@@ -232,6 +232,9 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
+      captions?: string[]
+      authorName?: string
+      authorHandle?: string
     }>
   }>({})
 
@@ -244,6 +247,9 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
+      captions?: string[]
+      authorName?: string
+      authorHandle?: string
     }
   } | null>(null)
 
@@ -984,87 +990,147 @@ export default function PortfolioBuilder({
         logoHref="/network"
         logoSrc="/dmz-logo-white.svg"
       >
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("left")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={leftWidgets}
-            onReorder={setLeftWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
-          >
-            {leftWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: 2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {renderWidget(w, "left")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+        {imagesOnlyMode ? (
+          <div className="col-span-full">
+            <div className="grid grid-cols-4 gap-3 auto-rows-max">
+              {[...leftWidgets, ...rightWidgets]
+                .filter((w) => w.type === "image")
+                .map((w) => {
+                  const imageData = widgetContent[w.id] || { url: "", caption: "" }
+                  if (!imageData.url) return null
 
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("right")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={rightWidgets}
-            onReorder={setRightWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
-          >
-            {rightWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: -2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  return (
+                    <div key={w.id} className="group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                        <img
+                          src={imageData.url || "/placeholder.svg"}
+                          alt={imageData.caption || "Image"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {imageData.caption && (
+                        <p className="text-white/70 text-xs mt-1.5 line-clamp-2">{imageData.caption}</p>
+                      )}
+                    </div>
+                  )
+                })}
+
+              {[...leftWidgets, ...rightWidgets]
+                .filter((w) => w.type === "gallery")
+                .flatMap((w) => {
+                  const groups = galleryGroups[w.id] || []
+                  return groups.flatMap((group) =>
+                    group.images.map((img, idx) => ({
+                      widgetId: w.id,
+                      groupId: group.id,
+                      image: img,
+                      caption: group.captions?.[idx] || "",
+                      authorName: group.authorName || group.name,
+                      authorHandle: group.authorHandle,
+                    })),
+                  )
+                })
+                .map((item, index) => (
+                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                      <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.caption || `Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-1.5">
+                      <p className="text-white/70 text-xs line-clamp-2">{item.caption || item.authorName}</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div
+              className={`lg:w-1/2 relative transition-all duration-200 ${
+                dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOverColumn("left")
+              }}
+              onDragLeave={() => setDragOverColumn(null)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragOverColumn(null)
+              }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={leftWidgets}
+                onReorder={setLeftWidgets}
+                className="flex flex-col gap-4 sm:gap-6"
               >
-                {renderWidget(w, "right")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+                {leftWidgets.map((w) => (
+                  <Reorder.Item
+                    key={w.id}
+                    value={w}
+                    className="list-none"
+                    whileDrag={{
+                      scale: 1.05,
+                      zIndex: 50,
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      rotate: 2,
+                    }}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={() => setIsDragging(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    {renderWidget(w, "left")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+
+            <div
+              className={`lg:w-1/2 relative transition-all duration-200 ${
+                dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOverColumn("right")
+              }}
+              onDragLeave={() => setDragOverColumn(null)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragOverColumn(null)
+              }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={rightWidgets}
+                onReorder={setRightWidgets}
+                className="flex flex-col gap-4 sm:gap-6"
+              >
+                {rightWidgets.map((w) => (
+                  <Reorder.Item
+                    key={w.id}
+                    value={w}
+                    className="list-none"
+                    whileDrag={{
+                      scale: 1.05,
+                      zIndex: 50,
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      rotate: -2,
+                    }}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={() => setIsDragging(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    {renderWidget(w, "right")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+          </>
+        )}
       </PortfolioShell>
 
       <GroupDetailView />

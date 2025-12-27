@@ -221,7 +221,7 @@ export default function GalleryWidget({
                 {group.images.length > 0 ? (
                   <div className="relative">
                     <div
-                      className={`grid grid-cols-2 gap-1 bg-black/10 p-2 rounded-xl ${isPreviewMode ? "max-w-md" : ""}`}
+                      className={`grid grid-cols-2 gap-1 bg-black/10 p-2 rounded-xl ${isPreviewMode ? "max-w-sm" : ""}`}
                     >
                       {group.images.slice(0, 4).map((img, idx) => (
                         <div key={idx} className="relative aspect-square rounded-lg overflow-hidden">

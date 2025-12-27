@@ -5,7 +5,7 @@ import { UnifiedPortfolioCard } from "@/components/unified-portfolio-card"
 import { useAuth } from "@/lib/auth"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import { createClient } from "@/lib/supabase/client"
-import { Upload, ChevronRight, Plus } from "lucide-react"
+import { Upload, Plus } from "lucide-react"
 import { PortfolioTemplateModal } from "@/components/portfolio-template-modal"
 
 export default function EventsRightColumn({
@@ -303,18 +303,6 @@ export default function EventsRightColumn({
 
   return (
     <div className="w-full">
-      {onToggleRightColumn && (
-        <div className="mb-4">
-          <button
-            onClick={onToggleRightColumn}
-            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
-            aria-label="Hide sidebar"
-          >
-            <ChevronRight className="w-4 h-4 text-white/70" />
-          </button>
-        </div>
-      )}
-
       <div className="space-y-6">
         {/* Profile editing card */}
         <div className="rounded-2xl p-6">

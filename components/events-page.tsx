@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { PanelRight } from "lucide-react"
 import EventsLeftColumn from "@/components/events-left-column"
 import EventsRightColumn from "@/components/events-right-column"
 import EventsHeader from "@/components/events-header"
@@ -276,6 +277,19 @@ export default function EventsPage({
                     userPortfolio={userPortfolio}
                   />
                 </div>
+              )}
+
+              {!showRightColumn && (
+                <button
+                  onClick={() => setShowRightColumn(true)}
+                  className="fixed right-6 top-28 z-50 w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 transition-all duration-300 flex items-center justify-center shadow-lg hover:scale-110 group"
+                  aria-label="Show sidebar"
+                >
+                  <PanelRight
+                    className="w-5 h-5 text-white/70 group-hover:text-white transition-colors"
+                    strokeWidth={2}
+                  />
+                </button>
               )}
             </div>
           </main>

@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2 } from "lucide-react"
-import { TemplateWidgetEditor } from "./template-widget-editor"
+import { Loader2, Maximize2 } from "lucide-react"
+import { TemplateBuilderExpanded } from "./template-builder-expanded"
 
 interface CreateTemplateModalProps {
   communityId: string
@@ -23,6 +23,7 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
   const [description, setDescription] = useState("")
   const [isMandatory, setIsMandatory] = useState(false)
   const [isActive, setIsActive] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [widgetConfigs, setWidgetConfigs] = useState<any[]>([])
   const [layout, setLayout] = useState<any>({
     left: { type: "column", widgets: [] },
@@ -87,18 +88,9 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
       created_by: user.id,
     }
 
-    console.log("[v0] Saving template:", {
-      communityId,
-      name: name.trim(),
-      isMandatory,
-      isActive,
-      isUpdate: !!existingTemplate,
-    })
-
     let error
 
     if (existingTemplate) {
-      // Update existing template
       const result = await supabase
         .from("portfolio_templates")
         .update({
@@ -108,40 +100,53 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
         .eq("id", existingTemplate.id)
 
       error = result.error
-      console.log("[v0] Template update result:", error ? "ERROR" : "SUCCESS", error)
     } else {
-      // Create new template
       const result = await supabase.from("portfolio_templates").insert(templateData).select()
 
       error = result.error
-      console.log("[v0] Template creation result:", error ? "ERROR" : "SUCCESS", error)
-      if (!error && result.data) {
-        console.log("[v0] Created template ID:", result.data[0]?.id)
-      }
     }
 
     if (error) {
-      console.error("[v0] Error saving template:", error)
+      console.error("Error saving template:", error)
       alert("Failed to save template: " + error.message)
     } else {
-      console.log("[v0] Template saved successfully, closing modal")
       onClose()
     }
 
     setSaving(false)
   }
 
+  function handleSaveFromExpanded(builderLayout: any, builderWidgetConfigs: any[]) {
+    setLayout(builderLayout)
+    setWidgetConfigs(builderWidgetConfigs)
+    setIsExpanded(false)
+  }
+
+  if (isExpanded) {
+    return (
+      <TemplateBuilderExpanded
+        communityId={communityId}
+        templateName={name}
+        templateDescription={description}
+        isMandatory={isMandatory}
+        isActive={isActive}
+        initialLayout={layout}
+        initialWidgetConfigs={widgetConfigs}
+        onSave={handleSaveFromExpanded}
+        onClose={() => setIsExpanded(false)}
+      />
+    )
+  }
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="!max-w-none w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[1200px] max-h-[90vh] overflow-y-auto bg-white/5 backdrop-blur-sm border-white/10">
+      <DialogContent className="!max-w-none w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[800px] max-h-[90vh] overflow-y-auto bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-white">
-            {existingTemplate ? "Edit Template" : "Create New Template"}
-          </DialogTitle>
+          <DialogTitle className="text-2xl">{existingTemplate ? "Edit Template" : "Create New Template"}</DialogTitle>
           {communityName && (
             <div className="flex items-center gap-2 pt-2">
-              <span className="text-sm text-white/60">For community:</span>
-              <span className="inline-flex items-center rounded-full bg-white/10 border border-white/20 px-3 py-1 text-sm font-medium text-white">
+              <span className="text-sm text-muted-foreground">For community:</span>
+              <span className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-sm font-medium">
                 {communityName}
               </span>
             </div>
@@ -150,27 +155,23 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="size-8 animate-spin text-white/40" />
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <div className="space-y-6 pt-6">
-            {/* Basic Info */}
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-white">
-                  Template Name *
-                </Label>
+                <Label htmlFor="name">Template Name *</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., Startup Founder Portfolio"
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Settings</Label>
+                <Label>Settings</Label>
                 <div className="flex gap-6 pt-2">
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -178,7 +179,7 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
                       checked={isMandatory}
                       onCheckedChange={(checked) => setIsMandatory(checked as boolean)}
                     />
-                    <Label htmlFor="mandatory" className="text-sm text-white/60 cursor-pointer">
+                    <Label htmlFor="mandatory" className="text-sm cursor-pointer font-normal">
                       Required Template
                     </Label>
                   </div>
@@ -188,52 +189,54 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
                       checked={isActive}
                       onCheckedChange={(checked) => setIsActive(checked as boolean)}
                     />
-                    <Label htmlFor="active" className="text-sm text-white/60 cursor-pointer">
+                    <Label htmlFor="active" className="text-sm cursor-pointer font-normal">
                       Active
                     </Label>
                   </div>
                 </div>
                 {isMandatory && (
-                  <p className="text-xs text-white/60 mt-2">Members will be required to use this template</p>
+                  <p className="text-xs text-muted-foreground mt-2">Members will be required to use this template</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-white">
-                Description
-              </Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what this template is best suited for..."
                 rows={3}
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 resize-none"
+                className="resize-none"
               />
             </div>
 
-            {/* Widget Editor */}
             <div className="space-y-2">
-              <Label className="text-white">Template Layout</Label>
-              <TemplateWidgetEditor
-                layout={layout}
-                widgetConfigs={widgetConfigs}
-                onLayoutChange={setLayout}
-                onWidgetConfigsChange={setWidgetConfigs}
-              />
+              <Label>Template Layout</Label>
+              <div className="border border-border rounded-lg p-8 bg-muted/20">
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Use the portfolio builder to create your template layout
+                  </p>
+                  <Button onClick={() => setIsExpanded(true)} variant="outline" className="gap-2">
+                    <Maximize2 className="size-4" />
+                    Open Portfolio Builder
+                  </Button>
+                  {widgetConfigs.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {widgetConfigs.length} widget{widgetConfigs.length !== 1 ? "s" : ""} configured
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-              <Button variant="ghost" onClick={onClose} disabled={saving} className="text-white hover:bg-white/10">
+            <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <Button variant="ghost" onClick={onClose} disabled={saving}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
-              >
+              <Button onClick={handleSave} disabled={saving}>
                 {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
                 {existingTemplate ? "Update Template" : "Create Template"}
               </Button>

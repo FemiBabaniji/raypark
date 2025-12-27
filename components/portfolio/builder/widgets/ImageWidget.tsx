@@ -37,10 +37,15 @@ export default function ImageWidget({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      console.log("[v0] Image file selected:", file.name, file.size)
       const reader = new FileReader()
       reader.onload = (e) => {
         const url = e.target?.result as string
+        console.log("[v0] Image loaded, URL length:", url.length)
         onImageChange(url)
+      }
+      reader.onerror = (error) => {
+        console.error("[v0] Error reading image file:", error)
       }
       reader.readAsDataURL(file)
     }

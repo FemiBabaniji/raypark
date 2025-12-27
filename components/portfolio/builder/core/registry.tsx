@@ -158,7 +158,9 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
         />
       )
     case "image":
-      const imageData = deps.widgetContent.image?.[w.id] || { url: "", caption: "" }
+      const imageContent = deps.widgetContent.image || {}
+      const imageData = imageContent[w.id] || { url: "", caption: "" }
+      console.log("[v0] Rendering image widget:", w.id, "data:", imageData)
       return (
         <ImageWidget
           key={w.id}
@@ -169,12 +171,16 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           onMove={move}
           imageUrl={imageData.url}
           caption={imageData.caption}
-          onImageChange={(url) =>
-            deps.onContentChange("image", { ...deps.widgetContent.image, [w.id]: { ...imageData, url } })
-          }
-          onCaptionChange={(caption) =>
-            deps.onContentChange("image", { ...deps.widgetContent.image, [w.id]: { ...imageData, caption } })
-          }
+          onImageChange={(url) => {
+            console.log("[v0] Image changed:", w.id, url)
+            const updatedImageContent = { ...(deps.widgetContent.image || {}), [w.id]: { ...imageData, url } }
+            deps.onContentChange("image", updatedImageContent)
+          }}
+          onCaptionChange={(caption) => {
+            console.log("[v0] Caption changed:", w.id, caption)
+            const updatedImageContent = { ...(deps.widgetContent.image || {}), [w.id]: { ...imageData, caption } }
+            deps.onContentChange("image", updatedImageContent)
+          }}
         />
       )
     default:

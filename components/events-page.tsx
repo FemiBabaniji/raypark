@@ -250,17 +250,11 @@ export default function EventsPage({
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
           <main className="w-full relative mt-6">
             <div
-              className={`flex items-start gap-6 md:gap-8 transition-all duration-500 ease-in-out ${
+              className={`flex items-start gap-8 transition-all duration-500 ease-in-out ${
                 showRightColumn ? "justify-start" : "justify-center"
               }`}
             >
-              <div
-                className={`transition-all duration-500 ease-in-out ${
-                  showRightColumn
-                    ? "w-full max-w-[600px] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1000px]"
-                    : "w-full max-w-[700px] md:max-w-[900px] lg:max-w-[1100px] xl:max-w-[1300px]"
-                }`}
-              >
+              <div className="max-w-[600px] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1000px] transition-all duration-500 ease-in-out">
                 <EventsLeftColumn
                   onEventClick={handleEventClick}
                   selectedEvent={selectedEvent}

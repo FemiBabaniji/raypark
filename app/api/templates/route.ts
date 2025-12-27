@@ -8,11 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const communityId = searchParams.get("communityId") || undefined
 
-    console.log("[v0] Templates API called with communityId:", communityId)
-
     const templates = await getAvailableTemplates(communityId)
-
-    console.log("[v0] Returning templates:", templates.length)
 
     return NextResponse.json({ templates })
   } catch (error) {

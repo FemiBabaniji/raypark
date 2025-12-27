@@ -74,14 +74,6 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
       created_by: user.id,
     }
 
-    console.log("[v0] Saving template:", {
-      communityId,
-      name: name.trim(),
-      isMandatory,
-      isActive,
-      isUpdate: !!existingTemplate,
-    })
-
     let error
 
     if (existingTemplate) {
@@ -95,23 +87,17 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
         .eq("id", existingTemplate.id)
 
       error = result.error
-      console.log("[v0] Template update result:", error ? "ERROR" : "SUCCESS", error)
     } else {
       // Create new template
-      const result = await supabase.from("portfolio_templates").insert(templateData).select()
+      const result = await supabase.from("portfolio_templates").insert(templateData)
 
       error = result.error
-      console.log("[v0] Template creation result:", error ? "ERROR" : "SUCCESS", error)
-      if (!error && result.data) {
-        console.log("[v0] Created template ID:", result.data[0]?.id)
-      }
     }
 
     if (error) {
       console.error("[v0] Error saving template:", error)
       alert("Failed to save template: " + error.message)
     } else {
-      console.log("[v0] Template saved successfully, closing modal")
       onClose()
     }
 

@@ -52,9 +52,9 @@ export default function ImageWidget({
   }
 
   return (
-    <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl overflow-hidden group relative">
+    <div className="rounded-2xl overflow-hidden group relative">
       {!isPreviewMode && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-20">
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-20 bg-black/60 backdrop-blur-sm rounded-lg p-1">
           <GripVertical className="w-4 h-4 text-white/70" />
           <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-white/20 hover:bg-white/30">
             {column === "left" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
@@ -72,21 +72,31 @@ export default function ImageWidget({
 
       {imageUrl ? (
         <div className="relative">
-          <img src={imageUrl || "/placeholder.svg"} alt={caption || "Image"} className="w-full h-auto object-cover" />
+          <img
+            src={imageUrl || "/placeholder.svg"}
+            alt={caption || "Image"}
+            className="w-full h-auto object-cover rounded-2xl"
+          />
 
           {!isPreviewMode && (
             <Button
               size="sm"
               variant="ghost"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-4 right-4 p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+              className="absolute bottom-4 right-4 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80"
             >
               <Upload className="w-4 h-4" />
             </Button>
           )}
+
+          {caption && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 rounded-b-2xl">
+              <p className="text-white text-sm">{caption}</p>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="aspect-square bg-white/5 flex flex-col items-center justify-center p-8">
+        <div className="aspect-square bg-black/20 border border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center p-8">
           <div className="w-16 h-16 bg-white/10 rounded-xl mb-4 flex items-center justify-center">
             <Upload className="w-8 h-8 text-white/50" />
           </div>
@@ -103,8 +113,8 @@ export default function ImageWidget({
       )}
 
       {/* Caption Section */}
-      {(caption || !isPreviewMode) && (
-        <div className="p-4">
+      {(caption || !isPreviewMode) && imageUrl && (
+        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-b-2xl">
           {isEditingCaption && !isPreviewMode ? (
             <div className="flex gap-2">
               <Input
@@ -137,14 +147,16 @@ export default function ImageWidget({
               )}
             </div>
           ) : (
-            <Button
-              onClick={() => setIsEditingCaption(true)}
-              variant="ghost"
-              size="sm"
-              className="text-white/50 hover:text-white/80 text-xs"
-            >
-              + Add caption
-            </Button>
+            !isPreviewMode && (
+              <Button
+                onClick={() => setIsEditingCaption(true)}
+                variant="ghost"
+                size="sm"
+                className="text-white/50 hover:text-white/80 text-xs w-full"
+              >
+                + Add caption
+              </Button>
+            )
           )}
         </div>
       )}

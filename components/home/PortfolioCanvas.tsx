@@ -7,6 +7,7 @@ import type { ThemeIndex } from "@/lib/theme"
 
 export default function PortfolioCanvas({
   isPreviewMode,
+  imagesOnlyMode = false, // Added imagesOnlyMode prop
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
@@ -17,6 +18,7 @@ export default function PortfolioCanvas({
   communityId, // Add communityId prop
 }: {
   isPreviewMode: boolean
+  imagesOnlyMode?: boolean // Added imagesOnlyMode to type
   useStarterTemplate?: boolean
   activeIdentity?: {
     id: string
@@ -63,6 +65,7 @@ export default function PortfolioCanvas({
         onActiveIdentityChange && (
           <PortfolioBuilder
             isPreviewMode={isPreviewMode}
+            imagesOnlyMode={imagesOnlyMode} // Pass imagesOnlyMode to PortfolioBuilder
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
             onSavePortfolio={onSavePortfolio}

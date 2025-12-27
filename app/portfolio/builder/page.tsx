@@ -16,6 +16,7 @@ export default function PortfolioBuilderPage() {
   const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [imagesOnlyMode, setImagesOnlyMode] = useState(false)
   const [activeIdentity, setActiveIdentity] = useState<{
     id: string | null
     name: string
@@ -278,6 +279,10 @@ export default function PortfolioBuilderPage() {
     setIsPreviewMode(!isPreviewMode)
   }
 
+  const toggleImagesOnly = () => {
+    setImagesOnlyMode(!imagesOnlyMode)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -306,7 +311,30 @@ export default function PortfolioBuilderPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        {isPreviewMode && (
+          <Button
+            onClick={toggleImagesOnly}
+            variant="ghost"
+            size="sm"
+            className={`${
+              imagesOnlyMode ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-white/10 hover:bg-white/20 text-white"
+            } border border-white/20 transition-all`}
+          >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+              <path d="M21 15l-5-5L5 21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {imagesOnlyMode ? "Show All" : "Images Only"}
+          </Button>
+        )}
         <Button
           onClick={togglePreview}
           variant="ghost"
@@ -331,13 +359,14 @@ export default function PortfolioBuilderPage() {
         <div className="flex-1 max-w-5xl mx-auto">
           <PortfolioCanvas
             isPreviewMode={isPreviewMode}
+            imagesOnlyMode={imagesOnlyMode}
             useStarterTemplate={false}
             activeIdentity={activeIdentity}
             onActiveIdentityChange={handleIdentityChange}
             isLive={isLive}
             onToggleLive={handleToggleLive}
             onBack={handleBack}
-            communityId={communityId} // Pass communityId to PortfolioCanvas
+            communityId={communityId}
           />
         </div>
 

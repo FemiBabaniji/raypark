@@ -10,6 +10,7 @@ type GalleryGroup = {
   name: string
   description?: string
   images: string[]
+  captions?: string[]
   isVideo?: boolean
   authorName?: string
   authorHandle?: string
@@ -39,6 +40,7 @@ export default function GalleryWidget({
 }: Props) {
   const [showAddGroup, setShowAddGroup] = useState(false)
   const [newGroupName, setNewGroupName] = useState("")
+  const [editingCaption, setEditingCaption] = useState<{ groupId: string; imageIndex: number } | null>(null)
 
   const addGroup = () => {
     if (!newGroupName.trim()) return
@@ -48,6 +50,7 @@ export default function GalleryWidget({
       name: newGroupName,
       description: "",
       images: [],
+      captions: [],
       isVideo: false,
       authorName: newGroupName,
       authorHandle: "@" + newGroupName.toLowerCase().replace(/\s+/g, ""),
@@ -77,7 +80,13 @@ export default function GalleryWidget({
             const imageUrl = e.target?.result as string
             onGroupsChange(
               galleryGroups.map((group) =>
-                group.id === groupId ? { ...group, images: [...group.images, imageUrl] } : group,
+                group.id === groupId
+                  ? {
+                      ...group,
+                      images: [...group.images, imageUrl],
+                      captions: [...(group.captions || []), ""],
+                    }
+                  : group,
               ),
             )
           }
@@ -89,10 +98,23 @@ export default function GalleryWidget({
     input.click()
   }
 
+  const updateImageCaption = (groupId: string, imageIndex: number, caption: string) => {
+    onGroupsChange(
+      galleryGroups.map((group) => {
+        if (group.id === groupId) {
+          const newCaptions = [...(group.captions || [])]
+          newCaptions[imageIndex] = caption
+          return { ...group, captions: newCaptions }
+        }
+        return group
+      }),
+    )
+  }
+
   return (
-    <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 group relative">
+    <div className="group relative">
       {!isPreviewMode && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10 bg-black/60 backdrop-blur-sm rounded-lg p-1">
           <GripVertical className="w-4 h-4 text-white/70" />
           <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-white/20 hover:bg-white/30">
             {column === "left" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
@@ -108,15 +130,11 @@ export default function GalleryWidget({
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-white">Image Gallery</h3>
-      </div>
-
       <div className="space-y-3">
         {!isPreviewMode && (
           <>
             {showAddGroup ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 bg-black/40 backdrop-blur-sm rounded-lg p-2">
                 <input
                   type="text"
                   placeholder="Group name..."
@@ -146,7 +164,7 @@ export default function GalleryWidget({
                 onClick={() => setShowAddGroup(true)}
                 variant="outline"
                 size="sm"
-                className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white"
+                className="w-full bg-black/40 backdrop-blur-sm border-white/20 hover:bg-black/60 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Group
@@ -160,7 +178,7 @@ export default function GalleryWidget({
             {galleryGroups.map((group) => (
               <div
                 key={group.id}
-                className="bg-[#2a2a2a] rounded-2xl overflow-hidden relative group/group cursor-pointer hover:bg-[#333333] transition-colors"
+                className="rounded-2xl overflow-hidden relative group/group cursor-pointer hover:scale-[1.02] transition-transform"
                 onClick={() => onGroupClick(group)}
               >
                 {!isPreviewMode && (
@@ -172,7 +190,7 @@ export default function GalleryWidget({
                       }}
                       size="sm"
                       variant="ghost"
-                      className="bg-white/20 hover:bg-white/30 text-white p-1 h-6 w-6"
+                      className="bg-black/60 backdrop-blur-sm hover:bg-black/80 text-white p-1 h-6 w-6"
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
@@ -183,7 +201,7 @@ export default function GalleryWidget({
                       }}
                       size="sm"
                       variant="ghost"
-                      className="bg-red-500/20 hover:bg-red-500/30 text-white p-1 h-6 w-6"
+                      className="bg-red-500/60 backdrop-blur-sm hover:bg-red-500/80 text-white p-1 h-6 w-6"
                     >
                       <X className="w-3 h-3" />
                     </Button>
@@ -192,17 +210,21 @@ export default function GalleryWidget({
 
                 {group.images.length > 0 ? (
                   <div className="relative">
-                    <div className="grid grid-cols-2 gap-1 p-3">
+                    <div className="grid grid-cols-2 gap-1 bg-black/20 p-2 rounded-2xl">
                       {group.images.slice(0, 4).map((img, idx) => (
-                        <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-white/5">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden">
                           <img
                             src={img || "/placeholder.svg"}
-                            alt={`${group.name} ${idx + 1}`}
+                            alt={group.captions?.[idx] || `${group.name} ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
+                          {group.captions?.[idx] && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 hover:opacity-100 transition-opacity">
+                              <p className="text-white text-xs line-clamp-2">{group.captions[idx]}</p>
+                            </div>
+                          )}
                         </div>
                       ))}
-                      {/* Fill empty slots if less than 4 images */}
                       {Array.from({ length: Math.max(0, 4 - group.images.length) }).map((_, idx) => (
                         <div
                           key={`empty-${idx}`}
@@ -214,7 +236,7 @@ export default function GalleryWidget({
                     </div>
 
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="bg-black/80 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-3">
+                      <div className="bg-black/80 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-3 shadow-xl">
                         <Avatar className="w-10 h-10 border-2 border-white/20">
                           <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-sm">
@@ -231,31 +253,31 @@ export default function GalleryWidget({
                         </div>
                       </div>
                     </div>
+
+                    {/* Bottom attribution bar */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 flex items-center gap-2">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs">
+                          {group.authorName?.charAt(0) || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-white text-sm font-medium">{group.authorHandle || group.name}</span>
+                    </div>
                   </div>
                 ) : (
-                  <div className="aspect-square bg-white/5 border border-dashed border-white/20 flex flex-col items-center justify-center">
+                  <div className="aspect-square bg-black/20 border border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center">
                     <Upload className="w-8 h-8 text-white/50 mb-2" />
                     <p className="text-white/60 text-sm">Upload images</p>
                   </div>
                 )}
-
-                {/* Bottom Author Attribution */}
-                <div className="p-3 flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs">
-                      {group.authorName?.charAt(0) || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-white text-sm font-medium">{group.authorHandle || group.name}</span>
-                </div>
               </div>
             ))}
           </div>
         )}
 
         {galleryGroups.length === 0 && (
-          <div className="text-center py-6 text-white/60">
+          <div className="text-center py-8 text-white/60 bg-black/20 rounded-2xl">
             <div className="w-12 h-12 bg-white/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
               <Upload className="w-6 h-6" />
             </div>

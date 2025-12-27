@@ -26,10 +26,10 @@ import {
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
-import type { MeetingSchedulerContent } from "./widgets/MeetingSchedulerWidget"
 
 type Props = {
   isPreviewMode?: boolean
+  imagesOnlyMode?: boolean // Added imagesOnlyMode prop
   identity: Identity
   onIdentityChange: (updates: Partial<Identity>) => void
   onExportData?: (data: PortfolioExportData) => void
@@ -59,6 +59,7 @@ type EditorState = {
 
 export default function PortfolioBuilder({
   isPreviewMode = false,
+  imagesOnlyMode = false, // Added imagesOnlyMode prop
   identity,
   onIdentityChange: parentOnIdentityChange,
   onExportData,
@@ -71,7 +72,6 @@ export default function PortfolioBuilder({
   const { user } = useAuth()
   const [isDragging, setIsDragging] = useState(false)
   const [dragOverColumn, setDragOverColumn] = useState<"left" | "right" | null>(null)
-
   const [state, setState] = useState<EditorState>({
     name: initialPortfolio?.name || identity.name || "Untitled Portfolio",
     description: initialPortfolio?.description || "",
@@ -617,15 +617,26 @@ export default function PortfolioBuilder({
     }
   }
 
-  const renderWidget = (w: WidgetDef, column: "left" | "right") => {
-    const canDelete = w.id !== "identity"
-    const canMove = w.id !== "identity"
+  const handleWidgetContentChange = (widgetType: string, updates: any, widgetId?: string) => {
+    setWidgetContent((prev) => ({
+      ...prev,
+      [widgetType]: widgetId ? { ...prev[widgetType], [widgetId]: updates } : updates,
+    }))
+  }
 
-    switch (w.type) {
+  const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
+    const canDelete = widget.id !== "identity"
+    const canMove = widget.id !== "identity"
+
+    if (imagesOnlyMode && widget.type !== "image" && widget.type !== "gallery") {
+      return null
+    }
+
+    switch (widget.type) {
       case "identity":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             id="widget-identity"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -644,19 +655,19 @@ export default function PortfolioBuilder({
       case "education":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <EducationWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[w.id] || widgetContent.education}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              content={widgetContent[widget.id] || widgetContent.education}
+              onContentChange={(updates) => handleWidgetContentChange("education", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -666,24 +677,25 @@ export default function PortfolioBuilder({
       case "projects":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <ProjectsWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[w.id] || widgetContent.projects}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              content={widgetContent.projects[widget.id] || []}
+              onContentChange={(updates) => handleWidgetContentChange("projects", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               projectColors={projectColors}
               setProjectColors={setProjectColors}
               showProjectColorPicker={showProjectColorPicker}
               setShowProjectColorPicker={setShowProjectColorPicker}
-              projectColorOptions={projectColorOptions}
+              editingField={editingField}
+              setEditingField={setEditingField}
             />
           </motion.div>
         )
@@ -691,21 +703,23 @@ export default function PortfolioBuilder({
       case "description":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <DescriptionWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[w.id] || widgetContent.description}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              content={widgetContent.description[widget.id]}
+              onContentChange={(updates) => handleWidgetContentChange("description", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
+              widgetColors={widgetColors}
+              setWidgetColors={setWidgetColors}
             />
           </motion.div>
         )
@@ -713,19 +727,19 @@ export default function PortfolioBuilder({
       case "services":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <ServicesWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[w.id] || widgetContent.services}
-              onContentChange={(content) => setWidgetContent((prev) => ({ ...prev, [w.id]: content }))}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              content={widgetContent.services[widget.id] || []}
+              onContentChange={(updates) => handleWidgetContentChange("services", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -735,20 +749,20 @@ export default function PortfolioBuilder({
       case "gallery":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <GalleryWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
-              galleryGroups={galleryGroups[w.id] || []}
-              onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [w.id]: groups }))}
-              onGroupClick={(group) => setSelectedGroup({ widgetId: w.id, groupId: group.id, group })}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              galleryGroups={galleryGroups[widget.id] || []}
+              onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [widget.id]: groups }))}
+              onGroupClick={(group) => setSelectedGroup({ widgetId: widget.id, groupId: group.id, group })}
             />
           </motion.div>
         )
@@ -756,22 +770,19 @@ export default function PortfolioBuilder({
       case "meeting-scheduler":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <MeetingSchedulerWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              onDelete={() => deleteWidget(w.id, column)}
-              selectedColor={widgetColors[w.type] ?? 5}
-              onColorChange={(color) => setWidgetColors((prev) => ({ ...prev, [w.type]: color }))}
-              content={widgetContent[w.id] || widgetContent[w.type]}
-              onContentChange={(content: MeetingSchedulerContent) =>
-                setWidgetContent((prev) => ({ ...prev, [w.id]: content }))
-              }
+              content={widgetContent.meetingScheduler[widget.id]}
+              onContentChange={(updates) => handleWidgetContentChange("meetingScheduler", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
             />
           </motion.div>
         )
@@ -779,17 +790,19 @@ export default function PortfolioBuilder({
       case "startup":
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <StartupWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              content={widgetContent.startup[widget.id]}
+              onContentChange={(updates) => handleWidgetContentChange("startup", updates, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -797,34 +810,24 @@ export default function PortfolioBuilder({
         )
 
       case "image":
-        const imageData = widgetContent[w.id] || { url: "", caption: "" }
+        const imageData = widgetContent[widget.id] || { url: "", caption: "" }
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
             <ImageWidget
-              widgetId={w.id}
+              widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              onDelete={() => deleteWidget(w.id, column)}
-              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
               imageUrl={imageData.url}
               caption={imageData.caption}
-              onImageChange={(url) =>
-                setWidgetContent((prev) => ({
-                  ...prev,
-                  [w.id]: { ...imageData, url },
-                }))
-              }
-              onCaptionChange={(caption) =>
-                setWidgetContent((prev) => ({
-                  ...prev,
-                  [w.id]: { ...imageData, caption },
-                }))
-              }
+              onImageChange={(url) => handleWidgetContentChange("image", { ...imageData, url }, widget.id)}
+              onCaptionChange={(caption) => handleWidgetContentChange("image", { ...imageData, caption }, widget.id)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
             />
           </motion.div>
         )
@@ -832,7 +835,7 @@ export default function PortfolioBuilder({
       default:
         return (
           <motion.div
-            key={w.id}
+            key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
@@ -842,13 +845,13 @@ export default function PortfolioBuilder({
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => deleteWidget(w.id, column)}
+                  onClick={() => deleteWidget(widget.id, column)}
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
                 >
                   <X className="w-3 h-3" />
                 </Button>
               )}
-              <span className="text-white">Widget: {w.type}</span>
+              <span className="text-white">Widget: {widget.type}</span>
             </div>
           </motion.div>
         )

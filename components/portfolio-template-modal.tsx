@@ -107,25 +107,49 @@ export function PortfolioTemplateModal({
       const params = new URLSearchParams()
       if (communityId) params.append("communityId", communityId)
 
+      console.log("[v0] 📋 Fetching templates with params:")
+      console.log("[v0]   - communityId:", communityId)
+      console.log("[v0]   - API URL:", `/api/templates?${params.toString()}`)
+
       const response = await fetch(`/api/templates?${params.toString()}`)
+
+      console.log("[v0] 📋 API Response status:", response.status)
+
       if (response.ok) {
         const data = await response.json()
+        console.log("[v0] 📋 API returned data:", data)
+        console.log("[v0] 📋 Number of templates:", data.templates?.length || 0)
+        console.log(
+          "[v0] 📋 Templates:",
+          data.templates?.map((t: PortfolioTemplate) => ({
+            id: t.id,
+            name: t.name,
+            community_id: t.community_id,
+            is_mandatory: t.is_mandatory,
+            is_active: t.is_active,
+          })),
+        )
+
         setTemplates(data.templates || [])
 
         const mandatory = data.templates?.find((t: PortfolioTemplate) => t.is_mandatory)
         if (mandatory) {
-          console.log("[v0] Found mandatory template:", mandatory.name)
+          console.log("[v0] ✅ Found mandatory template:", mandatory.name, "ID:", mandatory.id)
           setMandatoryTemplate(mandatory)
           setSelectedTemplateId(mandatory.id)
         } else {
+          console.log("[v0] ℹ️ No mandatory template found")
           setMandatoryTemplate(null)
         }
       } else {
+        console.error("[v0] ❌ API request failed with status:", response.status)
+        const errorText = await response.text()
+        console.error("[v0] ❌ Error response:", errorText)
         setTemplates([])
         setMandatoryTemplate(null)
       }
     } catch (error) {
-      console.error("Failed to fetch templates:", error)
+      console.error("[v0] ❌ Failed to fetch templates:", error)
       setTemplates([])
       setMandatoryTemplate(null)
     } finally {

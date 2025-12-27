@@ -126,6 +126,7 @@ export default function DashboardPage() {
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
+  const [templateCommunityId, setTemplateCommunityId] = useState<string | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -192,6 +193,8 @@ export default function DashboardPage() {
       return
     }
 
+    const defaultCommunityId = userCommunities.length > 0 ? userCommunities[0].id : null
+    setTemplateCommunityId(defaultCommunityId)
     setIsTemplateModalOpen(true)
   }
 
@@ -440,6 +443,7 @@ export default function DashboardPage() {
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
         onSelectTemplate={handleTemplateSelect}
+        communityId={templateCommunityId || undefined}
       />
     </div>
   )

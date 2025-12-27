@@ -27,6 +27,10 @@ export interface PortfolioTemplate {
  * Includes system templates (community_id = null) and community-specific templates
  */
 export async function getAvailableTemplates(communityId?: string): Promise<PortfolioTemplate[]> {
+  console.log("[v0] 🔍 getAvailableTemplates called:")
+  console.log("[v0]   - communityId:", communityId)
+  console.log("[v0]   - communityId type:", typeof communityId)
+
   const supabase = await createClient()
 
   let query = supabase
@@ -37,17 +41,30 @@ export async function getAvailableTemplates(communityId?: string): Promise<Portf
 
   // If communityId provided, include community-specific templates
   if (communityId) {
-    query = query.or(`community_id.is.null,community_id.eq.${communityId}`)
+    const orFilter = `community_id.is.null,community_id.eq.${communityId}`
+    console.log("[v0]   - Using OR filter:", orFilter)
+    query = query.or(orFilter)
   } else {
     // Only system templates
+    console.log("[v0]   - Fetching system templates only (community_id IS NULL)")
     query = query.is("community_id", null)
   }
 
   const { data, error } = await query
 
   if (error) {
-    console.error("[v0] Error fetching templates:", error)
+    console.error("[v0] ❌ Error fetching templates:", error)
     return []
+  }
+
+  console.log("[v0] ✅ Successfully fetched templates:")
+  console.log("[v0]   - Total count:", data?.length || 0)
+
+  if (data && data.length > 0) {
+    console.log("[v0]   - Breakdown:")
+    console.log("[v0]     * System templates:", data.filter((t) => t.community_id === null).length)
+    console.log("[v0]     * Community templates:", data.filter((t) => t.community_id !== null).length)
+    console.log("[v0]     * Mandatory templates:", data.filter((t) => t.is_mandatory).length)
   }
 
   return (data as PortfolioTemplate[]) || []

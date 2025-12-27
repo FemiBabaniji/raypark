@@ -60,10 +60,14 @@ export default function AdminPage() {
 
       const communitiesList = (memberCommunities || []).map((m: any) => m.communities).filter(Boolean)
 
+      console.log("[v0] Admin communities found:", communitiesList)
+      console.log("[v0] Number of admin communities:", communitiesList.length)
+
       setCommunities(communitiesList)
 
       if (communitiesList.length > 0) {
         setSelectedCommunity(communitiesList[0].id)
+        console.log("[v0] Selected community:", communitiesList[0].name, communitiesList[0].id)
       }
 
       setLoading(false)
@@ -143,19 +147,24 @@ export default function AdminPage() {
             <div className="flex items-center justify-between mb-12">
               <h1 className="text-3xl font-bold text-white">Admin Portal</h1>
 
-              {communities.length > 1 && (
-                <Select value={selectedCommunity} onValueChange={setSelectedCommunity}>
-                  <SelectTrigger className="w-[280px] bg-[#1a1a1d] border-white/10">
-                    <SelectValue placeholder="Select community" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {communities.map((community) => (
-                      <SelectItem key={community.id} value={community.id}>
-                        {community.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {communities.length > 0 && (
+                <div className="flex flex-col items-end gap-1">
+                  <Select value={selectedCommunity} onValueChange={setSelectedCommunity}>
+                    <SelectTrigger className="w-[280px] bg-[#1a1a1d] border-white/10">
+                      <SelectValue placeholder="Select community" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {communities.map((community) => (
+                        <SelectItem key={community.id} value={community.id}>
+                          {community.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {communities.length === 1 && (
+                    <span className="text-xs text-muted-foreground">Only 1 community available</span>
+                  )}
+                </div>
               )}
             </div>
 

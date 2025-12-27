@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { X, Save } from "lucide-react"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
+import type { Identity } from "@/components/portfolio/builder/PortfolioBuilder"
 
 interface TemplateBuilderExpandedProps {
   communityId: string
@@ -28,11 +29,20 @@ export function TemplateBuilderExpanded({
   onSave,
   onClose,
 }: TemplateBuilderExpandedProps) {
-  const [currentLayout, setCurrentLayout] = useState(initialLayout)
-  const [currentWidgetConfigs, setCurrentWidgetConfigs] = useState(initialWidgetConfigs)
+  const [identity, setIdentity] = useState<Identity>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    bio: "",
+    skills: [],
+    avatarUrl: "",
+  })
 
-  function handleSave() {
-    onSave(currentLayout, currentWidgetConfigs)
+  function handleSavePortfolio(data: any) {
+    console.log("[v0] Template builder - saving portfolio data:", data)
+    if (data) {
+      onSave(data.layout || initialLayout, data.widgetConfigs || initialWidgetConfigs)
+    }
   }
 
   return (
@@ -45,10 +55,6 @@ export function TemplateBuilderExpanded({
             <p className="text-xs text-muted-foreground">Building template for community</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleSave} className="gap-2">
-              <Save className="size-4" />
-              Save Template
-            </Button>
             <Button onClick={onClose} variant="ghost" size="icon">
               <X className="size-4" />
             </Button>
@@ -59,11 +65,14 @@ export function TemplateBuilderExpanded({
       {/* Portfolio Builder */}
       <div className="pt-16 h-screen overflow-auto">
         <PortfolioBuilder
-          portfolioId={null}
-          mode="template"
+          identity={identity}
+          onIdentityChange={setIdentity}
+          onSavePortfolio={handleSavePortfolio}
           communityId={communityId}
-          onLayoutChange={setCurrentLayout}
-          onWidgetConfigsChange={setCurrentWidgetConfigs}
+          initialPortfolio={{
+            name: templateName,
+            description: templateDescription,
+          }}
         />
       </div>
     </div>

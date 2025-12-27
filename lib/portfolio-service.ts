@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/types/theme"
+import { createBaseSlug, generateSlugWithSuffix } from "./slug-generator"
 
 export interface PortfolioData {
   id: string
@@ -72,7 +73,7 @@ export async function createPortfolioOnce(params: {
 }) {
   const supabase = createClient()
   const baseName = params.name?.trim() || "portfolio"
-  const baseSlug = toSlug(baseName)
+  const baseSlug = createBaseSlug(baseName)
 
   if (params.community_id && !params.template_id) {
     console.log("[v0] Checking for mandatory template in community:", params.community_id)
@@ -107,7 +108,7 @@ export async function createPortfolioOnce(params: {
   let inserted: any = null
 
   for (let i = 0; i < 10; i++) {
-    const trySlug = i === 0 ? baseSlug : `${baseSlug}-${i}`
+    const trySlug = generateSlugWithSuffix(baseSlug, i)
 
     const insertData: any = {
       user_id: params.userId,

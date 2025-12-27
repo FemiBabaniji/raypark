@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { isCommunityAdmin } from "@/lib/permissions"
+import { createBaseSlug, generateSlugWithSuffix } from "@/lib/slug-generator"
 
 export async function GET(request: NextRequest) {
   try {
@@ -140,13 +141,21 @@ export async function POST(request: NextRequest) {
       templateId || "blank",
     )
 
-    const timestamp = Date.now()
-    const baseSlug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
+    const baseSlug = createBaseSlug(name)
+    let slug = baseSlug
+    let attempt = 0
 
-    const slug = `${baseSlug}-${timestamp}`
+    // Try to find a unique slug with friendly suffixes
+    while (attempt < 10) {
+      const { data: existingPortfolio } = await supabase.from("portfolios").select("id").eq("slug", slug).maybeSingle()
+
+      if (!existingPortfolio) {
+        break // Slug is unique
+      }
+
+      attempt++
+      slug = generateSlugWithSuffix(baseSlug, attempt)
+    }
 
     console.log("[v0] Generated unique slug:", slug)
 

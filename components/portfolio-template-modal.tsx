@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PortfolioTemplateCard } from "@/components/cards/portfolio-template-card"
 import type { PortfolioTemplate } from "@/lib/template-service"
 import { cn } from "@/lib/utils"
+import { ShieldCheck } from "lucide-react"
 
 interface PortfolioTemplateModalProps {
   isOpen: boolean
@@ -90,15 +91,14 @@ export function PortfolioTemplateModal({
   const [templates, setTemplates] = useState<PortfolioTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState<string>("All")
+  const [mandatoryTemplate, setMandatoryTemplate] = useState<PortfolioTemplate | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
     fetchTemplates()
-    // clean open state
     setActiveFilter("All")
     setSelectedTemplateId(null)
     setIsCreating(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, communityId])
 
   const fetchTemplates = async () => {
@@ -111,12 +111,23 @@ export function PortfolioTemplateModal({
       if (response.ok) {
         const data = await response.json()
         setTemplates(data.templates || [])
+
+        const mandatory = data.templates?.find((t: PortfolioTemplate) => t.is_mandatory)
+        if (mandatory) {
+          console.log("[v0] Found mandatory template:", mandatory.name)
+          setMandatoryTemplate(mandatory)
+          setSelectedTemplateId(mandatory.id)
+        } else {
+          setMandatoryTemplate(null)
+        }
       } else {
         setTemplates([])
+        setMandatoryTemplate(null)
       }
     } catch (error) {
       console.error("Failed to fetch templates:", error)
       setTemplates([])
+      setMandatoryTemplate(null)
     } finally {
       setIsLoading(false)
     }
@@ -124,6 +135,11 @@ export function PortfolioTemplateModal({
 
   const handleSelect = async (templateId: string) => {
     if (isCreating) return
+
+    if (mandatoryTemplate && templateId !== mandatoryTemplate.id) {
+      console.log("[v0] Cannot select non-mandatory template when mandatory template exists")
+      return
+    }
 
     setIsCreating(true)
     setSelectedTemplateId(templateId)
@@ -158,19 +174,12 @@ export function PortfolioTemplateModal({
         if (!open && !isCreating) onClose()
       }}
     >
-      {/* BIGGER + RESPONSIVE + NO CLIPPING:
-          - width uses viewport-based clamp
-          - height uses 92vh
-          - inner layout uses flex + min-h-0 so only grid scrolls
-      */}
-
       <DialogContent
         className={cn(
           "p-0 overflow-hidden",
           "bg-[#1a1a1d] backdrop-blur-xl border-white/10",
-          // Full width with proper responsive constraints
           "w-[95vw] sm:w-[90vw] lg:w-[85vw] xl:w-[1200px]",
-          "!max-w-none", // Override default dialog max-width
+          "!max-w-none",
           "h-[92vh] max-h-[900px]",
         )}
       >
@@ -183,7 +192,19 @@ export function PortfolioTemplateModal({
               Select the perfect starting point from your template library.
             </p>
 
-            {/* ✅ chips: scroll on small screens, wrap on larger */}
+            {mandatoryTemplate && (
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <ShieldCheck className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-200">Required Template</p>
+                  <p className="text-sm text-amber-300/70 mt-1">
+                    Your community requires using the "{mandatoryTemplate.name}" template. This ensures consistency
+                    across member portfolios.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="mt-4">
               <div className="flex items-center gap-2 overflow-x-auto pr-2 sm:flex-wrap sm:overflow-visible">
                 {filters.map((f) => {
@@ -220,15 +241,7 @@ export function PortfolioTemplateModal({
                     <p className="text-white/55 text-sm mt-1">Try another filter.</p>
                   </div>
                 ) : (
-                  <div
-                    className={cn(
-                      // ✅ card library grid that fits the modal
-                      "grid gap-5",
-                      "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-                      // only go 4-up when there’s room
-                      "2xl:grid-cols-4",
-                    )}
-                  >
+                  <div className={cn("grid gap-5", "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3", "2xl:grid-cols-4")}>
                     {filteredTemplates.map((template) => (
                       <PortfolioTemplateCard
                         key={template.id}
@@ -238,6 +251,8 @@ export function PortfolioTemplateModal({
                         visual={getVisual(template.name)}
                         isCreating={isCreating}
                         isSelected={selectedTemplateId === template.id}
+                        isMandatory={template.is_mandatory}
+                        isDisabled={mandatoryTemplate ? template.id !== mandatoryTemplate.id : false}
                         onSelect={handleSelect}
                       />
                     ))}

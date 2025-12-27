@@ -16,6 +16,7 @@ export interface PortfolioTemplate {
   }>
   preview_image_url: string | null
   is_active: boolean
+  is_mandatory: boolean
   created_by: string | null
   created_at: string
   updated_at: string
@@ -77,7 +78,7 @@ export async function getTemplateById(templateId: string): Promise<PortfolioTemp
  * Create a new template (for community admins)
  */
 export async function createTemplate(
-  template: Omit<PortfolioTemplate, "id" | "created_at" | "updated_at" | "created_by">
+  template: Omit<PortfolioTemplate, "id" | "created_at" | "updated_at" | "created_by">,
 ): Promise<PortfolioTemplate | null> {
   const supabase = await createClient()
 
@@ -112,7 +113,7 @@ export async function createTemplate(
  */
 export async function updateTemplate(
   templateId: string,
-  updates: Partial<Omit<PortfolioTemplate, "id" | "created_at" | "created_by">>
+  updates: Partial<Omit<PortfolioTemplate, "id" | "created_at" | "created_by">>,
 ): Promise<PortfolioTemplate | null> {
   const supabase = await createClient()
 
@@ -151,4 +152,57 @@ export async function deleteTemplate(templateId: string): Promise<boolean> {
   }
 
   return true
+}
+
+/**
+ * Get the mandatory template for a specific community
+ * Returns null if no mandatory template exists
+ */
+export async function getMandatoryTemplate(communityId: string): Promise<PortfolioTemplate | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("portfolio_templates")
+    .select("*")
+    .eq("community_id", communityId)
+    .eq("is_mandatory", true)
+    .eq("is_active", true)
+    .maybeSingle()
+
+  if (error) {
+    console.error("[v0] Error fetching mandatory template:", error)
+    return null
+  }
+
+  return data as PortfolioTemplate | null
+}
+
+/**
+ * Ensure only one template is mandatory per community
+ * Automatically un-marks other templates when setting a new mandatory template
+ */
+export async function ensureSingleMandatoryTemplate(
+  communityId: string,
+  newMandatoryTemplateId: string,
+): Promise<void> {
+  const supabase = await createClient()
+
+  console.log(
+    "[v0] Ensuring single mandatory template for community:",
+    communityId,
+    "new mandatory:",
+    newMandatoryTemplateId,
+  )
+
+  // Un-mark all other templates in this community as mandatory
+  const { error } = await supabase
+    .from("portfolio_templates")
+    .update({ is_mandatory: false, updated_at: new Date().toISOString() })
+    .eq("community_id", communityId)
+    .neq("id", newMandatoryTemplateId)
+    .eq("is_mandatory", true)
+
+  if (error) {
+    console.error("[v0] Error ensuring single mandatory template:", error)
+  }
 }

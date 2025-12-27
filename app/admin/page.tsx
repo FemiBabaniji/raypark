@@ -13,6 +13,7 @@ import { AdminAnalytics } from "@/components/admin/admin-analytics"
 import { AdminIntegrations } from "@/components/admin/admin-integrations"
 import { AdminSettings } from "@/components/admin/admin-settings"
 import { AdminAssignments } from "@/components/admin/admin-assignments"
+import { AdminTemplates } from "@/components/admin/admin-templates"
 import {
   Loader2,
   LayoutDashboard,
@@ -23,6 +24,7 @@ import {
   BarChart3,
   Puzzle,
   Settings,
+  FileText,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import BackButton from "@/components/ui/back-button"
@@ -161,6 +163,10 @@ export default function AdminPage() {
                   <UserCheck className="size-4" />
                   Assignments
                 </TabsTrigger>
+                <TabsTrigger value="templates">
+                  <FileText className="size-4" />
+                  Templates
+                </TabsTrigger>
                 <TabsTrigger value="analytics">
                   <BarChart3 className="size-4" />
                   Analytics
@@ -193,6 +199,10 @@ export default function AdminPage() {
 
               <TabsContent value="assignments">
                 <AdminAssignments communityId={selectedCommunity} />
+              </TabsContent>
+
+              <TabsContent value="templates">
+                <AdminTemplates communityId={selectedCommunity} />
               </TabsContent>
 
               <TabsContent value="analytics">

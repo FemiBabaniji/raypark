@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ArrowUpRight, Check, Sparkles } from "lucide-react"
+import { ArrowUpRight, Check, Sparkles, ShieldCheck } from "lucide-react"
 
 interface TemplateVisual {
   bgColor: string
@@ -17,6 +17,8 @@ interface PortfolioTemplateCardProps {
   visual: TemplateVisual
   isCreating: boolean
   isSelected: boolean
+  isMandatory?: boolean
+  isDisabled?: boolean
   onSelect: (templateId: string) => void
 }
 
@@ -36,6 +38,8 @@ export function PortfolioTemplateCard({
   visual,
   isCreating,
   isSelected,
+  isMandatory = false,
+  isDisabled = false,
   onSelect,
 }: PortfolioTemplateCardProps) {
   const templateType = useMemo(() => getTemplateType(name), [name])
@@ -44,24 +48,21 @@ export function PortfolioTemplateCard({
     <button
       type="button"
       onClick={() => onSelect(templateId)}
-      disabled={isCreating}
+      disabled={isCreating || isDisabled}
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl border text-left",
         "bg-neutral-950/35 border-white/10 hover:border-white/15",
         "shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset]",
         "transition-colors",
         "disabled:opacity-50 disabled:cursor-not-allowed",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950",
+        isMandatory && "border-amber-500/50 hover:border-amber-500/60 ring-1 ring-amber-500/20",
       )}
     >
       <div className="p-4 sm:p-5">
         {/* Top: visual preview */}
         <div className="relative w-full overflow-hidden rounded-xl border border-white/10">
-          {/* Keep preview proportional and consistent */}
-          <div
-            className="relative aspect-[16/10]"
-            style={{ backgroundColor: visual.bgColor }}
-          >
+          <div className="relative aspect-[16/10]" style={{ backgroundColor: visual.bgColor }}>
             <div className="absolute inset-0 bg-gradient-to-br from-white/12 via-white/0 to-black/35" />
             <div className="absolute inset-0 p-3 sm:p-4">
               <div className="grid h-full grid-cols-2 gap-2">
@@ -75,12 +76,16 @@ export function PortfolioTemplateCard({
               </div>
             </div>
 
-            {/* Selected dot */}
-            {isSelected && (
+            {isMandatory ? (
+              <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-2.5 py-1.5 text-white shadow-lg">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span className="text-[11px] font-semibold tracking-wide">REQUIRED</span>
+              </div>
+            ) : isSelected ? (
               <div className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-black shadow">
                 <Check className="h-4 w-4" />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -100,9 +105,7 @@ export function PortfolioTemplateCard({
             )}
           </div>
 
-          <h3 className="mt-2 text-base sm:text-lg font-semibold text-white leading-snug line-clamp-1">
-            {name}
-          </h3>
+          <h3 className="mt-2 text-base sm:text-lg font-semibold text-white leading-snug line-clamp-1">{name}</h3>
 
           <p className="mt-1 text-sm text-white/55 leading-relaxed line-clamp-2 min-h-[2.5rem]">
             {description || "A clean slate to build your unique portfolio."}
@@ -118,9 +121,9 @@ export function PortfolioTemplateCard({
               "h-9 rounded-full px-4",
               isSelected
                 ? "bg-white/10 text-white hover:bg-white/14 border border-white/10"
-                : "bg-white text-black hover:bg-white/90"
+                : "bg-white text-black hover:bg-white/90",
             )}
-            disabled={isCreating}
+            disabled={isCreating || isDisabled}
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
@@ -134,7 +137,7 @@ export function PortfolioTemplateCard({
             type="button"
             variant="ghost"
             className="h-9 w-9 rounded-full p-0 text-white/70 hover:text-white hover:bg-white/5"
-            disabled={isCreating}
+            disabled={isCreating || isDisabled}
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()

@@ -250,11 +250,11 @@ export default function EventsPage({
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
           <main className="w-full relative mt-6">
             <div
-              className={`flex items-start gap-8 transition-all duration-500 ease-in-out ${
-                showRightColumn ? "justify-start" : "justify-center"
-              }`}
+              className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? "justify-between" : "justify-center"}`}
             >
-              <div className="max-w-[600px] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1000px] transition-all duration-500 ease-in-out">
+              <div
+                className={`flex-1 min-w-0 transition-all duration-300 ease-out ${showRightColumn ? "max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]" : "max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"}`}
+              >
                 <EventsLeftColumn
                   onEventClick={handleEventClick}
                   selectedEvent={selectedEvent}
@@ -268,11 +268,7 @@ export default function EventsPage({
               </div>
 
               <div
-                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-500 ease-in-out ${
-                  showRightColumn
-                    ? "translate-x-0 opacity-100 pointer-events-auto"
-                    : "translate-x-full opacity-0 pointer-events-none absolute right-0"
-                }`}
+                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"}`}
               >
                 <EventsRightColumn
                   onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}

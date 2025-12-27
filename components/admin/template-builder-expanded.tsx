@@ -50,34 +50,36 @@ export function TemplateBuilderExpanded({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <div>
-          <h2 className="text-lg font-semibold">{templateName || "New Template"}</h2>
-          <p className="text-sm text-muted-foreground">Design the portfolio layout for this community template</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-[70vw] h-[90vh] bg-background rounded-lg shadow-xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div>
+            <h2 className="text-lg font-semibold">{templateName || "New Template"}</h2>
+            <p className="text-sm text-muted-foreground">Design the portfolio layout for this community template</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
 
-      {/* Portfolio Builder */}
-      <div className="h-[calc(100vh-5rem)] overflow-auto p-6">
-        <PortfolioBuilder
-          identity={identity}
-          onIdentityChange={setIdentity}
-          onSavePortfolio={handleSavePortfolio}
-          communityId={communityId}
-          initialPortfolio={{
-            name: templateName,
-            description: templateDescription,
-            layout: {
-              left: [{ id: "identity", type: "identity" }],
-              right: [],
-            },
-          }}
-        />
+        {/* Portfolio Builder */}
+        <div className="flex-1 overflow-auto p-6">
+          <PortfolioBuilder
+            identity={identity}
+            onIdentityChange={setIdentity}
+            onSavePortfolio={handleSavePortfolio}
+            communityId={communityId}
+            initialPortfolio={{
+              name: templateName,
+              description: templateDescription,
+              layout: {
+                left: [{ id: "identity", type: "identity" }],
+                right: [],
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   )

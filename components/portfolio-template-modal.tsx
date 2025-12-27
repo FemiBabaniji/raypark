@@ -6,6 +6,13 @@ import { PortfolioTemplateCard } from "@/components/cards/portfolio-template-car
 import type { PortfolioTemplate } from "@/lib/template-service"
 import { cn } from "@/lib/utils"
 
+interface PortfolioTemplateModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSelectTemplate: (templateId: string) => void
+  communityId?: string
+}
+
 const templateVisuals: Record<string, { bgColor: string; widgets: { color: string; size: string }[] }> = {
   "Blank Portfolio": {
     bgColor: "#111827",
@@ -72,13 +79,6 @@ const getTemplateType = (name: string) => {
   return "CUSTOM"
 }
 
-interface PortfolioTemplateModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSelectTemplate: (templateId: string) => void
-  communityId?: string
-}
-
 export function PortfolioTemplateModal({
   isOpen,
   onClose,
@@ -89,20 +89,15 @@ export function PortfolioTemplateModal({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
   const [templates, setTemplates] = useState<PortfolioTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
-  // UI filters (chips)
   const [activeFilter, setActiveFilter] = useState<string>("All")
 
   useEffect(() => {
-    if (isOpen) {
-      fetchTemplates()
-    }
-    // Reset UI state each open for a clean feel
-    if (isOpen) {
-      setActiveFilter("All")
-      setSelectedTemplateId(null)
-      setIsCreating(false)
-    }
+    if (!isOpen) return
+    fetchTemplates()
+    // clean open state
+    setActiveFilter("All")
+    setSelectedTemplateId(null)
+    setIsCreating(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, communityId])
 
@@ -129,9 +124,9 @@ export function PortfolioTemplateModal({
 
   const handleSelect = async (templateId: string) => {
     if (isCreating) return
+
     setIsCreating(true)
     setSelectedTemplateId(templateId)
-
     try {
       await onSelectTemplate(templateId)
     } finally {
@@ -139,11 +134,8 @@ export function PortfolioTemplateModal({
     }
   }
 
-  const getVisual = (name: string) => templateVisuals[name] || templateVisuals["Blank Portfolio"]
-
   const filters = useMemo(() => {
     const types = Array.from(new Set(templates.map((t) => getTemplateType(t.name))))
-    // Keep it stable + friendly ordering
     const ordered = ["CREATIVE", "TECHNICAL", "MARKETING", "BUSINESS", "ANALYTICAL", "CUSTOM"]
     const uniqueTypes = ordered.filter((t) => types.includes(t))
     return ["All", "Installed", ...uniqueTypes]
@@ -151,14 +143,13 @@ export function PortfolioTemplateModal({
 
   const filteredTemplates = useMemo(() => {
     if (activeFilter === "All") return templates
-
-    // "Installed" = show the one you've picked in this modal (matches the reference UX)
     if (activeFilter === "Installed") {
       return selectedTemplateId ? templates.filter((t) => t.id === selectedTemplateId) : []
     }
-
     return templates.filter((t) => getTemplateType(t.name) === activeFilter)
   }, [activeFilter, templates, selectedTemplateId])
+
+  const getVisual = (name: string) => templateVisuals[name] || templateVisuals["Blank Portfolio"]
 
   return (
     <Dialog
@@ -167,16 +158,34 @@ export function PortfolioTemplateModal({
         if (!open && !isCreating) onClose()
       }}
     >
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto bg-neutral-950/95 backdrop-blur-2xl border-neutral-800/60">
-        <DialogHeader className="space-y-2">
-          <DialogTitle className="text-3xl font-semibold text-white">Choose & Organise Templates</DialogTitle>
-          <p className="text-neutral-400 text-base">
-            Select the perfect starting point from your template library.
-          </p>
-        </DialogHeader>
+      {/* BIGGER + RESPONSIVE + NO CLIPPING:
+          - width uses viewport-based clamp
+          - height uses 92vh
+          - inner layout uses flex + min-h-0 so only grid scrolls
+      */}
 
-        {/* Filter chips */}
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
+      
+      <DialogContent
+  className={cn(
+    "p-0 overflow-hidden",
+    "bg-neutral-950/92 backdrop-blur-2xl border-white/10",
+    // ✅ big, not extreme
+    "w-[min(1040px,calc(100vw-2.5rem))] max-w-none",
+    "h-[min(84vh,820px)]"
+  )}
+>
+  <div className="relative h-full flex flex-col">
+    <DialogHeader className="px-6 pt-6 pb-4 border-b border-white/10">
+      <DialogTitle className="text-2xl sm:text-3xl font-semibold text-white">
+        Choose & Organise Templates
+      </DialogTitle>
+      <p className="text-neutral-400 text-sm sm:text-base mt-1">
+        Select the perfect starting point from your template library.
+      </p>
+
+      {/* ✅ chips: scroll on small screens, wrap on larger */}
+      <div className="mt-4">
+        <div className="flex items-center gap-2 overflow-x-auto pr-2 sm:flex-wrap sm:overflow-visible">
           {filters.map((f) => {
             const active = f === activeFilter
             return (
@@ -195,48 +204,61 @@ export function PortfolioTemplateModal({
             )
           })}
         </div>
+      </div>
+    </DialogHeader>
 
-        {/* Loading / Overlay */}
-        {isCreating && (
-          <div className="absolute inset-0 z-50 bg-neutral-950/70 backdrop-blur-md rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-base text-white font-medium">Creating your portfolio…</p>
-              <p className="text-sm text-white/60 mt-1">Just a moment.</p>
+    <div className="flex-1 min-h-0">
+      {isLoading ? (
+        <div className="h-full flex items-center justify-center">
+          <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div className="h-full overflow-y-auto px-6 pb-6 pt-6">
+          {filteredTemplates.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center">
+              <p className="text-white/85 font-medium">No templates in this view.</p>
+              <p className="text-white/55 text-sm mt-1">Try another filter.</p>
             </div>
-          </div>
-        )}
+          ) : (
+            <div
+              className={cn(
+                // ✅ card library grid that fits the modal
+                "grid gap-5",
+                "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+                // only go 4-up when there’s room
+                "2xl:grid-cols-4"
+              )}
+            >
+              {filteredTemplates.map((template) => (
+                <PortfolioTemplateCard
+                  key={template.id}
+                  templateId={template.id}
+                  name={template.name}
+                  description={template.description}
+                  visual={getVisual(template.name)}
+                  isCreating={isCreating}
+                  isSelected={selectedTemplateId === template.id}
+                  onSelect={handleSelect}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-24">
-            <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="mt-6 pb-6">
-            {filteredTemplates.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-                <p className="text-white/80 font-medium">No templates in this view.</p>
-                <p className="text-white/50 text-sm mt-1">Try another filter.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTemplates.map((template) => (
-                  <PortfolioTemplateCard
-                    key={template.id}
-                    templateId={template.id}
-                    name={template.name}
-                    description={template.description}
-                    visual={getVisual(template.name)}
-                    isCreating={isCreating}
-                    isSelected={selectedTemplateId === template.id}
-                    onSelect={handleSelect}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </DialogContent>
+    {isCreating && (
+      <div className="absolute inset-0 z-50 bg-neutral-950/70 backdrop-blur-md flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-base text-white font-medium">Creating your portfolio…</p>
+          <p className="text-sm text-white/60 mt-1">Just a moment.</p>
+        </div>
+      </div>
+    )}
+  </div>
+</DialogContent>
+
     </Dialog>
   )
 }

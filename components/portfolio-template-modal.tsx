@@ -167,7 +167,7 @@ export function PortfolioTemplateModal({
       <DialogContent
         className={cn(
           "p-0 overflow-hidden",
-          "bg-neutral-950/92 backdrop-blur-2xl border-white/10",
+          "bg-[#1a1a1d] backdrop-blur-xl border-white/10",
           // Full width with proper responsive constraints
           "w-[95vw] sm:w-[90vw] lg:w-[85vw] xl:w-[1200px]",
           "!max-w-none", // Override default dialog max-width
@@ -179,7 +179,7 @@ export function PortfolioTemplateModal({
             <DialogTitle className="text-2xl sm:text-3xl font-semibold text-white">
               Choose & Organise Templates
             </DialogTitle>
-            <p className="text-neutral-400 text-sm sm:text-base mt-1">
+            <p className="text-white/60 text-sm sm:text-base mt-1">
               Select the perfect starting point from your template library.
             </p>
 
@@ -195,8 +195,8 @@ export function PortfolioTemplateModal({
                       onClick={() => setActiveFilter(f)}
                       className={cn(
                         "shrink-0 rounded-full border px-4 py-2 text-sm transition-colors",
-                        "border-white/10 bg-white/5 text-white/70 hover:bg-white/8 hover:text-white",
-                        active && "bg-white text-black border-white",
+                        "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
+                        active && "bg-white/15 text-white border-white/20",
                       )}
                     >
                       {f}
@@ -210,7 +210,7 @@ export function PortfolioTemplateModal({
           <div className="flex-1 min-h-0 overflow-hidden">
             {isLoading ? (
               <div className="h-full flex items-center justify-center">
-                <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+                <div className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               </div>
             ) : (
               <div className="h-full overflow-y-auto px-6 pb-6 pt-6">
@@ -248,9 +248,9 @@ export function PortfolioTemplateModal({
           </div>
 
           {isCreating && (
-            <div className="absolute inset-0 z-50 bg-neutral-950/70 backdrop-blur-md flex items-center justify-center">
+            <div className="absolute inset-0 z-50 bg-[#1a1a1d]/90 backdrop-blur-md flex items-center justify-center">
               <div className="text-center">
-                <div className="w-12 h-12 border-2 border-neutral-700 border-t-white rounded-full animate-spin mx-auto mb-4" />
+                <div className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-base text-white font-medium">Creating your portfolio…</p>
                 <p className="text-sm text-white/60 mt-1">Just a moment.</p>
               </div>

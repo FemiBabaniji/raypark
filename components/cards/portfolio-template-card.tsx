@@ -47,18 +47,30 @@ export function PortfolioTemplateCard({
   return (
     <button
       type="button"
-      onClick={() => onSelect(templateId)}
+      onClick={() => {
+        if (isDisabled || isCreating) return
+        onSelect(templateId)
+      }}
       disabled={isCreating || isDisabled}
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl border text-left",
-        "bg-neutral-950/35 border-white/10 hover:border-white/15",
+        "bg-neutral-950/35 border-white/10",
         "shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset]",
         "transition-colors",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950",
+        isDisabled && "opacity-40 cursor-not-allowed grayscale hover:border-white/10",
+        !isDisabled && "hover:border-white/15",
         isMandatory && "border-amber-500/50 hover:border-amber-500/60 ring-1 ring-amber-500/20",
       )}
     >
+      {isDisabled && (
+        <div className="absolute inset-0 z-10 bg-black/30 flex items-center justify-center pointer-events-none">
+          <div className="bg-black/80 backdrop-blur-sm rounded-full px-4 py-2 text-xs text-white/70 font-medium">
+            Not Available
+          </div>
+        </div>
+      )}
+
       <div className="p-4 sm:p-5">
         {/* Top: visual preview */}
         <div className="relative w-full overflow-hidden rounded-xl border border-white/10">
@@ -127,6 +139,7 @@ export function PortfolioTemplateCard({
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              if (isDisabled || isCreating) return
               onSelect(templateId)
             }}
           >
@@ -141,6 +154,7 @@ export function PortfolioTemplateCard({
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              if (isDisabled || isCreating) return
               onSelect(templateId)
             }}
             aria-label="Open template"

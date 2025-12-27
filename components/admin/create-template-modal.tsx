@@ -122,9 +122,10 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
     setIsExpanded(false)
   }
 
-  if (isExpanded) {
-    return (
+  return (
+    <>
       <TemplateBuilderExpanded
+        isOpen={isExpanded}
         communityId={communityId}
         templateName={name}
         templateDescription={description}
@@ -135,115 +136,113 @@ export function CreateTemplateModal({ communityId, existingTemplate, onClose }: 
         onSave={handleSaveFromExpanded}
         onClose={() => setIsExpanded(false)}
       />
-    )
-  }
 
-  return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="!max-w-none w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[800px] max-h-[90vh] overflow-y-auto bg-background border-border">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{existingTemplate ? "Edit Template" : "Create New Template"}</DialogTitle>
-          {communityName && (
-            <div className="flex items-center gap-2 pt-2">
-              <span className="text-sm text-muted-foreground">For community:</span>
-              <span className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-sm font-medium">
-                {communityName}
-              </span>
+      <Dialog open={!isExpanded} onOpenChange={onClose}>
+        <DialogContent className="!max-w-none w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[800px] max-h-[90vh] overflow-y-auto bg-background border-border">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{existingTemplate ? "Edit Template" : "Create New Template"}</DialogTitle>
+            {communityName && (
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-sm text-muted-foreground">For community:</span>
+                <span className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-sm font-medium">
+                  {communityName}
+                </span>
+              </div>
+            )}
+          </DialogHeader>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="size-8 animate-spin text-muted-foreground" />
             </div>
-          )}
-        </DialogHeader>
+          ) : (
+            <div className="space-y-6 pt-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Template Name *</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g., Startup Founder Portfolio"
+                  />
+                </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <div className="space-y-6 pt-6">
-            <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Settings</Label>
+                  <div className="flex gap-6 pt-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="mandatory"
+                        checked={isMandatory}
+                        onCheckedChange={(checked) => setIsMandatory(checked as boolean)}
+                      />
+                      <Label htmlFor="mandatory" className="text-sm cursor-pointer font-normal">
+                        Required Template
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="active"
+                        checked={isActive}
+                        onCheckedChange={(checked) => setIsActive(checked as boolean)}
+                      />
+                      <Label htmlFor="active" className="text-sm cursor-pointer font-normal">
+                        Active
+                      </Label>
+                    </div>
+                  </div>
+                  {isMandatory && (
+                    <p className="text-xs text-muted-foreground mt-2">Members will be required to use this template</p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="name">Template Name *</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Startup Founder Portfolio"
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe what this template is best suited for..."
+                  rows={3}
+                  className="resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Settings</Label>
-                <div className="flex gap-6 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="mandatory"
-                      checked={isMandatory}
-                      onCheckedChange={(checked) => setIsMandatory(checked as boolean)}
-                    />
-                    <Label htmlFor="mandatory" className="text-sm cursor-pointer font-normal">
-                      Required Template
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="active"
-                      checked={isActive}
-                      onCheckedChange={(checked) => setIsActive(checked as boolean)}
-                    />
-                    <Label htmlFor="active" className="text-sm cursor-pointer font-normal">
-                      Active
-                    </Label>
-                  </div>
-                </div>
-                {isMandatory && (
-                  <p className="text-xs text-muted-foreground mt-2">Members will be required to use this template</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what this template is best suited for..."
-                rows={3}
-                className="resize-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Template Layout</Label>
-              <div className="border border-border rounded-lg p-8 bg-muted/20">
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Use the portfolio builder to create your template layout
-                  </p>
-                  <Button onClick={() => setIsExpanded(true)} variant="outline" className="gap-2">
-                    <Maximize2 className="size-4" />
-                    Open Portfolio Builder
-                  </Button>
-                  {widgetConfigs.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {widgetConfigs.length} widget{widgetConfigs.length !== 1 ? "s" : ""} configured
+                <Label>Template Layout</Label>
+                <div className="border border-border rounded-lg p-8 bg-muted/20">
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <p className="text-sm text-muted-foreground text-center">
+                      Use the portfolio builder to create your template layout
                     </p>
-                  )}
+                    <Button onClick={() => setIsExpanded(true)} variant="outline" className="gap-2">
+                      <Maximize2 className="size-4" />
+                      Open Portfolio Builder
+                    </Button>
+                    {widgetConfigs.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {widgetConfigs.length} widget{widgetConfigs.length !== 1 ? "s" : ""} configured
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button variant="ghost" onClick={onClose} disabled={saving}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                {existingTemplate ? "Update Template" : "Create Template"}
-              </Button>
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <Button variant="ghost" onClick={onClose} disabled={saving}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
+                  {existingTemplate ? "Update Template" : "Create Template"}
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
 import type { Identity } from "@/components/portfolio/builder/PortfolioBuilder"
 
 interface TemplateBuilderExpandedProps {
+  isOpen: boolean
   communityId: string
   templateName: string
   templateDescription: string
@@ -19,6 +19,7 @@ interface TemplateBuilderExpandedProps {
 }
 
 export function TemplateBuilderExpanded({
+  isOpen,
   communityId,
   templateName,
   templateDescription,
@@ -46,35 +47,30 @@ export function TemplateBuilderExpanded({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background">
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center justify-between h-full px-6">
-          <div>
-            <h2 className="text-lg font-semibold">{templateName || "New Template"}</h2>
-            <p className="text-xs text-muted-foreground">Building template for community</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={onClose} variant="ghost" size="icon">
-              <X className="size-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b border-border">
+          <DialogTitle>{templateName || "New Template"}</DialogTitle>
+          <DialogDescription>Design the portfolio layout for this community template</DialogDescription>
+        </DialogHeader>
 
-      {/* Portfolio Builder */}
-      <div className="pt-16 h-screen overflow-auto">
-        <PortfolioBuilder
-          identity={identity}
-          onIdentityChange={setIdentity}
-          onSavePortfolio={handleSavePortfolio}
-          communityId={communityId}
-          initialPortfolio={{
-            name: templateName,
-            description: templateDescription,
-          }}
-        />
-      </div>
-    </div>
+        <div className="flex-1 overflow-auto p-6">
+          <PortfolioBuilder
+            identity={identity}
+            onIdentityChange={setIdentity}
+            onSavePortfolio={handleSavePortfolio}
+            communityId={communityId}
+            initialPortfolio={{
+              name: templateName,
+              description: templateDescription,
+              layout: {
+                left: [{ id: "identity", type: "identity" }],
+                right: [],
+              },
+            }}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

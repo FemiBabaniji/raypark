@@ -10,7 +10,8 @@ import {
   ServicesWidget,
   GalleryWidget,
   StartupWidget,
-  MeetingSchedulerWidget, // Added MeetingSchedulerWidget import
+  MeetingSchedulerWidget,
+  ImageWidget,
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -144,7 +145,7 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           setEditingField={deps.setEditingField}
         />
       )
-    case "meeting-scheduler": // Added meeting-scheduler case
+    case "meeting-scheduler":
       return (
         <MeetingSchedulerWidget
           key={w.id}
@@ -154,6 +155,26 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           content={deps.widgetContent[w.id]}
           onContentChange={(c) => deps.onContentChange(w.id, c)}
           onDelete={del}
+        />
+      )
+    case "image":
+      const imageData = deps.widgetContent.image?.[w.id] || { url: "", caption: "" }
+      return (
+        <ImageWidget
+          key={w.id}
+          widgetId={w.id}
+          column={column}
+          isPreviewMode={deps.isPreviewMode}
+          onDelete={del}
+          onMove={move}
+          imageUrl={imageData.url}
+          caption={imageData.caption}
+          onImageChange={(url) =>
+            deps.onContentChange("image", { ...deps.widgetContent.image, [w.id]: { ...imageData, url } })
+          }
+          onCaptionChange={(caption) =>
+            deps.onContentChange("image", { ...deps.widgetContent.image, [w.id]: { ...imageData, caption } })
+          }
         />
       )
     default:

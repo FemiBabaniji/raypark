@@ -16,6 +16,7 @@ export type WidgetType =
   | "gallery"
   | "startup"
   | "meeting-scheduler"
+  | "image"
 
 export type WidgetDef = { id: string; type: WidgetType }
 
@@ -93,6 +94,13 @@ export type WidgetContent = {
   gallery: Record<
     string,
     Array<{ id: string; name: string; description?: string; images: string[]; isVideo?: boolean }>
+  >
+  image: Record<
+    string,
+    {
+      url: string
+      caption?: string
+    }
   >
 }
 
@@ -180,6 +188,7 @@ const DEFAULT_CONTENT: WidgetContent = {
     },
   },
   gallery: {},
+  image: {},
 }
 
 /** ---------- Hook ---------- */
@@ -212,6 +221,7 @@ export function usePortfolioBuilder(initial?: {
     ...DEFAULT_CONTENT,
     ...initial?.content,
     gallery: initial?.content?.gallery ?? {},
+    image: initial?.content?.image ?? {},
   }))
 
   /** ----- actions ----- */
@@ -228,6 +238,12 @@ export function usePortfolioBuilder(initial?: {
         gallery: { ...prev.gallery, [id]: [] },
       }))
     }
+    if (type === "image") {
+      setWidgetContent((prev) => ({
+        ...prev,
+        image: { ...prev.image, [id]: { url: "", caption: "" } },
+      }))
+    }
     return id
   }, [])
 
@@ -236,12 +252,16 @@ export function usePortfolioBuilder(initial?: {
     setLeftWidgets((p) => p.filter((w) => w.id !== id))
     setRightWidgets((p) => p.filter((w) => w.id !== id))
     setWidgetContent((prev) => {
-      // clean gallery bucket if it existed
+      const newContent = { ...prev }
       if (prev.gallery[id]) {
         const { [id]: _, ...rest } = prev.gallery
-        return { ...prev, gallery: rest }
+        newContent.gallery = rest
       }
-      return prev
+      if (prev.image[id]) {
+        const { [id]: _, ...rest } = prev.image
+        newContent.image = rest
+      }
+      return newContent
     })
   }, [])
 

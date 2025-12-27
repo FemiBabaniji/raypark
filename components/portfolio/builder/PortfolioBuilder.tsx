@@ -2,12 +2,17 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { Reorder, motion } from "framer-motion"
-import { X, ArrowLeft } from 'lucide-react'
+import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
 import { useAuth } from "@/lib/auth"
-import { createPortfolioOnce, updatePortfolioById, saveWidgetLayout, loadPortfolioData, materializeTemplateWidgets } from "@/lib/portfolio-service"
+import {
+  updatePortfolioById,
+  saveWidgetLayout,
+  loadPortfolioData,
+  materializeTemplateWidgets,
+} from "@/lib/portfolio-service"
 import {
   IdentityWidget,
   EducationWidget,
@@ -17,6 +22,7 @@ import {
   GalleryWidget,
   StartupWidget,
   MeetingSchedulerWidget,
+  ImageWidget, // Added ImageWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -76,7 +82,7 @@ export default function PortfolioBuilder({
   const [portfolioId, setPortfolioId] = useState<string | null>(identity.id ?? initialPortfolio?.id ?? null)
   const portfolioIdRef = useRef<string | null>(identity.id ?? initialPortfolio?.id ?? null)
   const prevUserRef = useRef(user)
-  
+
   const [isLoadingData, setIsLoadingData] = useState(false)
   const hasLoadedDataRef = useRef<string | null>(null)
 
@@ -106,13 +112,13 @@ export default function PortfolioBuilder({
   const identityFromContent = widgetContent.identity || {}
   const currentIdentity: Identity = {
     ...identity,
-    ...identityFromContent
+    ...identityFromContent,
   }
 
   const handleIdentityChange = useCallback(
     (updates: Partial<Identity>) => {
       console.log("[v0] 🎨 handleIdentityChange called with updates:", updates)
-      
+
       // Generate slug from profileName if it changed
       if (updates.profileName) {
         const slug = toSlug(updates.profileName)
@@ -120,24 +126,24 @@ export default function PortfolioBuilder({
         // You can optionally update the portfolio slug here if needed
         // This would require an additional API call or state update
       }
-      
+
       setWidgetContent((prev) => ({
         ...prev,
         identity: {
           ...prev.identity,
-          ...updates
-        }
+          ...updates,
+        },
       }))
-      
+
       parentOnIdentityChange(updates)
     },
-    [parentOnIdentityChange]
+    [parentOnIdentityChange],
   )
 
   useEffect(() => {
     async function loadData() {
       const idToLoad = identity.id || portfolioId
-      
+
       if (!idToLoad || isLoadingData) {
         console.log("[v0] Skipping load:", { idToLoad, isLoading: isLoadingData })
         return
@@ -153,12 +159,12 @@ export default function PortfolioBuilder({
       try {
         console.log("[v0] 🔄 Loading portfolio data for ID:", idToLoad)
         console.log("[v0] 🔍 Community context:", communityId)
-        
+
         const data = await loadPortfolioData(idToLoad, communityId)
 
         if (data) {
           console.log("[v0] ✅ Loaded data from", data.isFromTemplate ? "template" : "database")
-          
+
           setIsFromTemplate(data.isFromTemplate)
 
           if (data.widgetContent.identity) {
@@ -182,7 +188,7 @@ export default function PortfolioBuilder({
           }
 
           console.log("[v0] ✅ Data loaded and state updated successfully")
-          
+
           hasLoadedDataRef.current = idToLoad
         } else {
           console.log("[v0] ℹ️ No saved data found, using default layout")
@@ -190,12 +196,11 @@ export default function PortfolioBuilder({
           setRightWidgets([])
           hasLoadedDataRef.current = idToLoad
         }
-        
+
         setTimeout(() => {
           console.log("[v0] ✅ Enabling auto-save after data load")
           setHasInitialized(true)
         }, 1500)
-        
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
         setLeftWidgets([{ id: "identity", type: "identity" }])
@@ -355,15 +360,15 @@ export default function PortfolioBuilder({
 
   const debouncedSave = useCallback(async () => {
     const currentPortfolioId = portfolioIdRef.current
-    
+
     if (!user?.id) {
       return
     }
-    
+
     if (!hasInitialized) {
       return
     }
-    
+
     if (isLoadingData) {
       return
     }
@@ -380,7 +385,7 @@ export default function PortfolioBuilder({
     const timeout = setTimeout(async () => {
       setIsSaving(true)
       setSaveError(null)
-      
+
       try {
         if (isFromTemplate) {
           await materializeTemplateWidgets(currentPortfolioId)
@@ -397,14 +402,16 @@ export default function PortfolioBuilder({
         await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, widgetContent, communityId)
 
         setLastSaveTime(new Date())
-        
-        window.dispatchEvent(new CustomEvent("portfolio-identity-updated", {
-          detail: {
-            portfolioId: currentPortfolioId,
-            updates: widgetContent.identity || {}
-          }
-        }))
-        
+
+        window.dispatchEvent(
+          new CustomEvent("portfolio-identity-updated", {
+            detail: {
+              portfolioId: currentPortfolioId,
+              updates: widgetContent.identity || {},
+            },
+          }),
+        )
+
         window.dispatchEvent(new Event("portfolio-updated"))
       } catch (error) {
         console.error("[v0] ❌ Auto-save failed:", error)
@@ -415,7 +422,18 @@ export default function PortfolioBuilder({
     }, 800)
 
     setSaveTimeout(timeout)
-  }, [hasInitialized, user, state, leftWidgets, rightWidgets, widgetContent, isLoadingData, saveTimeout, communityId, isFromTemplate])
+  }, [
+    hasInitialized,
+    user,
+    state,
+    leftWidgets,
+    rightWidgets,
+    widgetContent,
+    isLoadingData,
+    saveTimeout,
+    communityId,
+    isFromTemplate,
+  ])
 
   const prevLeftWidgetsRef = useRef<string>("")
   const prevRightWidgetsRef = useRef<string>("")
@@ -438,23 +456,23 @@ export default function PortfolioBuilder({
       prevLeftWidgetsRef.current = leftSerialized
       prevRightWidgetsRef.current = rightSerialized
       prevWidgetContentRef.current = contentSerialized
-      
+
       debouncedSave()
     }
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
     if (leftWidgets.length > 0 && !isLoadingData) {
-      const hadDescription = prevLeftWidgetsRef.current.includes('description')
-      const widgetIds = leftWidgets.map(w => w.id).join(',')
-      const hasDescription = widgetIds.includes('description')
-      
+      const hadDescription = prevLeftWidgetsRef.current.includes("description")
+      const widgetIds = leftWidgets.map((w) => w.id).join(",")
+      const hasDescription = widgetIds.includes("description")
+
       if (hadDescription && !hasDescription) {
         if (widgetContent.description) {
-          setLeftWidgets(prev => {
-            const hasDesc = prev.some(w => w.type === 'description')
+          setLeftWidgets((prev) => {
+            const hasDesc = prev.some((w) => w.type === "description")
             if (!hasDesc) {
-              return [...prev, { id: 'description', type: 'description' }]
+              return [...prev, { id: "description", type: "description" }]
             }
             return prev
           })
@@ -493,7 +511,7 @@ export default function PortfolioBuilder({
 
   const addWidget = (type: string, column: "left" | "right") => {
     const newWidget: WidgetDef = {
-      id: type,  // Use type as ID
+      id: type, // Use type as ID
       type: type,
     }
 
@@ -506,9 +524,9 @@ export default function PortfolioBuilder({
             school: "University Name",
             year: "2020-2024",
             description: "",
-            certified: false
-          }
-        ]
+            certified: false,
+          },
+        ],
       },
       projects: {
         title: "Projects",
@@ -517,42 +535,46 @@ export default function PortfolioBuilder({
             name: "Project Name",
             description: "Project description goes here...",
             year: "2024",
-            tags: ["React", "TypeScript"]
-          }
-        ]
+            tags: ["React", "TypeScript"],
+          },
+        ],
       },
       description: {
         title: "About Me",
         description: "Tell your story here...",
-        subdescription: "Add more details about yourself..."
+        subdescription: "Add more details about yourself...",
       },
       services: {
         title: "Services",
         description: "Describe the services you offer...",
-        items: []
+        items: [],
       },
       gallery: {
         title: "Gallery",
-        groups: []
+        groups: [],
       },
       startup: {
         title: "Startup",
-        description: "Describe your startup..."
+        description: "Describe your startup...",
       },
       "meeting-scheduler": {
         mode: "button",
-        calendlyUrl: ""
-      }
+        calendlyUrl: "",
+      },
+      image: {
+        url: "",
+        caption: "",
+      }, // Added default content for image widget
     }
 
     if (defaultContent[type]) {
       console.log("[v0] 📝 Initializing default content for widget:", type)
       const newContent = defaultContent[type]
-      setWidgetContent(prev => ({
+      setWidgetContent((prev) => ({
         ...prev,
-        [type]: newContent
+        [type]: newContent,
       }))
-      
+
       setTimeout(() => {
         console.log("[v0] ✅ Widget content initialized for:", type)
       }, 0)
@@ -774,6 +796,39 @@ export default function PortfolioBuilder({
           </motion.div>
         )
 
+      case "image":
+        const imageData = widgetContent[w.id] || { url: "", caption: "" }
+        return (
+          <motion.div
+            key={w.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <ImageWidget
+              widgetId={w.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              onDelete={() => deleteWidget(w.id, column)}
+              onMove={() => moveWidgetToColumn(w, column, column === "left" ? "right" : "left")}
+              imageUrl={imageData.url}
+              caption={imageData.caption}
+              onImageChange={(url) =>
+                setWidgetContent((prev) => ({
+                  ...prev,
+                  [w.id]: { ...imageData, url },
+                }))
+              }
+              onCaptionChange={(caption) =>
+                setWidgetContent((prev) => ({
+                  ...prev,
+                  [w.id]: { ...imageData, caption },
+                }))
+              }
+            />
+          </motion.div>
+        )
+
       default:
         return (
           <motion.div
@@ -802,18 +857,12 @@ export default function PortfolioBuilder({
 
   const rightSlot = !isPreviewMode ? (
     <div className="flex gap-2 items-center">
-      {isSaving && (
-        <span className="text-white/60 text-xs animate-pulse">Saving...</span>
-      )}
+      {isSaving && <span className="text-white/60 text-xs animate-pulse">Saving...</span>}
       {lastSaveTime && !isSaving && !saveError && (
-        <span className="text-green-400/60 text-xs">
-          Saved {new Date(lastSaveTime).toLocaleTimeString()}
-        </span>
+        <span className="text-green-400/60 text-xs">Saved {new Date(lastSaveTime).toLocaleTimeString()}</span>
       )}
-      {saveError && (
-        <span className="text-red-400 text-xs">{saveError}</span>
-      )}
-      
+      {saveError && <span className="text-red-400 text-xs">{saveError}</span>}
+
       <div className="flex items-center gap-2">
         <span className="text-white/70 text-sm">Live</span>
         <button
@@ -829,7 +878,7 @@ export default function PortfolioBuilder({
           />
         </button>
       </div>
-      
+
       <div className="relative">
         <AddButton
           onClick={() => setShowAddDropdown(!showAddDropdown)}
@@ -868,17 +917,24 @@ export default function PortfolioBuilder({
                   <div className="px-3 py-2 text-xs font-medium text-neutral-300 uppercase tracking-wider">
                     Select Widget Type
                   </div>
-                  {["projects", "education", "description", "services", "gallery", "startup", "meeting-scheduler"].map(
-                    (type) => (
-                      <button
-                        key={type}
-                        onClick={() => setSelectedWidgetType(type)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
-                      >
-                        {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
-                      </button>
-                    ),
-                  )}
+                  {[
+                    "projects",
+                    "education",
+                    "description",
+                    "services",
+                    "gallery",
+                    "startup",
+                    "meeting-scheduler",
+                    "image",
+                  ].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setSelectedWidgetType(type)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
+                    >
+                      {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
+                    </button>
+                  ))}
                 </>
               )}
             </div>

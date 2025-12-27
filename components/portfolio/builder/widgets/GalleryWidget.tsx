@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { GripVertical, ArrowLeft, ArrowRight, X, Plus, Upload } from "lucide-react"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 type GalleryGroup = {
   id: string
@@ -10,6 +11,9 @@ type GalleryGroup = {
   description?: string
   images: string[]
   isVideo?: boolean
+  authorName?: string
+  authorHandle?: string
+  authorAvatar?: string
 }
 
 type Props = {
@@ -45,6 +49,8 @@ export default function GalleryWidget({
       description: "",
       images: [],
       isVideo: false,
+      authorName: newGroupName,
+      authorHandle: "@" + newGroupName.toLowerCase().replace(/\s+/g, ""),
     }
 
     onGroupsChange([...galleryGroups, newGroup])
@@ -86,7 +92,7 @@ export default function GalleryWidget({
   return (
     <div className="bg-[#1a1a1a] backdrop-blur-xl rounded-3xl p-6 group relative">
       {!isPreviewMode && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
           <GripVertical className="w-4 h-4 text-white/70" />
           <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-white/20 hover:bg-white/30">
             {column === "left" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
@@ -150,11 +156,11 @@ export default function GalleryWidget({
         )}
 
         {galleryGroups.length > 0 && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-4">
             {galleryGroups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white/5 rounded-xl p-3 relative group/group cursor-pointer hover:bg-white/10 transition-colors"
+                className="bg-[#2a2a2a] rounded-2xl overflow-hidden relative group/group cursor-pointer hover:bg-[#333333] transition-colors"
                 onClick={() => onGroupClick(group)}
               >
                 {!isPreviewMode && (
@@ -185,24 +191,63 @@ export default function GalleryWidget({
                 )}
 
                 {group.images.length > 0 ? (
-                  <div className="aspect-video bg-white/10 rounded-lg overflow-hidden mb-2">
-                    <img
-                      src={group.images[0] || "/placeholder.svg"}
-                      alt={`${group.name} main`}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="relative">
+                    <div className="grid grid-cols-2 gap-1 p-3">
+                      {group.images.slice(0, 4).map((img, idx) => (
+                        <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-white/5">
+                          <img
+                            src={img || "/placeholder.svg"}
+                            alt={`${group.name} ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                      {/* Fill empty slots if less than 4 images */}
+                      {Array.from({ length: Math.max(0, 4 - group.images.length) }).map((_, idx) => (
+                        <div
+                          key={`empty-${idx}`}
+                          className="aspect-square rounded-lg bg-white/5 border border-dashed border-white/10 flex items-center justify-center"
+                        >
+                          <Upload className="w-6 h-6 text-white/30" />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="bg-black/80 backdrop-blur-md rounded-2xl px-6 py-3 flex items-center gap-3">
+                        <Avatar className="w-10 h-10 border-2 border-white/20">
+                          <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white text-sm">
+                            {group.authorName?.charAt(0) || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-left">
+                          <p className="text-white font-medium text-base leading-tight">
+                            by {group.authorName || group.name}
+                          </p>
+                          <p className="text-white/60 text-sm leading-tight">
+                            {group.authorHandle || `@${group.name.toLowerCase()}`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <div className="aspect-video bg-white/5 rounded-lg border border-dashed border-white/20 flex items-center justify-center mb-2">
-                    <Upload className="w-4 h-4 text-white/50" />
+                  <div className="aspect-square bg-white/5 border border-dashed border-white/20 flex flex-col items-center justify-center">
+                    <Upload className="w-8 h-8 text-white/50 mb-2" />
+                    <p className="text-white/60 text-sm">Upload images</p>
                   </div>
                 )}
 
-                <div>
-                  <h4 className="font-medium text-white text-sm truncate">{group.name}</h4>
-                  <p className="text-white/60 text-xs">
-                    {group.images.length} image{group.images.length !== 1 ? "s" : ""}
-                  </p>
+                {/* Bottom Author Attribution */}
+                <div className="p-3 flex items-center gap-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs">
+                      {group.authorName?.charAt(0) || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-white text-sm font-medium">{group.authorHandle || group.name}</span>
                 </div>
               </div>
             ))}

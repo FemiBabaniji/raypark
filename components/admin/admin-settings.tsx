@@ -14,8 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, ShieldAlert, ShieldCheck } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2, ShieldAlert, ShieldCheck, Palette } from "lucide-react"
 import { enableAdminRestriction, disableAdminRestriction } from "@/app/actions/admin-settings"
+import { useTheme } from "@/lib/theme-context"
+import { THEMES, type ThemeName } from "@/lib/theme-colors"
+import { whitelabelThemes, type WhitelabelTheme } from "@/lib/whitelabel-themes"
 
 interface AdminSettingsProps {
   communityId: string
@@ -28,6 +32,7 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
   const [saving, setSaving] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const { theme, setTheme, whitelabelTheme, setWhitelabelTheme } = useTheme()
 
   useEffect(() => {
     async function loadSettings() {
@@ -49,10 +54,8 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
 
   const handleToggle = async () => {
     if (!restricted) {
-      // About to enable restriction - show confirmation modal
       setShowConfirmModal(true)
     } else {
-      // Disabling restriction - no confirmation needed
       await saveRestrictionSetting(false)
     }
   }
@@ -102,6 +105,72 @@ export function AdminSettings({ communityId, currentUserId }: AdminSettingsProps
 
   return (
     <div className="space-y-6">
+      <Card className="bg-white/[0.03] border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-white">
+            <Palette className="w-5 h-5" />
+            Theme Configuration
+          </CardTitle>
+          <CardDescription className="text-white/60">
+            Customize the appearance of event cards and overall app theme
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Event Card Colors */}
+          <div className="space-y-3">
+            <Label className="text-white font-medium">Event Card Colors</Label>
+            <p className="text-sm text-white/60">Select the color scheme for event cards throughout the platform</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {(Object.keys(THEMES) as ThemeName[]).map((themeName) => (
+                <button
+                  key={themeName}
+                  onClick={() => setTheme(themeName)}
+                  className="relative w-10 h-10 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  style={{ backgroundColor: THEMES[themeName].dotColor }}
+                  aria-label={`Select ${THEMES[themeName].displayName} theme`}
+                  title={THEMES[themeName].displayName}
+                >
+                  {theme === themeName && (
+                    <span className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-2 ring-offset-[#1a1a1d]" />
+                  )}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-white/50">
+              Current: <span className="font-medium text-white/70">{THEMES[theme].displayName}</span>
+            </p>
+          </div>
+
+          {/* App Theme */}
+          <div className="space-y-3 pt-4 border-t border-white/10">
+            <Label className="text-white font-medium">App Theme</Label>
+            <p className="text-sm text-white/60">Choose the overall visual style for the application</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {(Object.keys(whitelabelThemes) as WhitelabelTheme[]).map((themeName) => (
+                <button
+                  key={themeName}
+                  onClick={() => setWhitelabelTheme(themeName)}
+                  className={`w-full px-4 py-3 text-left text-sm rounded-lg transition-all ${
+                    whitelabelTheme === themeName
+                      ? "bg-white/10 text-white ring-2 ring-white/20"
+                      : "bg-white/5 text-white/70 hover:bg-white/8"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-5 h-5 rounded-md flex-shrink-0"
+                      style={{ backgroundColor: whitelabelThemes[themeName].accentPrimary }}
+                    />
+                    <span className="font-medium">{whitelabelThemes[themeName].name}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Admin Access Control */}
       <Alert variant={restricted ? "default" : "default"}>
         <ShieldCheck className="size-4" />
         <AlertTitle>Admin Access Mode</AlertTitle>

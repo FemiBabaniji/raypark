@@ -1,11 +1,8 @@
 "use client"
 
-import { Bell, User, Palette, Shield, PanelRight, PanelRightClose } from "lucide-react"
+import { Bell, User, Shield, PanelRight, PanelRightClose } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { useTheme } from "@/lib/theme-context"
-import { THEMES, type ThemeName, getMutedGradient } from "@/lib/theme-colors"
-import { whitelabelThemes, type WhitelabelTheme } from "@/lib/whitelabel-themes"
 import { useIsAdmin } from "@/hooks/use-is-admin"
 
 interface EventsHeaderProps {
@@ -25,7 +22,6 @@ export default function EventsHeader({
 }: EventsHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { theme, setTheme, whitelabelTheme, setWhitelabelTheme } = useTheme()
   const { isAdmin } = useIsAdmin()
 
   useEffect(() => {
@@ -45,19 +41,13 @@ export default function EventsHeader({
   }, [isDropdownOpen])
 
   const tabs = ["Home", "Events", "Network", "Meetings"]
-  const mutedGradient = getMutedGradient(theme)
 
   return (
     <div className="bg-transparent px-6 py-3.5">
       <div className="flex items-center justify-between gap-6">
-        {/* Left: Logo with theme-based gradient */}
+        {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"
-            style={{
-              background: `linear-gradient(135deg, ${mutedGradient.from}, ${mutedGradient.to})`,
-            }}
-          >
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg bg-gradient-to-br from-zinc-700 to-zinc-800">
             <span className="text-white font-bold text-sm">{communityName}</span>
           </div>
           <div className="flex flex-col">
@@ -114,9 +104,8 @@ export default function EventsHeader({
               <User className="w-5 h-5 text-zinc-400" strokeWidth={2} />
             </button>
 
-            {/* Dropdown menu */}
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-card">
+              <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border border-white/10 overflow-hidden bg-card">
                 <Link
                   href="/dashboard"
                   onClick={() => setIsDropdownOpen(false)}
@@ -138,55 +127,6 @@ export default function EventsHeader({
                     </Link>
                   </>
                 )}
-
-                <div className="border-t border-white/5 px-4 py-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Palette className="w-4 h-4 text-white/70" />
-                    <span className="text-white/90 text-sm font-medium">Event Card Colors</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {(Object.keys(THEMES) as ThemeName[]).map((themeName) => (
-                      <button
-                        key={themeName}
-                        onClick={() => setTheme(themeName)}
-                        className="relative w-8 h-8 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30"
-                        style={{ backgroundColor: THEMES[themeName].dotColor }}
-                        aria-label={`Select ${THEMES[themeName].displayName} theme`}
-                        title={THEMES[themeName].displayName}
-                      >
-                        {theme === themeName && (
-                          <span className="absolute inset-0 rounded-full ring-2 ring-white ring-offset-2 ring-offset-card" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t border-white/5 px-4 py-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Palette className="w-4 h-4 text-white/70" />
-                    <span className="text-white/90 text-sm font-medium">App Theme</span>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {(Object.keys(whitelabelThemes) as WhitelabelTheme[]).map((themeName) => (
-                      <button
-                        key={themeName}
-                        onClick={() => setWhitelabelTheme(themeName)}
-                        className={`w-full px-3 py-2 text-left text-sm rounded-md transition-colors ${
-                          whitelabelTheme === themeName ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/5"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: whitelabelThemes[themeName].accentPrimary }}
-                          />
-                          <span>{whitelabelThemes[themeName].name}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <button
                   onClick={() => {

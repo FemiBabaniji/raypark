@@ -310,7 +310,17 @@ export default function EventsLeftColumn({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-[1200px]">
+      {!showRightColumn && onToggleRightColumn && (
+        <button
+          onClick={onToggleRightColumn}
+          className="fixed right-6 top-24 z-50 w-12 h-12 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-xl border border-white/20 transition-all duration-500 ease-in-out flex items-center justify-center shadow-xl animate-in fade-in slide-in-from-right-4"
+          aria-label="Show sidebar"
+        >
+          <ChevronLeft className="w-5 h-5 text-white" />
+        </button>
+      )}
+
+      <div className="w-full max-w-[1200px] transition-all duration-500 ease-in-out">
         {activeTab === "Home" && selectedEvent && selectedEventData ? (
           <div className="mt-6 w-full">
             <EventDetailView

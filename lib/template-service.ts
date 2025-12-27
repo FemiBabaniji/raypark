@@ -27,6 +27,8 @@ export interface PortfolioTemplate {
  * Includes system templates (community_id = null) and community-specific templates
  */
 export async function getAvailableTemplates(communityId?: string): Promise<PortfolioTemplate[]> {
+  console.log("[v0] getAvailableTemplates called with communityId:", communityId)
+
   const supabase = await createClient()
 
   let query = supabase
@@ -38,9 +40,11 @@ export async function getAvailableTemplates(communityId?: string): Promise<Portf
   // If communityId provided, include community-specific templates
   if (communityId) {
     query = query.or(`community_id.is.null,community_id.eq.${communityId}`)
+    console.log("[v0] Fetching templates for community:", communityId)
   } else {
     // Only system templates
     query = query.is("community_id", null)
+    console.log("[v0] Fetching system templates only")
   }
 
   const { data, error } = await query
@@ -49,6 +53,9 @@ export async function getAvailableTemplates(communityId?: string): Promise<Portf
     console.error("[v0] Error fetching templates:", error)
     return []
   }
+
+  console.log("[v0] Fetched templates:", data?.length || 0, "templates")
+  console.log("[v0] Templates data:", data)
 
   return (data as PortfolioTemplate[]) || []
 }

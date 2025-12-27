@@ -48,7 +48,7 @@ export function TemplateBuilderExpanded({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
+      <DialogContent className="w-[95vw] max-w-[95vw] h-[90vh] p-0 gap-0">
         <DialogHeader className="px-6 py-4 border-b border-border">
           <DialogTitle>{templateName || "New Template"}</DialogTitle>
           <DialogDescription>Design the portfolio layout for this community template</DialogDescription>

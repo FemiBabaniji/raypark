@@ -250,13 +250,15 @@ export default function EventsPage({
         <div className="max-w-screen-2xl mx-auto px-6 md:px-10 lg:px-16 xl:px-20">
           <main className="w-full relative mt-6">
             <div
-              className={`flex items-start gap-6 md:gap-8 transition-all duration-300 ease-out ${showRightColumn ? "justify-start" : "justify-center"}`}
+              className={`flex items-start gap-6 md:gap-8 transition-all duration-500 ease-in-out ${
+                showRightColumn ? "justify-start" : "justify-center"
+              }`}
             >
               <div
-                className={`flex-1 min-w-0 transition-all duration-300 ease-out ${
+                className={`transition-all duration-500 ease-in-out ${
                   showRightColumn
-                    ? "max-w-[600px] md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px]"
-                    : "max-w-[800px] md:max-w-[1000px] lg:max-w-[1200px] xl:max-w-[1400px]"
+                    ? "w-full max-w-[600px] md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1000px]"
+                    : "w-full max-w-[700px] md:max-w-[900px] lg:max-w-[1100px] xl:max-w-[1300px]"
                 }`}
               >
                 <EventsLeftColumn
@@ -272,9 +274,9 @@ export default function EventsPage({
               </div>
 
               <div
-                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${
+                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-500 ease-in-out ${
                   showRightColumn
-                    ? "translate-x-0 opacity-100"
+                    ? "translate-x-0 opacity-100 pointer-events-auto"
                     : "translate-x-full opacity-0 pointer-events-none absolute right-0"
                 }`}
               >

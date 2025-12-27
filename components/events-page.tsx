@@ -267,16 +267,16 @@ export default function EventsPage({
                 />
               </div>
 
-              <div
-                className={`w-64 flex-shrink-0 sticky top-24 self-start transition-all duration-300 ease-out ${showRightColumn ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"}`}
-              >
-                <EventsRightColumn
-                  onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
-                  communityId={communityId}
-                  hasUserPortfolio={hasUserPortfolio}
-                  userPortfolio={userPortfolio}
-                />
-              </div>
+              {showRightColumn && (
+                <div className="w-64 flex-shrink-0 sticky top-24 self-start">
+                  <EventsRightColumn
+                    onToggleRightColumn={() => setShowRightColumn(!showRightColumn)}
+                    communityId={communityId}
+                    hasUserPortfolio={hasUserPortfolio}
+                    userPortfolio={userPortfolio}
+                  />
+                </div>
+              )}
             </div>
           </main>
         </div>

@@ -21,7 +21,7 @@ const DashboardHeader = () => {
   const { isAdmin } = useIsAdmin()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-40 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
         {/* Left: Logo and Navigation */}
         <div className="flex items-center gap-8">

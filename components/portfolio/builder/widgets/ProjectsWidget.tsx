@@ -56,6 +56,8 @@ export default function ProjectsWidget({
   const [showColorPicker, setShowColorPicker] = useState(false)
   const layoutId = `widget-${widgetId}`
 
+  const items = Array.isArray(content?.items) ? content.items : []
+
   const colorOptions = [
     { name: "Default", value: "bg-zinc-900/40" },
     { name: "Blue", value: "bg-gradient-to-br from-blue-900/40 to-cyan-900/40" },
@@ -71,30 +73,30 @@ export default function ProjectsWidget({
       year: "2024",
       tags: ["React"],
     }
-    onContentChange({ ...content, items: [...content.items, newProject] })
+    onContentChange({ ...content, items: [...items, newProject] })
   }
 
   const updateProject = (index: number, updates: Partial<ProjectItem>) => {
-    const newItems = [...content.items]
+    const newItems = [...items]
     newItems[index] = { ...newItems[index], ...updates }
     onContentChange({ ...content, items: newItems })
   }
 
   const deleteProject = (index: number) => {
-    const newItems = content.items.filter((_, i) => i !== index)
+    const newItems = items.filter((_, i) => i !== index)
     onContentChange({ ...content, items: newItems })
   }
 
   const addTag = (projectIndex: number) => {
     const newTag = prompt("Enter tag name:")
     if (newTag) {
-      const project = content.items[projectIndex]
+      const project = items[projectIndex]
       updateProject(projectIndex, { tags: [...project.tags, newTag] })
     }
   }
 
   const removeTag = (projectIndex: number, tagIndex: number) => {
-    const project = content.items[projectIndex]
+    const project = items[projectIndex]
     const newTags = project.tags.filter((_, i) => i !== tagIndex)
     updateProject(projectIndex, { tags: newTags })
   }
@@ -200,7 +202,7 @@ export default function ProjectsWidget({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          {content.items.map((project, idx) => (
+          {items.map((project, idx) => (
             <div
               key={idx}
               className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 space-y-3 transition-all duration-200 hover:bg-white/10 relative group/project min-h-[180px]"

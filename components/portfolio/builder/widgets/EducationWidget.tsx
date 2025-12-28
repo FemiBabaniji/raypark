@@ -43,6 +43,8 @@ export default function EducationWidget({
   const [widgetColor, setWidgetColor] = useState("bg-zinc-900/40")
   const [showColorPicker, setShowColorPicker] = useState(false)
 
+  const items = Array.isArray(content?.items) ? content.items : []
+
   const colorOptions = [
     { name: "Default", value: "bg-zinc-900/40" },
     { name: "Blue", value: "bg-gradient-to-br from-blue-900/40 to-cyan-900/40" },
@@ -59,17 +61,17 @@ export default function EducationWidget({
       description: "",
       certified: false,
     }
-    onContentChange({ ...content, items: [...content.items, newItem] })
+    onContentChange({ ...content, items: [...items, newItem] })
   }
 
   const updateItem = (index: number, updates: Partial<EducationItem>) => {
-    const newItems = [...content.items]
+    const newItems = [...items]
     newItems[index] = { ...newItems[index], ...updates }
     onContentChange({ ...content, items: newItems })
   }
 
   const deleteItem = (index: number) => {
-    const newItems = content.items.filter((_, i) => i !== index)
+    const newItems = items.filter((_, i) => i !== index)
     onContentChange({ ...content, items: newItems })
   }
 
@@ -153,7 +155,7 @@ export default function EducationWidget({
       </div>
 
       <div className="space-y-4">
-        {content.items.map((item, idx) => (
+        {items.map((item, idx) => (
           <div
             key={idx}
             className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 transition-all duration-200 hover:bg-white/10 relative group/item"

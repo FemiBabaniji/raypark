@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { GripVertical, ArrowLeft, ArrowRight, X, Plus, Upload } from "lucide-react"
+import { GripVertical, ArrowLeft, ArrowRight, X, Plus, Upload, Pencil } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
 
 type GalleryGroup = {
   id: string
@@ -41,6 +42,7 @@ export default function GalleryWidget({
   const [showAddGroup, setShowAddGroup] = useState(false)
   const [newGroupName, setNewGroupName] = useState("")
   const [editingCaption, setEditingCaption] = useState<{ groupId: string; imageIndex: number } | null>(null)
+  const [localCaption, setLocalCaption] = useState("")
 
   const addGroup = () => {
     if (!newGroupName.trim()) return
@@ -111,6 +113,14 @@ export default function GalleryWidget({
     )
   }
 
+  const saveCaption = () => {
+    if (editingCaption) {
+      updateImageCaption(editingCaption.groupId, editingCaption.imageIndex, localCaption)
+      setEditingCaption(null)
+      setLocalCaption("")
+    }
+  }
+
   return (
     <div className="group relative">
       {!isPreviewMode && (
@@ -178,7 +188,7 @@ export default function GalleryWidget({
             {galleryGroups.map((group) => (
               <div
                 key={group.id}
-                className="rounded-2xl overflow-hidden relative group/group cursor-pointer hover:scale-[1.02] transition-transform"
+                className="rounded-xl overflow-hidden relative group/group cursor-pointer hover:scale-[1.01] transition-transform"
                 onClick={() => onGroupClick(group)}
               >
                 {!isPreviewMode && (
@@ -210,7 +220,9 @@ export default function GalleryWidget({
 
                 {group.images.length > 0 ? (
                   <div className="relative">
-                    <div className="grid grid-cols-2 gap-1 bg-black/20 p-2 rounded-2xl">
+                    <div
+                      className={`grid grid-cols-2 gap-1 bg-black/10 p-2 rounded-xl ${isPreviewMode ? "max-w-sm" : ""}`}
+                    >
                       {group.images.slice(0, 4).map((img, idx) => (
                         <div key={idx} className="relative aspect-square rounded-lg overflow-hidden">
                           <img
@@ -218,6 +230,20 @@ export default function GalleryWidget({
                             alt={group.captions?.[idx] || `${group.name} ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
+                          {!isPreviewMode && (
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setEditingCaption({ groupId: group.id, imageIndex: idx })
+                                setLocalCaption(group.captions?.[idx] || "")
+                              }}
+                              size="sm"
+                              variant="ghost"
+                              className="absolute bottom-1 right-1 p-1 h-6 w-6 bg-black/60 backdrop-blur-sm hover:bg-black/80 opacity-0 group-hover/group:opacity-100"
+                            >
+                              <Pencil className="w-3 h-3 text-white" />
+                            </Button>
+                          )}
                           {group.captions?.[idx] && (
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 hover:opacity-100 transition-opacity">
                               <p className="text-white text-xs line-clamp-2">{group.captions[idx]}</p>
@@ -254,7 +280,6 @@ export default function GalleryWidget({
                       </div>
                     </div>
 
-                    {/* Bottom attribution bar */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 flex items-center gap-2">
                       <Avatar className="w-8 h-8">
                         <AvatarImage src={group.authorAvatar || "/placeholder.svg"} />
@@ -271,6 +296,12 @@ export default function GalleryWidget({
                     <p className="text-white/60 text-sm">Upload images</p>
                   </div>
                 )}
+
+                {group.description && isPreviewMode && (
+                  <div className="mt-2">
+                    <p className="text-white/70 text-sm">{group.description}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -285,6 +316,33 @@ export default function GalleryWidget({
           </div>
         )}
       </div>
+
+      {editingCaption && !isPreviewMode && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setEditingCaption(null)}
+        >
+          <div className="bg-black/90 rounded-xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-white text-lg font-medium mb-4">Edit Image Caption</h3>
+            <Input
+              value={localCaption}
+              onChange={(e) => setLocalCaption(e.target.value)}
+              placeholder="Enter caption..."
+              className="bg-white/10 border-white/20 text-white placeholder-white/50 mb-4"
+              onKeyPress={(e) => e.key === "Enter" && saveCaption()}
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <Button onClick={() => setEditingCaption(null)} variant="ghost" className="text-white/70">
+                Cancel
+              </Button>
+              <Button onClick={saveCaption} className="bg-blue-600 hover:bg-blue-700">
+                Save Caption
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Reorder, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -22,7 +22,7 @@ import {
   GalleryWidget,
   StartupWidget,
   MeetingSchedulerWidget,
-  ImageWidget, // Added ImageWidget import
+  ImageWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -232,6 +232,9 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
+      captions?: string[]
+      authorName?: string
+      authorHandle?: string
     }>
   }>({})
 
@@ -244,6 +247,9 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
+      captions?: string[]
+      authorName?: string
+      authorHandle?: string
     }
   } | null>(null)
 
@@ -462,24 +468,32 @@ export default function PortfolioBuilder({
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
-    if (leftWidgets.length > 0 && !isLoadingData) {
-      const hadDescription = prevLeftWidgetsRef.current.includes("description")
-      const widgetIds = leftWidgets.map((w) => w.id).join(",")
-      const hasDescription = widgetIds.includes("description")
+    if (!hasInitialized) return
 
-      if (hadDescription && !hasDescription) {
-        if (widgetContent.description) {
-          setLeftWidgets((prev) => {
-            const hasDesc = prev.some((w) => w.type === "description")
-            if (!hasDesc) {
-              return [...prev, { id: "description", type: "description" }]
-            }
-            return prev
-          })
+    // Sync gallery groups into widgetContent for all gallery widgets
+    const updates: Record<string, any> = {}
+    let hasChanges = false
+
+    Object.entries(galleryGroups).forEach(([widgetId, groups]) => {
+      const currentContent = widgetContent[widgetId]?.groups
+      const newContent = groups
+
+      // Only update if content has actually changed
+      if (JSON.stringify(currentContent) !== JSON.stringify(newContent)) {
+        console.log(`[v0] 🖼️ Syncing gallery groups for widget ${widgetId}:`, groups.length, "groups")
+        updates[widgetId] = {
+          ...widgetContent[widgetId],
+          groups: newContent,
         }
+        hasChanges = true
       }
+    })
+
+    if (hasChanges) {
+      console.log("[v0] 🖼️ Gallery groups changed, updating widgetContent")
+      setWidgetContent((prev) => ({ ...prev, ...updates }))
     }
-  }, [leftWidgets, widgetContent.description, isLoadingData])
+  }, [galleryGroups, hasInitialized])
 
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
@@ -510,8 +524,13 @@ export default function PortfolioBuilder({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
+    const newWidgetId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? `${type}-${crypto.randomUUID()}`
+        : `${type}-${Date.now()}`
+
     const newWidget: WidgetDef = {
-      id: type, // Use type as ID
+      id: newWidgetId,
       type: type,
     }
 
@@ -564,20 +583,14 @@ export default function PortfolioBuilder({
       image: {
         url: "",
         caption: "",
-      }, // Added default content for image widget
+      },
     }
 
     if (defaultContent[type]) {
-      console.log("[v0] 📝 Initializing default content for widget:", type)
-      const newContent = defaultContent[type]
       setWidgetContent((prev) => ({
         ...prev,
-        [type]: newContent,
+        [newWidgetId]: defaultContent[type],
       }))
-
-      setTimeout(() => {
-        console.log("[v0] ✅ Widget content initialized for:", type)
-      }, 0)
     }
 
     if (column === "left") {
@@ -617,10 +630,10 @@ export default function PortfolioBuilder({
     }
   }
 
-  const handleWidgetContentChange = (widgetType: string, updates: any, widgetId?: string) => {
+  const handleWidgetContentChange = (widgetId: string, updates: any) => {
     setWidgetContent((prev) => ({
       ...prev,
-      [widgetType]: widgetId ? { ...prev[widgetType], [widgetId]: updates } : updates,
+      [widgetId]: updates,
     }))
   }
 
@@ -653,6 +666,10 @@ export default function PortfolioBuilder({
         )
 
       case "education":
+        const educationContent = widgetContent[widget.id] ?? {
+          title: "Education",
+          items: [],
+        }
         return (
           <motion.div
             key={widget.id}
@@ -664,8 +681,11 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent[widget.id] || widgetContent.education}
-              onContentChange={(updates) => handleWidgetContentChange("education", updates, widget.id)}
+              content={{
+                ...educationContent,
+                items: Array.isArray(educationContent.items) ? educationContent.items : [],
+              }}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -675,6 +695,10 @@ export default function PortfolioBuilder({
         )
 
       case "projects":
+        const projectsContent = widgetContent[widget.id] ?? {
+          title: "Projects",
+          items: [],
+        }
         return (
           <motion.div
             key={widget.id}
@@ -686,8 +710,8 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.projects[widget.id] || []}
-              onContentChange={(updates) => handleWidgetContentChange("projects", updates, widget.id)}
+              content={{ ...projectsContent, items: Array.isArray(projectsContent.items) ? projectsContent.items : [] }}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               projectColors={projectColors}
@@ -701,6 +725,11 @@ export default function PortfolioBuilder({
         )
 
       case "description":
+        const descriptionContent = widgetContent[widget.id] ?? {
+          title: "About Me",
+          description: "",
+          subdescription: "",
+        }
         return (
           <motion.div
             key={widget.id}
@@ -712,8 +741,8 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.description[widget.id]}
-              onContentChange={(updates) => handleWidgetContentChange("description", updates, widget.id)}
+              content={descriptionContent}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -725,6 +754,11 @@ export default function PortfolioBuilder({
         )
 
       case "services":
+        const servicesContent = widgetContent[widget.id] ?? {
+          title: "Services",
+          description: "",
+          items: [],
+        }
         return (
           <motion.div
             key={widget.id}
@@ -736,8 +770,8 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.services[widget.id] || []}
-              onContentChange={(updates) => handleWidgetContentChange("services", updates, widget.id)}
+              content={{ ...servicesContent, items: Array.isArray(servicesContent.items) ? servicesContent.items : [] }}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -768,6 +802,10 @@ export default function PortfolioBuilder({
         )
 
       case "meeting-scheduler":
+        const meetingContent = widgetContent[widget.id] ?? {
+          mode: "button",
+          calendlyUrl: "",
+        }
         return (
           <motion.div
             key={widget.id}
@@ -779,8 +817,8 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.meetingScheduler[widget.id]}
-              onContentChange={(updates) => handleWidgetContentChange("meetingScheduler", updates, widget.id)}
+              content={meetingContent}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
             />
@@ -788,6 +826,10 @@ export default function PortfolioBuilder({
         )
 
       case "startup":
+        const startupContent = widgetContent[widget.id] ?? {
+          title: "Startup",
+          description: "",
+        }
         return (
           <motion.div
             key={widget.id}
@@ -799,8 +841,8 @@ export default function PortfolioBuilder({
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              content={widgetContent.startup[widget.id]}
-              onContentChange={(updates) => handleWidgetContentChange("startup", updates, widget.id)}
+              content={startupContent}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
               editingField={editingField}
@@ -824,8 +866,8 @@ export default function PortfolioBuilder({
               isPreviewMode={isPreviewMode}
               imageUrl={imageData.url}
               caption={imageData.caption}
-              onImageChange={(url) => handleWidgetContentChange("image", { ...imageData, url }, widget.id)}
-              onCaptionChange={(caption) => handleWidgetContentChange("image", { ...imageData, caption }, widget.id)}
+              onImageChange={(url) => handleWidgetContentChange(widget.id, { ...imageData, url })}
+              onCaptionChange={(caption) => handleWidgetContentChange(widget.id, { ...imageData, caption })}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
             />
@@ -956,87 +998,77 @@ export default function PortfolioBuilder({
         logoHref="/network"
         logoSrc="/dmz-logo-white.svg"
       >
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("left")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={leftWidgets}
-            onReorder={setLeftWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
-          >
-            {leftWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: 2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {renderWidget(w, "left")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+        {imagesOnlyMode ? (
+          <div className="col-span-full">
+            <div className="grid grid-cols-4 gap-3 auto-rows-max">
+              {[...leftWidgets, ...rightWidgets]
+                .filter((w) => w.type === "image")
+                .map((w) => {
+                  const imageData = widgetContent[w.id] || { url: "", caption: "" }
+                  if (!imageData.url) return null
 
-        <div
-          className={`lg:w-1/2 relative transition-all duration-200 ${
-            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-          }`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOverColumn("right")
-          }}
-          onDragLeave={() => setDragOverColumn(null)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setDragOverColumn(null)
-          }}
-        >
-          <Reorder.Group
-            axis="y"
-            values={rightWidgets}
-            onReorder={setRightWidgets}
-            className="flex flex-col gap-4 sm:gap-6"
-          >
-            {rightWidgets.map((w) => (
-              <Reorder.Item
-                key={w.id}
-                value={w}
-                className="list-none"
-                whileDrag={{
-                  scale: 1.05,
-                  zIndex: 50,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                  rotate: -2,
-                }}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {renderWidget(w, "right")}
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+                  return (
+                    <div key={w.id} className="group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                        <img
+                          src={imageData.url || "/placeholder.svg"}
+                          alt={imageData.caption || "Image"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {imageData.caption && (
+                        <p className="text-white/70 text-xs mt-1.5 line-clamp-2">{imageData.caption}</p>
+                      )}
+                    </div>
+                  )
+                })}
+
+              {[...leftWidgets, ...rightWidgets]
+                .filter((w) => w.type === "gallery")
+                .flatMap((w) => {
+                  const groups = galleryGroups[w.id] || []
+                  return groups.flatMap((group) =>
+                    group.images.map((img, idx) => ({
+                      widgetId: w.id,
+                      groupId: group.id,
+                      image: img,
+                      caption: group.captions?.[idx] || "",
+                      authorName: group.authorName || group.name,
+                      authorHandle: group.authorHandle,
+                    })),
+                  )
+                })
+                .map((item, index) => (
+                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                      <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.caption || `Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-1.5">
+                      <p className="text-white/70 text-xs line-clamp-2">{item.caption || item.authorName}</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
+              {leftWidgets.map((w) => (
+                <div key={w.id}>{renderWidget(w, "left")}</div>
+              ))}
+            </div>
+
+            <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
+              {rightWidgets.map((w) => (
+                <div key={w.id}>{renderWidget(w, "right")}</div>
+              ))}
+            </div>
+          </>
+        )}
       </PortfolioShell>
 
       <GroupDetailView />

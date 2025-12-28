@@ -1,13 +1,15 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
-import StarterPortfolio from "@/components/starter-portfolio"
 import { BackButton } from "@/components/ui/back-button"
 import type { ThemeIndex } from "@/lib/theme"
 
+const StarterPortfolio = dynamic(() => import("@/components/starter-portfolio"), { ssr: false })
+
 export default function PortfolioCanvas({
   isPreviewMode,
-  imagesOnlyMode = false, // Added imagesOnlyMode prop
+  imagesOnlyMode = false,
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
@@ -15,10 +17,10 @@ export default function PortfolioCanvas({
   isLive = false,
   onToggleLive,
   onBack,
-  communityId, // Add communityId prop
+  communityId,
 }: {
   isPreviewMode: boolean
-  imagesOnlyMode?: boolean // Added imagesOnlyMode to type
+  imagesOnlyMode?: boolean
   useStarterTemplate?: boolean
   activeIdentity?: {
     id: string
@@ -39,7 +41,7 @@ export default function PortfolioCanvas({
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
   onBack?: () => void
-  communityId?: string | null // Add communityId type
+  communityId?: string | null
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
@@ -65,13 +67,13 @@ export default function PortfolioCanvas({
         onActiveIdentityChange && (
           <PortfolioBuilder
             isPreviewMode={isPreviewMode}
-            imagesOnlyMode={imagesOnlyMode} // Pass imagesOnlyMode to PortfolioBuilder
+            imagesOnlyMode={imagesOnlyMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
             onSavePortfolio={onSavePortfolio}
             isLive={isLive}
             onToggleLive={onToggleLive}
-            communityId={communityId} // Pass communityId to PortfolioBuilder
+            communityId={communityId}
           />
         )
       )}

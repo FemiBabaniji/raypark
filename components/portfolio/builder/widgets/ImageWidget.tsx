@@ -37,10 +37,15 @@ export default function ImageWidget({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      console.log("[v0] Image file selected:", file.name, file.size)
       const reader = new FileReader()
       reader.onload = (e) => {
         const url = e.target?.result as string
+        console.log("[v0] Image loaded, URL length:", url.length)
         onImageChange(url)
+      }
+      reader.onerror = (error) => {
+        console.error("[v0] Error reading image file:", error)
       }
       reader.readAsDataURL(file)
     }
@@ -52,9 +57,9 @@ export default function ImageWidget({
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden group relative">
+    <div className="group relative">
       {!isPreviewMode && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-20 bg-black/60 backdrop-blur-sm rounded-lg p-1">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-20 bg-black/60 backdrop-blur-sm rounded-lg p-1">
           <GripVertical className="w-4 h-4 text-white/70" />
           <Button size="sm" variant="ghost" onClick={onMove} className="p-1 h-6 w-6 bg-white/20 hover:bg-white/30">
             {column === "left" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
@@ -72,31 +77,28 @@ export default function ImageWidget({
 
       {imageUrl ? (
         <div className="relative">
-          <img
-            src={imageUrl || "/placeholder.svg"}
-            alt={caption || "Image"}
-            className="w-full h-auto object-cover rounded-2xl"
-          />
+          <div className={isPreviewMode ? "max-w-[280px]" : ""}>
+            <img
+              src={imageUrl || "/placeholder.svg"}
+              alt={caption || "Image"}
+              className="w-full h-auto rounded-xl object-cover"
+              style={isPreviewMode ? { maxHeight: "280px" } : {}}
+            />
+          </div>
 
           {!isPreviewMode && (
             <Button
               size="sm"
               variant="ghost"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-4 right-4 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80"
+              className="absolute top-2 left-2 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80"
             >
               <Upload className="w-4 h-4" />
             </Button>
           )}
-
-          {caption && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 rounded-b-2xl">
-              <p className="text-white text-sm">{caption}</p>
-            </div>
-          )}
         </div>
       ) : (
-        <div className="aspect-square bg-black/20 border border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center p-8">
+        <div className="aspect-square bg-black/20 border border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center p-8 max-w-sm">
           <div className="w-16 h-16 bg-white/10 rounded-xl mb-4 flex items-center justify-center">
             <Upload className="w-8 h-8 text-white/50" />
           </div>
@@ -112,16 +114,15 @@ export default function ImageWidget({
         </div>
       )}
 
-      {/* Caption Section */}
-      {(caption || !isPreviewMode) && imageUrl && (
-        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-b-2xl">
+      {imageUrl && (
+        <div className="mt-2">
           {isEditingCaption && !isPreviewMode ? (
             <div className="flex gap-2">
               <Input
                 value={localCaption}
                 onChange={(e) => setLocalCaption(e.target.value)}
                 placeholder="Add caption..."
-                className="flex-1 bg-white/10 border-white/20 text-white placeholder-white/50"
+                className="flex-1 bg-white/10 border-white/20 text-white placeholder-white/50 text-sm"
                 onKeyPress={(e) => e.key === "Enter" && saveCaption()}
                 autoFocus
               />
@@ -130,8 +131,8 @@ export default function ImageWidget({
               </Button>
             </div>
           ) : caption ? (
-            <div className="flex items-center justify-between group/caption">
-              <p className="text-white/80 text-sm">{caption}</p>
+            <div className="flex items-start justify-between group/caption gap-2">
+              <p className="text-white/70 text-sm flex-1">{caption}</p>
               {!isPreviewMode && (
                 <Button
                   size="sm"
@@ -140,7 +141,7 @@ export default function ImageWidget({
                     setLocalCaption(caption)
                     setIsEditingCaption(true)
                   }}
-                  className="opacity-0 group-hover/caption:opacity-100 p-1 h-6 w-6"
+                  className="opacity-0 group-hover/caption:opacity-100 p-1 h-6 w-6 flex-shrink-0"
                 >
                   <Pencil className="w-3 h-3" />
                 </Button>
@@ -152,7 +153,7 @@ export default function ImageWidget({
                 onClick={() => setIsEditingCaption(true)}
                 variant="ghost"
                 size="sm"
-                className="text-white/50 hover:text-white/80 text-xs w-full"
+                className="text-white/40 hover:text-white/70 text-xs w-full justify-start px-0"
               >
                 + Add caption
               </Button>

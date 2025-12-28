@@ -26,6 +26,7 @@ import {
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
+import { Reorder } from "framer-motion"
 
 type Props = {
   isPreviewMode?: boolean
@@ -655,12 +656,14 @@ export default function PortfolioBuilder({
     }
   }
 
-  const handleWidgetContentChange = (widgetId: string, updates: any) => {
-    setWidgetContent((prev) => ({
-      ...prev,
-      [widgetId]: updates,
-    }))
-  }
+  const handleWidgetContentChange = useCallback((widgetId: string, newContent: any) => {
+    console.log("[v0] Widget content changing:", widgetId, newContent)
+    setWidgetContent((prev) => {
+      const updated = { ...prev, [widgetId]: newContent }
+      console.log("[v0] Updated widgetContent:", updated)
+      return updated
+    })
+  }, [])
 
   const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
     const canDelete = widget.id !== "identity"
@@ -925,6 +928,14 @@ export default function PortfolioBuilder({
     }
   }
 
+  const handleLeftReorder = (newOrder: WidgetDef[]) => {
+    setLeftWidgets(newOrder)
+  }
+
+  const handleRightReorder = (newOrder: WidgetDef[]) => {
+    setRightWidgets(newOrder)
+  }
+
   const rightSlot = !isPreviewMode ? (
     <div className="flex gap-2 items-center">
       {isSaving && <span className="text-white/60 text-xs animate-pulse">Saving...</span>}
@@ -1015,7 +1026,7 @@ export default function PortfolioBuilder({
   ) : null
 
   return (
-    <>
+    <div className="flex-1 flex flex-col overflow-hidden bg-black">
       <PortfolioShell
         title={`${currentIdentity.name || "your name"}.`}
         isPreviewMode={isPreviewMode}
@@ -1087,22 +1098,40 @@ export default function PortfolioBuilder({
         ) : (
           <>
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {leftWidgets.map((w) => (
-                <div key={w.id}>{renderWidget(w, "left")}</div>
-              ))}
+              {!isPreviewMode && leftWidgets.length === 0 && (
+                <div className="text-center py-12 text-white/40">
+                  <p>Add widgets from the + button above</p>
+                </div>
+              )}
+              <Reorder.Group axis="y" values={leftWidgets} onReorder={handleLeftReorder} className="space-y-6">
+                {leftWidgets.map((widget) => (
+                  <Reorder.Item key={widget.id} value={widget} className="cursor-move">
+                    {renderWidget(widget, "left")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
             </div>
 
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {rightWidgets.map((w) => (
-                <div key={w.id}>{renderWidget(w, "right")}</div>
-              ))}
+              {!isPreviewMode && rightWidgets.length === 0 && (
+                <div className="text-center py-12 text-white/40">
+                  <p>Widgets can be moved here</p>
+                </div>
+              )}
+              <Reorder.Group axis="y" values={rightWidgets} onReorder={handleRightReorder} className="space-y-6">
+                {rightWidgets.map((widget) => (
+                  <Reorder.Item key={widget.id} value={widget} className="cursor-move">
+                    {renderWidget(widget, "right")}
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
             </div>
           </>
         )}
       </PortfolioShell>
 
       <GroupDetailView />
-    </>
+    </div>
   )
 }
 

@@ -731,18 +731,20 @@ export async function saveWidgetLayout(
         continue
       }
 
-      const widget_type_id = keyToId[widgetType]
+      const extractedType = (widgetType.includes("-") && widgetType.match(/^[a-z]+(?=-)/)?.[0]) || widgetType
+      const widget_type_id = keyToId[extractedType]
 
       if (!widget_type_id) {
-        console.warn("[v0] ⚠️ Widget type not found in database:", widgetType)
+        console.warn("[v0] ⚠️ Widget type not found in database:", extractedType, "from", widgetType)
         continue
       }
 
       const content = widgetContent[widgetId] || {}
 
       console.log(
-        `[v0] Saving widget '${widgetId}' (type: '${widgetType}') with ${Object.keys(content).length} properties`,
+        `[v0] Saving widget '${widgetId}' (type: '${extractedType}') with ${Object.keys(content).length} properties`,
       )
+      console.log(`[v0] Widget content:`, content)
 
       const { error: widgetError } = await supabase.from("widget_instances").insert({
         page_id: pageId,
@@ -754,7 +756,7 @@ export async function saveWidgetLayout(
       if (widgetError) {
         console.error(`[v0] ❌ Failed to save widget '${widgetId}':`, widgetError)
       } else {
-        console.log(`[v0] ✅ Widget '${widgetId}' saved`)
+        console.log(`[v0] ✅ Widget '${widgetId}' saved successfully`)
       }
     }
 
@@ -1201,4 +1203,18 @@ export async function materializeTemplateWidgets(portfolioId: string): Promise<v
   } else {
     console.log("[v0] ✅ Layout materialized successfully")
   }
+}
+
+function parseWidgetKey(key: string): { id: string; type: string } {
+  if (key.match(/^[a-z]+-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    // UUID-based key like "image-81fc8c75-2239-4950-93b0-5aafdb2ea5aa"
+    const typeMatch = key.match(/^([a-z]+)-/)
+    const type = typeMatch ? typeMatch[1] : key
+    console.log("[v0] Parsed UUID key:", key, "-> type:", type)
+    return { id: key, type }
+  }
+
+  // Legacy key (just type name like "identity", "description")
+  console.log("[v0] Parsed legacy key:", key, "-> type:", key)
+  return { id: key, type: key }
 }

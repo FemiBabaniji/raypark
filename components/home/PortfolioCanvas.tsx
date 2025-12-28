@@ -1,11 +1,8 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import PortfolioBuilder from "@/components/portfolio/builder/PortfolioBuilder"
 import { BackButton } from "@/components/ui/back-button"
 import type { ThemeIndex } from "@/lib/theme"
-
-const StarterPortfolio = dynamic(() => import("@/components/starter-portfolio"), { ssr: false })
 
 export default function PortfolioCanvas({
   isPreviewMode,
@@ -23,7 +20,7 @@ export default function PortfolioCanvas({
   imagesOnlyMode?: boolean
   useStarterTemplate?: boolean
   activeIdentity?: {
-    id: string
+    id: string | null
     name: string
     handle: string
     avatarUrl?: string
@@ -55,27 +52,17 @@ export default function PortfolioCanvas({
         </div>
       )}
 
-      {useStarterTemplate ? (
-        <StarterPortfolio
+      {activeIdentity && onActiveIdentityChange && (
+        <PortfolioBuilder
           isPreviewMode={isPreviewMode}
-          activeIdentity={activeIdentity}
-          onActiveIdentityChange={onActiveIdentityChange}
+          imagesOnlyMode={imagesOnlyMode}
+          identity={activeIdentity}
+          onIdentityChange={onActiveIdentityChange}
           onSavePortfolio={onSavePortfolio}
+          isLive={isLive}
+          onToggleLive={onToggleLive}
+          communityId={communityId}
         />
-      ) : (
-        activeIdentity &&
-        onActiveIdentityChange && (
-          <PortfolioBuilder
-            isPreviewMode={isPreviewMode}
-            imagesOnlyMode={imagesOnlyMode}
-            identity={activeIdentity}
-            onIdentityChange={onActiveIdentityChange}
-            onSavePortfolio={onSavePortfolio}
-            isLive={isLive}
-            onToggleLive={onToggleLive}
-            communityId={communityId}
-          />
-        )
       )}
     </div>
   )

@@ -165,6 +165,9 @@ export default function PortfolioBuilder({
         if (data) {
           console.log("[v0] ✅ Loaded data from", data.isFromTemplate ? "template" : "database")
 
+          console.log("[v0] 📦 Full widgetContent loaded:", JSON.stringify(data.widgetContent, null, 2))
+          console.log("[v0] 📦 Widget content keys:", Object.keys(data.widgetContent))
+
           setIsFromTemplate(data.isFromTemplate)
 
           if (data.widgetContent.identity) {
@@ -174,6 +177,8 @@ export default function PortfolioBuilder({
 
           if (data.layout.left.length > 0 || data.layout.right.length > 0) {
             console.log("[v0] Setting widgets from", data.isFromTemplate ? "template" : "database")
+            console.log("[v0] 📍 Left widgets:", data.layout.left)
+            console.log("[v0] 📍 Right widgets:", data.layout.right)
             setLeftWidgets(data.layout.left.length > 0 ? data.layout.left : [{ id: "identity", type: "identity" }])
             setRightWidgets(data.layout.right)
           } else {
@@ -184,7 +189,23 @@ export default function PortfolioBuilder({
 
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
+            Object.keys(data.widgetContent).forEach((key) => {
+              console.log(`[v0] 📦 Widget ${key} content:`, data.widgetContent[key])
+            })
             setWidgetContent(data.widgetContent)
+
+            const loadedGalleryGroups: Record<string, any[]> = {}
+            Object.entries(data.widgetContent).forEach(([widgetId, content]: [string, any]) => {
+              if (content?.groups && Array.isArray(content.groups)) {
+                console.log(`[v0] 🖼️ Loading gallery groups for widget ${widgetId}:`, content.groups.length, "groups")
+                loadedGalleryGroups[widgetId] = content.groups
+              }
+            })
+
+            if (Object.keys(loadedGalleryGroups).length > 0) {
+              console.log("[v0] 🖼️ Setting gallery groups from database:", loadedGalleryGroups)
+              setGalleryGroups(loadedGalleryGroups)
+            }
           }
 
           console.log("[v0] ✅ Data loaded and state updated successfully")

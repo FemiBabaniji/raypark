@@ -999,8 +999,8 @@ export default function PortfolioBuilder({
         logoSrc="/dmz-logo-white.svg"
       >
         {imagesOnlyMode ? (
-          <div className="col-span-full">
-            <div className="columns-3 gap-3 space-y-3">
+          <div className="col-span-full px-4">
+            <div className="grid grid-cols-3 gap-4">
               {[...leftWidgets, ...rightWidgets]
                 .filter((w) => w.type === "image")
                 .map((w) => {
@@ -1008,7 +1008,7 @@ export default function PortfolioBuilder({
                   if (!imageData.url) return null
 
                   return (
-                    <div key={w.id} className="break-inside-avoid mb-3">
+                    <div key={w.id} className="w-full">
                       <div className="rounded-lg overflow-hidden bg-black/20">
                         <img
                           src={imageData.url || "/placeholder.svg"}
@@ -1028,7 +1028,7 @@ export default function PortfolioBuilder({
                 .flatMap((w) => {
                   const groups = galleryGroups[w.id] || []
                   return groups.flatMap((group) =>
-                    group.images.map((img, idx) => ({
+                    (group.images || []).map((img, idx) => ({
                       widgetId: w.id,
                       groupId: group.id,
                       image: img,
@@ -1039,7 +1039,7 @@ export default function PortfolioBuilder({
                   )
                 })
                 .map((item, index) => (
-                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="break-inside-avoid mb-3">
+                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="w-full">
                     <div className="rounded-lg overflow-hidden bg-black/20">
                       <img
                         src={item.image || "/placeholder.svg"}
@@ -1048,12 +1048,16 @@ export default function PortfolioBuilder({
                       />
                     </div>
                     <div className="mt-1.5">
-                      <p className="text-white/70 text-xs line-clamp-2">{item.caption || item.authorName}</p>
+                      {item.caption && <p className="text-white/70 text-xs line-clamp-2">{item.caption}</p>}
+                      {(item.authorName || item.authorHandle) && (
+                        <p className="text-white/50 text-xs mt-0.5">
+                          {item.authorName} {item.authorHandle && `• ${item.authorHandle}`}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
             </div>
-            {/* End of change */}
           </div>
         ) : (
           <>

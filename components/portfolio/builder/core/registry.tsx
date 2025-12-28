@@ -158,8 +158,7 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
         />
       )
     case "image":
-      const imageContent = deps.widgetContent.image || {}
-      const imageData = imageContent[w.id] || { url: "", caption: "" }
+      const imageData = deps.widgetContent[w.id] || { url: "", caption: "" }
       console.log("[v0] Rendering image widget:", w.id, "data:", imageData)
       return (
         <ImageWidget
@@ -173,13 +172,11 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           caption={imageData.caption}
           onImageChange={(url) => {
             console.log("[v0] Image changed:", w.id, url)
-            const updatedImageContent = { ...(deps.widgetContent.image || {}), [w.id]: { ...imageData, url } }
-            deps.onContentChange("image", updatedImageContent)
+            deps.onContentChange(w.id, { ...imageData, url })
           }}
           onCaptionChange={(caption) => {
             console.log("[v0] Caption changed:", w.id, caption)
-            const updatedImageContent = { ...(deps.widgetContent.image || {}), [w.id]: { ...imageData, caption } }
-            deps.onContentChange("image", updatedImageContent)
+            deps.onContentChange(w.id, { ...imageData, caption })
           }}
         />
       )

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Reorder, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -22,7 +22,7 @@ import {
   GalleryWidget,
   StartupWidget,
   MeetingSchedulerWidget,
-  ImageWidget, // Added ImageWidget import
+  ImageWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -466,26 +466,6 @@ export default function PortfolioBuilder({
       debouncedSave()
     }
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
-
-  useEffect(() => {
-    if (leftWidgets.length > 0 && !isLoadingData) {
-      const hadDescription = prevLeftWidgetsRef.current.includes("description")
-      const widgetIds = leftWidgets.map((w) => w.id).join(",")
-      const hasDescription = widgetIds.includes("description")
-
-      if (hadDescription && !hasDescription) {
-        if (widgetContent.description) {
-          setLeftWidgets((prev) => {
-            const hasDesc = prev.some((w) => w.type === "description")
-            if (!hasDesc) {
-              return [...prev, { id: "description", type: "description" }]
-            }
-            return prev
-          })
-        }
-      }
-    }
-  }, [leftWidgets, widgetContent.description, isLoadingData])
 
   useEffect(() => {
     if (!hasInitialized) return
@@ -993,7 +973,8 @@ export default function PortfolioBuilder({
         {imagesOnlyMode ? (
           <div className="col-span-full">
             <div className="grid grid-cols-4 gap-3 auto-rows-max">
-              {[...leftWidgets, ...rightWidgets]
+              {(Array.isArray(leftWidgets) ? leftWidgets : [])
+                .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
                 .filter((w) => w.type === "image")
                 .map((w) => {
                   const imageData = widgetContent[w.id] || { url: "", caption: "" }
@@ -1015,20 +996,25 @@ export default function PortfolioBuilder({
                   )
                 })}
 
-              {[...leftWidgets, ...rightWidgets]
+              {(Array.isArray(leftWidgets) ? leftWidgets : [])
+                .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
                 .filter((w) => w.type === "gallery")
                 .flatMap((w) => {
-                  const groups = galleryGroups[w.id] || []
-                  return groups.flatMap((group) =>
-                    group.images.map((img, idx) => ({
+                  const groups = galleryGroups[w.id]
+                  if (!groups || !Array.isArray(groups)) return []
+
+                  return groups.flatMap((group) => {
+                    if (!group.images || !Array.isArray(group.images)) return []
+
+                    return group.images.map((img, idx) => ({
                       widgetId: w.id,
                       groupId: group.id,
                       image: img,
                       caption: group.captions?.[idx] || "",
                       authorName: group.authorName || group.name,
                       authorHandle: group.authorHandle,
-                    })),
-                  )
+                    }))
+                  })
                 })
                 .map((item, index) => (
                   <div key={`${item.widgetId}-${item.groupId}-${index}`} className="group">
@@ -1048,86 +1034,20 @@ export default function PortfolioBuilder({
           </div>
         ) : (
           <>
-            <div
-              className={`lg:w-1/2 relative transition-all duration-200 ${
-                dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setDragOverColumn("left")
-              }}
-              onDragLeave={() => setDragOverColumn(null)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setDragOverColumn(null)
-              }}
-            >
-              <Reorder.Group
-                axis="y"
-                values={leftWidgets}
-                onReorder={setLeftWidgets}
-                className="flex flex-col gap-4 sm:gap-6"
-              >
-                {leftWidgets.map((w) => (
-                  <Reorder.Item
-                    key={w.id}
-                    value={w}
-                    className="list-none"
-                    whileDrag={{
-                      scale: 1.05,
-                      zIndex: 50,
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                      rotate: 2,
-                    }}
-                    onDragStart={() => setIsDragging(true)}
-                    onDragEnd={() => setIsDragging(false)}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  >
-                    {renderWidget(w, "left")}
-                  </Reorder.Item>
+            <div className="lg:w-1/2 relative">
+              <div className="flex flex-col gap-4 sm:gap-6">
+                {(Array.isArray(leftWidgets) ? leftWidgets : []).map((w) => (
+                  <div key={w.id}>{renderWidget(w, "left")}</div>
                 ))}
-              </Reorder.Group>
+              </div>
             </div>
 
-            <div
-              className={`lg:w-1/2 relative transition-all duration-200 ${
-                dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setDragOverColumn("right")
-              }}
-              onDragLeave={() => setDragOverColumn(null)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setDragOverColumn(null)
-              }}
-            >
-              <Reorder.Group
-                axis="y"
-                values={rightWidgets}
-                onReorder={setRightWidgets}
-                className="flex flex-col gap-4 sm:gap-6"
-              >
-                {rightWidgets.map((w) => (
-                  <Reorder.Item
-                    key={w.id}
-                    value={w}
-                    className="list-none"
-                    whileDrag={{
-                      scale: 1.05,
-                      zIndex: 50,
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                      rotate: -2,
-                    }}
-                    onDragStart={() => setIsDragging(true)}
-                    onDragEnd={() => setIsDragging(false)}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  >
-                    {renderWidget(w, "right")}
-                  </Reorder.Item>
+            <div className="lg:w-1/2 relative">
+              <div className="flex flex-col gap-4 sm:gap-6">
+                {(Array.isArray(rightWidgets) ? rightWidgets : []).map((w) => (
+                  <div key={w.id}>{renderWidget(w, "right")}</div>
                 ))}
-              </Reorder.Group>
+              </div>
             </div>
           </>
         )}

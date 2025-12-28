@@ -1000,7 +1000,7 @@ export default function PortfolioBuilder({
       >
         {imagesOnlyMode ? (
           <div className="col-span-full">
-            <div className="grid grid-cols-4 gap-3 auto-rows-max">
+            <div className="columns-3 gap-3 space-y-3">
               {[...leftWidgets, ...rightWidgets]
                 .filter((w) => w.type === "image")
                 .map((w) => {
@@ -1008,12 +1008,12 @@ export default function PortfolioBuilder({
                   if (!imageData.url) return null
 
                   return (
-                    <div key={w.id} className="group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                    <div key={w.id} className="break-inside-avoid mb-3">
+                      <div className="rounded-lg overflow-hidden bg-black/20">
                         <img
                           src={imageData.url || "/placeholder.svg"}
                           alt={imageData.caption || "Image"}
-                          className="w-full h-full object-cover"
+                          className="w-full h-auto object-cover"
                         />
                       </div>
                       {imageData.caption && (
@@ -1039,12 +1039,12 @@ export default function PortfolioBuilder({
                   )
                 })
                 .map((item, index) => (
-                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
+                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="break-inside-avoid mb-3">
+                    <div className="rounded-lg overflow-hidden bg-black/20">
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.caption || `Image ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-cover"
                       />
                     </div>
                     <div className="mt-1.5">
@@ -1053,6 +1053,7 @@ export default function PortfolioBuilder({
                   </div>
                 ))}
             </div>
+            {/* End of change */}
           </div>
         ) : (
           <>

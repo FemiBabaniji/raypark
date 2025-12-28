@@ -956,11 +956,6 @@ export async function loadPortfolioData(
   }
 
   const leftWidgets = leftWidgetKeys.map((key: string) => {
-    if (key === "identity") {
-      widgetContent.identity = typeToPropsMap.identity || {}
-      return { id: key, type: key }
-    }
-
     // Check if it's a UUID-based key (type-{uuid})
     if (key.includes("-") && key.length > 20) {
       const parts = key.split("-")

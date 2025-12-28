@@ -998,21 +998,29 @@ export default function PortfolioBuilder({
                       if (!groups || !Array.isArray(groups)) return []
 
                       return groups.flatMap((group) => {
-                        if (!group || !group.images || !Array.isArray(group.images)) return []
+                        // Ensure group exists and has valid structure
+                        if (!group || typeof group !== "object") return []
 
-                        return group.images
-                          .filter((img) => img) // Filter out null/undefined images
+                        // Safe array guard for images
+                        const images = Array.isArray(group.images) ? group.images : []
+                        if (images.length === 0) return []
+
+                        // Safe array guard for captions
+                        const captions = Array.isArray(group.captions) ? group.captions : []
+
+                        return images
+                          .filter((img) => img && typeof img === "string") // Filter out null/undefined/invalid images
                           .map((img, idx) => ({
                             widgetId: w.id,
-                            groupId: group.id,
+                            groupId: group.id || `group-${idx}`,
                             image: img,
-                            caption: (Array.isArray(group.captions) ? group.captions[idx] : "") || "",
+                            caption: captions[idx] || "",
                             authorName: group.authorName || group.name || "",
                             authorHandle: group.authorHandle || "",
                           }))
                       })
                     })
-                    .filter((item) => item.image) // Only show if image exists
+                    .filter((item) => item && item.image) // Only show if item and image exist
 
                   const allImages = [...imageWidgetImages, ...galleryImages]
 
@@ -1053,7 +1061,7 @@ export default function PortfolioBuilder({
                   console.error("[v0] Error rendering images-only mode:", error)
                   return (
                     <div className="col-span-full text-center py-12 text-red-400">
-                      Error loading images. Please try refreshing the page.
+                      Error loading images. Please refresh the page.
                     </div>
                   )
                 }

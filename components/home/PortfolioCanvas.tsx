@@ -7,7 +7,7 @@ import type { ThemeIndex } from "@/lib/theme"
 
 export default function PortfolioCanvas({
   isPreviewMode,
-  imagesOnlyMode = false, // Added imagesOnlyMode prop
+  imagesOnlyMode = false,
   useStarterTemplate = false,
   activeIdentity,
   onActiveIdentityChange,
@@ -15,10 +15,10 @@ export default function PortfolioCanvas({
   isLive = false,
   onToggleLive,
   onBack,
-  communityId, // Add communityId prop
+  communityId,
 }: {
   isPreviewMode: boolean
-  imagesOnlyMode?: boolean // Added imagesOnlyMode to type
+  imagesOnlyMode?: boolean
   useStarterTemplate?: boolean
   activeIdentity?: {
     id: string
@@ -39,7 +39,7 @@ export default function PortfolioCanvas({
   isLive?: boolean
   onToggleLive?: (isLive: boolean) => void
   onBack?: () => void
-  communityId?: string | null // Add communityId type
+  communityId?: string | null
 }) {
   return (
     <div className={isPreviewMode ? "max-w-5xl mx-auto" : ""}>
@@ -64,14 +64,15 @@ export default function PortfolioCanvas({
         activeIdentity &&
         onActiveIdentityChange && (
           <PortfolioBuilder
+            key={`${activeIdentity.id}-${isPreviewMode ? "preview" : "edit"}-${imagesOnlyMode ? "images" : "all"}`}
             isPreviewMode={isPreviewMode}
-            imagesOnlyMode={imagesOnlyMode} // Pass imagesOnlyMode to PortfolioBuilder
+            imagesOnlyMode={imagesOnlyMode}
             identity={activeIdentity}
             onIdentityChange={onActiveIdentityChange}
             onSavePortfolio={onSavePortfolio}
             isLive={isLive}
             onToggleLive={onToggleLive}
-            communityId={communityId} // Pass communityId to PortfolioBuilder
+            communityId={communityId}
           />
         )
       )}

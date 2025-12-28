@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { motion } from "framer-motion"
+import { Reorder, motion } from "framer-motion"
 import { X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -22,7 +22,7 @@ import {
   GalleryWidget,
   StartupWidget,
   MeetingSchedulerWidget,
-  ImageWidget,
+  ImageWidget, // Added ImageWidget import
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -232,9 +232,6 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
-      captions?: string[]
-      authorName?: string
-      authorHandle?: string
     }>
   }>({})
 
@@ -247,9 +244,6 @@ export default function PortfolioBuilder({
       description?: string
       images: string[]
       isVideo?: boolean
-      captions?: string[]
-      authorName?: string
-      authorHandle?: string
     }
   } | null>(null)
 
@@ -466,6 +460,26 @@ export default function PortfolioBuilder({
       debouncedSave()
     }
   }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
+
+  useEffect(() => {
+    if (leftWidgets.length > 0 && !isLoadingData) {
+      const hadDescription = prevLeftWidgetsRef.current.includes("description")
+      const widgetIds = leftWidgets.map((w) => w.id).join(",")
+      const hasDescription = widgetIds.includes("description")
+
+      if (hadDescription && !hasDescription) {
+        if (widgetContent.description) {
+          setLeftWidgets((prev) => {
+            const hasDesc = prev.some((w) => w.type === "description")
+            if (!hasDesc) {
+              return [...prev, { id: "description", type: "description" }]
+            }
+            return prev
+          })
+        }
+      }
+    }
+  }, [leftWidgets, widgetContent.description, isLoadingData])
 
   useEffect(() => {
     if (!hasInitialized) return
@@ -970,123 +984,87 @@ export default function PortfolioBuilder({
         logoHref="/network"
         logoSrc="/dmz-logo-white.svg"
       >
-        {imagesOnlyMode ? (
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(() => {
-                try {
-                  // Individual images from ImageWidget
-                  const imageWidgetImages = (Array.isArray(leftWidgets) ? leftWidgets : [])
-                    .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
-                    .filter((w) => w?.type === "image" && widgetContent?.image?.[w.id])
-                    .map((w) => {
-                      const imageData = widgetContent.image[w.id]
-                      return {
-                        widgetId: w.id,
-                        image: imageData?.url || "",
-                        caption: imageData?.caption || "",
-                      }
-                    })
-                    .filter((item) => item.image) // Only show if image exists
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "left" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("left")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
+        >
+          <Reorder.Group
+            axis="y"
+            values={leftWidgets}
+            onReorder={setLeftWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {leftWidgets.map((w) => (
+              <Reorder.Item
+                key={w.id}
+                value={w}
+                className="list-none"
+                whileDrag={{
+                  scale: 1.05,
+                  zIndex: 50,
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                  rotate: 2,
+                }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(w, "left")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
 
-                  // Images from GalleryWidget
-                  const galleryImages = (Array.isArray(leftWidgets) ? leftWidgets : [])
-                    .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
-                    .filter((w) => w?.type === "gallery")
-                    .flatMap((w) => {
-                      const groups = galleryGroups?.[w.id]
-                      if (!groups || !Array.isArray(groups)) return []
-
-                      return groups.flatMap((group) => {
-                        // Ensure group exists and has valid structure
-                        if (!group || typeof group !== "object") return []
-
-                        // Safe array guard for images
-                        const images = Array.isArray(group.images) ? group.images : []
-                        if (images.length === 0) return []
-
-                        // Safe array guard for captions
-                        const captions = Array.isArray(group.captions) ? group.captions : []
-
-                        return images
-                          .filter((img) => img && typeof img === "string") // Filter out null/undefined/invalid images
-                          .map((img, idx) => ({
-                            widgetId: w.id,
-                            groupId: group.id || `group-${idx}`,
-                            image: img,
-                            caption: captions[idx] || "",
-                            authorName: group.authorName || group.name || "",
-                            authorHandle: group.authorHandle || "",
-                          }))
-                      })
-                    })
-                    .filter((item) => item && item.image) // Only show if item and image exist
-
-                  const allImages = [...imageWidgetImages, ...galleryImages]
-
-                  if (allImages.length === 0) {
-                    return (
-                      <div className="col-span-full text-center py-12 text-white/50">
-                        No images to display. Add some image widgets or gallery groups to see them here.
-                      </div>
-                    )
-                  }
-
-                  return allImages.map((item, index) => (
-                    <div key={`image-${item.widgetId}-${item.groupId || "single"}-${index}`} className="group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
-                        <img
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.caption || `Image ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "/placeholder.svg"
-                          }}
-                        />
-                      </div>
-                      {item.caption && (
-                        <div className="mt-1.5">
-                          <p className="text-white/70 text-xs line-clamp-2">{item.caption}</p>
-                          {item.authorName && (
-                            <p className="text-white/50 text-xs">
-                              by {item.authorName}
-                              {item.authorHandle && ` @${item.authorHandle}`}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                } catch (error) {
-                  console.error("[v0] Error rendering images-only mode:", error)
-                  return (
-                    <div className="col-span-full text-center py-12 text-red-400">
-                      Error loading images. Please refresh the page.
-                    </div>
-                  )
-                }
-              })()}
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="lg:w-1/2 relative">
-              <div className="flex flex-col gap-4 sm:gap-6">
-                {(Array.isArray(leftWidgets) ? leftWidgets : []).map((w) => (
-                  <div key={w.id}>{renderWidget(w, "left")}</div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:w-1/2 relative">
-              <div className="flex flex-col gap-4 sm:gap-6">
-                {(Array.isArray(rightWidgets) ? rightWidgets : []).map((w) => (
-                  <div key={w.id}>{renderWidget(w, "right")}</div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+        <div
+          className={`lg:w-1/2 relative transition-all duration-200 ${
+            dragOverColumn === "right" ? "bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl" : ""
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragOverColumn("right")
+          }}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragOverColumn(null)
+          }}
+        >
+          <Reorder.Group
+            axis="y"
+            values={rightWidgets}
+            onReorder={setRightWidgets}
+            className="flex flex-col gap-4 sm:gap-6"
+          >
+            {rightWidgets.map((w) => (
+              <Reorder.Item
+                key={w.id}
+                value={w}
+                className="list-none"
+                whileDrag={{
+                  scale: 1.05,
+                  zIndex: 50,
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                  rotate: -2,
+                }}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                {renderWidget(w, "right")}
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
       </PortfolioShell>
 
       <GroupDetailView />

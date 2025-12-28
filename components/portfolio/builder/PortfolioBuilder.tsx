@@ -971,65 +971,93 @@ export default function PortfolioBuilder({
         logoSrc="/dmz-logo-white.svg"
       >
         {imagesOnlyMode ? (
-          <div className="col-span-full">
-            <div className="grid grid-cols-4 gap-3 auto-rows-max">
-              {(Array.isArray(leftWidgets) ? leftWidgets : [])
-                .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
-                .filter((w) => w.type === "image")
-                .map((w) => {
-                  const imageData = widgetContent[w.id] || { url: "", caption: "" }
-                  if (!imageData.url) return null
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {(() => {
+                try {
+                  // Individual images from ImageWidget
+                  const imageWidgetImages = (Array.isArray(leftWidgets) ? leftWidgets : [])
+                    .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
+                    .filter((w) => w?.type === "image" && widgetContent?.image?.[w.id])
+                    .map((w) => {
+                      const imageData = widgetContent.image[w.id]
+                      return {
+                        widgetId: w.id,
+                        image: imageData?.url || "",
+                        caption: imageData?.caption || "",
+                      }
+                    })
+                    .filter((item) => item.image) // Only show if image exists
 
-                  return (
-                    <div key={w.id} className="group">
+                  // Images from GalleryWidget
+                  const galleryImages = (Array.isArray(leftWidgets) ? leftWidgets : [])
+                    .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
+                    .filter((w) => w?.type === "gallery")
+                    .flatMap((w) => {
+                      const groups = galleryGroups?.[w.id]
+                      if (!groups || !Array.isArray(groups)) return []
+
+                      return groups.flatMap((group) => {
+                        if (!group || !group.images || !Array.isArray(group.images)) return []
+
+                        return group.images
+                          .filter((img) => img) // Filter out null/undefined images
+                          .map((img, idx) => ({
+                            widgetId: w.id,
+                            groupId: group.id,
+                            image: img,
+                            caption: (Array.isArray(group.captions) ? group.captions[idx] : "") || "",
+                            authorName: group.authorName || group.name || "",
+                            authorHandle: group.authorHandle || "",
+                          }))
+                      })
+                    })
+                    .filter((item) => item.image) // Only show if image exists
+
+                  const allImages = [...imageWidgetImages, ...galleryImages]
+
+                  if (allImages.length === 0) {
+                    return (
+                      <div className="col-span-full text-center py-12 text-white/50">
+                        No images to display. Add some image widgets or gallery groups to see them here.
+                      </div>
+                    )
+                  }
+
+                  return allImages.map((item, index) => (
+                    <div key={`image-${item.widgetId}-${item.groupId || "single"}-${index}`} className="group">
                       <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
                         <img
-                          src={imageData.url || "/placeholder.svg"}
-                          alt={imageData.caption || "Image"}
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.caption || `Image ${index + 1}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg"
+                          }}
                         />
                       </div>
-                      {imageData.caption && (
-                        <p className="text-white/70 text-xs mt-1.5 line-clamp-2">{imageData.caption}</p>
+                      {item.caption && (
+                        <div className="mt-1.5">
+                          <p className="text-white/70 text-xs line-clamp-2">{item.caption}</p>
+                          {item.authorName && (
+                            <p className="text-white/50 text-xs">
+                              by {item.authorName}
+                              {item.authorHandle && ` @${item.authorHandle}`}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
+                  ))
+                } catch (error) {
+                  console.error("[v0] Error rendering images-only mode:", error)
+                  return (
+                    <div className="col-span-full text-center py-12 text-red-400">
+                      Error loading images. Please try refreshing the page.
+                    </div>
                   )
-                })}
-
-              {(Array.isArray(leftWidgets) ? leftWidgets : [])
-                .concat(Array.isArray(rightWidgets) ? rightWidgets : [])
-                .filter((w) => w.type === "gallery")
-                .flatMap((w) => {
-                  const groups = galleryGroups[w.id]
-                  if (!groups || !Array.isArray(groups)) return []
-
-                  return groups.flatMap((group) => {
-                    if (!group.images || !Array.isArray(group.images)) return []
-
-                    return group.images.map((img, idx) => ({
-                      widgetId: w.id,
-                      groupId: group.id,
-                      image: img,
-                      caption: group.captions?.[idx] || "",
-                      authorName: group.authorName || group.name,
-                      authorHandle: group.authorHandle,
-                    }))
-                  })
-                })
-                .map((item, index) => (
-                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-black/20">
-                      <img
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.caption || `Image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="mt-1.5">
-                      <p className="text-white/70 text-xs line-clamp-2">{item.caption || item.authorName}</p>
-                    </div>
-                  </div>
-                ))}
+                }
+              })()}
             </div>
           </div>
         ) : (

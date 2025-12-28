@@ -481,34 +481,6 @@ export default function PortfolioBuilder({
     }
   }, [leftWidgets, widgetContent.description, isLoadingData])
 
-  useEffect(() => {
-    if (!hasInitialized) return
-
-    // Sync gallery groups into widgetContent for all gallery widgets
-    const updates: Record<string, any> = {}
-    let hasChanges = false
-
-    Object.entries(galleryGroups).forEach(([widgetId, groups]) => {
-      const currentContent = widgetContent[widgetId]?.groups
-      const newContent = groups
-
-      // Only update if content has actually changed
-      if (JSON.stringify(currentContent) !== JSON.stringify(newContent)) {
-        console.log(`[v0] 🖼️ Syncing gallery groups for widget ${widgetId}:`, groups.length, "groups")
-        updates[widgetId] = {
-          ...widgetContent[widgetId],
-          groups: newContent,
-        }
-        hasChanges = true
-      }
-    })
-
-    if (hasChanges) {
-      console.log("[v0] 🖼️ Gallery groups changed, updating widgetContent")
-      setWidgetContent((prev) => ({ ...prev, ...updates }))
-    }
-  }, [galleryGroups, hasInitialized])
-
   const deleteWidget = (widgetId: string, column: "left" | "right") => {
     if (widgetId === "identity") return // Can't delete identity widget
 

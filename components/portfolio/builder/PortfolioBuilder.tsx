@@ -545,14 +545,18 @@ export default function PortfolioBuilder({
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
+    console.log("[v0] 🎯 addWidget called with:", { type, column })
+
     const newWidgetId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? `${type}-${crypto.randomUUID()}`
-        : `${type}-${Date.now()}`
+      type === "identity"
+        ? "identity"
+        : typeof crypto !== "undefined" && crypto.randomUUID
+          ? `${type}-${crypto.randomUUID()}`
+          : `${type}-${Date.now()}`
 
     const newWidget: WidgetDef = {
       id: newWidgetId,
-      type: type,
+      type: type, // Keep type as just the type name, not including ID
     }
 
     const defaultContent: Record<string, any> = {

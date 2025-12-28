@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { UnifiedPortfolio } from "@/components/unified-portfolio-card"
 import type { ThemeIndex } from "@/types/theme"
 import { createBaseSlug, generateSlugWithSuffix } from "./slug-generator"
+import { getIdentityProps } from "@/lib/widget-service" // Assuming getIdentityProps is defined in widget-service
 
 export interface PortfolioData {
   id: string
@@ -960,13 +961,16 @@ export async function loadPortfolioData(
       return { id: key, type: key }
     }
 
-    // Check if it's a UUID-based key (description-{uuid})
+    // Check if it's a UUID-based key (type-{uuid})
     if (key.includes("-") && key.length > 20) {
-      const instanceId = key.split("-").slice(1).join("-")
+      const parts = key.split("-")
+      const widgetType = parts[0] // Extract type prefix (e.g., "image" from "image-uuid")
+      const instanceId = parts.slice(1).join("-")
       const widgetData = instanceMap[instanceId]
       if (widgetData) {
         widgetContent[key] = widgetData.props
-        return { id: key, type: widgetData.type }
+        console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetType}' from instance`)
+        return { id: key, type: widgetType } // Use extracted type, not full key
       }
     }
 
@@ -982,13 +986,16 @@ export async function loadPortfolioData(
   })
 
   const rightWidgets = rightWidgetKeys.map((key: string) => {
-    // Check if it's a UUID-based key (description-{uuid})
+    // Check if it's a UUID-based key (type-{uuid})
     if (key.includes("-") && key.length > 20) {
-      const instanceId = key.split("-").slice(1).join("-")
+      const parts = key.split("-")
+      const widgetType = parts[0] // Extract type prefix (e.g., "image" from "image-uuid")
+      const instanceId = parts.slice(1).join("-")
       const widgetData = instanceMap[instanceId]
       if (widgetData) {
         widgetContent[key] = widgetData.props
-        return { id: key, type: widgetData.type }
+        console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetType}' from instance`)
+        return { id: key, type: widgetType } // Use extracted type, not full key
       }
     }
 
@@ -1113,53 +1120,6 @@ export type IdentityProps = {
   twitter?: string
   unsplash?: string
   instagram?: string
-}
-
-export async function getIdentityProps(portfolioId: string): Promise<IdentityProps | null> {
-  const supabase = createClient()
-
-  console.log("[v0] 🎨 getIdentityProps called for portfolio:", portfolioId)
-
-  const { data: page, error: pageErr } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("portfolio_id", portfolioId)
-    .eq("key", "main")
-    .maybeSingle()
-
-  if (pageErr || !page?.id) {
-    console.log("[v0] getIdentityProps: No page found for portfolio:", portfolioId, "error:", pageErr)
-    return null
-  }
-
-  console.log("[v0] getIdentityProps: Found page ID:", page.id)
-
-  const { data: wt, error: wtErr } = await supabase
-    .from("widget_types")
-    .select("id")
-    .eq("key", "identity")
-    .maybeSingle()
-
-  if (wtErr || !wt?.id) {
-    console.log("[v0] getIdentityProps: Identity widget type not found, error:", wtErr)
-    return null
-  }
-
-  console.log("[v0] getIdentityProps: Found identity widget type ID:", wt.id)
-
-  const { data: wi, error: wiErr } = await supabase
-    .from("widget_instances")
-    .select("props")
-    .eq("page_id", page.id)
-    .eq("widget_type_id", wt.id)
-    .maybeSingle()
-
-  if (wiErr) {
-    console.log("[v0] getIdentityProps: Error fetching widget instance:", wiErr)
-    return null
-  }
-
-  return (wi?.props as IdentityProps) ?? null
 }
 
 export async function materializeTemplateWidgets(portfolioId: string): Promise<void> {

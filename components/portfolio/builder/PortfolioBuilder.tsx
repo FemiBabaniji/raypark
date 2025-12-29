@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { X, ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
 import PortfolioShell from "@/components/portfolio/portfolio-shell"
@@ -665,16 +665,30 @@ export default function PortfolioBuilder({
     })
   }, [])
 
+  const dedupeById = (items: WidgetDef[]) => {
+    const seen = new Set<string>()
+    return items.filter((w) => {
+      if (!w?.id) return false
+      if (seen.has(w.id)) return false
+      seen.add(w.id)
+      return true
+    })
+  }
+
+  const handleLeftReorder = useCallback((newOrder: WidgetDef[]) => {
+    setLeftWidgets(dedupeById(newOrder))
+  }, [])
+
+  const handleRightReorder = useCallback((newOrder: WidgetDef[]) => {
+    setRightWidgets(dedupeById(newOrder))
+  }, [])
+
   const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
     const canDelete = widget.id !== "identity"
     const canMove = widget.id !== "identity"
 
-    if (imagesOnlyMode && widget.type !== "image" && widget.type !== "gallery") {
-      return null
-    }
-
     switch (widget.type) {
-      case "identity":
+      case "identity": {
         return (
           <motion.div
             key={widget.id}
@@ -692,8 +706,9 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "education":
+      case "education": {
         const educationContent = widgetContent[widget.id] ?? {
           title: "Education",
           items: [],
@@ -721,8 +736,9 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "projects":
+      case "projects": {
         const projectsContent = widgetContent[widget.id] ?? {
           title: "Projects",
           items: [],
@@ -751,8 +767,9 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "description":
+      case "description": {
         const descriptionContent = widgetContent[widget.id] ?? {
           title: "About Me",
           description: "",
@@ -780,8 +797,9 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "services":
+      case "services": {
         const servicesContent = widgetContent[widget.id] ?? {
           title: "Services",
           description: "",
@@ -807,29 +825,35 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "gallery":
+      case "gallery": {
         return (
           <motion.div
             key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <GalleryWidget
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
+              groups={galleryGroups[widget.id] || []}
+              onGroupsChange={(groups) => {
+                setGalleryGroups((prev) => ({
+                  ...prev,
+                  [widget.id]: groups,
+                }))
+              }}
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              galleryGroups={galleryGroups[widget.id] || []}
-              onGroupsChange={(groups) => setGalleryGroups((prev) => ({ ...prev, [widget.id]: groups }))}
-              onGroupClick={(group) => setSelectedGroup({ widgetId: widget.id, groupId: group.id, group })}
             />
           </motion.div>
         )
+      }
 
-      case "meeting-scheduler":
+      case "meeting-scheduler": {
         const meetingContent = widgetContent[widget.id] ?? {
           mode: "button",
           calendlyUrl: "",
@@ -852,8 +876,9 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "startup":
+      case "startup": {
         const startupContent = widgetContent[widget.id] ?? {
           title: "Startup",
           description: "",
@@ -878,22 +903,23 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
-      case "image":
+      case "image": {
         const imageData = widgetContent[widget.id] || { url: "", caption: "" }
         return (
           <motion.div
             key={widget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <ImageWidget
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              imageUrl={imageData.url}
-              caption={imageData.caption}
+              imageUrl={imageData.url || ""}
+              caption={imageData.caption || ""}
               onImageChange={(url) => handleWidgetContentChange(widget.id, { ...imageData, url })}
               onCaptionChange={(caption) => handleWidgetContentChange(widget.id, { ...imageData, caption })}
               onDelete={() => deleteWidget(widget.id, column)}
@@ -901,40 +927,33 @@ export default function PortfolioBuilder({
             />
           </motion.div>
         )
+      }
 
       default:
         return (
           <motion.div
             key={widget.id}
+            className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <div className="p-4 bg-white/5 backdrop-blur-sm rounded-lg group relative border border-white/10 hover:border-white/20 transition-colors">
-              {!isPreviewMode && canDelete && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => deleteWidget(widget.id, column)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 h-6 w-6 bg-red-500/20 hover:bg-red-500/30"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
-              <span className="text-white">Widget: {widget.type}</span>
-            </div>
+            <span className="text-white">Widget: {widget.type}</span>
           </motion.div>
         )
     }
   }
 
-  const handleLeftReorder = (newOrder: WidgetDef[]) => {
-    setLeftWidgets(newOrder)
-  }
+  const safeLeftWidgets = Array.isArray(leftWidgets) ? leftWidgets : []
+  const safeRightWidgets = Array.isArray(rightWidgets) ? rightWidgets : []
 
-  const handleRightReorder = (newOrder: WidgetDef[]) => {
-    setRightWidgets(newOrder)
-  }
+  const leftForRender = imagesOnlyMode
+    ? safeLeftWidgets.filter((w) => w.type === "image" || w.type === "gallery")
+    : safeLeftWidgets
+
+  const rightForRender = imagesOnlyMode
+    ? safeRightWidgets.filter((w) => w.type === "image" || w.type === "gallery")
+    : safeRightWidgets
 
   const rightSlot = !isPreviewMode ? (
     <div className="flex gap-2 items-center">
@@ -1037,7 +1056,7 @@ export default function PortfolioBuilder({
         {imagesOnlyMode ? (
           <div className="col-span-full px-4">
             <div className="grid grid-cols-3 gap-4">
-              {[...leftWidgets, ...rightWidgets]
+              {[...safeLeftWidgets, ...safeRightWidgets]
                 .filter((w) => w.type === "image")
                 .map((w) => {
                   const imageData = widgetContent[w.id] || { url: "", caption: "" }
@@ -1059,7 +1078,7 @@ export default function PortfolioBuilder({
                   )
                 })}
 
-              {[...leftWidgets, ...rightWidgets]
+              {[...safeLeftWidgets, ...safeRightWidgets]
                 .filter((w) => w.type === "gallery")
                 .flatMap((w) => {
                   const groups = galleryGroups[w.id] || []
@@ -1098,33 +1117,51 @@ export default function PortfolioBuilder({
         ) : (
           <>
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {!isPreviewMode && leftWidgets.length === 0 && (
-                <div className="text-center py-12 text-white/40">
-                  <p>Add widgets from the + button above</p>
-                </div>
+              {!isPreviewMode && leftForRender.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
-              <Reorder.Group axis="y" values={leftWidgets} onReorder={handleLeftReorder} className="space-y-6">
-                {leftWidgets.map((widget) => (
-                  <Reorder.Item key={widget.id} value={widget} className="cursor-move">
-                    {renderWidget(widget, "left")}
-                  </Reorder.Item>
-                ))}
-              </Reorder.Group>
+
+              {isLoadingData ? (
+                <div className="text-white/50 text-sm">Loading...</div>
+              ) : (
+                <Reorder.Group axis="y" values={leftForRender} onReorder={handleLeftReorder} className="space-y-4">
+                  {leftForRender.map((widget) => (
+                    <Reorder.Item
+                      key={widget.id}
+                      value={widget}
+                      layout
+                      layoutId={widget.id}
+                      className="cursor-grab active:cursor-grabbing"
+                    >
+                      {renderWidget(widget, "left")}
+                    </Reorder.Item>
+                  ))}
+                </Reorder.Group>
+              )}
             </div>
 
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {!isPreviewMode && rightWidgets.length === 0 && (
-                <div className="text-center py-12 text-white/40">
-                  <p>Widgets can be moved here</p>
-                </div>
+              {!isPreviewMode && rightForRender.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
-              <Reorder.Group axis="y" values={rightWidgets} onReorder={handleRightReorder} className="space-y-6">
-                {rightWidgets.map((widget) => (
-                  <Reorder.Item key={widget.id} value={widget} className="cursor-move">
-                    {renderWidget(widget, "right")}
-                  </Reorder.Item>
-                ))}
-              </Reorder.Group>
+
+              {isLoadingData ? (
+                <div className="text-white/50 text-sm">Loading...</div>
+              ) : (
+                <Reorder.Group axis="y" values={rightForRender} onReorder={handleRightReorder} className="space-y-4">
+                  {rightForRender.map((widget) => (
+                    <Reorder.Item
+                      key={widget.id}
+                      value={widget}
+                      layout
+                      layoutId={widget.id}
+                      className="cursor-grab active:cursor-grabbing"
+                    >
+                      {renderWidget(widget, "right")}
+                    </Reorder.Item>
+                  ))}
+                </Reorder.Group>
+              )}
             </div>
           </>
         )}

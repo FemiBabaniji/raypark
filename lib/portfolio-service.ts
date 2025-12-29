@@ -957,53 +957,63 @@ export async function loadPortfolioData(
     console.log("[v0] Loaded widget instance:", instance.id, "type:", widgetType)
   }
 
-  const leftWidgets = leftWidgetKeys.map((key: string) => {
-    // Check if it's a UUID-based key (type-{uuid})
-    if (key.includes("-") && key.length > 20) {
-      const parts = key.split("-")
-      const widgetType = parts[0] // Extract type prefix (e.g., "image" from "image-uuid")
-      const instanceId = parts.slice(1).join("-")
-      const widgetData = instanceMap[instanceId]
-      if (widgetData) {
-        widgetContent[key] = widgetData.props
-        console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetType}' from instance`)
-        return { id: key, type: widgetType } // Use extracted type, not full key
+  const keyToInstance: Record<string, { type: string; props: any }> = {}
+
+  // For each instance, find it in the layout keys and map it
+  for (const key of [...leftWidgetKeys, ...rightWidgetKeys]) {
+    // Find instance where the widget type matches the key prefix
+    for (const [instanceId, data] of Object.entries(instanceMap)) {
+      // Match if key is either:
+      // 1. Exact type match (legacy): key === data.type
+      // 2. UUID-based match: key starts with type-
+      if (key === data.type || key.startsWith(`${data.type}-`)) {
+        keyToInstance[key] = data
+        break
       }
     }
+  }
 
-    // Otherwise treat as widget type key
-    if (typeToPropsMap[key]) {
-      widgetContent[key] = typeToPropsMap[key]
-      console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
-    } else {
-      console.log(`[v0] ⚠️ No content found for widget '${key}'`)
+  const leftWidgets = leftWidgetKeys.map((key: string) => {
+    const widgetData = keyToInstance[key]
+
+    if (widgetData) {
+      widgetContent[key] = widgetData.props
+      console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetData.type}'`)
+      return { id: key, type: widgetData.type }
     }
 
+    if (key.includes("-") && key.length > 20) {
+      const widgetType = key.split("-")[0]
+      console.log(`[v0] ⚠️ No instance found for '${key}', using extracted type '${widgetType}'`)
+      return { id: key, type: widgetType }
+    }
+
+    if (typeToPropsMap[key]) {
+      widgetContent[key] = typeToPropsMap[key]
+      console.log(`[v0] ✅ Loaded content for widget type '${key}'`)
+    }
     return { id: key, type: key }
   })
 
   const rightWidgets = rightWidgetKeys.map((key: string) => {
-    // Check if it's a UUID-based key (type-{uuid})
-    if (key.includes("-") && key.length > 20) {
-      const parts = key.split("-")
-      const widgetType = parts[0] // Extract type prefix (e.g., "image" from "image-uuid")
-      const instanceId = parts.slice(1).join("-")
-      const widgetData = instanceMap[instanceId]
-      if (widgetData) {
-        widgetContent[key] = widgetData.props
-        console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetType}' from instance`)
-        return { id: key, type: widgetType } // Use extracted type, not full key
-      }
+    const widgetData = keyToInstance[key]
+
+    if (widgetData) {
+      widgetContent[key] = widgetData.props
+      console.log(`[v0] ✅ Loaded widget '${key}' with type '${widgetData.type}'`)
+      return { id: key, type: widgetData.type }
     }
 
-    // Otherwise treat as widget type key
+    if (key.includes("-") && key.length > 20) {
+      const widgetType = key.split("-")[0]
+      console.log(`[v0] ⚠️ No instance found for '${key}', using extracted type '${widgetType}'`)
+      return { id: key, type: widgetType }
+    }
+
     if (typeToPropsMap[key]) {
       widgetContent[key] = typeToPropsMap[key]
-      console.log(`[v0] ✅ Loaded content for widget type '${key}':`, Object.keys(typeToPropsMap[key]))
-    } else {
-      console.log(`[v0] ⚠️ No content found for widget '${key}'`)
+      console.log(`[v0] ✅ Loaded content for widget type '${key}'`)
     }
-
     return { id: key, type: key }
   })
 

@@ -17,6 +17,7 @@ export type WidgetType =
   | "startup"
   | "meeting-scheduler"
   | "image"
+  | "projects-tasks" // Added new swipeable projects-tasks widget type
 
 export type WidgetDef = { id: string; type: WidgetType }
 
@@ -100,6 +101,26 @@ export type WidgetContent = {
     {
       url: string
       caption?: string
+    }
+  >
+  swipeableProjects: Record<
+    string,
+    {
+      title: string
+      items: Array<{
+        id: string
+        name: string
+        description: string
+        status: "active" | "completed" | "archived"
+        tags: string[]
+        dueDate?: string
+        progress?: number
+        tasks: Array<{
+          id: string
+          title: string
+          completed: boolean
+        }>
+      }>
     }
   >
 }
@@ -189,6 +210,7 @@ const DEFAULT_CONTENT: WidgetContent = {
   },
   gallery: {},
   image: {},
+  swipeableProjects: {},
 }
 
 /** ---------- Hook ---------- */
@@ -222,6 +244,7 @@ export function usePortfolioBuilder(initial?: {
     ...initial?.content,
     gallery: initial?.content?.gallery ?? {},
     image: initial?.content?.image ?? {},
+    swipeableProjects: initial?.content?.swipeableProjects ?? {},
   }))
 
   /** ----- actions ----- */
@@ -244,6 +267,44 @@ export function usePortfolioBuilder(initial?: {
         image: { ...prev.image, [id]: { url: "", caption: "" } },
       }))
     }
+    if (type === "projects-tasks") {
+      setWidgetContent((prev) => ({
+        ...prev,
+        swipeableProjects: {
+          ...prev.swipeableProjects,
+          [id]: {
+            title: "Projects",
+            items: [
+              {
+                id: nanoid(6),
+                name: "Holidays in Norway",
+                description: "Planning my summer vacation",
+                status: "active",
+                tags: ["travel", "personal"],
+                progress: 80,
+                tasks: [
+                  { id: nanoid(6), title: "Book flights", completed: true },
+                  { id: nanoid(6), title: "Reserve hotel", completed: true },
+                  { id: nanoid(6), title: "Plan activities", completed: false },
+                ],
+              },
+              {
+                id: nanoid(6),
+                name: "Daily Tasks",
+                description: "My everyday todo list",
+                status: "active",
+                tags: ["work", "routine"],
+                progress: 50,
+                tasks: [
+                  { id: nanoid(6), title: "Create a presentation in Keynote", completed: false },
+                  { id: nanoid(6), title: "Give feedback to the team", completed: false },
+                ],
+              },
+            ],
+          },
+        },
+      }))
+    }
     return id
   }, [])
 
@@ -260,6 +321,10 @@ export function usePortfolioBuilder(initial?: {
       if (prev.image[id]) {
         const { [id]: _, ...rest } = prev.image
         newContent.image = rest
+      }
+      if (prev.swipeableProjects[id]) {
+        const { [id]: _, ...rest } = prev.swipeableProjects
+        newContent.swipeableProjects = rest
       }
       return newContent
     })

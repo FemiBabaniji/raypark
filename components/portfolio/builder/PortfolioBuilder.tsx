@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { motion, Reorder } from "framer-motion"
+import { motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -23,6 +23,7 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
+  SwipeableProjectsWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -613,13 +614,37 @@ export default function PortfolioBuilder({
         url: "",
         caption: "",
       },
+      "projects-tasks": {
+        title: "Projects",
+        items: [
+          {
+            id: newWidgetId + "-1",
+            name: "Sample Project",
+            description: "This is a sample project",
+            status: "active",
+            tags: ["sample"],
+            progress: 0,
+            tasks: [{ id: newWidgetId + "-task-1", title: "First task", completed: false }],
+          },
+        ],
+      },
     }
 
     if (defaultContent[type]) {
-      setWidgetContent((prev) => ({
-        ...prev,
-        [newWidgetId]: defaultContent[type],
-      }))
+      if (type === "projects-tasks") {
+        setWidgetContent((prev) => ({
+          ...prev,
+          swipeableProjects: {
+            ...prev.swipeableProjects,
+            [newWidgetId]: defaultContent[type],
+          },
+        }))
+      } else {
+        setWidgetContent((prev) => ({
+          ...prev,
+          [newWidgetId]: defaultContent[type],
+        }))
+      }
     }
 
     if (type === "gallery") {
@@ -687,10 +712,20 @@ export default function PortfolioBuilder({
   }
 
   const handleLeftReorder = useCallback((newOrder: WidgetDef[]) => {
+    console.log("[v0] Left widgets reordered:", newOrder)
+    if (!Array.isArray(newOrder)) {
+      console.error("[v0] Invalid reorder data:", newOrder)
+      return
+    }
     setLeftWidgets(sanitizeWidgets(newOrder))
   }, [])
 
   const handleRightReorder = useCallback((newOrder: WidgetDef[]) => {
+    console.log("[v0] Right widgets reordered:", newOrder)
+    if (!Array.isArray(newOrder)) {
+      console.error("[v0] Invalid reorder data:", newOrder)
+      return
+    }
     setRightWidgets(sanitizeWidgets(newOrder))
   }, [])
 
@@ -708,18 +743,11 @@ export default function PortfolioBuilder({
     }
 
     return (
-      <Reorder.Group
-        axis="y"
-        values={safeWidgets}
-        onReorder={column === "left" ? handleLeftReorder : handleRightReorder}
-        className="flex flex-col gap-4"
-      >
-        {safeWidgets.map((widget) => (
-          <Reorder.Item key={widget.id} value={widget} className="cursor-grab active:cursor-grabbing">
-            {renderWidget(widget, column)}
-          </Reorder.Item>
+      <div className="flex flex-col gap-4">
+        {safeWidgets.map((widget, index) => (
+          <div key={widget.id}>{renderWidget(widget, column)}</div>
         ))}
-      </Reorder.Group>
+      </div>
     )
   }
 
@@ -790,24 +818,45 @@ export default function PortfolioBuilder({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
-            <ProjectsWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={{
-                ...projectsContent,
-                items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
-              }}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              projectColors={projectColors}
-              setProjectColors={setProjectColors}
-              showProjectColorPicker={showProjectColorPicker}
-              setShowProjectColorPicker={setShowProjectColorPicker}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
+            {column === "left" ? (
+              <ProjectsWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={{
+                  ...projectsContent,
+                  items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
+                }}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                projectColors={projectColors}
+                setProjectColors={setProjectColors}
+                showProjectColorPicker={showProjectColorPicker}
+                setShowProjectColorPicker={setShowProjectColorPicker}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            ) : (
+              <SwipeableProjectsWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={{
+                  ...projectsContent,
+                  items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
+                }}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                projectColors={projectColors}
+                setProjectColors={setProjectColors}
+                showProjectColorPicker={showProjectColorPicker}
+                setShowProjectColorPicker={setShowProjectColorPicker}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            )}
           </motion.div>
         )
       }
@@ -976,6 +1025,45 @@ export default function PortfolioBuilder({
         )
       }
 
+      case "projects-tasks": {
+        const swipeableData = widgetContent.swipeableProjects?.[widget.id] || {
+          title: "Projects",
+          items: [],
+        }
+        return (
+          <motion.div
+            key={widget.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <SwipeableProjectsWidget
+              widgetId={widget.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={{
+                ...swipeableData,
+                items: Array.isArray(swipeableData.items) ? swipeableData.items : [],
+              }}
+              onContentChange={(updates) => {
+                const newSwipeableProjects = {
+                  ...widgetContent.swipeableProjects,
+                  [widget.id]: updates,
+                }
+                setWidgetContent((prev) => ({
+                  ...prev,
+                  swipeableProjects: newSwipeableProjects,
+                }))
+              }}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
+          </motion.div>
+        )
+      }
+
       default:
         return (
           <div className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
@@ -1067,13 +1155,18 @@ export default function PortfolioBuilder({
                     "startup",
                     "meeting-scheduler",
                     "image",
+                    "projects-tasks", // Added projects-tasks to the list
                   ].map((type) => (
                     <button
                       key={type}
                       onClick={() => setSelectedWidgetType(type)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
                     >
-                      {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
+                      {type === "meeting-scheduler"
+                        ? "Meeting Scheduler"
+                        : type === "projects-tasks"
+                          ? "Projects Tasks Widget"
+                          : `${type} Widget`}
                     </button>
                   ))}
                 </>

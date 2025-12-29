@@ -871,7 +871,7 @@ export default function PortfolioBuilder({
         }
 
         case "gallery": {
-          const groups = galleryGroups[widget.id] ?? []
+          const groups = galleryGroups[widget.id] || []
           return (
             <GalleryWidget
               widgetId={widget.id}
@@ -1113,61 +1113,59 @@ export default function PortfolioBuilder({
       >
         {imagesOnlyMode ? (
           <div className="col-span-full px-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div
+              className="masonry-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(236px, 1fr))",
+                gap: "1rem",
+                gridAutoRows: "10px",
+              }}
+            >
               {[...safeLeftWidgets, ...safeRightWidgets]
-                .filter((w) => w.type === "image")
-                .map((w) => {
-                  const imageData = widgetContent[w.id] || { url: "", caption: "" }
-                  if (!imageData.url) return null
-
-                  return (
-                    <div key={w.id} className="w-full">
-                      <div className="rounded-lg overflow-hidden bg-black/20">
-                        <img
-                          src={imageData.url || "/placeholder.svg"}
-                          alt={imageData.caption || "Image"}
-                          className="w-full h-auto object-cover"
-                        />
-                      </div>
-                      {imageData.caption && (
-                        <p className="text-white/70 text-xs mt-1.5 line-clamp-2">{imageData.caption}</p>
-                      )}
-                    </div>
-                  )
-                })}
-
-              {[...safeLeftWidgets, ...safeRightWidgets]
-                .filter((w) => w.type === "gallery")
+                .filter((w) => w.type === "image" || w.type === "gallery")
                 .flatMap((w) => {
-                  const groups = galleryGroups[w.id] || []
-                  return groups.flatMap((group) =>
-                    (group.images || []).map((img, idx) => ({
-                      widgetId: w.id,
-                      groupId: group.id,
-                      image: img,
-                      caption: group.captions?.[idx] || "",
-                      authorName: group.authorName || group.name,
-                      authorHandle: group.authorHandle,
-                    })),
-                  )
+                  if (w.type === "image") {
+                    const imageData = widgetContent[w.id]
+                    if (imageData?.url) {
+                      return [
+                        {
+                          id: w.id,
+                          url: imageData.url,
+                          caption: imageData.caption || "",
+                          type: "single",
+                        },
+                      ]
+                    }
+                  } else if (w.type === "gallery") {
+                    const groups = galleryGroups[w.id] || []
+                    return groups.flatMap((group) =>
+                      (group.images || []).map((img, idx) => ({
+                        id: `${w.id}-${group.id}-${idx}`,
+                        url: img,
+                        caption: group.captions?.[idx] || "",
+                        groupName: group.name,
+                        authorName: group.authorName,
+                        authorHandle: group.authorHandle,
+                        type: "gallery",
+                      })),
+                    )
+                  }
+                  return []
                 })
-                .map((item, index) => (
-                  <div key={`${item.widgetId}-${item.groupId}-${index}`} className="w-full">
-                    <div className="rounded-lg overflow-hidden bg-black/20">
-                      <img
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.caption || `Image ${index + 1}`}
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                    <div className="mt-1.5">
-                      {item.caption && <p className="text-white/70 text-xs line-clamp-2">{item.caption}</p>}
-                      {(item.authorName || item.authorHandle) && (
-                        <p className="text-white/50 text-xs mt-0.5">
-                          {item.authorName} {item.authorHandle && `• ${item.authorHandle}`}
-                        </p>
-                      )}
-                    </div>
+                .filter((img) => img.url)
+                .map((img) => (
+                  <div key={img.id} className="masonry-item break-inside-avoid" style={{ gridRowEnd: "span 30" }}>
+                    <img
+                      src={img.url || "/placeholder.svg"}
+                      alt={img.caption || "Image"}
+                      className="w-full h-auto rounded-xl object-cover mb-2"
+                      style={{ display: "block" }}
+                    />
+                    {img.caption && <p className="text-white/70 text-sm px-1">{img.caption}</p>}
+                    {img.type === "gallery" && img.authorHandle && (
+                      <p className="text-white/50 text-xs px-1 mt-1">{img.authorHandle}</p>
+                    )}
                   </div>
                 ))}
             </div>

@@ -77,12 +77,11 @@ export default function ImageWidget({
 
       {imageUrl ? (
         <div className="relative">
-          <div className={isPreviewMode ? "max-w-[280px]" : ""}>
+          <div className={isPreviewMode ? "w-full max-w-[236px]" : ""}>
             <img
               src={imageUrl || "/placeholder.svg"}
               alt={caption || "Image"}
               className="w-full h-auto rounded-xl object-cover"
-              style={isPreviewMode ? { maxHeight: "280px" } : {}}
             />
           </div>
 

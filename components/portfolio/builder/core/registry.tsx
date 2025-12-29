@@ -12,6 +12,7 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
+  TaskManagerWidget,
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -178,6 +179,19 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
             console.log("[v0] Caption changed:", w.id, caption)
             deps.onContentChange(w.id, { ...imageData, caption })
           }}
+        />
+      )
+    case "task-manager":
+      return (
+        <TaskManagerWidget
+          key={w.id}
+          widgetId={w.id}
+          column={column}
+          isPreviewMode={deps.isPreviewMode}
+          content={deps.widgetContent[w.id]}
+          onContentChange={(c) => deps.onContentChange(w.id, c)}
+          onDelete={del}
+          selectedColor={deps.selectedColor}
         />
       )
     default:

@@ -17,22 +17,22 @@ type Props = {
   widgetId: string
   column: "left" | "right"
   isPreviewMode?: boolean
-  content: MeetingSchedulerContent
-  onContentChange: (content: MeetingSchedulerContent) => void
+  content?: MeetingSchedulerContent
+  onContentChange?: (content: MeetingSchedulerContent) => void
   onDelete?: () => void
   onMove?: () => void
-  selectedColor: number
+  selectedColor?: number
 }
 
 export default function MeetingSchedulerWidget({
   widgetId,
   column,
   isPreviewMode = false,
-  content,
-  onContentChange,
+  content = { mode: "custom", calendlyUrl: "https://calendly.com/your-username/30min" },
+  onContentChange = () => {},
   onDelete,
   onMove,
-  selectedColor,
+  selectedColor = 0,
 }: Props) {
   const mode = content.mode || "custom"
   const calendlyUrl = content.calendlyUrl || "https://calendly.com/your-username/30min"

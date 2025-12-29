@@ -1,7 +1,26 @@
 "use client"
 
+import type React from "react"
+
 import { useEffect, useState, useCallback, useRef } from "react"
-import { motion, Reorder } from "framer-motion"
+import { motion } from "framer-motion"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -24,8 +43,9 @@ import {
   MeetingSchedulerWidget,
   ImageWidget,
 } from "./widgets"
-import type { Identity, WidgetDef } from "./types"
+import type { Identity, WidgetDef, WidgetInstance, WidgetStyle } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
+import { createWidgetInstance, migrateWidgetDef } from "./core/widget-registry"
 
 type Props = {
   isPreviewMode?: boolean
@@ -88,6 +108,17 @@ export default function PortfolioBuilder({
 
   const [isFromTemplate, setIsFromTemplate] = useState(false)
 
+  const [leftWidgetIds, setLeftWidgetIds] = useState<string[]>([])
+  const [rightWidgetIds, setRightWidgetIds] = useState<string[]>([])
+  const [widgetsById, setWidgetsById] = useState<Record<string, WidgetInstance>>({})
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
   useEffect(() => {
     portfolioIdRef.current = portfolioId
   }, [portfolioId])
@@ -99,9 +130,6 @@ export default function PortfolioBuilder({
       portfolioIdRef.current = identity.id
     }
   }, [identity.id, portfolioId])
-
-  const [leftWidgets, setLeftWidgets] = useState<WidgetDef[]>([])
-  const [rightWidgets, setRightWidgets] = useState<WidgetDef[]>([])
 
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null)
@@ -178,17 +206,32 @@ export default function PortfolioBuilder({
           const left = sanitizeWidgets(data.layout?.left)
           const right = sanitizeWidgets(data.layout?.right)
 
-          if (left.length > 0 || right.length > 0) {
-            console.log("[v0] Setting widgets from", data.isFromTemplate ? "template" : "database")
-            console.log("[v0] 📍 Left widgets:", left)
-            console.log("[v0] 📍 Right widgets:", right)
-            setLeftWidgets(left.length > 0 ? left : [{ id: "identity", type: "identity" }])
-            setRightWidgets(right)
-          } else {
-            console.log("[v0] No widgets found, using default identity widget")
-            setLeftWidgets([{ id: "identity", type: "identity" }])
-            setRightWidgets([])
+          const widgetMap: Record<string, WidgetInstance> = {}
+          const leftIds: string[] = []
+          const rightIds: string[] = []
+
+          for (const w of left) {
+            const content = data.widgetContent[w.id] || {}
+            widgetMap[w.id] = migrateWidgetDef(w, content)
+            leftIds.push(w.id)
           }
+
+          for (const w of right) {
+            const content = data.widgetContent[w.id] || {}
+            widgetMap[w.id] = migrateWidgetDef(w, content)
+            rightIds.push(w.id)
+          }
+
+          if (leftIds.length === 0 && rightIds.length === 0) {
+            console.log("[v0] No widgets found, using default identity widget")
+            const identityWidget = migrateWidgetDef({ id: "identity", type: "identity" }, {})
+            widgetMap.identity = identityWidget
+            leftIds.push("identity")
+          }
+
+          setLeftWidgetIds(leftIds)
+          setRightWidgetIds(rightIds)
+          setWidgetsById(widgetMap)
 
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
@@ -217,8 +260,10 @@ export default function PortfolioBuilder({
           hasLoadedDataRef.current = idToLoad
         } else {
           console.log("[v0] ℹ️ No saved data found, using default layout")
-          setLeftWidgets([{ id: "identity", type: "identity" }])
-          setRightWidgets([])
+          const identityWidget = migrateWidgetDef({ id: "identity", type: "identity" }, {})
+          setWidgetsById({ identity: identityWidget })
+          setLeftWidgetIds(["identity"])
+          setRightWidgetIds([])
           hasLoadedDataRef.current = idToLoad
         }
 
@@ -228,8 +273,10 @@ export default function PortfolioBuilder({
         }, 1500)
       } catch (error) {
         console.error("[v0] ❌ Failed to load portfolio data:", error)
-        setLeftWidgets([{ id: "identity", type: "identity" }])
-        setRightWidgets([])
+        const identityWidget = migrateWidgetDef({ id: "identity", type: "identity" }, {})
+        setWidgetsById({ identity: identityWidget })
+        setLeftWidgetIds(["identity"])
+        setRightWidgetIds([])
         setTimeout(() => setHasInitialized(true), 1500)
       } finally {
         setIsLoadingData(false)
@@ -430,6 +477,9 @@ export default function PortfolioBuilder({
           is_public: !!state.is_public,
         })
 
+        const leftWidgets = leftWidgetIds.map((id) => ({ id, type: widgetsById[id]?.type || id }))
+        const rightWidgets = rightWidgetIds.map((id) => ({ id, type: widgetsById[id]?.type || id }))
+
         await saveWidgetLayout(currentPortfolioId, leftWidgets, rightWidgets, widgetContent, communityId)
 
         setLastSaveTime(new Date())
@@ -457,8 +507,9 @@ export default function PortfolioBuilder({
     hasInitialized,
     user,
     state,
-    leftWidgets,
-    rightWidgets,
+    leftWidgetIds,
+    rightWidgetIds,
+    widgetsById,
     widgetContent,
     isLoadingData,
     saveTimeout,
@@ -466,8 +517,8 @@ export default function PortfolioBuilder({
     isFromTemplate,
   ])
 
-  const prevLeftWidgetsRef = useRef<string>("")
-  const prevRightWidgetsRef = useRef<string>("")
+  const prevLeftIdsRef = useRef<string>("")
+  const prevRightIdsRef = useRef<string>("")
   const prevWidgetContentRef = useRef<string>("")
 
   useEffect(() => {
@@ -475,22 +526,22 @@ export default function PortfolioBuilder({
       return
     }
 
-    const leftSerialized = JSON.stringify(leftWidgets)
-    const rightSerialized = JSON.stringify(rightWidgets)
+    const leftSerialized = JSON.stringify(leftWidgetIds)
+    const rightSerialized = JSON.stringify(rightWidgetIds)
     const contentSerialized = JSON.stringify(widgetContent)
 
-    const leftChanged = leftSerialized !== prevLeftWidgetsRef.current
-    const rightChanged = rightSerialized !== prevRightWidgetsRef.current
+    const leftChanged = leftSerialized !== prevLeftIdsRef.current
+    const rightChanged = rightSerialized !== prevRightIdsRef.current
     const contentChanged = contentSerialized !== prevWidgetContentRef.current
 
     if (leftChanged || rightChanged || contentChanged) {
-      prevLeftWidgetsRef.current = leftSerialized
-      prevRightWidgetsRef.current = rightSerialized
+      prevLeftIdsRef.current = leftSerialized
+      prevRightIdsRef.current = rightSerialized
       prevWidgetContentRef.current = contentSerialized
 
       debouncedSave()
     }
-  }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
+  }, [leftWidgetIds, rightWidgetIds, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
     if (!hasInitialized) return
@@ -524,116 +575,63 @@ export default function PortfolioBuilder({
     if (widgetId === "identity") return // Can't delete identity widget
 
     if (column === "left") {
-      setLeftWidgets(leftWidgets.filter((widget) => widget.id !== widgetId))
+      setLeftWidgetIds((prev) => prev.filter((id) => id !== widgetId))
     } else {
-      setRightWidgets(rightWidgets.filter((widget) => widget.id !== widgetId))
+      setRightWidgetIds((prev) => prev.filter((id) => id !== widgetId))
     }
+
+    setWidgetsById((prev) => {
+      const next = { ...prev }
+      delete next[widgetId]
+      return next
+    })
   }
 
-  const moveWidgetToColumn = (widget: WidgetDef, fromColumn: "left" | "right", toColumn: "left" | "right") => {
-    if (fromColumn === toColumn || widget.id === "identity") return
+  const moveWidgetToColumn = (widgetId: string, fromColumn: "left" | "right", toColumn: "left" | "right") => {
+    if (fromColumn === toColumn || widgetId === "identity") return
 
     // Remove from source column
     if (fromColumn === "left") {
-      setLeftWidgets((prev) => prev.filter((w) => w.id !== widget.id))
+      setLeftWidgetIds((prev) => prev.filter((id) => id !== widgetId))
     } else {
-      setRightWidgets((prev) => prev.filter((w) => w.id !== widget.id))
+      setRightWidgetIds((prev) => prev.filter((id) => id !== widgetId))
     }
 
     // Add to target column
     if (toColumn === "left") {
-      setLeftWidgets((prev) => [...prev, widget])
+      setLeftWidgetIds((prev) => [...prev, widgetId])
     } else {
-      setRightWidgets((prev) => [...prev, widget])
+      setRightWidgetIds((prev) => [...prev, widgetId])
     }
   }
 
   const addWidget = (type: string, column: "left" | "right") => {
     console.log("[v0] 🎯 addWidget called with:", { type, column })
 
-    const newWidgetId =
-      type === "identity"
-        ? "identity"
-        : typeof crypto !== "undefined" && crypto.randomUUID
-          ? `${type}-${crypto.randomUUID()}`
-          : `${type}-${Date.now()}`
+    const newWidget = createWidgetInstance(type)
 
-    const newWidget: WidgetDef = {
-      id: newWidgetId,
-      type: type, // Keep type as just the type name, not including ID
-    }
+    setWidgetsById((prev) => ({
+      ...prev,
+      [newWidget.id]: newWidget,
+    }))
 
-    const defaultContent: Record<string, any> = {
-      education: {
-        title: "Education",
-        items: [
-          {
-            degree: "Bachelor of Science",
-            school: "University Name",
-            year: "2020-2024",
-            description: "",
-            certified: false,
-          },
-        ],
-      },
-      projects: {
-        title: "Projects",
-        items: [
-          {
-            name: "Project Name",
-            description: "Project description goes here...",
-            year: "2024",
-            tags: ["React", "TypeScript"],
-          },
-        ],
-      },
-      description: {
-        title: "About Me",
-        description: "Tell your story here...",
-        subdescription: "Add more details about yourself...",
-      },
-      services: {
-        title: "Services",
-        description: "Describe the services you offer...",
-        items: [],
-      },
-      gallery: {
-        title: "Gallery",
-        groups: [],
-      },
-      startup: {
-        title: "Startup",
-        description: "Describe your startup...",
-      },
-      "meeting-scheduler": {
-        mode: "button",
-        calendlyUrl: "",
-      },
-      image: {
-        url: "",
-        caption: "",
-      },
-    }
-
-    if (defaultContent[type]) {
-      setWidgetContent((prev) => ({
-        ...prev,
-        [newWidgetId]: defaultContent[type],
-      }))
-    }
+    setWidgetContent((prev) => ({
+      ...prev,
+      [newWidget.id]: newWidget.content,
+    }))
 
     if (type === "gallery") {
-      console.log("[v0] 🖼️ Initializing gallery groups for new widget:", newWidgetId)
+      console.log("[v0] 🖼️ Initializing gallery groups for new widget:", newWidget.id)
       setGalleryGroups((prev) => ({
         ...prev,
-        [newWidgetId]: [],
+        [newWidget.id]: [],
       }))
     }
 
     if (column === "left") {
-      setLeftWidgets([...leftWidgets, newWidget])
+      setLeftWidgetIds((prev) => [...prev, newWidget.id])
     } else {
-      setRightWidgets([...rightWidgets, newWidget])
+      setRightWidgetIds((prev) => [...prev, newWidget.id])
     }
 
     setSelectedWidgetType(null)
@@ -643,8 +641,8 @@ export default function PortfolioBuilder({
   const exportPortfolioData = () => {
     const exportData: PortfolioExportData = {
       identity: currentIdentity,
-      leftWidgets,
-      rightWidgets,
+      leftWidgets: leftWidgetIds.map((id) => ({ id, type: widgetsById[id]?.type || id })),
+      rightWidgets: rightWidgetIds.map((id) => ({ id, type: widgetsById[id]?.type || id })),
       metadata: {
         createdAt: new Date().toISOString(),
         version: "1.0.0",
@@ -674,56 +672,69 @@ export default function PortfolioBuilder({
       console.log("[v0] Updated widgetContent:", updated)
       return updated
     })
+
+    setWidgetsById((prev) => ({
+      ...prev,
+      [widgetId]: {
+        ...prev[widgetId],
+        content: newContent,
+      },
+    }))
   }, [])
 
-  const dedupeById = (items: WidgetDef[]) => {
-    const seen = new Set<string>()
-    return items.filter((w) => {
-      if (!w?.id) return false
-      if (seen.has(w.id)) return false
-      seen.add(w.id)
-      return true
-    })
+  const handleWidgetStyleChange = useCallback((widgetId: string, newStyle: WidgetStyle) => {
+    console.log("[v0] Widget style changing:", widgetId, newStyle)
+    setWidgetsById((prev) => ({
+      ...prev,
+      [widgetId]: {
+        ...prev[widgetId],
+        style: newStyle,
+      },
+    }))
+  }, [])
+
+  const handleDragEnd = (event: DragEndEvent, column: "left" | "right") => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    const ids = column === "left" ? leftWidgetIds : rightWidgetIds
+    const setIds = column === "left" ? setLeftWidgetIds : setRightWidgetIds
+
+    const oldIndex = ids.indexOf(active.id as string)
+    const newIndex = ids.indexOf(over.id as string)
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      setIds(arrayMove(ids, oldIndex, newIndex))
+    }
   }
 
-  const handleLeftReorder = useCallback((newOrder: WidgetDef[]) => {
-    setLeftWidgets(sanitizeWidgets(newOrder))
-  }, [])
+  const SortableWidget = ({ id, children }: { id: string; children: React.ReactNode }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
-  const handleRightReorder = useCallback((newOrder: WidgetDef[]) => {
-    setRightWidgets(sanitizeWidgets(newOrder))
-  }, [])
-
-  const renderWidgets = (widgets: WidgetDef[], column: "left" | "right") => {
-    const safeWidgets = Array.isArray(widgets) ? widgets.filter(Boolean) : []
-
-    return safeWidgets.map((widget) => renderWidget(widget, column))
-  }
-
-  const renderWidgetsColumn = (widgets: WidgetDef[], column: "left" | "right") => {
-    const safeWidgets = sanitizeWidgets(Array.isArray(widgets) ? widgets : [])
-
-    if (isLoadingData) {
-      return <div className="text-white/50 text-sm">Loading...</div>
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
     }
 
     return (
-      <Reorder.Group
-        axis="y"
-        values={safeWidgets}
-        onReorder={column === "left" ? handleLeftReorder : handleRightReorder}
-        className="flex flex-col gap-4"
-      >
-        {safeWidgets.map((widget) => (
-          <Reorder.Item key={widget.id} value={widget} className="cursor-grab active:cursor-grabbing">
-            {renderWidget(widget, column)}
-          </Reorder.Item>
-        ))}
-      </Reorder.Group>
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        {children}
+      </div>
     )
   }
 
-  const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
+  const renderWidget = (widgetId: string, column: "left" | "right") => {
+    const widget = widgetsById[widgetId]
+
+    if (!widget) {
+      console.warn("[v0] Widget not found in widgetsById:", widgetId)
+      return null
+    }
+
     const canDelete = widget.id !== "identity"
     const canMove = widget.id !== "identity"
 
@@ -749,7 +760,7 @@ export default function PortfolioBuilder({
       }
 
       case "education": {
-        const educationContent = widgetContent[widget.id] ?? {
+        const educationContent = widget.content ?? {
           title: "Education",
           items: [],
         }
@@ -770,7 +781,7 @@ export default function PortfolioBuilder({
               }}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -779,7 +790,7 @@ export default function PortfolioBuilder({
       }
 
       case "projects": {
-        const projectsContent = widgetContent[widget.id] ?? {
+        const projectsContent = widget.content ?? {
           title: "Projects",
           items: [],
         }
@@ -800,7 +811,7 @@ export default function PortfolioBuilder({
               }}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
               projectColors={projectColors}
               setProjectColors={setProjectColors}
               showProjectColorPicker={showProjectColorPicker}
@@ -813,7 +824,7 @@ export default function PortfolioBuilder({
       }
 
       case "description": {
-        const descriptionContent = widgetContent[widget.id] ?? {
+        const descriptionContent = widget.content ?? {
           title: "About Me",
           description: "",
           subdescription: "",
@@ -830,9 +841,11 @@ export default function PortfolioBuilder({
               column={column}
               isPreviewMode={isPreviewMode}
               content={descriptionContent}
+              style={widget.style}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+              onStyleChange={(style) => handleWidgetStyleChange(widget.id, style)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
               widgetColors={widgetColors}
@@ -843,7 +856,7 @@ export default function PortfolioBuilder({
       }
 
       case "services": {
-        const servicesContent = widgetContent[widget.id] ?? {
+        const servicesContent = widget.content ?? {
           title: "Services",
           description: "",
           items: [],
@@ -865,7 +878,7 @@ export default function PortfolioBuilder({
               }}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -895,13 +908,13 @@ export default function PortfolioBuilder({
               })
             }
             onDelete={() => deleteWidget(widget.id, column)}
-            onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+            onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
           />
         )
       }
 
       case "meeting-scheduler": {
-        const meetingContent = widgetContent[widget.id] ?? {
+        const meetingContent = widget.content ?? {
           mode: "button",
           calendlyUrl: "",
         }
@@ -919,14 +932,14 @@ export default function PortfolioBuilder({
               content={meetingContent}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
             />
           </motion.div>
         )
       }
 
       case "startup": {
-        const startupContent = widgetContent[widget.id] ?? {
+        const startupContent = widget.content ?? {
           title: "Startup",
           description: "",
         }
@@ -944,7 +957,7 @@ export default function PortfolioBuilder({
               content={startupContent}
               onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
               editingField={editingField}
               setEditingField={setEditingField}
             />
@@ -953,7 +966,7 @@ export default function PortfolioBuilder({
       }
 
       case "image": {
-        const imageData = widgetContent[widget.id] || { url: "", caption: "" }
+        const imageData = widget.content || { url: "", caption: "" }
         return (
           <motion.div
             key={widget.id}
@@ -970,7 +983,7 @@ export default function PortfolioBuilder({
               onImageChange={(url) => handleWidgetContentChange(widget.id, { ...imageData, url })}
               onCaptionChange={(caption) => handleWidgetContentChange(widget.id, { ...imageData, caption })}
               onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
             />
           </motion.div>
         )
@@ -985,8 +998,8 @@ export default function PortfolioBuilder({
     }
   }
 
-  const safeLeftWidgets = Array.isArray(leftWidgets) ? leftWidgets : []
-  const safeRightWidgets = Array.isArray(rightWidgets) ? rightWidgets : []
+  const safeLeftWidgets = leftWidgetIds.map((id) => widgetsById[id])
+  const safeRightWidgets = rightWidgetIds.map((id) => widgetsById[id])
 
   const leftForRender = imagesOnlyMode
     ? safeLeftWidgets.filter((w) => w.type === "image" || w.type === "gallery")
@@ -1086,9 +1099,29 @@ export default function PortfolioBuilder({
   ) : null
 
   useEffect(() => {
-    console.log("[v0] 📊 leftWidgets:", leftWidgets)
-    console.log("[v0] 📊 rightWidgets:", rightWidgets)
-  }, [leftWidgets, rightWidgets])
+    console.log("[v0] 📊 leftWidgets:", leftWidgetIds)
+    console.log("[v0] 📊 rightWidgets:", rightWidgetIds)
+  }, [leftWidgetIds, rightWidgetIds])
+
+  const renderWidgetsColumn = (widgetIds: string[], column: "left" | "right") => {
+    if (isLoadingData) {
+      return <div className="text-white/50 text-sm">Loading...</div>
+    }
+
+    return (
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, column)}>
+        <SortableContext items={widgetIds} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-4">
+            {widgetIds.map((widgetId) => (
+              <SortableWidget key={widgetId} id={widgetId}>
+                {renderWidget(widgetId, column)}
+              </SortableWidget>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    )
+  }
 
   return (
     <div className="relative h-full">
@@ -1163,19 +1196,19 @@ export default function PortfolioBuilder({
         ) : (
           <>
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {!isPreviewMode && leftForRender.length === 0 && (
+              {!isPreviewMode && leftWidgetIds.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
 
-              {renderWidgetsColumn(leftWidgets, "left")}
+              {renderWidgetsColumn(leftWidgetIds, "left")}
             </div>
 
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
-              {!isPreviewMode && rightForRender.length === 0 && (
+              {!isPreviewMode && rightWidgetIds.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
 
-              {renderWidgetsColumn(rightWidgets, "right")}
+              {renderWidgetsColumn(rightWidgetIds, "right")}
             </div>
           </>
         )}

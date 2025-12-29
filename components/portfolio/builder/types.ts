@@ -91,11 +91,27 @@ export type Community = {
   settings?: Record<string, any>
 }
 
+export type WidgetStyle = {
+  bg?: string // tailwind class OR theme token
+  accent?: ThemeIndex
+}
+
 export type WidgetInstance<T = any> = {
   id: string
-  type: string
+  type:
+    | "identity"
+    | "education"
+    | "projects"
+    | "description"
+    | "services"
+    | "gallery"
+    | "startup"
+    | "meeting-scheduler"
+    | "image"
+    | "task-manager"
   enabled: boolean
-  props: T
+  content: T
+  style?: WidgetStyle
 }
 
 export type WidgetBaseProps<T> = {
@@ -103,7 +119,7 @@ export type WidgetBaseProps<T> = {
   column: "left" | "right"
   isPreviewMode?: boolean
   content: T
-  onContentChange: (next: T) => void
+  style?: WidgetStyle
   onDelete?: () => void
   onMove?: () => void
 }

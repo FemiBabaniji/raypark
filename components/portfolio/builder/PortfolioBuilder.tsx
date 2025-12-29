@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, Reorder } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -622,6 +622,14 @@ export default function PortfolioBuilder({
       }))
     }
 
+    if (type === "gallery") {
+      console.log("[v0] 🖼️ Initializing gallery groups for new widget:", newWidgetId)
+      setGalleryGroups((prev) => ({
+        ...prev,
+        [newWidgetId]: [],
+      }))
+    }
+
     if (column === "left") {
       setLeftWidgets([...leftWidgets, newWidget])
     } else {
@@ -686,265 +694,307 @@ export default function PortfolioBuilder({
     setRightWidgets(sanitizeWidgets(newOrder))
   }, [])
 
+  const renderWidgets = (widgets: WidgetDef[], column: "left" | "right") => {
+    const safeWidgets = Array.isArray(widgets) ? widgets.filter(Boolean) : []
+
+    return safeWidgets.map((widget) => renderWidget(widget, column))
+  }
+
+  const renderWidgetsColumn = (widgets: WidgetDef[], column: "left" | "right") => {
+    const safeWidgets = sanitizeWidgets(widgets)
+
+    if (isLoadingData) {
+      return <div className="text-white/50 text-sm">Loading...</div>
+    }
+
+    return (
+      <Reorder.Group
+        axis="y"
+        values={safeWidgets}
+        onReorder={column === "left" ? handleLeftReorder : handleRightReorder}
+        className="flex flex-col gap-4"
+      >
+        {renderWidgets(safeWidgets, column)}
+      </Reorder.Group>
+    )
+  }
+
   const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
     const canDelete = widget.id !== "identity"
     const canMove = widget.id !== "identity"
 
-    switch (widget.type) {
-      case "identity": {
-        return (
-          <motion.div
-            key={widget.id}
-            id="widget-identity"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
-          >
-            <IdentityWidget
-              identity={currentIdentity}
-              isPreviewMode={isPreviewMode}
-              onChange={handleIdentityChange}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
-
-      case "education": {
-        const educationContent = widgetContent[widget.id] ?? {
-          title: "Education",
-          items: [],
+    const widgetElement = (() => {
+      switch (widget.type) {
+        case "identity": {
+          return (
+            <motion.div
+              key={widget.id}
+              id="widget-identity"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
+            >
+              <IdentityWidget
+                identity={currentIdentity}
+                isPreviewMode={isPreviewMode}
+                onChange={handleIdentityChange}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            </motion.div>
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <EducationWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={{
-                ...educationContent,
-                items: Array.isArray(educationContent.items) ? educationContent.items : [],
-              }}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
 
-      case "projects": {
-        const projectsContent = widgetContent[widget.id] ?? {
-          title: "Projects",
-          items: [],
+        case "education": {
+          const educationContent = widgetContent[widget.id] ?? {
+            title: "Education",
+            items: [],
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <EducationWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={{
+                  ...educationContent,
+                  items: Array.isArray(educationContent.items) ? educationContent.items : [],
+                }}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            </motion.div>
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <ProjectsWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={{ ...projectsContent, items: Array.isArray(projectsContent.items) ? projectsContent.items : [] }}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              projectColors={projectColors}
-              setProjectColors={setProjectColors}
-              showProjectColorPicker={showProjectColorPicker}
-              setShowProjectColorPicker={setShowProjectColorPicker}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
 
-      case "description": {
-        const descriptionContent = widgetContent[widget.id] ?? {
-          title: "About Me",
-          description: "",
-          subdescription: "",
+        case "projects": {
+          const projectsContent = widgetContent[widget.id] ?? {
+            title: "Projects",
+            items: [],
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <ProjectsWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={{
+                  ...projectsContent,
+                  items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
+                }}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                projectColors={projectColors}
+                setProjectColors={setProjectColors}
+                showProjectColorPicker={showProjectColorPicker}
+                setShowProjectColorPicker={setShowProjectColorPicker}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            </motion.div>
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <DescriptionWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={descriptionContent}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              editingField={editingField}
-              setEditingField={setEditingField}
-              widgetColors={widgetColors}
-              setWidgetColors={setWidgetColors}
-            />
-          </motion.div>
-        )
-      }
 
-      case "services": {
-        const servicesContent = widgetContent[widget.id] ?? {
-          title: "Services",
-          description: "",
-          items: [],
+        case "description": {
+          const descriptionContent = widgetContent[widget.id] ?? {
+            title: "About Me",
+            description: "",
+            subdescription: "",
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <DescriptionWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={descriptionContent}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                editingField={editingField}
+                setEditingField={setEditingField}
+                widgetColors={widgetColors}
+                setWidgetColors={setWidgetColors}
+              />
+            </motion.div>
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <ServicesWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={{ ...servicesContent, items: Array.isArray(servicesContent.items) ? servicesContent.items : [] }}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
 
-      case "gallery": {
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
+        case "services": {
+          const servicesContent = widgetContent[widget.id] ?? {
+            title: "Services",
+            description: "",
+            items: [],
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <ServicesWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={{
+                  ...servicesContent,
+                  items: Array.isArray(servicesContent.items) ? servicesContent.items : [],
+                }}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            </motion.div>
+          )
+        }
+
+        case "gallery": {
+          const groups = galleryGroups[widget.id] ?? []
+          return (
             <GalleryWidget
               widgetId={widget.id}
               column={column}
               isPreviewMode={isPreviewMode}
-              groups={galleryGroups[widget.id] || []}
+              galleryGroups={groups}
               onGroupsChange={(groups) => {
                 setGalleryGroups((prev) => ({
                   ...prev,
                   [widget.id]: groups,
                 }))
               }}
+              onGroupClick={(group) =>
+                setSelectedGroup({
+                  widgetId: widget.id,
+                  groupId: group.id,
+                  group,
+                })
+              }
               onDelete={() => deleteWidget(widget.id, column)}
               onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
             />
-          </motion.div>
-        )
-      }
-
-      case "meeting-scheduler": {
-        const meetingContent = widgetContent[widget.id] ?? {
-          mode: "button",
-          calendlyUrl: "",
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <MeetingSchedulerWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={meetingContent}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-            />
-          </motion.div>
-        )
-      }
 
-      case "startup": {
-        const startupContent = widgetContent[widget.id] ?? {
-          title: "Startup",
-          description: "",
+        case "meeting-scheduler": {
+          const meetingContent = widgetContent[widget.id] ?? {
+            mode: "button",
+            calendlyUrl: "",
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <MeetingSchedulerWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={meetingContent}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              />
+            </motion.div>
+          )
         }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <StartupWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={startupContent}
-              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
 
-      case "image": {
-        const imageData = widgetContent[widget.id] || { url: "", caption: "" }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <ImageWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              imageUrl={imageData.url || ""}
-              caption={imageData.caption || ""}
-              onImageChange={(url) => handleWidgetContentChange(widget.id, { ...imageData, url })}
-              onCaptionChange={(caption) => handleWidgetContentChange(widget.id, { ...imageData, caption })}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-            />
-          </motion.div>
-        )
-      }
+        case "startup": {
+          const startupContent = widgetContent[widget.id] ?? {
+            title: "Startup",
+            description: "",
+          }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            >
+              <StartupWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                content={startupContent}
+                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+                editingField={editingField}
+                setEditingField={setEditingField}
+              />
+            </motion.div>
+          )
+        }
 
-      default:
-        return (
-          <motion.div
-            key={widget.id}
-            className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <span className="text-white">Widget: {widget.type}</span>
-          </motion.div>
-        )
-    }
+        case "image": {
+          const imageData = widgetContent[widget.id] || { url: "", caption: "" }
+          return (
+            <motion.div
+              key={widget.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <ImageWidget
+                widgetId={widget.id}
+                column={column}
+                isPreviewMode={isPreviewMode}
+                imageUrl={imageData.url || ""}
+                caption={imageData.caption || ""}
+                onImageChange={(url) => handleWidgetContentChange(widget.id, { ...imageData, url })}
+                onCaptionChange={(caption) => handleWidgetContentChange(widget.id, { ...imageData, caption })}
+                onDelete={() => deleteWidget(widget.id, column)}
+                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              />
+            </motion.div>
+          )
+        }
+
+        default:
+          return (
+            <div className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+              <span className="text-white">Widget: {widget.type}</span>
+            </div>
+          )
+      }
+    })()
+
+    return (
+      <Reorder.Item
+        key={widget.id}
+        value={widget}
+        layout
+        layoutId={widget.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
+        {widgetElement}
+      </Reorder.Item>
+    )
   }
 
   const safeLeftWidgets = Array.isArray(leftWidgets) ? leftWidgets : []
@@ -1053,7 +1103,7 @@ export default function PortfolioBuilder({
   }, [leftWidgets, rightWidgets])
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-black">
+    <div className="relative h-full">
       <PortfolioShell
         title={`${currentIdentity.name || "your name"}.`}
         isPreviewMode={isPreviewMode}
@@ -1129,15 +1179,7 @@ export default function PortfolioBuilder({
                 <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
 
-              {isLoadingData ? (
-                <div className="text-white/50 text-sm">Loading...</div>
-              ) : (
-                <div className="space-y-4">
-                  {leftForRender.map((widget) => (
-                    <div key={widget.id}>{renderWidget(widget, "left")}</div>
-                  ))}
-                </div>
-              )}
+              {renderWidgetsColumn(leftWidgets, "left")}
             </div>
 
             <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
@@ -1145,15 +1187,7 @@ export default function PortfolioBuilder({
                 <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
 
-              {isLoadingData ? (
-                <div className="text-white/50 text-sm">Loading...</div>
-              ) : (
-                <div className="space-y-4">
-                  {rightForRender.map((widget) => (
-                    <div key={widget.id}>{renderWidget(widget, "right")}</div>
-                  ))}
-                </div>
-              )}
+              {renderWidgetsColumn(rightWidgets, "right")}
             </div>
           </>
         )}

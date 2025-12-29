@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, Reorder } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AddButton from "@/components/ui/add-button"
@@ -23,7 +23,6 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
-  SwipeableProjectsWidget,
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -179,8 +178,17 @@ export default function PortfolioBuilder({
           const left = sanitizeWidgets(data.layout?.left)
           const right = sanitizeWidgets(data.layout?.right)
 
-          setLeftWidgets(left.length > 0 ? left : [{ id: "identity", type: "identity" }])
-          setRightWidgets(right)
+          if (left.length > 0 || right.length > 0) {
+            console.log("[v0] Setting widgets from", data.isFromTemplate ? "template" : "database")
+            console.log("[v0] 📍 Left widgets:", left)
+            console.log("[v0] 📍 Right widgets:", right)
+            setLeftWidgets(left.length > 0 ? left : [{ id: "identity", type: "identity" }])
+            setRightWidgets(right)
+          } else {
+            console.log("[v0] No widgets found, using default identity widget")
+            setLeftWidgets([{ id: "identity", type: "identity" }])
+            setRightWidgets([])
+          }
 
           if (Object.keys(data.widgetContent).length > 0) {
             console.log("[v0] Setting widget content with", Object.keys(data.widgetContent).length, "widgets")
@@ -449,8 +457,8 @@ export default function PortfolioBuilder({
     hasInitialized,
     user,
     state,
-    leftWidgets, // Use widgets directly
-    rightWidgets, // Use widgets directly
+    leftWidgets,
+    rightWidgets,
     widgetContent,
     isLoadingData,
     saveTimeout,
@@ -482,15 +490,7 @@ export default function PortfolioBuilder({
 
       debouncedSave()
     }
-  }, [
-    leftWidgets, // Depend on widgets directly
-    rightWidgets, // Depend on widgets directly
-    widgetContent,
-    hasInitialized,
-    portfolioId,
-    isLoadingData,
-    debouncedSave,
-  ]) // Depend on ordered widgets
+  }, [leftWidgets, rightWidgets, widgetContent, hasInitialized, portfolioId, isLoadingData, debouncedSave])
 
   useEffect(() => {
     if (!hasInitialized) return
@@ -533,12 +533,14 @@ export default function PortfolioBuilder({
   const moveWidgetToColumn = (widget: WidgetDef, fromColumn: "left" | "right", toColumn: "left" | "right") => {
     if (fromColumn === toColumn || widget.id === "identity") return
 
+    // Remove from source column
     if (fromColumn === "left") {
       setLeftWidgets((prev) => prev.filter((w) => w.id !== widget.id))
     } else {
       setRightWidgets((prev) => prev.filter((w) => w.id !== widget.id))
     }
 
+    // Add to target column
     if (toColumn === "left") {
       setLeftWidgets((prev) => [...prev, widget])
     } else {
@@ -611,37 +613,13 @@ export default function PortfolioBuilder({
         url: "",
         caption: "",
       },
-      "projects-tasks": {
-        title: "Projects",
-        items: [
-          {
-            id: newWidgetId + "-1",
-            name: "Sample Project",
-            description: "This is a sample project",
-            status: "active",
-            tags: ["sample"],
-            progress: 0,
-            tasks: [{ id: newWidgetId + "-task-1", title: "First task", completed: false }],
-          },
-        ],
-      },
     }
 
     if (defaultContent[type]) {
-      if (type === "projects-tasks") {
-        setWidgetContent((prev) => ({
-          ...prev,
-          swipeableProjects: {
-            ...prev.swipeableProjects,
-            [newWidgetId]: defaultContent[type],
-          },
-        }))
-      } else {
-        setWidgetContent((prev) => ({
-          ...prev,
-          [newWidgetId]: defaultContent[type],
-        }))
-      }
+      setWidgetContent((prev) => ({
+        ...prev,
+        [newWidgetId]: defaultContent[type],
+      }))
     }
 
     if (type === "gallery") {
@@ -708,6 +686,14 @@ export default function PortfolioBuilder({
     })
   }
 
+  const handleLeftReorder = useCallback((newOrder: WidgetDef[]) => {
+    setLeftWidgets(sanitizeWidgets(newOrder))
+  }, [])
+
+  const handleRightReorder = useCallback((newOrder: WidgetDef[]) => {
+    setRightWidgets(sanitizeWidgets(newOrder))
+  }, [])
+
   const renderWidgets = (widgets: WidgetDef[], column: "left" | "right") => {
     const safeWidgets = Array.isArray(widgets) ? widgets.filter(Boolean) : []
 
@@ -722,11 +708,18 @@ export default function PortfolioBuilder({
     }
 
     return (
-      <div className="flex flex-col gap-4">
-        {safeWidgets.map((widget, index) => (
-          <div key={widget.id}>{renderWidget(widget, column)}</div>
+      <Reorder.Group
+        axis="y"
+        values={safeWidgets}
+        onReorder={column === "left" ? handleLeftReorder : handleRightReorder}
+        className="flex flex-col gap-4"
+      >
+        {safeWidgets.map((widget) => (
+          <Reorder.Item key={widget.id} value={widget} className="cursor-grab active:cursor-grabbing">
+            {renderWidget(widget, column)}
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
     )
   }
 
@@ -797,45 +790,24 @@ export default function PortfolioBuilder({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
           >
-            {column === "left" ? (
-              <ProjectsWidget
-                widgetId={widget.id}
-                column={column}
-                isPreviewMode={isPreviewMode}
-                content={{
-                  ...projectsContent,
-                  items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
-                }}
-                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-                onDelete={() => deleteWidget(widget.id, column)}
-                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-                projectColors={projectColors}
-                setProjectColors={setProjectColors}
-                showProjectColorPicker={showProjectColorPicker}
-                setShowProjectColorPicker={setShowProjectColorPicker}
-                editingField={editingField}
-                setEditingField={setEditingField}
-              />
-            ) : (
-              <SwipeableProjectsWidget
-                widgetId={widget.id}
-                column={column}
-                isPreviewMode={isPreviewMode}
-                content={{
-                  ...projectsContent,
-                  items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
-                }}
-                onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
-                onDelete={() => deleteWidget(widget.id, column)}
-                onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-                projectColors={projectColors}
-                setProjectColors={setProjectColors}
-                showProjectColorPicker={showProjectColorPicker}
-                setShowProjectColorPicker={setShowProjectColorPicker}
-                editingField={editingField}
-                setEditingField={setEditingField}
-              />
-            )}
+            <ProjectsWidget
+              widgetId={widget.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={{
+                ...projectsContent,
+                items: Array.isArray(projectsContent.items) ? projectsContent.items : [],
+              }}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
+              projectColors={projectColors}
+              setProjectColors={setProjectColors}
+              showProjectColorPicker={showProjectColorPicker}
+              setShowProjectColorPicker={setShowProjectColorPicker}
+              editingField={editingField}
+              setEditingField={setEditingField}
+            />
           </motion.div>
         )
       }
@@ -1004,45 +976,6 @@ export default function PortfolioBuilder({
         )
       }
 
-      case "projects-tasks": {
-        const swipeableData = widgetContent.swipeableProjects?.[widget.id] || {
-          title: "Projects",
-          items: [],
-        }
-        return (
-          <motion.div
-            key={widget.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
-          >
-            <SwipeableProjectsWidget
-              widgetId={widget.id}
-              column={column}
-              isPreviewMode={isPreviewMode}
-              content={{
-                ...swipeableData,
-                items: Array.isArray(swipeableData.items) ? swipeableData.items : [],
-              }}
-              onContentChange={(updates) => {
-                const newSwipeableProjects = {
-                  ...widgetContent.swipeableProjects,
-                  [widget.id]: updates,
-                }
-                setWidgetContent((prev) => ({
-                  ...prev,
-                  swipeableProjects: newSwipeableProjects,
-                }))
-              }}
-              onDelete={() => deleteWidget(widget.id, column)}
-              onMove={() => moveWidgetToColumn(widget, column, column === "left" ? "right" : "left")}
-              editingField={editingField}
-              setEditingField={setEditingField}
-            />
-          </motion.div>
-        )
-      }
-
       default:
         return (
           <div className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
@@ -1134,18 +1067,13 @@ export default function PortfolioBuilder({
                     "startup",
                     "meeting-scheduler",
                     "image",
-                    "projects-tasks", // Added projects-tasks to the list
                   ].map((type) => (
                     <button
                       key={type}
                       onClick={() => setSelectedWidgetType(type)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
                     >
-                      {type === "meeting-scheduler"
-                        ? "Meeting Scheduler"
-                        : type === "projects-tasks"
-                          ? "Projects Tasks Widget"
-                          : `${type} Widget`}
+                      {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
                     </button>
                   ))}
                 </>
@@ -1165,14 +1093,11 @@ export default function PortfolioBuilder({
   return (
     <div className="relative h-full">
       <PortfolioShell
-        identity={currentIdentity}
-        onIdentityChange={handleIdentityChange}
+        title={`${currentIdentity.name || "your name"}.`}
         isPreviewMode={isPreviewMode}
-        isLive={isLive}
-        portfolioId={portfolioId}
-        isSaving={isSaving}
-        saveError={saveError}
-        lastSaveTime={lastSaveTime}
+        rightSlot={rightSlot}
+        logoHref="/network"
+        logoSrc="/dmz-logo-white.svg"
       >
         {imagesOnlyMode ? (
           <div className="col-span-full px-4">
@@ -1236,53 +1161,23 @@ export default function PortfolioBuilder({
             </div>
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <div className="flex flex-col gap-6">
-                {leftWidgets.map((widget) => (
-                  <div key={widget.id}>{renderWidget(widget, "left")}</div>
-                ))}
-              </div>
-
-              {!isPreviewMode && (
-                <AddButton
-                  onClick={() => {
-                    setShowAddDropdown(!showAddDropdown)
-                    setSelectedWidgetType(null)
-                  }}
-                  column="left"
-                  showDropdown={showAddDropdown}
-                  selectedWidgetType={selectedWidgetType}
-                  setSelectedWidgetType={setSelectedWidgetType}
-                  onAddWidget={(type) => addWidget(type, "left")}
-                />
+          <>
+            <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
+              {!isPreviewMode && leftForRender.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
+
+              {renderWidgetsColumn(leftWidgets, "left")}
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              <div className="flex flex-col gap-6">
-                {rightWidgets.map((widget) => (
-                  <div key={widget.id}>{renderWidget(widget, "right")}</div>
-                ))}
-              </div>
-
-              {!isPreviewMode && (
-                <AddButton
-                  onClick={() => {
-                    setShowAddDropdown(!showAddDropdown)
-                    setSelectedWidgetType(null)
-                  }}
-                  column="right"
-                  showDropdown={showAddDropdown}
-                  selectedWidgetType={selectedWidgetType}
-                  setSelectedWidgetType={setSelectedWidgetType}
-                  onAddWidget={(type) => addWidget(type, "right")}
-                />
+            <div className="lg:w-1/2 flex flex-col gap-4 sm:gap-6">
+              {!isPreviewMode && rightForRender.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">No widgets yet. Click + to add widgets.</div>
               )}
+
+              {renderWidgetsColumn(rightWidgets, "right")}
             </div>
-          </div>
+          </>
         )}
       </PortfolioShell>
 

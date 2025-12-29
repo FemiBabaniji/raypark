@@ -12,7 +12,6 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
-  SwipeableProjectsWidget,
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -179,25 +178,6 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
             console.log("[v0] Caption changed:", w.id, caption)
             deps.onContentChange(w.id, { ...imageData, caption })
           }}
-        />
-      )
-    case "projects-tasks":
-      const swipeableData = deps.widgetContent.swipeableProjects?.[w.id] || { title: "Projects", items: [] }
-      return (
-        <SwipeableProjectsWidget
-          key={w.id}
-          widgetId={w.id}
-          column={column}
-          isPreviewMode={deps.isPreviewMode}
-          content={swipeableData}
-          onContentChange={(c) => {
-            const newSwipeableProjects = { ...deps.widgetContent.swipeableProjects, [w.id]: c }
-            deps.onContentChange("swipeableProjects", newSwipeableProjects)
-          }}
-          onDelete={del}
-          onMove={move}
-          editingField={deps.editingField}
-          setEditingField={deps.setEditingField}
         />
       )
     default:

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { GripVertical, X } from "lucide-react"
+import { GripVertical, X } from 'lucide-react'
 
 type DescriptionContent = {
   title: string
@@ -15,9 +15,7 @@ type Props = {
   column: "left" | "right"
   isPreviewMode: boolean
   content: DescriptionContent | null | undefined
-  style?: { bg?: string; accent?: number }
   onContentChange: (content: DescriptionContent) => void
-  onStyleChange?: (style: { bg?: string }) => void
   onDelete: () => void
   onMove: () => void
   editingField: string | null
@@ -29,9 +27,7 @@ export default function DescriptionWidget({
   column,
   isPreviewMode,
   content,
-  style,
   onContentChange,
-  onStyleChange,
   onDelete,
   onMove,
   editingField,
@@ -40,7 +36,7 @@ export default function DescriptionWidget({
   const [isHoveringTitle, setIsHoveringTitle] = useState(false)
   const [isHoveringDesc, setIsHoveringDesc] = useState(false)
   const [isHoveringSubdesc, setIsHoveringSubdesc] = useState(false)
-  const widgetColor = style?.bg || "bg-[#1a1a1a]"
+  const [widgetColor, setWidgetColor] = useState("bg-[#1a1a1a]")
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const colorOptions = [
@@ -80,7 +76,7 @@ export default function DescriptionWidget({
                     <button
                       key={color.name}
                       onClick={() => {
-                        onStyleChange?.({ bg: color.value })
+                        setWidgetColor(color.value)
                         setShowColorPicker(false)
                       }}
                       className="w-full text-left px-3 py-2 hover:bg-white/10 rounded text-white text-sm flex items-center gap-2"

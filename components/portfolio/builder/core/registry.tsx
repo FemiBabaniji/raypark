@@ -12,7 +12,6 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
-  TaskManagerWidget,
 } from "../widgets"
 import type { Column, WidgetDef, Identity } from "./usePortfolioBuilder"
 
@@ -33,7 +32,6 @@ export type RegistryDeps = {
   projectColorOptions: Array<{ name: string; gradient: string }>
   galleryGroups: Record<string, any[]>
   setGalleryGroups: (updater: (prev: Record<string, any[]>) => Record<string, any[]>) => void
-  selectedColor: number
 }
 
 export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps) {
@@ -84,6 +82,8 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           showProjectColorPicker={deps.showProjectColorPicker}
           setShowProjectColorPicker={deps.setShowProjectColorPicker}
           projectColorOptions={deps.projectColorOptions}
+          editingField={deps.editingField}
+          setEditingField={deps.setEditingField}
         />
       )
     case "description":
@@ -155,7 +155,6 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           content={deps.widgetContent[w.id]}
           onContentChange={(c) => deps.onContentChange(w.id, c)}
           onDelete={del}
-          selectedColor={deps.selectedColor}
         />
       )
     case "image":
@@ -179,19 +178,6 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
             console.log("[v0] Caption changed:", w.id, caption)
             deps.onContentChange(w.id, { ...imageData, caption })
           }}
-        />
-      )
-    case "task-manager":
-      return (
-        <TaskManagerWidget
-          key={w.id}
-          widgetId={w.id}
-          column={column}
-          isPreviewMode={deps.isPreviewMode}
-          content={deps.widgetContent[w.id]}
-          onContentChange={(c) => deps.onContentChange(w.id, c)}
-          onDelete={del}
-          selectedColor={deps.selectedColor}
         />
       )
     default:

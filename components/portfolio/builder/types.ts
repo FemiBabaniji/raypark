@@ -65,23 +65,6 @@ export type PageLayout = {
   right: ColumnLayout
 }
 
-export type ProjectItem = {
-  id: string
-  name: string
-  description: string
-  year: string
-  tags: string[]
-}
-
-export type EducationItem = {
-  id: string
-  degree: string
-  school: string
-  year: string
-  description?: string
-  certified?: boolean
-}
-
 export type Community = {
   id: string
   name: string
@@ -89,39 +72,6 @@ export type Community = {
   description?: string
   logo_url?: string
   settings?: Record<string, any>
-}
-
-export type WidgetStyle = {
-  bg?: string // tailwind class OR theme token
-  accent?: ThemeIndex
-}
-
-export type WidgetInstance<T = any> = {
-  id: string
-  type:
-    | "identity"
-    | "education"
-    | "projects"
-    | "description"
-    | "services"
-    | "gallery"
-    | "startup"
-    | "meeting-scheduler"
-    | "image"
-    | "task-manager"
-  enabled: boolean
-  content: T
-  style?: WidgetStyle
-}
-
-export type WidgetBaseProps<T> = {
-  widgetId: string
-  column: "left" | "right"
-  isPreviewMode?: boolean
-  content: T
-  style?: WidgetStyle
-  onDelete?: () => void
-  onMove?: () => void
 }
 
 export type PortfolioData = {

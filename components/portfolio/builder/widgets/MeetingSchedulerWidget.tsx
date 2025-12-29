@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { GripVertical, X, ChevronLeft, ChevronRight, Settings, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
@@ -242,14 +242,16 @@ export default function MeetingSchedulerWidget({
         )}
       </div>
 
-      <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-sm border border-white/10">
-        <TabsTrigger value="custom" onClick={() => setMode("custom")} className="data-[state=active]:bg-white/20">
-          Custom Calendar
-        </TabsTrigger>
-        <TabsTrigger value="calendly" onClick={() => setMode("calendly")} className="data-[state=active]:bg-white/20">
-          Calendly
-        </TabsTrigger>
-      </TabsList>
+      <Tabs value={mode} onValueChange={(value) => setMode(value as "custom" | "calendly")}>
+        <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-sm border border-white/10">
+          <TabsTrigger value="custom" className="data-[state=active]:bg-white/20">
+            Custom Calendar
+          </TabsTrigger>
+          <TabsTrigger value="calendly" className="data-[state=active]:bg-white/20">
+            Calendly
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="flex gap-2 mb-4">
         <Button onClick={() => setShowMeetingSidebar(true)} className="w-full bg-white/20 hover:bg-white/30 text-white">

@@ -731,18 +731,24 @@ export async function saveWidgetLayout(
         continue
       }
 
-      const extractedType = (widgetType.includes("-") && widgetType.match(/^[a-z]+(?=-)/)?.[0]) || widgetType
-      const widget_type_id = keyToId[extractedType]
+      const normalizedType = normalizeWidgetType(widgetType)
+      const resolvedType = TYPE_ALIASES[normalizedType] ?? normalizedType
+      const widget_type_id = keyToId[resolvedType]
 
       if (!widget_type_id) {
-        console.warn("[v0] ⚠️ Widget type not found in database:", extractedType, "from", widgetType)
-        continue
+        console.error("[v0] ❌ Unknown widget type:", {
+          original: widgetType,
+          normalized: normalizedType,
+          resolved: resolvedType,
+          availableTypes: Object.keys(keyToId),
+        })
+        throw new Error(`Unknown widget type: '${widgetType}'. Available types: ${Object.keys(keyToId).join(", ")}`)
       }
 
       const content = widgetContent[widgetId] || {}
 
       console.log(
-        `[v0] Saving widget '${widgetId}' (type: '${extractedType}') with ${Object.keys(content).length} properties`,
+        `[v0] Saving widget '${widgetId}' (type: '${resolvedType}') with ${Object.keys(content).length} properties`,
       )
       console.log(`[v0] Widget content:`, content)
 
@@ -755,6 +761,7 @@ export async function saveWidgetLayout(
 
       if (widgetError) {
         console.error(`[v0] ❌ Failed to save widget '${widgetId}':`, widgetError)
+        throw new Error(`Failed to save widget '${widgetId}': ${widgetError.message}`)
       } else {
         console.log(`[v0] ✅ Widget '${widgetId}' saved successfully`)
       }
@@ -1227,4 +1234,14 @@ function parseWidgetKey(key: string): { id: string; type: string } {
   // Legacy key (just type name like "identity", "description")
   console.log("[v0] Parsed legacy key:", key, "-> type:", key)
   return { id: key, type: key }
+}
+
+function normalizeWidgetType(type: string): string {
+  return type.trim().toLowerCase().replace(/_/g, "-")
+}
+
+const TYPE_ALIASES: Record<string, string> = {
+  meeting: "meeting-scheduler",
+  tasks: "task-manager",
+  task: "task-manager",
 }

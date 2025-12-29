@@ -916,7 +916,7 @@ export default function PortfolioBuilder({
 
       case "meeting-scheduler": {
         const meetingContent = widget.content ?? {
-          mode: "button",
+          mode: "custom",
           calendlyUrl: "",
         }
         return (

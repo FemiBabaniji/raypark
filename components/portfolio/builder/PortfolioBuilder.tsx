@@ -602,49 +602,12 @@ export default function PortfolioBuilder({
         groups: [],
       },
       startup: {
-        title: "My Startup",
-        slides: {
-          identity: {
-            companyName: "Company Name",
-            tagline: "Your tagline here",
-            stage: "Pre-seed",
-            ask: "Seeking investment",
-            logoUrl: "",
-          },
-          problem: {
-            title: "Problem",
-            description: "What problem are you solving?",
-          },
-          solution: {
-            title: "Solution",
-            description: "How does your product solve this problem?",
-            links: [],
-          },
-          market: {
-            title: "Market",
-            targetCustomer: "Who are your customers?",
-            marketSize: "Market size estimate",
-            useCase: "Primary use case",
-          },
-          traction: {
-            title: "Traction",
-            milestones: [],
-            metrics: "Key metrics",
-          },
-          team: {
-            title: "Team",
-            members: [],
-          },
-          cta: {
-            title: "Get Involved",
-            asks: [],
-            contact: "your@email.com",
-          },
-        },
+        title: "Startup",
+        description: "Describe your startup...",
       },
       "meeting-scheduler": {
-        mode: "custom",
-        calendlyUrl: "https://calendly.com/your-username/30min",
+        mode: "button",
+        calendlyUrl: "",
       },
       image: {
         url: "",
@@ -660,6 +623,7 @@ export default function PortfolioBuilder({
     }
 
     if (type === "gallery") {
+      console.log("[v0] 🖼️ Initializing gallery groups for new widget:", newWidgetId)
       setGalleryGroups((prev) => ({
         ...prev,
         [newWidgetId]: [],
@@ -938,8 +902,8 @@ export default function PortfolioBuilder({
 
       case "meeting-scheduler": {
         const meetingContent = widgetContent[widget.id] ?? {
-          mode: "custom",
-          calendlyUrl: "https://calendly.com/your-username/30min",
+          mode: "button",
+          calendlyUrl: "",
         }
         return (
           <motion.div
@@ -963,45 +927,8 @@ export default function PortfolioBuilder({
 
       case "startup": {
         const startupContent = widgetContent[widget.id] ?? {
-          title: "My Startup",
-          slides: {
-            identity: {
-              companyName: "",
-              tagline: "",
-              stage: "",
-              ask: "",
-              logoUrl: "",
-            },
-            problem: {
-              title: "",
-              description: "",
-            },
-            solution: {
-              title: "",
-              description: "",
-              links: [],
-            },
-            market: {
-              title: "",
-              targetCustomer: "",
-              marketSize: "",
-              useCase: "",
-            },
-            traction: {
-              title: "",
-              milestones: [],
-              metrics: "",
-            },
-            team: {
-              title: "",
-              members: [],
-            },
-            cta: {
-              title: "",
-              asks: [],
-              contact: "",
-            },
-          },
+          title: "Startup",
+          description: "",
         }
         return (
           <motion.div

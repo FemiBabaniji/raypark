@@ -731,31 +731,7 @@ export async function saveWidgetLayout(
         continue
       }
 
-      // Extract type by finding the longest match from available types in the database
-      let extractedType = widgetType
-
-      // If widgetType contains UUID (has multiple dashes), extract the type prefix
-      if (widgetType.split("-").length > 2) {
-        // Try to match against known types in database
-        const possibleTypes = Object.keys(keyToId)
-        const matchedType = possibleTypes.find((type) => widgetType.startsWith(type + "-"))
-
-        if (matchedType) {
-          extractedType = matchedType
-        } else {
-          // Fallback: take everything before the UUID portion
-          // For "meeting-scheduler-abc123", this gives "meeting-scheduler"
-          const parts = widgetType.split("-")
-          // Assume last 5 parts are UUID (format: xxxxx-xxxx-xxxx-xxxx-xxxx)
-          if (parts.length >= 6) {
-            extractedType = parts.slice(0, -5).join("-")
-          } else {
-            // Simple case: just the first part
-            extractedType = parts[0]
-          }
-        }
-      }
-
+      const extractedType = (widgetType.includes("-") && widgetType.match(/^[a-z]+(?=-)/)?.[0]) || widgetType
       const widget_type_id = keyToId[extractedType]
 
       if (!widget_type_id) {

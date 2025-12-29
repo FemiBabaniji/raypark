@@ -26,7 +26,6 @@ import {
 } from "./widgets"
 import type { Identity, WidgetDef } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
-import { Reorder } from "framer-motion"
 
 type Props = {
   isPreviewMode?: boolean
@@ -176,12 +175,15 @@ export default function PortfolioBuilder({
             parentOnIdentityChange(data.widgetContent.identity)
           }
 
-          if (data.layout.left.length > 0 || data.layout.right.length > 0) {
+          const left = sanitizeWidgets(data.layout?.left)
+          const right = sanitizeWidgets(data.layout?.right)
+
+          if (left.length > 0 || right.length > 0) {
             console.log("[v0] Setting widgets from", data.isFromTemplate ? "template" : "database")
-            console.log("[v0] 📍 Left widgets:", data.layout.left)
-            console.log("[v0] 📍 Right widgets:", data.layout.right)
-            setLeftWidgets(data.layout.left.length > 0 ? data.layout.left : [{ id: "identity", type: "identity" }])
-            setRightWidgets(data.layout.right)
+            console.log("[v0] 📍 Left widgets:", left)
+            console.log("[v0] 📍 Right widgets:", right)
+            setLeftWidgets(left.length > 0 ? left : [{ id: "identity", type: "identity" }])
+            setRightWidgets(right)
           } else {
             console.log("[v0] No widgets found, using default identity widget")
             setLeftWidgets([{ id: "identity", type: "identity" }])
@@ -195,6 +197,7 @@ export default function PortfolioBuilder({
             })
             setWidgetContent(data.widgetContent)
 
+            // Load gallery groups from widgetContent
             const loadedGalleryGroups: Record<string, any[]> = {}
             Object.entries(data.widgetContent).forEach(([widgetId, content]: [string, any]) => {
               if (content?.groups && Array.isArray(content.groups)) {
@@ -676,11 +679,11 @@ export default function PortfolioBuilder({
   }
 
   const handleLeftReorder = useCallback((newOrder: WidgetDef[]) => {
-    setLeftWidgets(dedupeById(newOrder))
+    setLeftWidgets(sanitizeWidgets(newOrder))
   }, [])
 
   const handleRightReorder = useCallback((newOrder: WidgetDef[]) => {
-    setRightWidgets(dedupeById(newOrder))
+    setRightWidgets(sanitizeWidgets(newOrder))
   }, [])
 
   const renderWidget = (widget: WidgetDef, column: "left" | "right") => {
@@ -1044,6 +1047,11 @@ export default function PortfolioBuilder({
     </div>
   ) : null
 
+  useEffect(() => {
+    console.log("[v0] 📊 leftWidgets:", leftWidgets)
+    console.log("[v0] 📊 rightWidgets:", rightWidgets)
+  }, [leftWidgets, rightWidgets])
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-black">
       <PortfolioShell
@@ -1124,19 +1132,11 @@ export default function PortfolioBuilder({
               {isLoadingData ? (
                 <div className="text-white/50 text-sm">Loading...</div>
               ) : (
-                <Reorder.Group axis="y" values={leftForRender} onReorder={handleLeftReorder} className="space-y-4">
+                <div className="space-y-4">
                   {leftForRender.map((widget) => (
-                    <Reorder.Item
-                      key={widget.id}
-                      value={widget}
-                      layout
-                      layoutId={widget.id}
-                      className="cursor-grab active:cursor-grabbing"
-                    >
-                      {renderWidget(widget, "left")}
-                    </Reorder.Item>
+                    <div key={widget.id}>{renderWidget(widget, "left")}</div>
                   ))}
-                </Reorder.Group>
+                </div>
               )}
             </div>
 
@@ -1148,19 +1148,11 @@ export default function PortfolioBuilder({
               {isLoadingData ? (
                 <div className="text-white/50 text-sm">Loading...</div>
               ) : (
-                <Reorder.Group axis="y" values={rightForRender} onReorder={handleRightReorder} className="space-y-4">
+                <div className="space-y-4">
                   {rightForRender.map((widget) => (
-                    <Reorder.Item
-                      key={widget.id}
-                      value={widget}
-                      layout
-                      layoutId={widget.id}
-                      className="cursor-grab active:cursor-grabbing"
-                    >
-                      {renderWidget(widget, "right")}
-                    </Reorder.Item>
+                    <div key={widget.id}>{renderWidget(widget, "right")}</div>
                   ))}
-                </Reorder.Group>
+                </div>
               )}
             </div>
           </>
@@ -1179,3 +1171,16 @@ const toSlug = (name: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
     .slice(0, 64)
+
+const sanitizeWidgets = (input: any): WidgetDef[] => {
+  if (!Array.isArray(input)) return []
+  const cleaned = input.filter(Boolean).filter((w) => typeof w?.id === "string" && typeof w?.type === "string")
+
+  // dedupe by id
+  const seen = new Set<string>()
+  return cleaned.filter((w) => {
+    if (seen.has(w.id)) return false
+    seen.add(w.id)
+    return true
+  })
+}

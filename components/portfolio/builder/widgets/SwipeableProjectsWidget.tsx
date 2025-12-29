@@ -140,12 +140,13 @@ export default function SwipeableProjectsWidget({
 
   const deleteTask = (projectIndex: number, taskIndex: number) => {
     const project = items[projectIndex]
-    const newTasks = project.tasks.filter((_, i) => i !== taskIndex)
+    const newTasks = (project.tasks || []).filter((_, i) => i !== taskIndex)
     updateProject(projectIndex, { tasks: newTasks })
   }
 
   const toggleTaskComplete = (projectIndex: number, taskIndex: number) => {
     const project = items[projectIndex]
+    if (!project.tasks || !project.tasks[taskIndex]) return
     const task = project.tasks[taskIndex]
     updateTask(projectIndex, taskIndex, { completed: !task.completed })
   }
@@ -164,8 +165,8 @@ export default function SwipeableProjectsWidget({
     updateProject(projectIndex, { tags: newTags })
   }
 
-  const completedTasks = currentItem?.tasks.filter((t) => t.completed).length || 0
-  const totalTasks = currentItem?.tasks.length || 0
+  const completedTasks = currentItem?.tasks?.filter((t) => t.completed).length || 0
+  const totalTasks = currentItem?.tasks?.length || 0
 
   return (
     <div className={`${widgetColor} backdrop-blur-xl rounded-3xl p-8 group relative overflow-hidden`}>

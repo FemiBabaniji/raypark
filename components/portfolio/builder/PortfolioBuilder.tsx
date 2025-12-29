@@ -42,6 +42,7 @@ import {
   StartupWidget,
   MeetingSchedulerWidget,
   ImageWidget,
+  TaskManagerWidget,
 } from "./widgets"
 import type { Identity, WidgetDef, WidgetInstance, WidgetStyle } from "./types"
 import type { ThemeIndex } from "@/lib/theme"
@@ -989,6 +990,31 @@ export default function PortfolioBuilder({
         )
       }
 
+      case "task-manager": {
+        const taskManagerContent = widget.content ?? {
+          title: "Task Manager",
+          tasks: [],
+        }
+        return (
+          <motion.div
+            key={widget.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+          >
+            <TaskManagerWidget
+              widgetId={widget.id}
+              column={column}
+              isPreviewMode={isPreviewMode}
+              content={taskManagerContent}
+              onContentChange={(updates) => handleWidgetContentChange(widget.id, updates)}
+              onDelete={() => deleteWidget(widget.id, column)}
+              onMove={() => moveWidgetToColumn(widget.id, column, column === "left" ? "right" : "left")}
+            />
+          </motion.div>
+        )
+      }
+
       default:
         return (
           <div className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
@@ -1079,6 +1105,7 @@ export default function PortfolioBuilder({
                     "gallery",
                     "startup",
                     "meeting-scheduler",
+                    "task-manager",
                     "image",
                   ].map((type) => (
                     <button
@@ -1086,7 +1113,11 @@ export default function PortfolioBuilder({
                       onClick={() => setSelectedWidgetType(type)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white hover:bg-white/10 rounded-lg transition-colors capitalize"
                     >
-                      {type === "meeting-scheduler" ? "Meeting Scheduler" : `${type} Widget`}
+                      {type === "meeting-scheduler"
+                        ? "Meeting Scheduler"
+                        : type === "task-manager"
+                          ? "Task Manager"
+                          : `${type} Widget`}
                     </button>
                   ))}
                 </>

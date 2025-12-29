@@ -68,11 +68,6 @@ export default function PortfolioShell({
           <h1 className="text-lg font-medium">{title}</h1>
         </div>
 
-        {/* Center: Logo pill */}
-        <div className="flex-1 flex justify-center">
-          <LogoPill src={logoSrc} href={logoHref} />
-        </div>
-
         {/* Right: configurable slot (e.g., + button). Hide when preview if you want */}
         <div className="min-w-[40px] flex justify-end">{!isPreviewMode ? rightSlot : null}</div>
       </div>

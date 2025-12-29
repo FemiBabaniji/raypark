@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button"
 import { GripVertical, X, Plus, Trash2 } from "lucide-react"
 
 type EducationItem = {
+  id: string // Added stable ID
   degree: string
   school: string
   year: string
-  description: string
+  description?: string
   certified?: boolean
 }
 
 type EducationContent = {
   title: string
+  style?: { bg: string } // Moved widget color to content
   items: EducationItem[]
 }
 
@@ -39,8 +41,8 @@ export default function EducationWidget({
   editingField,
   setEditingField,
 }: Props) {
-  const [isHovering, setIsHovering] = useState<number | null>(null)
-  const [widgetColor, setWidgetColor] = useState("bg-zinc-900/40")
+  const [isHovering, setIsHovering] = useState<string | null>(null) // Changed to string ID
+  const widgetColor = content.style?.bg || "bg-zinc-900/40"
   const [showColorPicker, setShowColorPicker] = useState(false)
 
   const items = Array.isArray(content?.items) ? content.items : []
@@ -55,6 +57,7 @@ export default function EducationWidget({
 
   const addEducationItem = () => {
     const newItem: EducationItem = {
+      id: crypto.randomUUID(),
       degree: "New Degree",
       school: "School Name",
       year: "2024",
@@ -64,15 +67,18 @@ export default function EducationWidget({
     onContentChange({ ...content, items: [...items, newItem] })
   }
 
-  const updateItem = (index: number, updates: Partial<EducationItem>) => {
-    const newItems = [...items]
-    newItems[index] = { ...newItems[index], ...updates }
+  const updateItem = (id: string, updates: Partial<EducationItem>) => {
+    const newItems = items.map((item) => (item.id === id ? { ...item, ...updates } : item))
     onContentChange({ ...content, items: newItems })
   }
 
-  const deleteItem = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index)
+  const deleteItem = (id: string) => {
+    const newItems = items.filter((item) => item.id !== id)
     onContentChange({ ...content, items: newItems })
+  }
+
+  const setWidgetColor = (bg: string) => {
+    onContentChange({ ...content, style: { bg } })
   }
 
   return (
@@ -155,20 +161,20 @@ export default function EducationWidget({
       </div>
 
       <div className="space-y-4">
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <div
-            key={idx}
+            key={item.id}
             className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 transition-all duration-200 hover:bg-white/10 relative group/item"
-            onMouseEnter={() => setIsHovering(idx)}
+            onMouseEnter={() => setIsHovering(item.id)}
             onMouseLeave={() => setIsHovering(null)}
           >
             <div className={item.certified ? "flex justify-between items-start" : ""}>
               <div className="flex-1 space-y-2">
-                {editingField === `${widgetId}-degree-${idx}` ? (
+                {editingField === `${widgetId}-degree-${item.id}` ? (
                   <input
                     type="text"
                     value={item.degree}
-                    onChange={(e) => updateItem(idx, { degree: e.target.value })}
+                    onChange={(e) => updateItem(item.id, { degree: e.target.value })}
                     onBlur={() => setEditingField(null)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -182,9 +188,9 @@ export default function EducationWidget({
                   />
                 ) : (
                   <h3
-                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-degree-${idx}`)}
+                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-degree-${item.id}`)}
                     className={`font-semibold text-white min-h-[24px] ${
-                      !isPreviewMode && isHovering === idx
+                      !isPreviewMode && isHovering === item.id
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
                     }`}
@@ -193,11 +199,11 @@ export default function EducationWidget({
                   </h3>
                 )}
 
-                {editingField === `${widgetId}-school-${idx}` ? (
+                {editingField === `${widgetId}-school-${item.id}` ? (
                   <input
                     type="text"
                     value={item.school}
-                    onChange={(e) => updateItem(idx, { school: e.target.value })}
+                    onChange={(e) => updateItem(item.id, { school: e.target.value })}
                     onBlur={() => setEditingField(null)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -211,9 +217,9 @@ export default function EducationWidget({
                   />
                 ) : (
                   <p
-                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-school-${idx}`)}
+                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-school-${item.id}`)}
                     className={`text-neutral-300 text-sm min-h-[20px] ${
-                      !isPreviewMode && isHovering === idx
+                      !isPreviewMode && isHovering === item.id
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
                     }`}
@@ -222,11 +228,11 @@ export default function EducationWidget({
                   </p>
                 )}
 
-                {editingField === `${widgetId}-year-${idx}` ? (
+                {editingField === `${widgetId}-year-${item.id}` ? (
                   <input
                     type="text"
                     value={item.year}
-                    onChange={(e) => updateItem(idx, { year: e.target.value })}
+                    onChange={(e) => updateItem(item.id, { year: e.target.value })}
                     onBlur={() => setEditingField(null)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -240,9 +246,9 @@ export default function EducationWidget({
                   />
                 ) : (
                   <p
-                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-year-${idx}`)}
+                    onClick={() => !isPreviewMode && setEditingField(`${widgetId}-year-${item.id}`)}
                     className={`text-neutral-400 text-xs min-h-[18px] ${
-                      !isPreviewMode && isHovering === idx
+                      !isPreviewMode && isHovering === item.id
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
                     }`}
@@ -258,12 +264,12 @@ export default function EducationWidget({
                     Certified
                   </span>
                 )}
-                {!isPreviewMode && isHovering === idx && (
+                {!isPreviewMode && isHovering === item.id && (
                   <Button
                     size="sm"
                     variant="ghost"
                     className="opacity-0 group-hover/item:opacity-100 transition-opacity bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2"
-                    onClick={() => deleteItem(idx)}
+                    onClick={() => deleteItem(item.id)}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>

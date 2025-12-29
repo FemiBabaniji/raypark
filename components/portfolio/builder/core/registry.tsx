@@ -32,6 +32,7 @@ export type RegistryDeps = {
   projectColorOptions: Array<{ name: string; gradient: string }>
   galleryGroups: Record<string, any[]>
   setGalleryGroups: (updater: (prev: Record<string, any[]>) => Record<string, any[]>) => void
+  selectedColor: number
 }
 
 export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps) {
@@ -82,8 +83,6 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           showProjectColorPicker={deps.showProjectColorPicker}
           setShowProjectColorPicker={deps.setShowProjectColorPicker}
           projectColorOptions={deps.projectColorOptions}
-          editingField={deps.editingField}
-          setEditingField={deps.setEditingField}
         />
       )
     case "description":
@@ -155,6 +154,7 @@ export function renderWidget(def: WidgetDef, column: Column, deps: RegistryDeps)
           content={deps.widgetContent[w.id]}
           onContentChange={(c) => deps.onContentChange(w.id, c)}
           onDelete={del}
+          selectedColor={deps.selectedColor}
         />
       )
     case "image":

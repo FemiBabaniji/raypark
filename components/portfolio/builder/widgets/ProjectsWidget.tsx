@@ -9,6 +9,7 @@ import FullscreenWidgetOverlay from "@/components/FullscreenWidgetOverlay"
 const ProjectWorkflowTab = dynamic(() => import("@/components/ProjectWorkflowTab"), { ssr: false })
 
 type ProjectItem = {
+  id: string // Added stable ID
   name: string
   description: string
   year: string
@@ -17,6 +18,7 @@ type ProjectItem = {
 
 type ProjectsContent = {
   title: string
+  style?: { bg: string } // Moved widget color to content
   items: ProjectItem[]
 }
 
@@ -50,9 +52,9 @@ export default function ProjectsWidget({
   projectColorOptions,
 }: Props) {
   const [open, setOpen] = useState(false)
-  const [isHovering, setIsHovering] = useState<number | null>(null)
+  const [isHovering, setIsHovering] = useState<string | null>(null) // Changed to string ID
   const [editingField, setEditingField] = useState<string | null>(null)
-  const [widgetColor, setWidgetColor] = useState("bg-zinc-900/40")
+  const widgetColor = content.style?.bg || "bg-zinc-900/40"
   const [showColorPicker, setShowColorPicker] = useState(false)
   const layoutId = `widget-${widgetId}`
 
@@ -68,6 +70,7 @@ export default function ProjectsWidget({
 
   const addProject = () => {
     const newProject: ProjectItem = {
+      id: crypto.randomUUID(),
       name: "New Project",
       description: "Project description...",
       year: "2024",
@@ -76,29 +79,36 @@ export default function ProjectsWidget({
     onContentChange({ ...content, items: [...items, newProject] })
   }
 
-  const updateProject = (index: number, updates: Partial<ProjectItem>) => {
-    const newItems = [...items]
-    newItems[index] = { ...newItems[index], ...updates }
+  const updateProject = (id: string, updates: Partial<ProjectItem>) => {
+    const newItems = items.map((item) => (item.id === id ? { ...item, ...updates } : item))
     onContentChange({ ...content, items: newItems })
   }
 
-  const deleteProject = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index)
+  const deleteProject = (id: string) => {
+    const newItems = items.filter((item) => item.id !== id)
     onContentChange({ ...content, items: newItems })
   }
 
-  const addTag = (projectIndex: number) => {
+  const addTag = (projectId: string) => {
     const newTag = prompt("Enter tag name:")
     if (newTag) {
-      const project = items[projectIndex]
-      updateProject(projectIndex, { tags: [...project.tags, newTag] })
+      const project = items.find((p) => p.id === projectId)
+      if (project) {
+        updateProject(projectId, { tags: [...project.tags, newTag] })
+      }
     }
   }
 
-  const removeTag = (projectIndex: number, tagIndex: number) => {
-    const project = items[projectIndex]
-    const newTags = project.tags.filter((_, i) => i !== tagIndex)
-    updateProject(projectIndex, { tags: newTags })
+  const removeTag = (projectId: string, tagIndex: number) => {
+    const project = items.find((p) => p.id === projectId)
+    if (project) {
+      const newTags = project.tags.filter((_, i) => i !== tagIndex)
+      updateProject(projectId, { tags: newTags })
+    }
+  }
+
+  const setWidgetColor = (bg: string) => {
+    onContentChange({ ...content, style: { bg } })
   }
 
   return (
@@ -202,20 +212,20 @@ export default function ProjectsWidget({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          {items.map((project, idx) => (
+          {items.map((project) => (
             <div
-              key={idx}
+              key={project.id}
               className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 space-y-3 transition-all duration-200 hover:bg-white/10 relative group/project min-h-[180px]"
-              onMouseEnter={() => setIsHovering(idx)}
+              onMouseEnter={() => setIsHovering(project.id)}
               onMouseLeave={() => setIsHovering(null)}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
-                {editingField === `name-${idx}` ? (
+                {editingField === `name-${project.id}` ? (
                   <input
                     type="text"
                     value={project.name}
-                    onChange={(e) => updateProject(idx, { name: e.target.value })}
+                    onChange={(e) => updateProject(project.id, { name: e.target.value })}
                     onBlur={() => setEditingField(null)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -229,9 +239,9 @@ export default function ProjectsWidget({
                   />
                 ) : (
                   <span
-                    onClick={() => !isPreviewMode && setEditingField(`name-${idx}`)}
+                    onClick={() => !isPreviewMode && setEditingField(`name-${project.id}`)}
                     className={`text-sm font-medium text-white min-h-[24px] block ${
-                      !isPreviewMode && isHovering === idx
+                      !isPreviewMode && isHovering === project.id
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
                     }`}
@@ -242,12 +252,12 @@ export default function ProjectsWidget({
 
                 <div className="flex items-center gap-2">
                   <Upload className="w-4 h-4 text-neutral-400" />
-                  {!isPreviewMode && isHovering === idx && (
+                  {!isPreviewMode && isHovering === project.id && (
                     <Button
                       size="sm"
                       variant="ghost"
                       className="opacity-0 group-hover/project:opacity-100 transition-opacity bg-red-500/20 hover:bg-red-500/30 text-red-400 p-1"
-                      onClick={() => deleteProject(idx)}
+                      onClick={() => deleteProject(project.id)}
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -255,10 +265,10 @@ export default function ProjectsWidget({
                 </div>
               </div>
 
-              {editingField === `description-${idx}` ? (
+              {editingField === `description-${project.id}` ? (
                 <textarea
                   value={project.description}
-                  onChange={(e) => updateProject(idx, { description: e.target.value })}
+                  onChange={(e) => updateProject(project.id, { description: e.target.value })}
                   onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -273,9 +283,9 @@ export default function ProjectsWidget({
                 />
               ) : (
                 <p
-                  onClick={() => !isPreviewMode && setEditingField(`description-${idx}`)}
+                  onClick={() => !isPreviewMode && setEditingField(`description-${project.id}`)}
                   className={`text-xs text-neutral-300 leading-relaxed ${
-                    !isPreviewMode && isHovering === idx
+                    !isPreviewMode && isHovering === project.id
                       ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                       : ""
                   }`}
@@ -288,19 +298,19 @@ export default function ProjectsWidget({
                 {project.tags.map((tag, tagIdx) => (
                   <span key={tagIdx} className="text-xs bg-white/10 px-2 py-1 rounded text-white group/tag relative">
                     {tag}
-                    {!isPreviewMode && isHovering === idx && (
+                    {!isPreviewMode && isHovering === project.id && (
                       <button
                         className="absolute -top-1 -right-1 bg-red-500/80 rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/tag:opacity-100 transition-opacity"
-                        onClick={() => removeTag(idx, tagIdx)}
+                        onClick={() => removeTag(project.id, tagIdx)}
                       >
                         <X className="w-2 h-2 text-white" />
                       </button>
                     )}
                   </span>
                 ))}
-                {!isPreviewMode && isHovering === idx && (
+                {!isPreviewMode && isHovering === project.id && (
                   <button
-                    onClick={() => addTag(idx)}
+                    onClick={() => addTag(project.id)}
                     className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-white transition-all duration-200"
                   >
                     <Plus className="w-3 h-3" />
@@ -308,11 +318,11 @@ export default function ProjectsWidget({
                 )}
               </div>
 
-              {editingField === `year-${idx}` ? (
+              {editingField === `year-${project.id}` ? (
                 <input
                   type="text"
                   value={project.year}
-                  onChange={(e) => updateProject(idx, { year: e.target.value })}
+                  onChange={(e) => updateProject(project.id, { year: e.target.value })}
                   onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
@@ -327,9 +337,9 @@ export default function ProjectsWidget({
               ) : (
                 <div className="flex items-center justify-between">
                   <span
-                    onClick={() => !isPreviewMode && setEditingField(`year-${idx}`)}
+                    onClick={() => !isPreviewMode && setEditingField(`year-${project.id}`)}
                     className={`text-xs text-blue-400 ${
-                      !isPreviewMode && isHovering === idx
+                      !isPreviewMode && isHovering === project.id
                         ? "cursor-text hover:bg-white/10 rounded-lg px-2 py-1 -mx-2 -my-1 transition-all duration-200"
                         : ""
                     }`}
